@@ -78,10 +78,15 @@ export default function Auth() {
                  className="text-stone-700 mb-2">Email envoyé !</p>
               <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem' }}
                  className="text-stone-400 mb-4">
-                Vérifiez votre boîte mail et suivez le lien pour réinitialiser votre mot de passe.
+                Si un compte existe avec cette adresse, vous recevrez un lien de réinitialisation.
+              </p>
+              <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem' }}
+                 className="text-stone-400 mb-6">
+                Vous n'avez pas reçu d'email ?{' '}
+                <a href="/register" className="text-[#4a5240] hover:underline">Créer un compte</a>
               </p>
               <button onClick={() => { setResetMode(false); setResetSent(false) }}
-                className="text-[#4a5240] hover:underline text-sm"
+                className="text-stone-400 hover:text-stone-600 text-sm"
                 style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
                 ← Retour à la connexion
               </button>

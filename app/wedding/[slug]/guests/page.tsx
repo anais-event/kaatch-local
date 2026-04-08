@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
+import GuestList from './GuestList'
 
 async function addGuest(formData: FormData) {
   'use server'
@@ -10,11 +11,17 @@ async function addGuest(formData: FormData) {
   const nickname = formData.get('nickname') as string
   const email = formData.get('email') as string
   const telephone = formData.get('telephone') as string
+  const relation = formData.get('relation') as string
   const slug = formData.get('slug') as string
 
-  await supabase
-    .from('guests')
-    .insert({ wedding_id, first_name, nickname, email: email || null, telephone: telephone || null })
+  await supabase.from('guests').insert({
+    wedding_id,
+    first_name,
+    nickname: nickname || null,
+    email: email || null,
+    telephone: telephone || null,
+    relation: relation || null,
+  })
 
   revalidatePath(`/wedding/${slug}/guests`)
 }
@@ -38,13 +45,29 @@ async function toggleRsvp(formData: FormData) {
   const slug = formData.get('slug') as string
   const current = formData.get('rsvp_confirmed') === 'true'
 
-  await supabase
-    .from('guests')
-    .update({ rsvp_confirmed: !current })
-    .eq('id', id)
+  await supabase.from('guests').update({ rsvp_confirmed: !current }).eq('id', id)
+  revalidatePath(`/wedding/${slug}/guests`)
+}
+
+async function updateGuest(formData: FormData) {
+  'use server'
+
+  const supabase = await createSupabaseServerClient()
+  const id = formData.get('id') as string
+  const slug = formData.get('slug') as string
+
+  await supabase.from('guests').update({
+    first_name: formData.get('first_name') as string,
+    nickname: (formData.get('nickname') as string) || null,
+    email: (formData.get('email') as string) || null,
+    telephone: (formData.get('telephone') as string) || null,
+    relation: (formData.get('relation') as string) || null,
+  }).eq('id', id)
 
   revalidatePath(`/wedding/${slug}/guests`)
 }
+
+const RELATIONS = ['Ami(e)', 'Frère', 'Sœur', 'Père', 'Mère', 'Oncle', 'Tante', 'Cousin(e)', 'Collègue', 'Autre']
 
 export default async function GuestsPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -113,9 +136,16 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
               placeholder="Téléphone"
               className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-rose-300"
             />
+            <select
+              name="relation"
+              className="border border-gray-300 rounded-lg px-4 py-2 text-gray-500 focus:outline-none focus:ring-2 focus:ring-rose-300"
+            >
+              <option value="">Lien de parenté</option>
+              {RELATIONS.map(r => <option key={r} value={r}>{r}</option>)}
+            </select>
             <button
               type="submit"
-              className="col-span-2 bg-rose-600 text-white px-6 py-2 rounded-lg hover:bg-rose-700 transition-colors"
+              className="bg-rose-600 text-white px-6 py-2 rounded-lg hover:bg-rose-700 transition-colors"
             >
               + Ajouter l'invité
             </button>
@@ -125,60 +155,13 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
         {/* Liste des invités */}
         <div className="bg-white rounded-2xl shadow p-6">
           <h2 className="text-xl font-semibold mb-4">Invités ({total})</h2>
-
-          {total === 0 ? (
-            <p className="text-gray-500 italic text-center py-8">Aucun invité pour le moment 🕊️</p>
-          ) : (
-            <div className="space-y-3">
-              {guests?.map((guest) => (
-                <div
-                  key={guest.id}
-                  className="flex justify-between items-center p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex flex-col gap-0.5">
-                    <p className="font-medium text-gray-800">
-                      {guest.first_name}
-                      {guest.nickname && <span className="text-gray-400 font-normal text-sm ml-1">({guest.nickname})</span>}
-                    </p>
-                    {guest.email && <p className="text-sm text-gray-400">✉️ {guest.email}</p>}
-                    {guest.telephone && <p className="text-sm text-gray-400">📞 {guest.telephone}</p>}
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    {/* Bouton RSVP */}
-                    <form action={toggleRsvp}>
-                      <input type="hidden" name="id" value={guest.id} />
-                      <input type="hidden" name="slug" value={slug} />
-                      <input type="hidden" name="rsvp_confirmed" value={String(guest.rsvp_confirmed)} />
-                      <button
-                        type="submit"
-                        className={`text-sm px-3 py-1 rounded-full transition-colors ${
-                          guest.rsvp_confirmed
-                            ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                        }`}
-                      >
-                        {guest.rsvp_confirmed ? '✅ Confirmé' : '⏳ En attente'}
-                      </button>
-                    </form>
-
-                    {/* Bouton supprimer */}
-                    <form action={deleteGuest}>
-                      <input type="hidden" name="id" value={guest.id} />
-                      <input type="hidden" name="slug" value={slug} />
-                      <button
-                        type="submit"
-                        className="text-gray-300 hover:text-red-500 transition-colors text-lg leading-none"
-                        title="Supprimer"
-                      >
-                        ✕
-                      </button>
-                    </form>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          <GuestList
+            guests={guests ?? []}
+            slug={slug}
+            toggleRsvp={toggleRsvp}
+            deleteGuest={deleteGuest}
+            updateGuest={updateGuest}
+          />
         </div>
 
       </div>

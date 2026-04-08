@@ -59,7 +59,7 @@ export default async function EditWedding({ params }: { params: Promise<{ slug: 
       <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow p-8">
         <h1 className="text-3xl font-bold text-rose-700 mb-6">✏️ Modifier les infos</h1>
 
-        <form action={updateWedding} encType="multipart/form-data" className="space-y-6">
+        <form action={updateWedding} className="space-y-6">
           <input type="hidden" name="slug" value={slug} />
 
           {/* Photo de couverture */}

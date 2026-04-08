@@ -55,67 +55,93 @@ export default async function EditWedding({ params }: { params: Promise<{ slug: 
   }
 
   return (
-    <div className="min-h-screen bg-rose-50 p-8">
-      <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow p-8">
-        <h1 className="text-3xl font-bold text-rose-700 mb-6">✏️ Modifier les infos</h1>
+    <div className="min-h-screen bg-[#f5f0e8] flex items-center justify-center p-8">
+      <div className="w-full max-w-lg">
 
-        <form action={updateWedding} className="space-y-6">
-          <input type="hidden" name="slug" value={slug} />
+        <div className="mb-6">
+          <a href={`/wedding/${slug}`}
+             className="text-sm text-[#4a5240] hover:underline"
+             style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
+            ← Retour
+          </a>
+        </div>
 
-          {/* Photo de couverture */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">🖼️ Photo de couverture</label>
-            {wedding.cover_image_url && (
-              <img
-                src={wedding.cover_image_url}
-                alt="Couverture actuelle"
-                className="w-full h-40 object-cover rounded-lg mb-3"
+        <div className="text-center mb-8">
+          <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.8rem', fontStyle: 'italic' }}
+              className="text-[#2d3228]">
+            Modifier les infos
+          </h1>
+        </div>
+
+        <div className="bg-white/80 rounded-3xl shadow-sm p-8">
+          <form action={updateWedding} className="space-y-6">
+            <input type="hidden" name="slug" value={slug} />
+
+            <div>
+              <label style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.7rem', letterSpacing: '0.15em' }}
+                     className="block text-stone-400 uppercase mb-2">
+                Photo de couverture
+              </label>
+              {wedding.cover_image_url && (
+                <img src={wedding.cover_image_url} alt="Couverture actuelle"
+                     className="w-full h-40 object-cover rounded-xl mb-3" />
+              )}
+              <input
+                type="file"
+                name="cover_image"
+                accept="image/*"
+                className="w-full border border-stone-200 rounded-xl px-4 py-3 text-stone-500 bg-white file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:bg-[#f5f0e8] file:text-[#4a5240] hover:file:bg-stone-200 transition"
+                style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem' }}
               />
-            )}
-            <input
-              type="file"
-              name="cover_image"
-              accept="image/*"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-500 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:bg-rose-100 file:text-rose-700 hover:file:bg-rose-200"
-            />
-          </div>
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">📅 Date</label>
-            <input
-              type="date"
-              name="date"
-              defaultValue={wedding.date || ''}
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-rose-500"
-            />
-          </div>
+            <div>
+              <label style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.7rem', letterSpacing: '0.15em' }}
+                     className="block text-stone-400 uppercase mb-2">
+                Date
+              </label>
+              <input
+                type="date"
+                name="date"
+                defaultValue={wedding.date || ''}
+                className="w-full border border-stone-200 rounded-xl px-4 py-3 outline-none focus:border-[#4a5240] transition text-stone-700 bg-white"
+                style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">📍 Lieu</label>
-            <input
-              type="text"
-              name="location"
-              defaultValue={wedding.location || ''}
-              placeholder="Ex: Château de Versailles"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-rose-500"
-            />
-          </div>
+            <div>
+              <label style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.7rem', letterSpacing: '0.15em' }}
+                     className="block text-stone-400 uppercase mb-2">
+                Lieu
+              </label>
+              <input
+                type="text"
+                name="location"
+                defaultValue={wedding.location || ''}
+                placeholder="Ex : Château de Versailles"
+                className="w-full border border-stone-200 rounded-xl px-4 py-3 outline-none focus:border-[#4a5240] transition text-stone-700 bg-white"
+                style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}
+              />
+            </div>
 
-          <div className="flex gap-4">
-            <button
-              type="submit"
-              className="flex-1 bg-rose-600 text-white py-3 rounded-full font-medium hover:bg-rose-700 transition"
-            >
-              Enregistrer
-            </button>
-            <a
-              href={`/wedding/${slug}`}
-              className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-full font-medium text-center hover:bg-gray-300 transition"
-            >
-              Annuler
-            </a>
-          </div>
-        </form>
+            <div className="flex gap-3 pt-2">
+              <button
+                type="submit"
+                className="flex-1 bg-[#4a5240] text-white py-3 rounded-full hover:bg-[#2d3228] transition"
+                style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, letterSpacing: '0.08em', fontSize: '0.85rem' }}
+              >
+                Enregistrer
+              </button>
+              <a
+                href={`/wedding/${slug}`}
+                className="flex-1 bg-stone-100 text-stone-500 py-3 rounded-full text-center hover:bg-stone-200 transition"
+                style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem' }}
+              >
+                Annuler
+              </a>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   )

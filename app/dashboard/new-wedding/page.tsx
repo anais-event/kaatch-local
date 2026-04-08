@@ -2,73 +2,81 @@ import { createWedding } from './actions'
 
 export default function NewWedding() {
   return (
-    <main className="min-h-screen p-8 bg-gray-50">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Créer mon mariage</h1>
-        <p className="text-gray-500 mb-8">Configurez votre espace en quelques clics</p>
+    <main className="min-h-screen bg-[#f5f0e8] flex flex-col items-center justify-center p-8">
+      <div className="w-full max-w-lg">
 
-        <div className="bg-white rounded-lg p-6 shadow-sm">
-          <form action={createWedding}>
-            {/* Nom du mariage */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+        <div className="text-center mb-10">
+          <p className="text-xs tracking-[0.4em] uppercase text-[#4a5240] mb-2"
+             style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
+            Bienvenue sur Kaatch
+          </p>
+          <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.8rem', fontStyle: 'italic' }}
+              className="text-[#2d3228]">
+            Créez votre mariage
+          </h1>
+        </div>
+
+        <div className="bg-white/80 rounded-3xl shadow-sm p-8">
+          <form action={createWedding} className="space-y-6">
+
+            <div>
+              <label style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.7rem', letterSpacing: '0.15em' }}
+                     className="block text-stone-400 uppercase mb-2">
                 Nom du mariage
               </label>
               <input
                 name="name"
                 type="text"
-                placeholder="Mariage Julie & Thomas"
+                placeholder="Ex : Mariage Julie & Thomas"
                 required
-                className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm outline-none"
+                className="w-full border border-stone-200 rounded-xl px-4 py-3 outline-none focus:border-[#4a5240] transition text-stone-700 bg-white"
+                style={{ fontFamily: 'var(--font-cormorant)', fontSize: '1.1rem' }}
               />
             </div>
 
-            {/* Date */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div>
+              <label style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.7rem', letterSpacing: '0.15em' }}
+                     className="block text-stone-400 uppercase mb-2">
                 Date du mariage
               </label>
               <input
                 name="date"
                 type="date"
                 required
-                className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm outline-none"
+                className="w-full border border-stone-200 rounded-xl px-4 py-3 outline-none focus:border-[#4a5240] transition text-stone-700 bg-white"
+                style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}
               />
             </div>
 
-            {/* Thème */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-4">
-                Choisissez votre thème
+            <div>
+              <label style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.7rem', letterSpacing: '0.15em' }}
+                     className="block text-stone-400 uppercase mb-3">
+                Ambiance
               </label>
-              <div className="grid grid-cols-3 gap-4">
-                <label className="cursor-pointer">
-                  <input type="radio" name="theme" value="elegant" className="peer sr-only" defaultChecked />
-                  <div className="border-2 border-gray-200 rounded-lg p-4 text-center peer-checked:border-black peer-checked:bg-gray-50">
-                    <div className="text-2xl mb-2">✨</div>
-                    <div className="text-sm font-medium">Élégant</div>
-                  </div>
-                </label>
-
-                <label className="cursor-pointer">
-                  <input type="radio" name="theme" value="moderne" className="peer sr-only" />
-                  <div className="border-2 border-gray-200 rounded-lg p-4 text-center peer-checked:border-black peer-checked:bg-gray-50">
-                    <div className="text-2xl mb-2">🎨</div>
-                    <div className="text-sm font-medium">Moderne</div>
-                  </div>
-                </label>
-
-                <label className="cursor-pointer">
-                  <input type="radio" name="theme" value="romantique" className="peer sr-only" />
-                  <div className="border-2 border-gray-200 rounded-lg p-4 text-center peer-checked:border-black peer-checked:bg-gray-50">
-                    <div className="text-2xl mb-2">🌸</div>
-                    <div className="text-sm font-medium">Romantique</div>
-                  </div>
-                </label>
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { value: 'elegant', emoji: '✨', label: 'Élégant' },
+                  { value: 'moderne', emoji: '🎨', label: 'Moderne' },
+                  { value: 'romantique', emoji: '🌸', label: 'Romantique' },
+                ].map((theme) => (
+                  <label key={theme.value} className="cursor-pointer">
+                    <input type="radio" name="theme" value={theme.value} className="peer sr-only"
+                      defaultChecked={theme.value === 'elegant'} />
+                    <div className="border-2 border-stone-200 rounded-2xl p-4 text-center peer-checked:border-[#4a5240] peer-checked:bg-[#f5f0e8] transition">
+                      <div className="text-2xl mb-2">{theme.emoji}</div>
+                      <div style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.8rem' }}
+                           className="text-stone-600">{theme.label}</div>
+                    </div>
+                  </label>
+                ))}
               </div>
             </div>
 
-            <button type="submit" className="w-full bg-black text-white py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition">
+            <button
+              type="submit"
+              className="w-full bg-[#4a5240] text-white py-3 rounded-full hover:bg-[#2d3228] transition mt-2"
+              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, letterSpacing: '0.08em', fontSize: '0.85rem' }}
+            >
               Créer mon espace mariage
             </button>
           </form>

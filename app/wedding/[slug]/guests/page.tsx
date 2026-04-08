@@ -89,81 +89,73 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
   const pending = guests?.filter(g => g.rsvp_status === 'en_attente').length ?? 0
 
   return (
-    <div className="min-h-screen bg-rose-50 p-8">
+    <div className="min-h-screen bg-[#f5f0e8] p-8">
       <div className="max-w-4xl mx-auto">
 
         <div className="mb-6">
-          <a href={`/wedding/${slug}`} className="text-rose-600 hover:underline">← Retour au mariage</a>
+          <a href={`/wedding/${slug}`}
+             className="text-sm text-[#4a5240] hover:underline"
+             style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
+            ← Retour au mariage
+          </a>
         </div>
 
-        <h1 className="text-3xl font-bold text-rose-700 mb-4">👥 Liste des invités</h1>
+        <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.5rem', fontStyle: 'italic' }}
+            className="text-[#2d3228] mb-6">
+          Liste des invités
+        </h1>
 
         {/* Compteurs RSVP */}
         <div className="grid grid-cols-3 gap-4 mb-8">
-          <div className="bg-white rounded-xl shadow p-4 text-center">
-            <p className="text-2xl font-bold text-green-600">{confirmed}</p>
-            <p className="text-sm text-gray-500">✅ Confirmé{confirmed > 1 ? 's' : ''}</p>
+          <div className="bg-white/80 rounded-2xl p-4 text-center">
+            <p className="text-2xl font-bold text-[#4a5240]" style={{ fontFamily: 'var(--font-cormorant)' }}>{confirmed}</p>
+            <p className="text-xs text-stone-400 uppercase tracking-wide mt-1" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>✅ Confirmé{confirmed > 1 ? 's' : ''}</p>
           </div>
-          <div className="bg-white rounded-xl shadow p-4 text-center">
-            <p className="text-2xl font-bold text-red-500">{declined}</p>
-            <p className="text-sm text-gray-500">❌ Décliné{declined > 1 ? 's' : ''}</p>
+          <div className="bg-white/80 rounded-2xl p-4 text-center">
+            <p className="text-2xl font-bold text-stone-400" style={{ fontFamily: 'var(--font-cormorant)' }}>{pending}</p>
+            <p className="text-xs text-stone-400 uppercase tracking-wide mt-1" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>⏳ En attente</p>
           </div>
-          <div className="bg-white rounded-xl shadow p-4 text-center">
-            <p className="text-2xl font-bold text-gray-400">{pending}</p>
-            <p className="text-sm text-gray-500">⏳ En attente</p>
+          <div className="bg-white/80 rounded-2xl p-4 text-center">
+            <p className="text-2xl font-bold text-red-400" style={{ fontFamily: 'var(--font-cormorant)' }}>{declined}</p>
+            <p className="text-xs text-stone-400 uppercase tracking-wide mt-1" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>❌ Décliné{declined > 1 ? 's' : ''}</p>
           </div>
         </div>
 
         {/* Formulaire d'ajout */}
-        <div className="bg-white rounded-2xl shadow p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4">Ajouter un invité</h2>
+        <div className="bg-white/80 rounded-3xl p-6 mb-8">
+          <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.4rem', fontStyle: 'italic' }}
+              className="text-[#4a5240] mb-4">Ajouter un invité</h2>
           <form action={addGuest} className="grid grid-cols-2 gap-3">
             <input type="hidden" name="wedding_id" value={wedding.id} />
             <input type="hidden" name="slug" value={slug} />
-            <input
-              type="text"
-              name="first_name"
-              placeholder="Prénom *"
-              required
-              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-rose-300"
-            />
-            <input
-              type="text"
-              name="nickname"
-              placeholder="Surnom (si homonyme)"
-              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-rose-300"
-            />
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-rose-300"
-            />
-            <input
-              type="tel"
-              name="telephone"
-              placeholder="Téléphone"
-              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-rose-300"
-            />
-            <select
-              name="relation"
-              className="border border-gray-300 rounded-lg px-4 py-2 text-gray-500 focus:outline-none focus:ring-2 focus:ring-rose-300"
-            >
+            {[
+              { name: 'first_name', placeholder: 'Prénom *', required: true, type: 'text' },
+              { name: 'nickname', placeholder: 'Surnom (si homonyme)', required: false, type: 'text' },
+              { name: 'email', placeholder: 'Email', required: false, type: 'email' },
+              { name: 'telephone', placeholder: 'Téléphone', required: false, type: 'tel' },
+            ].map(f => (
+              <input key={f.name} type={f.type} name={f.name} placeholder={f.placeholder} required={f.required}
+                className="border border-stone-200 rounded-xl px-4 py-2 bg-white outline-none focus:border-[#4a5240] transition text-stone-700"
+                style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.9rem' }} />
+            ))}
+            <select name="relation"
+              className="border border-stone-200 rounded-xl px-4 py-2 bg-white text-stone-500 outline-none focus:border-[#4a5240] transition"
+              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.9rem' }}>
               <option value="">Lien de parenté</option>
               {RELATIONS.map(r => <option key={r} value={r}>{r}</option>)}
             </select>
-            <button
-              type="submit"
-              className="bg-rose-600 text-white px-6 py-2 rounded-lg hover:bg-rose-700 transition-colors"
-            >
-              + Ajouter l'invité
+            <button type="submit"
+              className="bg-[#4a5240] text-white px-6 py-2 rounded-xl hover:bg-[#2d3228] transition"
+              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem', letterSpacing: '0.05em' }}>
+              + Ajouter
             </button>
           </form>
         </div>
 
         {/* Liste des invités */}
-        <div className="bg-white rounded-2xl shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">Invités ({total})</h2>
+        <div className="bg-white/80 rounded-3xl p-6">
+          <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.4rem', fontStyle: 'italic' }}
+              className="text-[#4a5240] mb-4">Invités ({total})</h2>
           <GuestList
             guests={guests ?? []}
             slug={slug}

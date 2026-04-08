@@ -7,6 +7,7 @@ import { useState } from 'react'
 export default function Register() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   async function handleSignup(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -53,14 +54,20 @@ export default function Register() {
             className="w-full border border-stone-300 rounded-xl px-4 py-3 bg-white/80 outline-none focus:border-[#4a5240] transition text-stone-700"
             style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}
           />
-          <input
-            name="password"
-            type="password"
-            placeholder="Mot de passe"
-            required
-            className="w-full border border-stone-300 rounded-xl px-4 py-3 bg-white/80 outline-none focus:border-[#4a5240] transition text-stone-700"
-            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}
-          />
+          <div className="relative">
+            <input
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Mot de passe"
+              required
+              className="w-full border border-stone-300 rounded-xl px-4 py-3 pr-12 bg-white/80 outline-none focus:border-[#4a5240] transition text-stone-700"
+              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}
+            />
+            <button type="button" onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition text-sm">
+              {showPassword ? '🙈' : '👁️'}
+            </button>
+          </div>
           <button
             type="submit"
             disabled={loading}

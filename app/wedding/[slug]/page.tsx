@@ -66,7 +66,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
         <div className="max-w-2xl mx-auto flex justify-around px-6 pt-4 pb-0">
           {[
             { label: 'Infos', href: `#infos` },
-            { label: 'Programme', href: `#programme` },
+            { label: 'Programme', href: `/wedding/${slug}/programme` },
             { label: 'Lieux', href: `#lieux` },
             { label: 'Hébergements', href: `#hebergements` },
           ].map((tab) => (

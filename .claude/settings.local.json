@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cp -r /c/Users/anais/Desktop/kaatch/.env.local .)",
+      "Bash(ln -s /c/Users/anais/Desktop/kaatch/node_modules ./node_modules)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Read(//c/Users/anais/Desktop/kaatch/**)",
+      "Bash(npm install:*)"
+    ]
+  }
+}

@@ -6,21 +6,15 @@ async function addGuest(formData: FormData) {
   'use server'
 
   const supabase = await createSupabaseServerClient()
-  const wedding_id = formData.get('wedding_id') as string
-  const first_name = formData.get('first_name') as string
-  const nickname = formData.get('nickname') as string
-  const email = formData.get('email') as string
-  const telephone = formData.get('telephone') as string
-  const relation = formData.get('relation') as string
   const slug = formData.get('slug') as string
 
   await supabase.from('guests').insert({
-    wedding_id,
-    first_name,
-    nickname: nickname || null,
-    email: email || null,
-    telephone: telephone || null,
-    relation: relation || null,
+    wedding_id: formData.get('wedding_id') as string,
+    first_name: formData.get('first_name') as string,
+    nickname: (formData.get('nickname') as string) || null,
+    email: (formData.get('email') as string) || null,
+    telephone: (formData.get('telephone') as string) || null,
+    relation: (formData.get('relation') as string) || null,
   })
 
   revalidatePath(`/wedding/${slug}/guests`)
@@ -37,15 +31,15 @@ async function deleteGuest(formData: FormData) {
   revalidatePath(`/wedding/${slug}/guests`)
 }
 
-async function toggleRsvp(formData: FormData) {
+async function setRsvp(formData: FormData) {
   'use server'
 
   const supabase = await createSupabaseServerClient()
   const id = formData.get('id') as string
   const slug = formData.get('slug') as string
-  const current = formData.get('rsvp_confirmed') === 'true'
+  const rsvp_status = formData.get('rsvp_status') as string
 
-  await supabase.from('guests').update({ rsvp_confirmed: !current }).eq('id', id)
+  await supabase.from('guests').update({ rsvp_status }).eq('id', id)
   revalidatePath(`/wedding/${slug}/guests`)
 }
 
@@ -89,8 +83,10 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
     .eq('wedding_id', wedding.id)
     .order('created_at', { ascending: false })
 
-  const confirmed = guests?.filter(g => g.rsvp_confirmed).length ?? 0
   const total = guests?.length ?? 0
+  const confirmed = guests?.filter(g => g.rsvp_status === 'confirme').length ?? 0
+  const declined = guests?.filter(g => g.rsvp_status === 'decline').length ?? 0
+  const pending = guests?.filter(g => g.rsvp_status === 'en_attente').length ?? 0
 
   return (
     <div className="min-h-screen bg-rose-50 p-8">
@@ -100,10 +96,23 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
           <a href={`/wedding/${slug}`} className="text-rose-600 hover:underline">← Retour au mariage</a>
         </div>
 
-        <h1 className="text-3xl font-bold text-rose-700 mb-2">👥 Liste des invités</h1>
-        <p className="text-gray-500 mb-8">
-          {confirmed} confirmé{confirmed > 1 ? 's' : ''} sur {total} invité{total > 1 ? 's' : ''}
-        </p>
+        <h1 className="text-3xl font-bold text-rose-700 mb-4">👥 Liste des invités</h1>
+
+        {/* Compteurs RSVP */}
+        <div className="grid grid-cols-3 gap-4 mb-8">
+          <div className="bg-white rounded-xl shadow p-4 text-center">
+            <p className="text-2xl font-bold text-green-600">{confirmed}</p>
+            <p className="text-sm text-gray-500">✅ Confirmé{confirmed > 1 ? 's' : ''}</p>
+          </div>
+          <div className="bg-white rounded-xl shadow p-4 text-center">
+            <p className="text-2xl font-bold text-red-500">{declined}</p>
+            <p className="text-sm text-gray-500">❌ Décliné{declined > 1 ? 's' : ''}</p>
+          </div>
+          <div className="bg-white rounded-xl shadow p-4 text-center">
+            <p className="text-2xl font-bold text-gray-400">{pending}</p>
+            <p className="text-sm text-gray-500">⏳ En attente</p>
+          </div>
+        </div>
 
         {/* Formulaire d'ajout */}
         <div className="bg-white rounded-2xl shadow p-6 mb-8">
@@ -158,7 +167,7 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
           <GuestList
             guests={guests ?? []}
             slug={slug}
-            toggleRsvp={toggleRsvp}
+            setRsvp={setRsvp}
             deleteGuest={deleteGuest}
             updateGuest={updateGuest}
           />

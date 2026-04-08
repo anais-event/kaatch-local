@@ -9,20 +9,26 @@ type Guest = {
   email: string | null
   telephone: string | null
   relation: string | null
-  rsvp_confirmed: boolean
+  rsvp_status: 'en_attente' | 'confirme' | 'decline'
 }
 
 const RELATIONS = ['Ami(e)', 'Frère', 'Sœur', 'Père', 'Mère', 'Oncle', 'Tante', 'Cousin(e)', 'Collègue', 'Autre']
 
+const RSVP_CONFIG = {
+  en_attente: { label: '⏳ En attente', classes: 'bg-gray-100 text-gray-500' },
+  confirme:   { label: '✅ Confirmé',   classes: 'bg-green-100 text-green-700' },
+  decline:    { label: '❌ Décliné',    classes: 'bg-red-100 text-red-500' },
+}
+
 type Props = {
   guests: Guest[]
   slug: string
-  toggleRsvp: (formData: FormData) => Promise<void>
+  setRsvp: (formData: FormData) => Promise<void>
   deleteGuest: (formData: FormData) => Promise<void>
   updateGuest: (formData: FormData) => Promise<void>
 }
 
-export default function GuestList({ guests, slug, toggleRsvp, deleteGuest, updateGuest }: Props) {
+export default function GuestList({ guests, slug, setRsvp, deleteGuest, updateGuest }: Props) {
   const [search, setSearch] = useState('')
   const [sortBy, setSortBy] = useState<'date' | 'nom' | 'relation' | 'rsvp'>('date')
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -38,8 +44,8 @@ export default function GuestList({ guests, slug, toggleRsvp, deleteGuest, updat
     .sort((a, b) => {
       if (sortBy === 'nom') return a.first_name.localeCompare(b.first_name)
       if (sortBy === 'relation') return (a.relation ?? '').localeCompare(b.relation ?? '')
-      if (sortBy === 'rsvp') return Number(b.rsvp_confirmed) - Number(a.rsvp_confirmed)
-      return 0 // date = ordre serveur
+      if (sortBy === 'rsvp') return a.rsvp_status.localeCompare(b.rsvp_status)
+      return 0
     })
 
   return (
@@ -154,27 +160,29 @@ export default function GuestList({ guests, slug, toggleRsvp, deleteGuest, updat
                   </div>
 
                   <div className="flex items-center gap-2">
-                    {/* Bouton RSVP */}
-                    <form action={toggleRsvp}>
+                    {/* Sélecteur RSVP */}
+                    <form action={setRsvp}>
                       <input type="hidden" name="id" value={guest.id} />
                       <input type="hidden" name="slug" value={slug} />
-                      <input type="hidden" name="rsvp_confirmed" value={String(guest.rsvp_confirmed)} />
-                      <button
-                        type="submit"
-                        className={`text-sm px-3 py-1 rounded-full transition-colors ${
-                          guest.rsvp_confirmed
-                            ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                        }`}
+                      <select
+                        name="rsvp_status"
+                        defaultValue={guest.rsvp_status}
+                        onChange={e => {
+                          const form = e.target.closest('form') as HTMLFormElement
+                          form.requestSubmit()
+                        }}
+                        className={`text-sm px-3 py-1 rounded-full border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-rose-300 ${RSVP_CONFIG[guest.rsvp_status].classes}`}
                       >
-                        {guest.rsvp_confirmed ? '✅ Confirmé' : '⏳ En attente'}
-                      </button>
+                        <option value="en_attente">⏳ En attente</option>
+                        <option value="confirme">✅ Confirmé</option>
+                        <option value="decline">❌ Décliné</option>
+                      </select>
                     </form>
 
                     {/* Bouton éditer */}
                     <button
                       onClick={() => setEditingId(guest.id)}
-                      className="text-gray-300 hover:text-blue-400 transition-colors text-sm"
+                      className="text-gray-300 hover:text-blue-400 transition-colors"
                       title="Modifier"
                     >
                       ✏️

@@ -8,11 +8,13 @@ async function addGuest(formData: FormData) {
   const wedding_id = formData.get('wedding_id') as string
   const first_name = formData.get('first_name') as string
   const nickname = formData.get('nickname') as string
+  const email = formData.get('email') as string
+  const telephone = formData.get('telephone') as string
   const slug = formData.get('slug') as string
 
   await supabase
     .from('guests')
-    .insert({ wedding_id, first_name, nickname })
+    .insert({ wedding_id, first_name, nickname, email: email || null, telephone: telephone || null })
 
   revalidatePath(`/wedding/${slug}/guests`)
 }
@@ -83,7 +85,7 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
         {/* Formulaire d'ajout */}
         <div className="bg-white rounded-2xl shadow p-6 mb-8">
           <h2 className="text-xl font-semibold mb-4">Ajouter un invité</h2>
-          <form action={addGuest} className="flex gap-4 flex-wrap">
+          <form action={addGuest} className="grid grid-cols-2 gap-3">
             <input type="hidden" name="wedding_id" value={wedding.id} />
             <input type="hidden" name="slug" value={slug} />
             <input
@@ -91,19 +93,31 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
               name="first_name"
               placeholder="Prénom *"
               required
-              className="flex-1 min-w-[140px] border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-rose-300"
+              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-rose-300"
             />
             <input
               type="text"
               name="nickname"
               placeholder="Surnom (si homonyme)"
-              className="flex-1 min-w-[140px] border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-rose-300"
+              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-rose-300"
+            />
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-rose-300"
+            />
+            <input
+              type="tel"
+              name="telephone"
+              placeholder="Téléphone"
+              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-rose-300"
             />
             <button
               type="submit"
-              className="bg-rose-600 text-white px-6 py-2 rounded-lg hover:bg-rose-700 transition-colors"
+              className="col-span-2 bg-rose-600 text-white px-6 py-2 rounded-lg hover:bg-rose-700 transition-colors"
             >
-              + Ajouter
+              + Ajouter l'invité
             </button>
           </form>
         </div>
@@ -121,11 +135,13 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
                   key={guest.id}
                   className="flex justify-between items-center p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors"
                 >
-                  <div>
-                    <p className="font-medium text-gray-800">{guest.first_name}</p>
-                    {guest.nickname && (
-                      <p className="text-sm text-gray-400">({guest.nickname})</p>
-                    )}
+                  <div className="flex flex-col gap-0.5">
+                    <p className="font-medium text-gray-800">
+                      {guest.first_name}
+                      {guest.nickname && <span className="text-gray-400 font-normal text-sm ml-1">({guest.nickname})</span>}
+                    </p>
+                    {guest.email && <p className="text-sm text-gray-400">✉️ {guest.email}</p>}
+                    {guest.telephone && <p className="text-sm text-gray-400">📞 {guest.telephone}</p>}
                   </div>
 
                   <div className="flex items-center gap-3">

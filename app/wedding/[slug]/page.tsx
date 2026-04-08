@@ -68,7 +68,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
             { label: 'Infos', href: `#infos` },
             { label: 'Programme', href: `/wedding/${slug}/programme` },
             { label: 'Lieux', href: `#lieux` },
-            { label: 'Hébergements', href: `#hebergements` },
+            { label: 'Hébergements', href: `/wedding/${slug}/hebergements` },
           ].map((tab) => (
             <a
               key={tab.label}

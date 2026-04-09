@@ -8,6 +8,7 @@ async function updateWedding(formData: FormData) {
   const slug = formData.get('slug') as string
   const date = formData.get('date') as string
   const location = formData.get('location') as string
+  const name = formData.get('name') as string
 
   const file = formData.get('cover_image') as File
 
@@ -33,6 +34,7 @@ async function updateWedding(formData: FormData) {
     .update({
       date,
       location,
+      name,
       ...(cover_image_url ? { cover_image_url } : {}),
     })
     .eq('slug', slug)
@@ -76,6 +78,21 @@ export default async function EditWedding({ params }: { params: Promise<{ slug: 
         <div className="bg-white/80 rounded-3xl shadow-sm p-8">
           <form action={updateWedding} className="space-y-6">
             <input type="hidden" name="slug" value={slug} />
+
+            <div>
+              <label style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.7rem', letterSpacing: '0.15em' }}
+                     className="block text-stone-400 uppercase mb-2">
+                Le mariage de
+              </label>
+              <input
+                type="text"
+                name="name"
+                defaultValue={wedding.name || ''}
+                placeholder="Ex : Sophie & Thomas"
+                className="w-full border border-stone-200 rounded-xl px-4 py-3 outline-none focus:border-[#4a5240] transition text-stone-700 bg-white"
+                style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}
+              />
+            </div>
 
             <div>
               <label style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.7rem', letterSpacing: '0.15em' }}

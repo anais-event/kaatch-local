@@ -1,8 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
-import dynamic from 'next/dynamic'
-
-const HotelSuggestions = dynamic(() => import('./HotelSuggestions'), { ssr: false })
+import HotelSuggestionsWrapper from './HotelSuggestionsWrapper.tsx'
 
 async function addAccommodation(formData: FormData) {
   'use server'
@@ -65,7 +63,6 @@ export default async function HebergementsPage({ params }: { params: Promise<{ s
           Hébergements
         </h1>
 
-        {/* Hébergements épinglés manuellement */}
         {accommodations && accommodations.length > 0 && (
           <div className="mb-8">
             <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.4rem', fontStyle: 'italic' }}
@@ -111,7 +108,6 @@ export default async function HebergementsPage({ params }: { params: Promise<{ s
           </div>
         )}
 
-        {/* Suggestions automatiques */}
         {wedding.location && (
           <div className="mb-8">
             <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.4rem', fontStyle: 'italic' }}
@@ -122,11 +118,10 @@ export default async function HebergementsPage({ params }: { params: Promise<{ s
                className="text-stone-400 mb-4">
               Hôtels trouvés automatiquement autour de "{wedding.location}"
             </p>
-            <HotelSuggestions location={wedding.location} />
+            <HotelSuggestionsWrapper location={wedding.location} />
           </div>
         )}
 
-        {/* Formulaire ajout manuel */}
         <div className="bg-white/80 rounded-3xl p-6 shadow-sm">
           <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.4rem', fontStyle: 'italic' }}
               className="text-[#4a5240] mb-4">

@@ -18,12 +18,7 @@ export default async function Dashboard() {
     redirect('/dashboard/new-wedding')
   }
 
-  // Si un seul mariage, on redirige directement dessus
-  if (weddings.length === 1) {
-    redirect(`/wedding/${weddings[0].slug}`)
-  }
-
-  // Plusieurs mariages : on affiche la liste
+  // Afficher la liste
   return (
     <div className="min-h-screen bg-[#f5f0e8] p-8">
       <div className="max-w-3xl mx-auto">

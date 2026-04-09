@@ -8,6 +8,7 @@ async function uploadPhoto(formData: FormData) {
   const slug = formData.get('slug') as string
   const uploader_name = (formData.get('uploader_name') as string) || 'Anonyme'
   const moment_tag = (formData.get('moment_tag') as string) || null
+  const tagged_guests = formData.getAll('tagged_guests') as string[]
   const file = formData.get('photo') as File
 
   if (!file || file.size === 0) return
@@ -18,9 +19,12 @@ async function uploadPhoto(formData: FormData) {
   const ext = file.name.split('.').pop()
   const path = `${wedding.id}/${Date.now()}.${ext}`
 
+  const bytes = await file.arrayBuffer()
+  const buffer = Buffer.from(bytes)
+
   const { error: uploadError } = await supabase.storage
     .from('wedding-photos')
-    .upload(path, file, { upsert: false })
+    .upload(path, buffer, { contentType: file.type, upsert: false })
 
   if (uploadError) return
 
@@ -31,6 +35,7 @@ async function uploadPhoto(formData: FormData) {
     url: urlData.publicUrl,
     uploader_name,
     moment_tag,
+    tagged_guests: tagged_guests.length > 0 ? tagged_guests : null,
   })
 
   revalidatePath(`/wedding/${slug}/photos`)
@@ -69,7 +74,7 @@ export default async function PhotosPage({ params }: { params: Promise<{ slug: s
 
   if (!wedding) return <div className="p-8">Mariage introuvable</div>
 
-  // Récupérer les moments du programme
+  // Moments du programme
   const { data: steps } = await supabase
     .from('program_steps')
     .select('title')
@@ -78,7 +83,16 @@ export default async function PhotosPage({ params }: { params: Promise<{ slug: s
 
   const moments = steps?.map(s => s.title) ?? []
 
-  // Récupérer les photos avec likes et commentaires
+  // Liste des invités pour le tagging
+  const { data: guests } = await supabase
+    .from('guests')
+    .select('id, first_name, last_name')
+    .eq('wedding_id', wedding.id)
+    .order('first_name')
+
+  const guestList = guests ?? []
+
+  // Photos avec likes et commentaires
   const { data: rawPhotos } = await supabase
     .from('photos')
     .select('*, photo_likes(id), photo_comments(id, author_name, content, created_at)')
@@ -90,13 +104,12 @@ export default async function PhotosPage({ params }: { params: Promise<{ slug: s
     url: p.url,
     uploader_name: p.uploader_name,
     moment_tag: p.moment_tag,
+    tagged_guests: p.tagged_guests ?? [],
     created_at: p.created_at,
     likes: p.photo_likes?.length ?? 0,
     comments: p.photo_comments ?? [],
   }))
 
-  // Lier le slug aux actions serveur
-  const uploadPhotoWithSlug = uploadPhoto
   const addLikeWithSlug = async (fd: FormData) => {
     'use server'
     fd.append('slug', slug)
@@ -128,7 +141,7 @@ export default async function PhotosPage({ params }: { params: Promise<{ slug: s
         <div className="bg-white/80 rounded-3xl p-6 mb-8 shadow-sm">
           <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.4rem', fontStyle: 'italic' }}
               className="text-[#4a5240] mb-4">Partager une photo</h2>
-          <form action={uploadPhotoWithSlug} className="space-y-3">
+          <form action={uploadPhoto} className="space-y-3">
             <input type="hidden" name="slug" value={slug} />
             <div className="grid grid-cols-2 gap-3">
               <input type="text" name="uploader_name" placeholder="Votre prénom"
@@ -147,6 +160,27 @@ export default async function PhotosPage({ params }: { params: Promise<{ slug: s
                   style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.9rem' }} />
               )}
             </div>
+
+            {/* Tagging invités */}
+            {guestList.length > 0 && (
+              <div>
+                <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.75rem', letterSpacing: '0.1em' }}
+                   className="text-stone-400 uppercase mb-2">Qui voit-on sur la photo ?</p>
+                <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-1">
+                  {guestList.map(g => (
+                    <label key={g.id}
+                      className="flex items-center gap-1.5 cursor-pointer px-3 py-1.5 rounded-full border border-stone-200 bg-white hover:border-[#4a5240] transition has-[:checked]:bg-[#4a5240] has-[:checked]:border-[#4a5240] has-[:checked]:text-white">
+                      <input type="checkbox" name="tagged_guests" value={`${g.first_name} ${g.last_name}`}
+                        className="hidden" />
+                      <span style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.8rem' }}>
+                        {g.first_name} {g.last_name}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <input type="file" name="photo" accept="image/*" required
               className="w-full border border-stone-200 rounded-xl px-4 py-2 text-stone-500 bg-white file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:bg-[#f5f0e8] file:text-[#4a5240] hover:file:bg-stone-200 transition"
               style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem' }} />

@@ -1,10 +1,8 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
-import dynamic from 'next/dynamic'
 import { headers } from 'next/headers'
-
-const QRCodeDisplay = dynamic(() => import('./QRCodeDisplay'), { ssr: false })
-const CopyButton = dynamic(() => import('./CopyButton'), { ssr: false })
+import QRCodeDisplay from './QRCodeDisplay'
+import CopyButton from './CopyButton'
 
 async function saveShareCode(formData: FormData) {
   'use server'

@@ -9,7 +9,7 @@ export default async function Dashboard() {
 
   const { data: weddings } = await supabase
     .from('weddings')
-    .select('slug, name, date, cover_image_url, theme')
+    .select('slug, name, date, cover_image_url, theme, photos(id)')
     .eq('couple_id', user.id)
     .order('created_at', { ascending: false })
 
@@ -57,6 +57,12 @@ export default async function Dashboard() {
                       <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.8rem' }}>
                         {wedding.name}
                       </h2>
+                      {(wedding.photos?.length ?? 0) > 0 && (
+                        <p className="text-xs opacity-60 mt-1"
+                           style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
+                          📸 {wedding.photos.length} photo{wedding.photos.length > 1 ? 's' : ''}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>

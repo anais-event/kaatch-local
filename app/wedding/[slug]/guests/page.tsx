@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
 import GuestList from './GuestList'
+import ImportGuests from './ImportGuests'
 
 async function addGuest(formData: FormData) {
   'use server'
@@ -15,6 +16,7 @@ async function addGuest(formData: FormData) {
     email: (formData.get('email') as string) || null,
     telephone: (formData.get('telephone') as string) || null,
     relation: (formData.get('relation') as string) || null,
+    guest_type: (formData.get('guest_type') as string) || 'adulte',
   })
 
   revalidatePath(`/wedding/${slug}/guests`)
@@ -121,6 +123,9 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
           </div>
         </div>
 
+        {/* Import Excel */}
+        <ImportGuests weddingId={wedding.id} slug={slug} />
+
         {/* Formulaire d'ajout */}
         <div className="bg-white/80 rounded-3xl p-6 mb-8">
           <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.4rem', fontStyle: 'italic' }}
@@ -144,12 +149,28 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
               <option value="">Lien de parenté</option>
               {RELATIONS.map(r => <option key={r} value={r}>{r}</option>)}
             </select>
+            <select name="guest_type"
+              className="border border-stone-200 rounded-xl px-4 py-2 bg-white text-stone-500 outline-none focus:border-[#4a5240] transition"
+              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.9rem' }}>
+              <option value="adulte">🧑 Adulte</option>
+              <option value="enfant">👶 Enfant</option>
+              <option value="animal">🐾 Animal</option>
+            </select>
             <button type="submit"
               className="bg-[#4a5240] text-white px-6 py-2 rounded-xl hover:bg-[#2d3228] transition"
               style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem', letterSpacing: '0.05em' }}>
               + Ajouter
             </button>
           </form>
+        </div>
+
+        {/* Message enfants/animaux */}
+        <div className="bg-[#4a5240]/10 border border-[#4a5240]/20 rounded-2xl px-5 py-4 mb-6 flex gap-3 items-start">
+          <span className="text-xl">😉</span>
+          <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem' }}
+             className="text-[#4a5240]">
+            N'oublie pas d'ajouter les enfants et animaux à ta liste pour pouvoir les retrouver facilement sur les photos !
+          </p>
         </div>
 
         {/* Liste des invités */}

@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
+import MessagerieForm from './MessagerieForm'
 
 async function sendMessage(formData: FormData) {
   'use server'
@@ -10,6 +11,42 @@ async function sendMessage(formData: FormData) {
     author_name: formData.get('author_name') as string,
     content: formData.get('content') as string,
   })
+  revalidatePath(`/wedding/${slug}/messagerie`)
+}
+
+async function deleteGroup(formData: FormData) {
+  'use server'
+  const supabase = await createSupabaseServerClient()
+  const slug = formData.get('slug') as string
+  const id = formData.get('id') as string
+  await supabase.from('message_groups').delete().eq('id', id)
+  revalidatePath(`/wedding/${slug}/messagerie`)
+}
+
+async function joinGroup(formData: FormData) {
+  'use server'
+  const supabase = await createSupabaseServerClient()
+  const slug = formData.get('slug') as string
+  const id = formData.get('id') as string
+  const name = formData.get('member_name') as string
+  if (!name?.trim()) return
+  const { data: group } = await supabase.from('message_groups').select('members').eq('id', id).single()
+  const members: string[] = group?.members ?? []
+  if (!members.includes(name)) {
+    await supabase.from('message_groups').update({ members: [...members, name] }).eq('id', id)
+  }
+  revalidatePath(`/wedding/${slug}/messagerie`)
+}
+
+async function leaveGroup(formData: FormData) {
+  'use server'
+  const supabase = await createSupabaseServerClient()
+  const slug = formData.get('slug') as string
+  const id = formData.get('id') as string
+  const name = formData.get('member_name') as string
+  const { data: group } = await supabase.from('message_groups').select('members').eq('id', id).single()
+  const members: string[] = (group?.members ?? []).filter((m: string) => m !== name)
+  await supabase.from('message_groups').update({ members }).eq('id', id)
   revalidatePath(`/wedding/${slug}/messagerie`)
 }
 
@@ -36,6 +73,12 @@ export default async function MessageriePage({ params, searchParams }: {
 
   const { data: wedding } = await supabase.from('weddings').select('id').eq('slug', slug).single()
   if (!wedding) return <div className="p-8">Mariage introuvable</div>
+
+  const { data: guests } = await supabase
+    .from('guests')
+    .select('id, first_name, last_name')
+    .eq('wedding_id', wedding.id)
+    .order('first_name')
 
   // Récupérer ou créer le groupe @tout le monde
   let { data: groups } = await supabase
@@ -81,15 +124,50 @@ export default async function MessageriePage({ params, searchParams }: {
         </h1>
 
         {/* Onglets groupes */}
-        <div className="flex gap-2 flex-wrap mb-6">
+        <div className="flex gap-2 flex-wrap mb-4">
           {groups?.map(g => (
             <a key={g.id} href={`/wedding/${slug}/messagerie?groupe=${g.id}`}
                className={`px-4 py-1.5 rounded-full text-sm transition ${g.id === activeGroup?.id ? 'bg-[#4a5240] text-white' : 'bg-white/60 text-stone-500 hover:bg-white'}`}
                style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
               {g.name}
+              {g.members?.length > 0 && (
+                <span className="ml-1.5 opacity-60 text-xs">({g.members.length})</span>
+              )}
             </a>
           ))}
         </div>
+
+        {/* Panneau du groupe actif */}
+        {activeGroup && activeGroup.name !== '@tout le monde' && (
+          <div className="bg-white/60 rounded-2xl px-4 py-3 mb-4 flex items-center justify-between gap-4">
+            <div>
+              <p className="text-xs text-stone-500 mb-1" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
+                Membres : {activeGroup.members?.length > 0 ? activeGroup.members.join(', ') : 'Aucun pour le moment'}
+              </p>
+              <form action={joinGroup} className="flex gap-2">
+                <input type="hidden" name="id" value={activeGroup.id} />
+                <input type="hidden" name="slug" value={slug} />
+                <input type="text" name="member_name" placeholder="Rejoindre ce groupe…"
+                  className="border border-stone-200 rounded-lg px-3 py-1 text-sm bg-white outline-none focus:border-[#4a5240]"
+                  style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }} />
+                <button type="submit"
+                  className="px-3 py-1 rounded-lg bg-[#4a5240] text-white text-sm hover:bg-[#2d3228] transition"
+                  style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
+                  + Rejoindre
+                </button>
+              </form>
+            </div>
+            <form action={deleteGroup}>
+              <input type="hidden" name="id" value={activeGroup.id} />
+              <input type="hidden" name="slug" value={slug} />
+              <button type="submit"
+                className="px-3 py-1.5 rounded-lg bg-red-50 text-red-400 border border-red-200 hover:bg-red-100 transition text-sm"
+                style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
+                🗑 Supprimer ce groupe
+              </button>
+            </form>
+          </div>
+        )}
 
         {/* Messages */}
         <div className="flex-1 bg-white/80 rounded-3xl p-5 mb-4 space-y-3 min-h-[300px] max-h-[500px] overflow-y-auto shadow-sm">
@@ -117,21 +195,12 @@ export default async function MessageriePage({ params, searchParams }: {
         </div>
 
         {/* Envoyer un message */}
-        <form action={sendMessage} className="flex gap-2">
-          <input type="hidden" name="group_id" value={activeGroup?.id ?? ''} />
-          <input type="hidden" name="slug" value={slug} />
-          <input type="text" name="author_name" placeholder="Votre prénom" required
-            className="w-28 border border-stone-200 rounded-xl px-3 py-2 bg-white outline-none focus:border-[#4a5240] transition text-stone-700 text-sm"
-            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }} />
-          <input type="text" name="content" placeholder="Votre message…" required
-            className="flex-1 border border-stone-200 rounded-xl px-4 py-2 bg-white outline-none focus:border-[#4a5240] transition text-stone-700 text-sm"
-            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }} />
-          <button type="submit"
-            className="bg-[#4a5240] text-white px-5 py-2 rounded-xl hover:bg-[#2d3228] transition text-sm"
-            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
-            →
-          </button>
-        </form>
+        <MessagerieForm
+          groupId={activeGroup?.id ?? ''}
+          slug={slug}
+          guests={guests ?? []}
+          sendMessage={sendMessage}
+        />
 
         {/* Créer un groupe (mariés) */}
         <div className="mt-6 bg-white/60 rounded-2xl p-4">

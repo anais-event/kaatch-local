@@ -11,7 +11,7 @@ export default function Auth() {
   const [resetMode, setResetMode] = useState(false)
   const [resetSent, setResetSent] = useState(false)
   const [resetLoading, setResetLoading] = useState(false)
-  const [mode, setMode] = useState<'choice' | 'married' | 'guest'>('choice')
+  const [mode, setMode] = useState<'choice' | 'married' | 'guest'>('married')
   const [guestCode, setGuestCode] = useState('')
   const [guestFirst, setGuestFirst] = useState('')
   const [guestLast, setGuestLast] = useState('')
@@ -162,11 +162,14 @@ export default function Auth() {
                     Mot de passe oublié ?
                   </button>
                 </p>
+                <p className="text-center text-sm" style={fontLato}>
+                  <span className="text-stone-400">Vous êtes invité(e) ? </span>
+                  <a href="/rejoindre" className="text-[#4a5240] hover:underline">Rejoindre un mariage</a>
+                </p>
                 <p className="text-center">
-                  <button type="button" onClick={() => setMode('choice')}
-                    className="text-stone-400 hover:text-stone-600 text-sm" style={fontLato}>
+                  <a href="/" className="text-stone-400 hover:text-stone-600 text-sm" style={fontLato}>
                     ← Retour
-                  </button>
+                  </a>
                 </p>
               </form>
             ) : (

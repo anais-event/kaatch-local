@@ -1,6 +1,8 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
 import PhotoFeed from './PhotoFeed'
+import GuestTagInput from './GuestTagInput'
+import UploaderNameInput from './UploaderNameInput'
 
 async function uploadPhoto(formData: FormData) {
   'use server'
@@ -33,8 +35,8 @@ async function uploadPhoto(formData: FormData) {
   await supabase.from('photos').insert({
     wedding_id: wedding.id,
     url: urlData.publicUrl,
-    uploader_name,
-    moment_tag,
+    uploaded_by_name: uploader_name,
+    caption: moment_tag,
     tagged_guests: tagged_guests.length > 0 ? tagged_guests : null,
   })
 
@@ -102,8 +104,8 @@ export default async function PhotosPage({ params }: { params: Promise<{ slug: s
   const photos = (rawPhotos ?? []).map(p => ({
     id: p.id,
     url: p.url,
-    uploader_name: p.uploader_name,
-    moment_tag: p.moment_tag,
+    uploader_name: p.uploaded_by_name,
+    moment_tag: p.caption,
     tagged_guests: p.tagged_guests ?? [],
     created_at: p.created_at,
     likes: p.photo_likes?.length ?? 0,
@@ -144,9 +146,7 @@ export default async function PhotosPage({ params }: { params: Promise<{ slug: s
           <form action={uploadPhoto} className="space-y-3">
             <input type="hidden" name="slug" value={slug} />
             <div className="grid grid-cols-2 gap-3">
-              <input type="text" name="uploader_name" placeholder="Votre prénom"
-                className="border border-stone-200 rounded-xl px-4 py-2 bg-white outline-none focus:border-[#4a5240] transition text-stone-700"
-                style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.9rem' }} />
+              <UploaderNameInput guests={guestList} />
               {moments.length > 0 ? (
                 <select name="moment_tag"
                   className="border border-stone-200 rounded-xl px-4 py-2 bg-white text-stone-500 outline-none focus:border-[#4a5240] transition"
@@ -161,23 +161,10 @@ export default async function PhotosPage({ params }: { params: Promise<{ slug: s
               )}
             </div>
 
-            {/* Tagging invités */}
+            {/* Tagging invités — autocomplete */}
             {guestList.length > 0 && (
               <div>
-                <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.75rem', letterSpacing: '0.1em' }}
-                   className="text-stone-400 uppercase mb-2">Qui voit-on sur la photo ?</p>
-                <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-1">
-                  {guestList.map(g => (
-                    <label key={g.id}
-                      className="flex items-center gap-1.5 cursor-pointer px-3 py-1.5 rounded-full border border-stone-200 bg-white hover:border-[#4a5240] transition has-[:checked]:bg-[#4a5240] has-[:checked]:border-[#4a5240] has-[:checked]:text-white">
-                      <input type="checkbox" name="tagged_guests" value={`${g.first_name} ${g.last_name}`}
-                        className="hidden" />
-                      <span style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.8rem' }}>
-                        {g.first_name} {g.last_name}
-                      </span>
-                    </label>
-                  ))}
-                </div>
+                <GuestTagInput guests={guestList} />
               </div>
             )}
 
@@ -196,6 +183,7 @@ export default async function PhotosPage({ params }: { params: Promise<{ slug: s
         <PhotoFeed
           photos={photos}
           moments={moments}
+          guestNames={guestList.map(g => [g.first_name, g.last_name].filter(Boolean).join(' '))}
           addLike={addLikeWithSlug}
           addComment={addCommentWithSlug}
         />

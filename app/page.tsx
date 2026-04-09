@@ -14,17 +14,22 @@ export default function Home() {
            className="text-stone-400 mb-10">
           Partagez vos plus beaux moments
         </p>
-        <a
-          href="/auth"
-          className="inline-block bg-[#4a5240] text-white px-10 py-3 rounded-full hover:bg-[#2d3228] transition"
-          style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem', letterSpacing: '0.1em' }}
-        >
-          Commencer
-        </a>
-        <p className="mt-6" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.8rem' }}>
-          <span className="text-stone-400">Pas encore de compte ? </span>
-          <a href="/register" className="text-[#4a5240] hover:underline">S'inscrire</a>
-        </p>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <a
+            href="/auth"
+            className="inline-block bg-[#4a5240] text-white px-10 py-3 rounded-full hover:bg-[#2d3228] transition"
+            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem', letterSpacing: '0.1em' }}
+          >
+            J'organise mon mariage
+          </a>
+          <a
+            href="/rejoindre"
+            className="inline-block border border-[#4a5240] text-[#4a5240] px-10 py-3 rounded-full hover:bg-[#4a5240] hover:text-white transition"
+            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem', letterSpacing: '0.1em' }}
+          >
+            Je suis invité
+          </a>
+        </div>
       </div>
     </main>
   )

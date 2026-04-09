@@ -42,7 +42,12 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
             style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, letterSpacing: '0.05em' }}>
             👥 Invités
           </a>
-        <a href={`/wedding/${slug}/partager`}
+        <a href={`/wedding/${slug}/contacts`}
+            className="text-xs bg-white/20 backdrop-blur text-white border border-white/30 px-4 py-2 rounded-full hover:bg-white/30 transition"
+            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, letterSpacing: '0.05em' }}>
+            📞 Contacts
+          </a>
+          <a href={`/wedding/${slug}/partager`}
             className="text-xs bg-white/20 backdrop-blur text-white border border-white/30 px-4 py-2 rounded-full hover:bg-white/30 transition"
             style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, letterSpacing: '0.05em' }}>
             🔗 Partager

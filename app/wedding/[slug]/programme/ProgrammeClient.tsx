@@ -176,7 +176,7 @@ export default function ProgrammeClient({ slug, steps, icons, addStep, deleteSte
         <div className="bg-white/70 rounded-3xl p-6 shadow-sm mb-6">
           <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '1.6rem', fontStyle: 'italic' }}
               className="text-[#2d3228] mb-4">
-            Ajouter une étape
+            Ajouter un moment
           </h2>
           <form action={addStep} className="space-y-3">
             <input type="hidden" name="slug" value={slug} />
@@ -199,7 +199,7 @@ export default function ProgrammeClient({ slug, steps, icons, addStep, deleteSte
             <button type="submit"
               className="w-full bg-[#4a5240] text-white py-3 rounded-full hover:bg-[#2d3228] transition"
               style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem', letterSpacing: '0.08em' }}>
-              + Ajouter cette étape
+              + Ajouter ce moment
             </button>
           </form>
         </div>

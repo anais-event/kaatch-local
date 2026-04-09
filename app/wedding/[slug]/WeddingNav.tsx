@@ -39,7 +39,7 @@ export default function WeddingNav({ slug, weddingName, weddingId }: { slug: str
               {tab.label}
             </a>
           ))}
-          <a href={`/invité/${slug}`}
+          <a href={`/invite/${slug}`}
             className="px-3 py-1 rounded-full text-xs whitespace-nowrap transition border border-[#4a5240] text-[#4a5240] hover:bg-[#4a5240] hover:text-white ml-2"
             style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, letterSpacing: '0.04em' }}>
             👁 Vue invité

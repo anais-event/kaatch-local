@@ -41,7 +41,7 @@ export default function GuestAuthForm({
     setLoading(false)
 
     if (data.ok) {
-      router.push(`/invité/${weddingSlug}`)
+      router.push(`/invite/${weddingSlug}`)
     } else {
       setError(data.message || 'Vous n\'êtes pas sur la liste des invités.')
     }

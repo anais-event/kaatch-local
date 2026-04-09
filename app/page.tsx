@@ -27,7 +27,7 @@ export default function Home() {
             className="inline-block border border-[#4a5240] text-[#4a5240] px-10 py-3 rounded-full hover:bg-[#4a5240] hover:text-white transition"
             style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem', letterSpacing: '0.1em' }}
           >
-            Je suis invité
+            Je suis invité(e)
           </a>
         </div>
       </div>

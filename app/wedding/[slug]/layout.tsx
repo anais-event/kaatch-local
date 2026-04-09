@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import WeddingNav from './WeddingNav'
+import RealtimeNotifications from './RealtimeNotifications'
 
 export default async function WeddingLayout({
   children,
@@ -13,16 +14,19 @@ export default async function WeddingLayout({
 
   const { data: wedding } = await supabase
     .from('weddings')
-    .select('name')
+    .select('id, name')
     .eq('slug', slug)
     .single()
 
   return (
     <>
-      <WeddingNav slug={slug} weddingName={wedding?.name ?? ''} />
+      <WeddingNav slug={slug} weddingName={wedding?.name ?? ''} weddingId={wedding?.id ?? ''} />
       <div className="pt-12">
         {children}
       </div>
+      {wedding?.id && (
+        <RealtimeNotifications slug={slug} weddingId={wedding.id} />
+      )}
     </>
   )
 }

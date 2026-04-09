@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 
-export default function WeddingNav({ slug, weddingName }: { slug: string; weddingName: string }) {
+export default function WeddingNav({ slug, weddingName, weddingId }: { slug: string; weddingName: string; weddingId: string }) {
   const pathname = usePathname()
 
   const tabs = [

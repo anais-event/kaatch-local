@@ -12,6 +12,7 @@ async function addGuest(formData: FormData) {
   await supabase.from('guests').insert({
     wedding_id: formData.get('wedding_id') as string,
     first_name: formData.get('first_name') as string,
+    last_name: (formData.get('last_name') as string) || null,
     nickname: (formData.get('nickname') as string) || null,
     email: (formData.get('email') as string) || null,
     telephone: (formData.get('telephone') as string) || null,
@@ -54,6 +55,7 @@ async function updateGuest(formData: FormData) {
 
   await supabase.from('guests').update({
     first_name: formData.get('first_name') as string,
+    last_name: (formData.get('last_name') as string) || null,
     nickname: (formData.get('nickname') as string) || null,
     email: (formData.get('email') as string) || null,
     telephone: (formData.get('telephone') as string) || null,
@@ -135,7 +137,8 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
             <input type="hidden" name="slug" value={slug} />
             {[
               { name: 'first_name', placeholder: 'Prénom *', required: true, type: 'text' },
-              { name: 'nickname', placeholder: 'Surnom (si homonyme)', required: false, type: 'text' },
+              { name: 'last_name', placeholder: 'Nom *', required: true, type: 'text' },
+              { name: 'nickname', placeholder: 'Surnom (optionnel)', required: false, type: 'text' },
               { name: 'email', placeholder: 'Email', required: false, type: 'email' },
               { name: 'telephone', placeholder: 'Téléphone', required: false, type: 'tel' },
             ].map(f => (

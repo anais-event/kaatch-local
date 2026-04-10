@@ -40,7 +40,7 @@ export default async function GuestProgrammePage({ params }: { params: Promise<{
         </h1>
 
         {(!steps || steps.length === 0) ? (
-          <div className="p-8 rounded-2xl bg-white/80 text-center">
+          <div className="p-8 rounded-xl bg-white border border-stone-100 text-center">
             <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.1rem' }}
                className="text-stone-400">Programme à venir…</p>
           </div>
@@ -66,14 +66,14 @@ export default async function GuestProgrammePage({ params }: { params: Promise<{
                     </div>
 
                     {/* Contenu */}
-                    <div className="flex-1 bg-white/80 rounded-2xl p-5 shadow-sm">
+                    <div className="flex-1 bg-white rounded-xl border border-stone-100 p-5 shadow-sm">
                       <div className="flex items-start justify-between gap-2 mb-1">
                         <h3 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.2rem' }}
                             className="text-[#2d3228]">
                           {step.title}
                         </h3>
                         {step.time && (
-                          <span className="text-xs bg-[#f5f0e8] text-[#4a5240] px-2 py-1 rounded-full whitespace-nowrap"
+                          <span className="text-xs bg-[#f5f0e8] text-[#4a5240] px-2 py-1 rounded whitespace-nowrap"
                                 style={{ fontWeight: 300 }}>
                             {step.time}
                           </span>
@@ -89,15 +89,15 @@ export default async function GuestProgrammePage({ params }: { params: Promise<{
                       {step.address && (
                         <div className="flex flex-wrap gap-2 mt-2">
                           <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-400 w-full">
-                            📍 {step.address}
+                            {step.address}
                           </p>
                           <a href={mapsUrl!} target="_blank" rel="noopener noreferrer"
-                             className="text-xs bg-[#4a5240] text-white px-3 py-1 rounded-full hover:bg-[#2d3228] transition"
+                             className="text-xs bg-[#4a5240] text-white px-3 py-1 rounded-lg hover:bg-[#2d3228] transition"
                              style={{ fontWeight: 300 }}>
                             Google Maps
                           </a>
                           <a href={appleMapsUrl!} target="_blank" rel="noopener noreferrer"
-                             className="text-xs border border-[#4a5240] text-[#4a5240] px-3 py-1 rounded-full hover:bg-[#4a5240] hover:text-white transition"
+                             className="text-xs border border-[#4a5240] text-[#4a5240] px-3 py-1 rounded-lg hover:bg-[#4a5240] hover:text-white transition"
                              style={{ fontWeight: 300 }}>
                             Apple Maps
                           </a>

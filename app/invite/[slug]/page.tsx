@@ -68,7 +68,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
             {wedding.name}
           </h1>
           <p style={{ fontWeight: 300, fontSize: '0.85rem' }} className="text-stone-300 mt-2">
-            Bienvenue, {guest.firstName} 🎉
+            Bienvenue, {guest.firstName}
           </p>
         </div>
       </div>
@@ -96,10 +96,9 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
       {/* Infos rapides */}
       <div className="max-w-2xl mx-auto px-6 py-8 space-y-4">
         {dateFormatted && (
-          <div className="flex items-center gap-4 p-5 rounded-2xl bg-white/80">
-            <span className="text-2xl">📅</span>
+          <div className="flex items-center gap-4 p-5 rounded-xl bg-white border border-stone-100">
             <div>
-              <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
+              <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.18em' }}
                  className="text-stone-400 uppercase mb-1">Date</p>
               <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.15rem' }}
                  className="text-stone-700 capitalize">{dateFormatted}</p>
@@ -107,17 +106,16 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
           </div>
         )}
         {wedding.location && (
-          <div className="flex items-center gap-4 p-5 rounded-2xl bg-white/80">
-            <span className="text-2xl">📍</span>
+          <div className="flex items-center gap-4 p-5 rounded-xl bg-white border border-stone-100">
             <div className="flex-1">
-              <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
+              <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.18em' }}
                  className="text-stone-400 uppercase mb-1">Lieu</p>
               <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.15rem' }}
                  className="text-stone-700">{wedding.location}</p>
             </div>
             <a href={`https://maps.google.com/?q=${encodeURIComponent(wedding.location)}`}
                target="_blank" rel="noopener noreferrer"
-               className="text-xs bg-[#4a5240] text-white px-3 py-1.5 rounded-full hover:bg-[#2d3228] transition whitespace-nowrap"
+               className="text-xs bg-[#4a5240] text-white px-3 py-1.5 rounded-lg hover:bg-[#2d3228] transition whitespace-nowrap"
                style={{ fontWeight: 300 }}>
               GPS →
             </a>
@@ -130,13 +128,13 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
         {/* Raccourcis */}
         <div className="grid grid-cols-2 gap-3 pt-2">
           {[
-            { label: '📋 Programme', href: `/invite/${slug}/programme` },
-            { label: '📸 Photos', href: `/invite/${slug}/photos` },
-            { label: '💬 Messagerie', href: `/invite/${slug}/groupes` },
-            { label: '📞 Contacts', href: `/invite/${slug}/contacts` },
+            { label: 'Programme', href: `/invite/${slug}/programme` },
+            { label: 'Photos', href: `/invite/${slug}/photos` },
+            { label: 'Messagerie', href: `/invite/${slug}/groupes` },
+            { label: 'Contacts', href: `/invite/${slug}/contacts` },
           ].map(item => (
             <a key={item.label} href={item.href}
-               className="p-4 rounded-2xl bg-white/80 text-center hover:shadow-md transition-shadow"
+               className="p-4 rounded-xl bg-white border border-stone-100 text-center transition-shadow"
                style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.1rem' }}>
               {item.label}
             </a>

@@ -111,17 +111,17 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
 
         {/* Compteurs RSVP */}
         <div className="grid grid-cols-3 gap-4 mb-8">
-          <div className="bg-white/80 rounded-2xl p-4 text-center">
+          <div className="bg-white rounded-xl border border-stone-100 p-4 text-center">
             <p className="text-2xl font-bold text-[#4a5240]" style={{ fontFamily: 'var(--font-cormorant)' }}>{confirmed}</p>
-            <p className="text-xs text-stone-400 uppercase tracking-wide mt-1" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>✅ Confirmé{confirmed > 1 ? 's' : ''}</p>
+            <p className="text-xs text-stone-400 uppercase tracking-wide mt-1" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>Confirmé{confirmed > 1 ? 's' : ''}</p>
           </div>
-          <div className="bg-white/80 rounded-2xl p-4 text-center">
+          <div className="bg-white rounded-xl border border-stone-100 p-4 text-center">
             <p className="text-2xl font-bold text-stone-400" style={{ fontFamily: 'var(--font-cormorant)' }}>{pending}</p>
-            <p className="text-xs text-stone-400 uppercase tracking-wide mt-1" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>⏳ En attente</p>
+            <p className="text-xs text-stone-400 uppercase tracking-wide mt-1" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>En attente</p>
           </div>
-          <div className="bg-white/80 rounded-2xl p-4 text-center">
+          <div className="bg-white rounded-xl border border-stone-100 p-4 text-center">
             <p className="text-2xl font-bold text-red-400" style={{ fontFamily: 'var(--font-cormorant)' }}>{declined}</p>
-            <p className="text-xs text-stone-400 uppercase tracking-wide mt-1" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>❌ Décliné{declined > 1 ? 's' : ''}</p>
+            <p className="text-xs text-stone-400 uppercase tracking-wide mt-1" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>Décliné{declined > 1 ? 's' : ''}</p>
           </div>
         </div>
 
@@ -129,7 +129,7 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
         <ImportGuests weddingId={wedding.id} slug={slug} />
 
         {/* Formulaire d'ajout */}
-        <div className="bg-white/80 rounded-3xl p-6 mb-8">
+        <div className="bg-white rounded-xl border border-stone-100 p-6 mb-8">
           <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.4rem', fontStyle: 'italic' }}
               className="text-[#4a5240] mb-4">Ajouter un invité</h2>
           <form action={addGuest} className="grid grid-cols-2 gap-3">
@@ -155,9 +155,9 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
             <select name="guest_type"
               className="border border-stone-200 rounded-xl px-4 py-2 bg-white text-stone-500 outline-none focus:border-[#4a5240] transition"
               style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.9rem' }}>
-              <option value="adulte">🧑 Adulte</option>
-              <option value="enfant">👶 Enfant</option>
-              <option value="animal">🐾 Animal</option>
+              <option value="adulte">Adulte</option>
+              <option value="enfant">Enfant</option>
+              <option value="animal">Animal</option>
             </select>
             <button type="submit"
               className="bg-[#4a5240] text-white px-6 py-2 rounded-xl hover:bg-[#2d3228] transition"
@@ -168,8 +168,7 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
         </div>
 
         {/* Message enfants/animaux */}
-        <div className="bg-[#4a5240]/10 border border-[#4a5240]/20 rounded-2xl px-5 py-4 mb-6 flex gap-3 items-start">
-          <span className="text-xl">😉</span>
+        <div className="bg-[#4a5240]/10 border border-[#4a5240]/20 rounded-lg px-5 py-4 mb-6">
           <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem' }}
              className="text-[#4a5240]">
             N'oublie pas d'ajouter les enfants et animaux à ta liste pour pouvoir les retrouver facilement sur les photos !
@@ -177,7 +176,7 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
         </div>
 
         {/* Liste des invités */}
-        <div className="bg-white/80 rounded-3xl p-6">
+        <div className="bg-white rounded-xl border border-stone-100 p-6">
           <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.4rem', fontStyle: 'italic' }}
               className="text-[#4a5240] mb-4">Invités ({total})</h2>
           <GuestList

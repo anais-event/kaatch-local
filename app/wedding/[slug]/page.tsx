@@ -34,24 +34,24 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
         {/* Boutons admin en haut à droite */}
         <div className="absolute top-4 right-4 flex gap-2">
           <a href={`/wedding/${slug}/edit`}
-            className="text-xs bg-white/20 backdrop-blur text-white border border-white/30 px-4 py-2 rounded-full hover:bg-white/30 transition"
-            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, letterSpacing: '0.05em' }}>
-            ✏️ Modifier
+            className="text-xs bg-white/20 backdrop-blur text-white border border-white/30 px-4 py-2 rounded-lg hover:bg-white/30 transition"
+            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, letterSpacing: '0.06em' }}>
+            Modifier
           </a>
           <a href={`/wedding/${slug}/guests`}
-            className="text-xs bg-white/20 backdrop-blur text-white border border-white/30 px-4 py-2 rounded-full hover:bg-white/30 transition"
-            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, letterSpacing: '0.05em' }}>
-            👥 Invités
+            className="text-xs bg-white/20 backdrop-blur text-white border border-white/30 px-4 py-2 rounded-lg hover:bg-white/30 transition"
+            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, letterSpacing: '0.06em' }}>
+            Invités
           </a>
         <a href={`/wedding/${slug}/contacts`}
-            className="text-xs bg-white/20 backdrop-blur text-white border border-white/30 px-4 py-2 rounded-full hover:bg-white/30 transition"
-            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, letterSpacing: '0.05em' }}>
-            📞 Contacts
+            className="text-xs bg-white/20 backdrop-blur text-white border border-white/30 px-4 py-2 rounded-lg hover:bg-white/30 transition"
+            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, letterSpacing: '0.06em' }}>
+            Contacts
           </a>
           <a href={`/wedding/${slug}/partager`}
-            className="text-xs bg-white/20 backdrop-blur text-white border border-white/30 px-4 py-2 rounded-full hover:bg-white/30 transition"
-            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, letterSpacing: '0.05em' }}>
-            🔗 Partager
+            className="text-xs bg-white/20 backdrop-blur text-white border border-white/30 px-4 py-2 rounded-lg hover:bg-white/30 transition"
+            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, letterSpacing: '0.06em' }}>
+            Partager
           </a>
         </div>
 
@@ -105,10 +105,9 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
           </h3>
           <div className="space-y-3">
             {dateFormatted && (
-              <div className="flex items-center gap-4 p-5 rounded-2xl bg-white/80">
-                <span className="text-2xl">📅</span>
+              <div className="flex items-center gap-4 p-5 rounded-xl bg-white border border-stone-100">
                 <div>
-                  <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
+                  <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.18em' }}
                      className="text-stone-400 uppercase mb-1">Date</p>
                   <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.15rem' }}
                      className="text-stone-700 capitalize">{dateFormatted}</p>
@@ -116,10 +115,9 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
               </div>
             )}
             {wedding.location && (
-              <div className="flex items-center gap-4 p-5 rounded-2xl bg-white/80">
-                <span className="text-2xl">📍</span>
+              <div className="flex items-center gap-4 p-5 rounded-xl bg-white border border-stone-100">
                 <div>
-                  <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
+                  <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.18em' }}
                      className="text-stone-400 uppercase mb-1">Lieu</p>
                   <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.15rem' }}
                      className="text-stone-700">{wedding.location}</p>
@@ -140,7 +138,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
               className="text-[#4a5240] mb-4">
             Programme
           </h3>
-          <div className="p-5 rounded-2xl bg-white/80 text-center">
+          <div className="p-5 rounded-xl bg-white border border-stone-100 text-center">
             <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.1rem' }}
                className="text-stone-400">
               Programme à venir…
@@ -154,7 +152,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
               className="text-[#4a5240] mb-4">
             Lieux
           </h3>
-          <div className="p-5 rounded-2xl bg-white/80 text-center">
+          <div className="p-5 rounded-xl bg-white border border-stone-100 text-center">
             <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.1rem' }}
                className="text-stone-400">
               Carte & adresses à venir…
@@ -168,7 +166,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
               className="text-[#4a5240] mb-4">
             Hébergements
           </h3>
-          <div className="p-5 rounded-2xl bg-white/80 text-center">
+          <div className="p-5 rounded-xl bg-white border border-stone-100 text-center">
             <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.1rem' }}
                className="text-stone-400">
               Suggestions d'hébergements à venir…

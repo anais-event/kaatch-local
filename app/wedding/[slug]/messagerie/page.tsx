@@ -127,7 +127,7 @@ export default async function MessageriePage({ params, searchParams }: {
         <div className="flex gap-2 flex-wrap mb-4">
           {groups?.map(g => (
             <a key={g.id} href={`/wedding/${slug}/messagerie?groupe=${g.id}`}
-               className={`px-4 py-1.5 rounded-full text-sm transition ${g.id === activeGroup?.id ? 'bg-[#4a5240] text-white' : 'bg-white/60 text-stone-500 hover:bg-white'}`}
+               className={`px-4 py-1.5 rounded-lg text-sm transition ${g.id === activeGroup?.id ? 'bg-[#4a5240] text-white' : 'bg-white border border-stone-100 text-stone-500 hover:border-stone-200'}`}
                style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
               {g.name}
               {g.members?.length > 0 && (
@@ -139,7 +139,7 @@ export default async function MessageriePage({ params, searchParams }: {
 
         {/* Panneau du groupe actif */}
         {activeGroup && activeGroup.name !== '@tout le monde' && (
-          <div className="bg-white/60 rounded-2xl px-4 py-3 mb-4 flex items-center justify-between gap-4">
+          <div className="bg-white rounded-xl border border-stone-100 px-4 py-3 mb-4 flex items-center justify-between gap-4">
             <div>
               <p className="text-xs text-stone-500 mb-1" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
                 Membres : {activeGroup.members?.length > 0 ? activeGroup.members.join(', ') : 'Aucun pour le moment'}
@@ -163,14 +163,14 @@ export default async function MessageriePage({ params, searchParams }: {
               <button type="submit"
                 className="px-3 py-1.5 rounded-lg bg-red-50 text-red-400 border border-red-200 hover:bg-red-100 transition text-sm"
                 style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
-                🗑 Supprimer ce groupe
+                Supprimer ce groupe
               </button>
             </form>
           </div>
         )}
 
         {/* Messages */}
-        <div className="flex-1 bg-white/80 rounded-3xl p-5 mb-4 space-y-3 min-h-[300px] max-h-[500px] overflow-y-auto shadow-sm">
+        <div className="flex-1 bg-white rounded-xl border border-stone-100 p-5 mb-4 space-y-3 min-h-[300px] max-h-[500px] overflow-y-auto shadow-sm">
           {!messages || messages.length === 0 ? (
             <p className="text-center text-stone-400 italic mt-8"
                style={{ fontFamily: 'var(--font-cormorant)', fontSize: '1.1rem' }}>
@@ -203,7 +203,7 @@ export default async function MessageriePage({ params, searchParams }: {
         />
 
         {/* Créer un groupe (mariés) */}
-        <div className="mt-6 bg-white/60 rounded-2xl p-4">
+        <div className="mt-6 bg-white rounded-xl border border-stone-100 p-4">
           <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1rem', fontStyle: 'italic' }}
              className="text-[#4a5240] mb-3">Créer un groupe</p>
           <form action={createGroup} className="flex gap-2">

@@ -42,7 +42,7 @@ export default async function Dashboard() {
 
             return (
               <a key={wedding.slug} href={`/wedding/${wedding.slug}`}
-                 className="group block rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                 className="group block rounded-xl overflow-hidden shadow-sm transition-shadow border border-stone-100">
                 <div className="relative h-40 bg-[#4a5240]">
                   {wedding.cover_image_url && (
                     <img src={wedding.cover_image_url} alt={wedding.name}
@@ -60,7 +60,7 @@ export default async function Dashboard() {
                       {(wedding.photos?.length ?? 0) > 0 && (
                         <p className="text-xs opacity-60 mt-1"
                            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
-                          📸 {wedding.photos.length} photo{wedding.photos.length > 1 ? 's' : ''}
+                          {wedding.photos.length} photo{wedding.photos.length > 1 ? 's' : ''}
                         </p>
                       )}
                     </div>
@@ -73,8 +73,8 @@ export default async function Dashboard() {
 
         <div className="text-center mt-10">
           <a href="/dashboard/new-wedding"
-             className="inline-block border border-[#4a5240] text-[#4a5240] px-8 py-3 rounded-full hover:bg-[#4a5240] hover:text-white transition"
-             style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem', letterSpacing: '0.08em' }}>
+             className="inline-block border border-[#4a5240] text-[#4a5240] px-8 py-2 rounded-lg hover:bg-[#4a5240] hover:text-white transition"
+             style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.82rem', letterSpacing: '0.1em' }}>
             + Créer un nouveau mariage
           </a>
         </div>

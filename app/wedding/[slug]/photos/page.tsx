@@ -140,7 +140,7 @@ export default async function PhotosPage({ params }: { params: Promise<{ slug: s
         </h1>
 
         {/* Formulaire upload */}
-        <div className="bg-white/80 rounded-3xl p-6 mb-8 shadow-sm">
+        <div className="bg-white rounded-xl border border-stone-100 p-6 mb-8 shadow-sm">
           <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.4rem', fontStyle: 'italic' }}
               className="text-[#4a5240] mb-4">Partager une photo</h2>
           <form action={uploadPhoto} className="space-y-3">
@@ -172,8 +172,8 @@ export default async function PhotosPage({ params }: { params: Promise<{ slug: s
               className="w-full border border-stone-200 rounded-xl px-4 py-2 text-stone-500 bg-white file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:bg-[#f5f0e8] file:text-[#4a5240] hover:file:bg-stone-200 transition"
               style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem' }} />
             <button type="submit"
-              className="w-full bg-[#4a5240] text-white py-3 rounded-full hover:bg-[#2d3228] transition"
-              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem', letterSpacing: '0.08em' }}>
+              className="w-full bg-[#4a5240] text-white py-2 rounded-lg hover:bg-[#2d3228] transition"
+              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.82rem', letterSpacing: '0.1em' }}>
               Partager
             </button>
           </form>

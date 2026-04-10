@@ -4,11 +4,11 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 
 const SUGGESTED_GROUPS = [
-  { name: '👶 Babysitting', desc: 'Organiser la garde des enfants' },
-  { name: '🎁 Cadeaux aux mariés', desc: 'Coordonner les cadeaux' },
-  { name: '🎤 Surprises & Flashmob', desc: 'Discours, jeux, chorégraphies…' },
-  { name: '🚗 Covoiturage', desc: 'Organiser les trajets' },
-  { name: '💃 Afterparty', desc: 'La suite de la fête' },
+  { name: 'Babysitting', desc: 'Organiser la garde des enfants' },
+  { name: 'Cadeaux aux mariés', desc: 'Coordonner les cadeaux' },
+  { name: 'Surprises & Flashmob', desc: 'Discours, jeux, chorégraphies…' },
+  { name: 'Covoiturage', desc: 'Organiser les trajets' },
+  { name: 'Afterparty', desc: 'La suite de la fête' },
 ]
 
 async function createGroup(formData: FormData) {
@@ -108,7 +108,7 @@ export default async function GuestGroupesPage({ params }: { params: Promise<{ s
             const last = msgs[msgs.length - 1]
             return (
               <a key={group.id} href={`/invite/${slug}/groupes/${group.id}`}
-                className="flex items-center gap-4 bg-white/80 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                className="flex items-center gap-4 bg-white rounded-xl border border-stone-100 p-4 shadow-sm transition-shadow cursor-pointer">
                 <div className="w-11 h-11 rounded-full bg-[#4a5240]/10 flex items-center justify-center text-xl shrink-0">
                   {group.name.charAt(0)}
                 </div>
@@ -160,7 +160,7 @@ export default async function GuestGroupesPage({ params }: { params: Promise<{ s
                 <input type="hidden" name="name" value={sg.name} />
                 <input type="hidden" name="author" value={guestName} />
                 <button type="submit"
-                  className="px-4 py-2 rounded-full border border-stone-200 bg-white hover:border-[#4a5240] hover:text-[#4a5240] transition text-sm text-stone-600"
+                  className="px-4 py-2 rounded-lg border border-stone-200 bg-white hover:border-[#4a5240] hover:text-[#4a5240] transition text-sm text-stone-600"
                   style={{ fontWeight: 300 }}>
                   {sg.name}
                 </button>

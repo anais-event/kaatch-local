@@ -31,7 +31,7 @@ export default function WeddingNav({ slug, weddingName, weddingId }: { slug: str
         <div className="flex items-center gap-1 overflow-x-auto">
           {tabs.map(tab => (
             <a key={tab.href} href={tab.href}
-              className={`px-3 py-1 rounded-full text-xs whitespace-nowrap transition ${
+              className={`px-3 py-1 rounded-md text-xs whitespace-nowrap transition ${
                 isActive(tab.href)
                   ? 'bg-[#4a5240] text-white'
                   : 'text-stone-500 hover:text-[#4a5240]'
@@ -41,13 +41,13 @@ export default function WeddingNav({ slug, weddingName, weddingId }: { slug: str
             </a>
           ))}
           <a href={`/invite/${slug}`}
-            className="px-3 py-1 rounded-full text-xs whitespace-nowrap transition border border-[#4a5240] text-[#4a5240] hover:bg-[#4a5240] hover:text-white ml-2"
+            className="px-3 py-1 rounded-md text-xs whitespace-nowrap transition border border-[#4a5240] text-[#4a5240] hover:bg-[#4a5240] hover:text-white ml-2"
             style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, letterSpacing: '0.04em' }}>
-            👁 Vue invité
+            Vue invité
           </a>
           <form action={logoutMaried}>
             <button type="submit"
-              className="px-3 py-1 rounded-full text-xs text-stone-400 hover:text-red-400 transition ml-1"
+              className="px-3 py-1 rounded-md text-xs text-stone-400 hover:text-red-400 transition ml-1"
               style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
               Déconnexion
             </button>

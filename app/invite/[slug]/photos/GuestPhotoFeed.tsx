@@ -175,6 +175,11 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
                     {photo.moment_tag && <span className="ml-1 text-[#4a5240]">· {photo.moment_tag}</span>}
                   </p>
                 )}
+                {photo.created_at && (
+                  <p className="text-[10px] text-stone-300 mb-1" style={{ fontWeight: 300 }}>
+                    {new Date(photo.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  </p>
+                )}
                 {photo.tagged_guests.length > 0 && (
                   <div className="flex flex-wrap gap-1 mb-2">
                     {photo.tagged_guests.map(g => (

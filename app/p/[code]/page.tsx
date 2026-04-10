@@ -1,4 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
 import GuestAuthForm from './GuestAuthForm'
 
 export default async function PublicPage({ params }: { params: Promise<{ code: string }> }) {
@@ -24,6 +26,10 @@ export default async function PublicPage({ params }: { params: Promise<{ code: s
       </div>
     )
   }
+
+  const cookieStore = await cookies()
+  const existingCookie = cookieStore.get(`guest_${wedding.slug}`)
+  if (existingCookie) redirect(`/invite/${wedding.slug}`)
 
   const dateFormatted = wedding.date
     ? new Date(wedding.date).toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })

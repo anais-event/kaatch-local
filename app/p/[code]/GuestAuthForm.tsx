@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
 export default function GuestAuthForm({
@@ -18,6 +18,17 @@ export default function GuestAuthForm({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
+
+  useEffect(() => {
+    const stored = localStorage.getItem('kaatch_guest')
+    if (stored) {
+      try {
+        const { firstName: fn, lastName: ln } = JSON.parse(stored)
+        if (fn) setFirstName(fn)
+        if (ln) setLastName(ln)
+      } catch {}
+    }
+  }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -41,6 +52,7 @@ export default function GuestAuthForm({
     setLoading(false)
 
     if (data.ok) {
+      localStorage.setItem('kaatch_guest', JSON.stringify({ firstName: firstName.trim(), lastName: lastName.trim() }))
       router.push(`/invite/${weddingSlug}`)
     } else {
       setError(data.message || 'Vous n\'êtes pas sur la liste des invités.')

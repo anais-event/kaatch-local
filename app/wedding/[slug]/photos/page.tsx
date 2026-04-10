@@ -11,34 +11,30 @@ async function uploadPhoto(formData: FormData) {
   const uploader_name = (formData.get('uploader_name') as string) || 'Anonyme'
   const moment_tag = (formData.get('moment_tag') as string) || null
   const tagged_guests = formData.getAll('tagged_guests') as string[]
-  const file = formData.get('photo') as File
-
-  if (!file || file.size === 0) return
+  const files = formData.getAll('photo') as File[]
 
   const { data: wedding } = await supabase.from('weddings').select('id').eq('slug', slug).single()
   if (!wedding) return
 
-  const ext = file.name.split('.').pop()
-  const path = `${wedding.id}/${Date.now()}.${ext}`
-
-  const bytes = await file.arrayBuffer()
-  const buffer = Buffer.from(bytes)
-
-  const { error: uploadError } = await supabase.storage
-    .from('wedding-photos')
-    .upload(path, buffer, { contentType: file.type, upsert: false })
-
-  if (uploadError) return
-
-  const { data: urlData } = supabase.storage.from('wedding-photos').getPublicUrl(path)
-
-  await supabase.from('photos').insert({
-    wedding_id: wedding.id,
-    url: urlData.publicUrl,
-    uploaded_by_name: uploader_name,
-    caption: moment_tag,
-    tagged_guests: tagged_guests.length > 0 ? tagged_guests : null,
-  })
+  await Promise.all(files.map(async (file) => {
+    if (!file || file.size === 0) return
+    const ext = file.name.split('.').pop()
+    const path = `${wedding.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+    const bytes = await file.arrayBuffer()
+    const buffer = Buffer.from(bytes)
+    const { error: uploadError } = await supabase.storage
+      .from('wedding-photos')
+      .upload(path, buffer, { contentType: file.type, upsert: false })
+    if (uploadError) return
+    const { data: urlData } = supabase.storage.from('wedding-photos').getPublicUrl(path)
+    await supabase.from('photos').insert({
+      wedding_id: wedding.id,
+      url: urlData.publicUrl,
+      uploaded_by_name: uploader_name,
+      caption: moment_tag,
+      tagged_guests: tagged_guests.length > 0 ? tagged_guests : null,
+    })
+  }))
 
   revalidatePath(`/wedding/${slug}/photos`)
 }
@@ -168,7 +164,7 @@ export default async function PhotosPage({ params }: { params: Promise<{ slug: s
               </div>
             )}
 
-            <input type="file" name="photo" accept="image/*" required
+            <input type="file" name="photo" accept="image/*" required multiple
               className="w-full border border-stone-200 rounded-xl px-4 py-2 text-stone-500 bg-white file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:bg-[#f5f0e8] file:text-[#4a5240] hover:file:bg-stone-200 transition"
               style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem' }} />
             <button type="submit"

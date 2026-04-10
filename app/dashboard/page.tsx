@@ -26,11 +26,11 @@ export default async function Dashboard() {
         <div className="text-center mb-12">
           <p className="text-xs tracking-[0.4em] uppercase text-[#4a5240] mb-2"
              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
-            Mes événements
+            Bienvenue
           </p>
           <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '3rem', fontStyle: 'italic' }}
               className="text-[#2d3228]">
-            Mes mariages
+            {weddings.length === 1 ? 'Votre mariage' : 'Vos mariages'}
           </h1>
         </div>
 
@@ -75,7 +75,7 @@ export default async function Dashboard() {
           <a href="/dashboard/new-wedding"
              className="inline-block border border-[#4a5240] text-[#4a5240] px-8 py-2 rounded-lg hover:bg-[#4a5240] hover:text-white transition"
              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.82rem', letterSpacing: '0.1em' }}>
-            + Créer un nouveau mariage
+            + Organiser un autre événement
           </a>
         </div>
 

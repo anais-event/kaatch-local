@@ -62,13 +62,13 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
         </div>
       </div>
 
-      {/* Navigation onglets */}
-      <div className="bg-[#f5f0e8] sticky top-0 z-10 border-b border-stone-200 shadow-sm">
-        <div className="max-w-2xl mx-auto flex justify-around px-4 pt-4 pb-0 overflow-x-auto">
+      {/* Navigation onglets — fixe en haut */}
+      <div className="bg-[#f5f0e8]/95 backdrop-blur fixed top-0 left-0 right-0 z-50 border-b border-stone-200 shadow-sm">
+        <div className="max-w-2xl mx-auto flex justify-around px-4 pt-3 pb-0 overflow-x-auto">
           {[
             { label: 'Programme', href: `/invite/${slug}/programme` },
             { label: 'Photos', href: `/invite/${slug}/photos` },
-            { label: 'Groupes', href: `/invite/${slug}/groupes` },
+            { label: 'Messagerie', href: `/invite/${slug}/groupes` },
             { label: 'Contacts', href: `/invite/${slug}/contacts` },
           ].map((tab) => (
             <a key={tab.label} href={tab.href}
@@ -79,6 +79,8 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
           ))}
         </div>
       </div>
+      {/* Spacer pour la navbar fixe */}
+      <div className="h-12" />
 
       {/* Infos rapides */}
       <div className="max-w-2xl mx-auto px-6 py-8 space-y-4">
@@ -116,7 +118,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
           {[
             { label: '📋 Programme', href: `/invite/${slug}/programme` },
             { label: '📸 Photos', href: `/invite/${slug}/photos` },
-            { label: '💬 Groupes', href: `/invite/${slug}/groupes` },
+            { label: '💬 Messagerie', href: `/invite/${slug}/groupes` },
             { label: '📞 Contacts', href: `/invite/${slug}/contacts` },
           ].map(item => (
             <a key={item.label} href={item.href}

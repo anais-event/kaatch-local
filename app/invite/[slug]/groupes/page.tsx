@@ -72,50 +72,70 @@ export default async function GuestGroupesPage({ params }: { params: Promise<{ s
 
   return (
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
-      <div className="max-w-2xl mx-auto px-6 py-8">
 
-        <div className="mb-6">
-          <a href={`/invite/${slug}`} className="text-sm text-[#4a5240] hover:underline" style={{ fontWeight: 300 }}>
-            ← Retour
-          </a>
+      {/* Navbar fixe */}
+      <div className="bg-[#f5f0e8]/95 backdrop-blur fixed top-0 left-0 right-0 z-50 border-b border-stone-200 shadow-sm">
+        <div className="max-w-2xl mx-auto flex justify-around px-4 pt-3 pb-0">
+          {[
+            { label: 'Programme', href: `/invite/${slug}/programme` },
+            { label: 'Photos', href: `/invite/${slug}/photos` },
+            { label: 'Messagerie', href: `/invite/${slug}/groupes` },
+            { label: 'Contacts', href: `/invite/${slug}/contacts` },
+          ].map((tab) => (
+            <a key={tab.label} href={tab.href}
+              className={`pb-3 text-sm whitespace-nowrap px-2 border-b-2 transition-colors ${
+                tab.href === `/invite/${slug}/groupes`
+                  ? 'border-[#4a5240] text-[#4a5240]'
+                  : 'border-transparent text-stone-400 hover:border-[#4a5240] hover:text-[#4a5240]'
+              }`}
+              style={{ fontWeight: 400, letterSpacing: '0.04em' }}>
+              {tab.label}
+            </a>
+          ))}
         </div>
+      </div>
+
+      <div className="max-w-2xl mx-auto px-6 pt-20 pb-8">
+
 
         <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.5rem', fontStyle: 'italic' }}
-            className="text-[#2d3228] mb-8">Groupes</h1>
+            className="text-[#2d3228] mb-8">Messagerie</h1>
 
         {/* Groupes existants */}
-        <div className="space-y-4 mb-10">
+        <div className="space-y-3 mb-10">
           {(groups ?? []).map(group => {
             const msgs = (group.messages as { id: string; content: string; author_name: string; created_at: string }[]) ?? []
             const last = msgs[msgs.length - 1]
             return (
-              <div key={group.id} className="bg-white/80 rounded-2xl p-5 shadow-sm">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.2rem' }}
-                      className="text-[#2d3228]">{group.name}</h3>
-                  <span className="text-xs text-stone-400" style={{ fontWeight: 300 }}>
-                    {msgs.length} message{msgs.length > 1 ? 's' : ''}
-                  </span>
+              <a key={group.id} href={`/invite/${slug}/groupes/${group.id}`}
+                className="flex items-center gap-4 bg-white/80 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                <div className="w-11 h-11 rounded-full bg-[#4a5240]/10 flex items-center justify-center text-xl shrink-0">
+                  {group.name.match(/\p{Emoji}/u)?.[0] ?? '💬'}
                 </div>
-                {last && (
-                  <p className="text-sm text-stone-500 mb-4" style={{ fontWeight: 300 }}>
-                    <span className="text-[#4a5240]">{last.author_name}</span> : {last.content}
-                  </p>
-                )}
-                <form action={sendMessage} className="flex gap-2">
-                  <input type="hidden" name="slug" value={slug} />
-                  <input type="hidden" name="group_id" value={group.id} />
-                  <input type="hidden" name="author" value={guestName} />
-                  <input type="text" name="content" placeholder="Écrire un message…" required
-                    className="flex-1 border border-stone-200 rounded-xl px-4 py-2 bg-white outline-none focus:border-[#4a5240] transition text-stone-700 text-sm"
-                    style={{ fontWeight: 300 }} />
-                  <button type="submit"
-                    className="bg-[#4a5240] text-white px-4 py-2 rounded-xl hover:bg-[#2d3228] transition text-sm"
-                    style={{ fontWeight: 300 }}>
-                    →
-                  </button>
-                </form>
-              </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.1rem' }}
+                        className="text-[#2d3228] truncate">{group.name}</h3>
+                    {last && (
+                      <span className="text-[10px] text-stone-300 shrink-0" style={{ fontWeight: 300 }}>
+                        {new Date(last.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    )}
+                  </div>
+                  {last ? (
+                    <p className="text-xs text-stone-400 truncate mt-0.5" style={{ fontWeight: 300 }}>
+                      <span className="text-[#4a5240]">{last.author_name}</span> : {last.content}
+                    </p>
+                  ) : (
+                    <p className="text-xs text-stone-300 mt-0.5" style={{ fontWeight: 300, fontStyle: 'italic' }}>
+                      Aucun message encore…
+                    </p>
+                  )}
+                </div>
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-stone-300 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 18l6-6-6-6"/>
+                </svg>
+              </a>
             )
           })}
           {(!groups || groups.length === 0) && (
@@ -162,6 +182,7 @@ export default async function GuestGroupesPage({ params }: { params: Promise<{ s
           </form>
         </div>
 
+      </div>
       </div>
     </div>
   )

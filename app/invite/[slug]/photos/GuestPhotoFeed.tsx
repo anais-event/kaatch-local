@@ -168,15 +168,13 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
                 </button>
               </div>
               <div className="p-3 bg-white/80">
+                <p className="text-[10px] text-stone-300 mb-1" style={{ fontWeight: 300 }}>
+                  {new Date(photo.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                </p>
                 {photo.uploader_name && (
                   <p className="text-xs text-stone-400 mb-1" style={{ fontWeight: 300 }}>
-                    📸 {photo.uploader_name}
+                    {photo.uploader_name}
                     {photo.moment_tag && <span className="ml-1 text-[#4a5240]">· {photo.moment_tag}</span>}
-                  </p>
-                )}
-                {photo.created_at && (
-                  <p className="text-[10px] text-stone-300 mb-1" style={{ fontWeight: 300 }}>
-                    {new Date(photo.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </p>
                 )}
                 {photo.tagged_guests.length > 0 && (

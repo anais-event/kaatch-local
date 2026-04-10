@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import Countdown from './Countdown'
 
 export default async function WeddingPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -127,6 +128,11 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
             )}
           </div>
         </section>
+
+        {/* Compte à rebours */}
+        {wedding.date && (
+          <Countdown weddingDate={wedding.date} />
+        )}
 
         {/* Programme */}
         <section id="programme">

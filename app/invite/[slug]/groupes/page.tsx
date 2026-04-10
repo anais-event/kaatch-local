@@ -110,7 +110,7 @@ export default async function GuestGroupesPage({ params }: { params: Promise<{ s
               <a key={group.id} href={`/invite/${slug}/groupes/${group.id}`}
                 className="flex items-center gap-4 bg-white/80 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
                 <div className="w-11 h-11 rounded-full bg-[#4a5240]/10 flex items-center justify-center text-xl shrink-0">
-                  {group.name.match(/\p{Emoji}/u)?.[0] ?? '💬'}
+                  {group.name.charAt(0)}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">

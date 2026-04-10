@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import WeddingNav from './WeddingNav'
 import RealtimeNotifications from './RealtimeNotifications'
+import OnboardingModal from './OnboardingModal'
 import { logoutMaried } from './logout-action'
 
 export default async function WeddingLayout({
@@ -28,6 +29,7 @@ export default async function WeddingLayout({
       {wedding?.id && (
         <RealtimeNotifications slug={slug} weddingId={wedding.id} />
       )}
+      <OnboardingModal slug={slug} />
       {/* Déconnexion en bas de page */}
       <footer className="py-8 text-center">
         <form action={logoutMaried}>

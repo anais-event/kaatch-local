@@ -26,6 +26,7 @@ export default function SeatingBoard({
 }) {
   const [newTableName, setNewTableName] = useState('')
   const [newTableCap, setNewTableCap] = useState(8)
+  const [creating, setCreating] = useState(false)
   const [editingTable, setEditingTable] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [draggingGuest, setDraggingGuest] = useState<Guest | null>(null)
@@ -42,6 +43,20 @@ export default function SeatingBoard({
 
   const guestLabel = (g: Guest) =>
     [g.first_name, g.last_name].filter(Boolean).join(' ')
+
+  async function handleCreateTable(e: React.FormEvent) {
+    e.preventDefault()
+    if (!newTableName.trim() || creating) return
+    setCreating(true)
+    const fd = new FormData()
+    fd.set('slug', slug)
+    fd.set('name', newTableName.trim())
+    fd.set('capacity', String(newTableCap))
+    await createTable(fd)
+    setNewTableName('')
+    setNewTableCap(8)
+    setCreating(false)
+  }
 
   // Drag & drop
   function handleDragStart(guest: Guest) {
@@ -93,11 +108,10 @@ export default function SeatingBoard({
       <div className="flex-1 min-w-0">
 
         {/* Créer une table */}
-        <form action={createTable} className="flex gap-2 mb-6 flex-wrap">
-          <input type="hidden" name="slug" value={slug} />
+        <form onSubmit={handleCreateTable} className="flex gap-2 mb-6 flex-wrap">
           <input
-            type="text" name="name"
-            placeholder="Nom de la table…"
+            type="text"
+            placeholder="Nom de la table… ex : Table des mariés"
             value={newTableName}
             onChange={e => setNewTableName(e.target.value)}
             className="flex-1 min-w-[160px] border border-stone-200 rounded-xl px-4 py-2.5 bg-white outline-none focus:border-[#4a5240] transition text-stone-700 text-sm"
@@ -105,16 +119,16 @@ export default function SeatingBoard({
           <div className="flex items-center gap-2 border border-stone-200 rounded-xl px-4 py-2.5 bg-white">
             <span className="text-stone-400 text-xs" style={{ fontWeight: 300 }}>Places</span>
             <input
-              type="number" name="capacity" min={1} max={30}
+              type="number" min={1} max={30}
               value={newTableCap}
               onChange={e => setNewTableCap(parseInt(e.target.value))}
               className="w-10 text-center outline-none text-stone-700 text-sm bg-transparent"
               style={{ fontWeight: 300 }} />
           </div>
-          <button type="submit" onClick={() => setNewTableName('')}
-            className="bg-[#4a5240] text-white px-5 py-2.5 rounded-xl hover:bg-[#2d3228] transition text-sm cursor-pointer"
+          <button type="submit" disabled={!newTableName.trim() || creating}
+            className="bg-[#4a5240] text-white px-5 py-2.5 rounded-xl hover:bg-[#2d3228] transition text-sm cursor-pointer disabled:opacity-40"
             style={{ fontWeight: 300 }}>
-            + Table
+            {creating ? '…' : '+ Table'}
           </button>
         </form>
 

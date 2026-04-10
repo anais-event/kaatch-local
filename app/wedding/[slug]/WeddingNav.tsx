@@ -7,6 +7,7 @@ export default function WeddingNav({ slug, weddingName }: { slug: string; weddin
 
   const tabs = [
     { label: 'Tableau de bord', href: `/wedding/${slug}` },
+    { label: 'Plan de table', href: `/wedding/${slug}/tables` },
     { label: 'Photos', href: `/wedding/${slug}/photos` },
     { label: 'Messagerie', href: `/wedding/${slug}/messagerie` },
     { label: 'Le mot des mariés', href: `/wedding/${slug}/regles` },

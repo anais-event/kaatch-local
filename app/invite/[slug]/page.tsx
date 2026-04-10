@@ -35,7 +35,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
   const supabase = await createSupabaseServerClient()
   const { data: wedding } = await supabase
     .from('weddings')
-    .select('id, name, date, cover_image_url, location, couple_message')
+    .select('id, name, date, cover_image_url, location, couple_message, tables_revealed_at')
     .eq('slug', slug)
     .single()
 
@@ -43,6 +43,23 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
 
   const { data: rules } = await supabase
     .from('wedding_rules').select('text').eq('wedding_id', wedding.id).order('created_at', { ascending: true })
+
+  // Table de l'invité — uniquement si le plan est révélé
+  let guestTable: string | null = null
+  const tablesRevealed = wedding.tables_revealed_at && new Date(wedding.tables_revealed_at) <= new Date()
+  if (tablesRevealed && guestCookie) {
+    const guestData = JSON.parse(guestCookie.value)
+    const { data: guestRow } = await supabase
+      .from('guests')
+      .select('table_id, wedding_tables(name)')
+      .eq('wedding_id', wedding.id)
+      .ilike('first_name', guestData.firstName ?? '')
+      .maybeSingle()
+    if (guestRow?.table_id) {
+      const tableInfo = guestRow.wedding_tables as unknown as { name: string } | null
+      guestTable = tableInfo?.name ?? null
+    }
+  }
 
   const dateFormatted = wedding.date
     ? new Date(wedding.date).toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
@@ -77,6 +94,16 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
           <p style={{ fontWeight: 300, fontSize: '0.85rem' }} className="text-white/70 mt-2">
             Bienvenue, {guestName}
           </p>
+          {guestTable && (
+            <div className="inline-flex items-center gap-2 mt-3 bg-white/15 backdrop-blur rounded-xl px-4 py-2 border border-white/20">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4 text-white/80 shrink-0">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+              </svg>
+              <span style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-white">
+                Votre table — <strong style={{ fontWeight: 600 }}>{guestTable}</strong>
+              </span>
+            </div>
+          )}
         </div>
       </div>
 

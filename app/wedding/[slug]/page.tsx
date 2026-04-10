@@ -77,7 +77,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
       value: hebergementCount ?? 0,
       unit: (n: number) => n > 1 ? 'options' : 'option',
     },
-    { label: 'Budget', sub: 'Suivi des dépenses', href: null, soon: true },
+    { label: 'Budget', sub: 'Suivi des dépenses', href: `/wedding/${slug}/budget`, value: null, unit: null, badge: null },
     { label: 'Invitations', sub: 'Faire-parts digitaux', href: null, soon: true },
   ]
 

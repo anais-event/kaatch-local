@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import Countdown from './Countdown'
+import Checklist from './Checklist'
 
 export default async function WeddingPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -16,6 +17,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
     { count: hebergementCount },
     { count: programmeCount },
     { count: ruleCount },
+    { data: todosData },
   ] = await Promise.all([
     supabase.from('guests').select('*', { count: 'exact', head: true }).eq('wedding_id', wedding.id),
     supabase.from('guests').select('*', { count: 'exact', head: true }).eq('wedding_id', wedding.id).eq('rsvp_status', 'confirme'),
@@ -24,22 +26,25 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
     supabase.from('accommodations').select('*', { count: 'exact', head: true }).eq('wedding_id', wedding.id),
     supabase.from('programme_steps').select('*', { count: 'exact', head: true }).eq('wedding_id', wedding.id),
     supabase.from('wedding_rules').select('*', { count: 'exact', head: true }).eq('wedding_id', wedding.id),
+    supabase.from('wedding_todos').select('*').eq('wedding_id', wedding.id).order('created_at'),
   ])
 
   const dateFormatted = wedding.date
     ? new Date(wedding.date).toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
     : null
 
-  // Checklist de préparation
-  const checklist = [
-    { label: 'Photo de couverture', done: !!wedding.cover_image_url },
-    { label: 'Date & lieu', done: !!(wedding.date && wedding.location) },
-    { label: 'Programme', done: (programmeCount ?? 0) > 0 },
-    { label: 'Invités', done: (guestCount ?? 0) > 0 },
-    { label: 'Prestataires', done: (prestataireCount ?? 0) > 0 },
-    { label: 'Mot des mariés', done: !!(wedding.couple_message || (ruleCount ?? 0) > 0) },
+  // Checklist système — auto-calculée
+  const systemChecklist = [
+    { label: 'Photo de couverture', done: !!wedding.cover_image_url, href: `/wedding/${slug}/edit` },
+    { label: 'Date fixée', done: !!wedding.date, href: `/wedding/${slug}/edit` },
+    { label: 'Lieu renseigné', done: !!wedding.location, href: `/wedding/${slug}/edit` },
+    { label: 'Programme créé', done: (programmeCount ?? 0) > 0, href: `/wedding/${slug}/programme` },
+    { label: 'Invités ajoutés', done: (guestCount ?? 0) > 0, href: `/wedding/${slug}/guests` },
+    { label: 'Prestataires', done: (prestataireCount ?? 0) > 0, href: `/wedding/${slug}/contacts` },
+    { label: 'Hébergements', done: (hebergementCount ?? 0) > 0, href: `/wedding/${slug}/hebergements` },
+    { label: 'Mot des mariés', done: !!(wedding.couple_message || (ruleCount ?? 0) > 0), href: `/wedding/${slug}/regles` },
+    { label: 'Lien partagé', done: !!wedding.share_code, href: `/wedding/${slug}/partager` },
   ]
-  const doneCount = checklist.filter(c => c.done).length
 
   // Modules organisation
   const modules = [
@@ -108,38 +113,12 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
 
       <div className="max-w-3xl mx-auto px-6 py-10 space-y-10">
 
-        {/* 1. Checklist inline */}
-        <div className="bg-white rounded-xl border border-stone-100 px-6 py-5">
-          <div className="flex items-center justify-between mb-4">
-            <p style={{ fontWeight: 300, fontSize: '0.68rem', letterSpacing: '0.2em' }}
-               className="text-stone-400 uppercase">Préparatifs</p>
-            <p style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-400">
-              <span className="text-[#4a5240] font-medium">{doneCount}</span> / {checklist.length}
-            </p>
-          </div>
-          {/* Barre de progression */}
-          <div className="w-full h-1 bg-stone-100 rounded-full mb-5 overflow-hidden">
-            <div className="h-full bg-[#4a5240] rounded-full transition-all duration-500"
-                 style={{ width: `${(doneCount / checklist.length) * 100}%` }} />
-          </div>
-          {/* Items inline */}
-          <div className="flex flex-wrap gap-2">
-            {checklist.map(item => (
-              <span key={item.label}
-                className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition ${
-                  item.done
-                    ? 'bg-[#4a5240]/8 border-[#4a5240]/20 text-[#4a5240]'
-                    : 'bg-stone-50 border-stone-200 text-stone-400'
-                }`}
-                style={{ fontWeight: 300 }}>
-                <span className={item.done ? 'text-[#4a5240]' : 'text-stone-300'}>
-                  {item.done ? '✓' : '○'}
-                </span>
-                {item.label}
-              </span>
-            ))}
-          </div>
-        </div>
+        {/* 1. Checklist */}
+        <Checklist
+          slug={slug}
+          systemItems={systemChecklist}
+          customItems={(todosData ?? []).map(t => ({ id: t.id, label: t.label, done: t.done }))}
+        />
 
         {/* 2. Organisation */}
         <div>

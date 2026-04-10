@@ -36,7 +36,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
   const supabase = await createSupabaseServerClient()
   const { data: wedding } = await supabase
     .from('weddings')
-    .select('id, name, date, cover_image_url, location')
+    .select('id, name, date, cover_image_url, location, couple_message')
     .eq('slug', slug)
     .single()
 
@@ -128,18 +128,28 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
           ))}
         </div>
 
-        {rules && rules.length > 0 && (
-          <div className="bg-white rounded-xl border border-stone-100 p-5">
-            <h3 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.2rem', fontStyle: 'italic' }}
-                className="text-[#2d3228] mb-3">Le mot des mariés</h3>
-            <ul className="space-y-2">
-              {rules.map((rule, i) => (
-                <li key={i} className="flex items-start gap-2.5 text-sm text-stone-600" style={{ fontWeight: 300 }}>
-                  <span className="text-[#4a5240] mt-0.5">—</span>
-                  {rule.text}
-                </li>
-              ))}
-            </ul>
+        {(wedding.couple_message || (rules && rules.length > 0)) && (
+          <div className="bg-white rounded-xl border border-stone-100 p-5 space-y-4">
+            <h3 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.3rem', fontStyle: 'italic' }}
+                className="text-[#2d3228]">Le mot des mariés</h3>
+
+            {wedding.couple_message && (
+              <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.05rem', lineHeight: 1.75 }}
+                 className="text-stone-600 whitespace-pre-wrap">
+                {wedding.couple_message}
+              </p>
+            )}
+
+            {rules && rules.length > 0 && (
+              <ul className="space-y-2 pt-2 border-t border-stone-100">
+                {rules.map((rule, i) => (
+                  <li key={i} className="flex items-start gap-2.5 text-sm text-stone-600" style={{ fontWeight: 300 }}>
+                    <span className="text-[#4a5240] mt-0.5">—</span>
+                    {rule.text}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         )}
       </div>

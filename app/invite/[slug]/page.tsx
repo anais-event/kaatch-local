@@ -131,7 +131,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
         {rules && rules.length > 0 && (
           <div className="bg-white rounded-xl border border-stone-100 p-5">
             <h3 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.2rem', fontStyle: 'italic' }}
-                className="text-[#2d3228] mb-3">Le règlement intérieur</h3>
+                className="text-[#2d3228] mb-3">Nos petites attentions</h3>
             <ul className="space-y-2">
               {rules.map((rule, i) => (
                 <li key={i} className="flex items-start gap-2.5 text-sm text-stone-600" style={{ fontWeight: 300 }}>
@@ -148,7 +148,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
         <div className="max-w-2xl mx-auto px-6 pb-12 text-center">
           <form action={logout}>
             <input type="hidden" name="slug" value={slug} />
-            <button type="submit" className="text-xs text-stone-400 hover:text-red-400 transition" style={{ fontWeight: 300 }}>
+            <button type="submit" className="text-xs text-stone-400 hover:text-red-400 transition cursor-pointer" style={{ fontWeight: 300 }}>
               Se déconnecter
             </button>
           </form>

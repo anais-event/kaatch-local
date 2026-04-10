@@ -31,30 +31,6 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
         )}
         <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/70" />
 
-        {/* Boutons admin en haut à droite */}
-        <div className="absolute top-4 right-4 flex gap-2">
-          <a href={`/wedding/${slug}/edit`}
-            className="text-xs bg-white/20 backdrop-blur text-white border border-white/30 px-4 py-2 rounded-lg hover:bg-white/30 transition"
-            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, letterSpacing: '0.06em' }}>
-            Modifier
-          </a>
-          <a href={`/wedding/${slug}/guests`}
-            className="text-xs bg-white/20 backdrop-blur text-white border border-white/30 px-4 py-2 rounded-lg hover:bg-white/30 transition"
-            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, letterSpacing: '0.06em' }}>
-            Invités
-          </a>
-        <a href={`/wedding/${slug}/contacts`}
-            className="text-xs bg-white/20 backdrop-blur text-white border border-white/30 px-4 py-2 rounded-lg hover:bg-white/30 transition"
-            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, letterSpacing: '0.06em' }}>
-            Contacts
-          </a>
-          <a href={`/wedding/${slug}/partager`}
-            className="text-xs bg-white/20 backdrop-blur text-white border border-white/30 px-4 py-2 rounded-lg hover:bg-white/30 transition"
-            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, letterSpacing: '0.06em' }}>
-            Partager
-          </a>
-        </div>
-
         {/* Titre */}
         <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
           {dateFormatted && (
@@ -69,28 +45,6 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
           <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: 'clamp(2.5rem, 7vw, 4.5rem)', lineHeight: 1 }}>
             {wedding.name}
           </h2>
-        </div>
-      </div>
-
-      {/* Navigation onglets */}
-      <div className="bg-[#f5f0e8] sticky top-0 z-10 border-b border-stone-200 shadow-sm">
-        <div className="max-w-2xl mx-auto flex justify-around px-6 pt-4 pb-0">
-          {[
-            { label: 'Infos', href: `#infos` },
-            { label: 'Programme', href: `/wedding/${slug}/programme` },
-            { label: 'Photos', href: `/wedding/${slug}/photos` },
-            { label: 'Hébergements', href: `/wedding/${slug}/hebergements` },
-            { label: 'Messages', href: `/wedding/${slug}/messagerie` },
-          ].map((tab) => (
-            <a
-              key={tab.label}
-              href={tab.href}
-              className="pb-3 text-sm border-b-2 border-transparent hover:border-[#4a5240] hover:text-[#4a5240] text-stone-400 transition-colors"
-              style={{ fontFamily: 'var(--font-lato)', fontWeight: 400, letterSpacing: '0.04em' }}
-            >
-              {tab.label}
-            </a>
-          ))}
         </div>
       </div>
 

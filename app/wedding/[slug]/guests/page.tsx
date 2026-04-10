@@ -106,7 +106,7 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
 
         <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.5rem', fontStyle: 'italic' }}
             className="text-[#2d3228] mb-6">
-          Liste des invités
+          Liste des invités{total > 0 && <span style={{ fontSize: '1.4rem', fontWeight: 300 }} className="text-stone-400 ml-3">({total})</span>}
         </h1>
 
         {/* Compteurs RSVP */}

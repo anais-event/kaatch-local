@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import ProgrammePDF from './ProgrammePDF'
 import MapEmbed from './MapEmbed'
+import ProgrammeMap from './ProgrammeMap'
 
 export default async function GuestProgrammePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -39,6 +40,8 @@ export default async function GuestProgrammePage({ params }: { params: Promise<{
             className="text-[#2d3228] mb-8">
           Programme de la journée
         </h1>
+
+        <ProgrammeMap steps={steps ?? []} />
 
         {(!steps || steps.length === 0) ? (
           <div className="p-8 rounded-xl bg-white border border-stone-100 text-center">

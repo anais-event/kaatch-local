@@ -61,7 +61,7 @@ export default async function ContactsPage({ params }: { params: Promise<{ slug:
         </div>
 
         <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.5rem', fontStyle: 'italic' }}
-            className="text-[#2d3228] mb-2">Contacts</h1>
+            className="text-[#2d3228] mb-2">Prestataires</h1>
         <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem' }}
            className="text-stone-400 mb-8">
           Les contacts visibles aux invités pourront leur envoyer un message via la plateforme — sans révéler leur numéro.

@@ -73,29 +73,7 @@ export default async function GuestGroupesPage({ params }: { params: Promise<{ s
   return (
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
 
-      {/* Navbar fixe */}
-      <div className="bg-[#f5f0e8]/95 backdrop-blur fixed top-0 left-0 right-0 z-50 border-b border-stone-200 shadow-sm">
-        <div className="max-w-2xl mx-auto flex justify-around px-4 pt-3 pb-0">
-          {[
-            { label: 'Programme', href: `/invite/${slug}/programme` },
-            { label: 'Photos', href: `/invite/${slug}/photos` },
-            { label: 'Messagerie', href: `/invite/${slug}/groupes` },
-            { label: 'Contacts', href: `/invite/${slug}/contacts` },
-          ].map((tab) => (
-            <a key={tab.label} href={tab.href}
-              className={`pb-3 text-sm whitespace-nowrap px-2 border-b-2 transition-colors ${
-                tab.href === `/invite/${slug}/groupes`
-                  ? 'border-[#4a5240] text-[#4a5240]'
-                  : 'border-transparent text-stone-400 hover:border-[#4a5240] hover:text-[#4a5240]'
-              }`}
-              style={{ fontWeight: 400, letterSpacing: '0.04em' }}>
-              {tab.label}
-            </a>
-          ))}
-        </div>
-      </div>
-
-      <div className="max-w-2xl mx-auto px-6 pt-20 pb-8">
+      <div className="max-w-2xl mx-auto px-6 pt-8 pb-8">
 
 
         <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.5rem', fontStyle: 'italic' }}
@@ -180,7 +158,6 @@ export default async function GuestGroupesPage({ params }: { params: Promise<{ s
           </form>
         </div>
 
-      </div>
       </div>
     </div>
   )

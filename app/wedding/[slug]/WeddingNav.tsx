@@ -12,7 +12,8 @@ export default function WeddingNav({ slug, weddingName, weddingId }: { slug: str
     { label: 'Invités', href: `/wedding/${slug}/guests` },
     { label: 'Photos', href: `/wedding/${slug}/photos` },
     { label: 'Messages', href: `/wedding/${slug}/messagerie` },
-    { label: 'Contacts', href: `/wedding/${slug}/contacts` },
+    { label: 'Prestataires', href: `/wedding/${slug}/contacts` },
+    { label: 'Règles', href: `/wedding/${slug}/regles` },
   ]
 
   const isActive = (href: string) => {

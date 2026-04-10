@@ -42,6 +42,12 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
 
   if (!wedding) return <div className="p-8">Mariage introuvable</div>
 
+  const { data: rules } = await supabase
+    .from('wedding_rules')
+    .select('text')
+    .eq('wedding_id', wedding.id)
+    .order('created_at', { ascending: true })
+
   const dateFormatted = wedding.date
     ? new Date(wedding.date).toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
     : null
@@ -73,25 +79,6 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
         </div>
       </div>
 
-      {/* Navigation onglets — fixe en haut */}
-      <div className="bg-[#f5f0e8]/95 backdrop-blur fixed top-0 left-0 right-0 z-50 border-b border-stone-200 shadow-sm">
-        <div className="max-w-2xl mx-auto flex justify-around px-4 pt-3 pb-0 overflow-x-auto">
-          {[
-            { label: 'Programme', href: `/invite/${slug}/programme` },
-            { label: 'Photos', href: `/invite/${slug}/photos` },
-            { label: 'Messagerie', href: `/invite/${slug}/groupes` },
-            { label: 'Contacts', href: `/invite/${slug}/contacts` },
-          ].map((tab) => (
-            <a key={tab.label} href={tab.href}
-              className="pb-3 text-sm whitespace-nowrap px-2 border-b-2 border-transparent hover:border-[#4a5240] hover:text-[#4a5240] text-stone-400 transition-colors"
-              style={{ fontWeight: 400, letterSpacing: '0.04em' }}>
-              {tab.label}
-            </a>
-          ))}
-        </div>
-      </div>
-      {/* Spacer pour la navbar fixe */}
-      <div className="h-12" />
 
       {/* Infos rapides */}
       <div className="max-w-2xl mx-auto px-6 py-8 space-y-4">
@@ -131,7 +118,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
             { label: 'Programme', href: `/invite/${slug}/programme` },
             { label: 'Photos', href: `/invite/${slug}/photos` },
             { label: 'Messagerie', href: `/invite/${slug}/groupes` },
-            { label: 'Contacts', href: `/invite/${slug}/contacts` },
+            { label: 'Prestataires', href: `/invite/${slug}/contacts` },
           ].map(item => (
             <a key={item.label} href={item.href}
                className="p-4 rounded-xl bg-white border border-stone-100 text-center transition-shadow"
@@ -140,6 +127,21 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
             </a>
           ))}
         </div>
+
+        {rules && rules.length > 0 && (
+          <div className="bg-white rounded-xl border border-stone-100 p-5">
+            <h3 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.2rem', fontStyle: 'italic' }}
+                className="text-[#2d3228] mb-3">Le règlement intérieur</h3>
+            <ul className="space-y-2">
+              {rules.map((rule, i) => (
+                <li key={i} className="flex items-start gap-2.5 text-sm text-stone-600" style={{ fontWeight: 300 }}>
+                  <span className="text-[#4a5240] mt-0.5">—</span>
+                  {rule.text}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
       {!isPreview && (

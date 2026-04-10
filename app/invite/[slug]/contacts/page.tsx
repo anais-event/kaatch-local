@@ -77,7 +77,7 @@ export default async function GuestContactsPage({ params }: { params: Promise<{ 
         </div>
 
         <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.5rem', fontStyle: 'italic' }}
-            className="text-[#2d3228] mb-8">Contacts</h1>
+            className="text-[#2d3228] mb-8">Prestataires</h1>
 
         {(!contacts || contacts.length === 0) ? (
           <div className="p-8 rounded-2xl bg-white/80 text-center">

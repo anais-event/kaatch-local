@@ -35,8 +35,7 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
       const s = search.toLowerCase()
       const matchMoment = p.moment_tag?.toLowerCase().includes(s)
       const matchGuest = p.tagged_guests.some(g => g.toLowerCase().includes(s))
-      const matchUploader = p.uploader_name?.toLowerCase().includes(s)
-      if (!matchMoment && !matchGuest && !matchUploader) return false
+      if (!matchMoment && !matchGuest) return false
     }
     return true
   })

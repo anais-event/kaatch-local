@@ -1,6 +1,17 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import Countdown from './Countdown'
+
+async function logout(formData: FormData) {
+  'use server'
+  const { cookies } = await import('next/headers')
+  const { redirect } = await import('next/navigation')
+  const cookieStore = await cookies()
+  const slug = formData.get('slug') as string
+  cookieStore.delete(`guest_${slug}`)
+  redirect('/rejoindre')
+}
 
 export default async function GuestPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -112,6 +123,9 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
             </a>
           </div>
         )}
+        {wedding.date && (
+          <Countdown weddingDate={wedding.date} />
+        )}
 
         {/* Raccourcis */}
         <div className="grid grid-cols-2 gap-3 pt-2">
@@ -129,6 +143,17 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
           ))}
         </div>
       </div>
+
+      {!isPreview && (
+        <div className="max-w-2xl mx-auto px-6 pb-12 text-center">
+          <form action={logout}>
+            <input type="hidden" name="slug" value={slug} />
+            <button type="submit" className="text-xs text-stone-400 hover:text-red-400 transition" style={{ fontWeight: 300 }}>
+              Se déconnecter
+            </button>
+          </form>
+        </div>
+      )}
     </div>
   )
 }

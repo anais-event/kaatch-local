@@ -1,6 +1,7 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import { logoutMaried } from './logout-action'
 
 export default function WeddingNav({ slug, weddingName, weddingId }: { slug: string; weddingName: string; weddingId: string }) {
   const pathname = usePathname()
@@ -44,6 +45,13 @@ export default function WeddingNav({ slug, weddingName, weddingId }: { slug: str
             style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, letterSpacing: '0.04em' }}>
             👁 Vue invité
           </a>
+          <form action={logoutMaried}>
+            <button type="submit"
+              className="px-3 py-1 rounded-full text-xs text-stone-400 hover:text-red-400 transition ml-1"
+              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
+              Déconnexion
+            </button>
+          </form>
         </div>
       </div>
     </nav>

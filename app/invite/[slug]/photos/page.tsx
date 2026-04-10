@@ -31,7 +31,8 @@ async function uploadPhoto(formData: FormData) {
   const slug = formData.get('slug') as string
   const uploader_name = formData.get('uploader_name') as string
   const moment_tag = (formData.get('moment_tag') as string) || null
-  const tagged_guests = formData.getAll('tagged_guests') as string[]
+  const tagged_guests_raw = (formData.get('tagged_guests_raw') as string) || ''
+  const tagged_guests = tagged_guests_raw.split(',').map(s => s.trim()).filter(Boolean)
   const file = formData.get('photo') as File
 
   if (!file || file.size === 0) return
@@ -69,7 +70,7 @@ export default async function GuestPhotosPage({ params }: { params: Promise<{ sl
   if (!guestCookie) redirect(`/invite/${slug}`)
 
   const guest = JSON.parse(guestCookie.value)
-  const guestName = `${guest.firstName} ${guest.lastName}`
+  const guestName = [guest.firstName, guest.lastName].filter(Boolean).join(' ')
 
   const supabase = await createSupabaseServerClient()
   const { data: wedding } = await supabase.from('weddings').select('id, name').eq('slug', slug).single()
@@ -82,6 +83,7 @@ export default async function GuestPhotosPage({ params }: { params: Promise<{ sl
   const { data: guests } = await supabase
     .from('guests').select('id, first_name, last_name, guest_type').eq('wedding_id', wedding.id).order('first_name')
   const guestList = guests ?? []
+  const guestNames = guestList.map(g => [g.first_name, g.last_name].filter(Boolean).join(' '))
 
   const { data: rawPhotos } = await supabase
     .from('photos')
@@ -132,19 +134,20 @@ export default async function GuestPhotosPage({ params }: { params: Promise<{ sl
             {guestList.length > 0 && (
               <div>
                 <p style={{ fontWeight: 300, fontSize: '0.75rem', letterSpacing: '0.1em' }}
-                   className="text-stone-400 uppercase mb-2">Qui voit-on sur la photo ?</p>
-                <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-1">
+                   className="text-stone-400 uppercase mb-2">Qui voit-on ? (séparé par virgules)</p>
+                <input
+                  type="text"
+                  name="tagged_guests_raw"
+                  list="guest-suggestions"
+                  placeholder="Ex: Marie Dupont, Jean Martin…"
+                  className="w-full border border-stone-200 rounded-xl px-4 py-2 bg-white outline-none focus:border-[#4a5240] transition text-stone-700 text-sm"
+                  style={{ fontWeight: 300 }}
+                />
+                <datalist id="guest-suggestions">
                   {guestList.map(g => (
-                    <label key={g.id}
-                      className="flex items-center gap-1.5 cursor-pointer px-3 py-1.5 rounded-full border border-stone-200 bg-white hover:border-[#4a5240] transition has-[:checked]:bg-[#4a5240] has-[:checked]:border-[#4a5240] has-[:checked]:text-white">
-                      <input type="checkbox" name="tagged_guests"
-                        value={`${g.first_name} ${g.last_name}`} className="hidden" />
-                      <span style={{ fontSize: '0.8rem', fontWeight: 300 }}>
-                        {g.guest_type === 'enfant' ? '👶' : g.guest_type === 'animal' ? '🐾' : ''} {g.first_name} {g.last_name}
-                      </span>
-                    </label>
+                    <option key={g.id} value={`${g.first_name} ${g.last_name ?? ''}`.trim()} />
                   ))}
-                </div>
+                </datalist>
               </div>
             )}
             <input type="file" name="photo" accept="image/*" required
@@ -158,7 +161,7 @@ export default async function GuestPhotosPage({ params }: { params: Promise<{ sl
           </form>
         </div>
 
-        <GuestPhotoFeed photos={photos} moments={moments} guestName={guestName} addLike={addLike} addComment={addComment} slug={slug} />
+        <GuestPhotoFeed photos={photos} moments={moments} guestName={guestName} guestNames={guestNames} addLike={addLike} addComment={addComment} slug={slug} />
       </div>
     </div>
   )

@@ -58,7 +58,7 @@ export default async function GuestGroupesPage({ params }: { params: Promise<{ s
   if (!guestCookie) redirect(`/invite/${slug}`)
 
   const guest = JSON.parse(guestCookie.value)
-  const guestName = `${guest.firstName} ${guest.lastName}`
+  const guestName = [guest.firstName, guest.lastName].filter(Boolean).join(' ')
 
   const supabase = await createSupabaseServerClient()
   const { data: wedding } = await supabase.from('weddings').select('id').eq('slug', slug).single()

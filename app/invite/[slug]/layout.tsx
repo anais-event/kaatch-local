@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers'
 import GuestNav from './GuestNav'
+import BottomNavGuest from './BottomNavGuest'
 
 export default async function InviteLayout({
   children,
@@ -15,9 +16,10 @@ export default async function InviteLayout({
   return (
     <>
       <GuestNav slug={slug} isPreview={isPreview} />
-      <div className="pt-12">
+      <div className="pt-12 pb-20 sm:pb-0">
         {children}
       </div>
+      <BottomNavGuest slug={slug} />
     </>
   )
 }

@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import WeddingNav from './WeddingNav'
+import BottomNav from './BottomNav'
 import RealtimeNotifications from './RealtimeNotifications'
 import OnboardingModal from './OnboardingModal'
 import { logoutMaried } from './logout-action'
@@ -23,9 +24,10 @@ export default async function WeddingLayout({
   return (
     <>
       <WeddingNav slug={slug} weddingName={wedding?.name ?? ''} weddingId={wedding?.id ?? ''} />
-      <div className="pt-12">
+      <div className="pt-12 pb-20 sm:pb-0">
         {children}
       </div>
+      <BottomNav slug={slug} />
       {wedding?.id && (
         <RealtimeNotifications slug={slug} weddingId={wedding.id} />
       )}

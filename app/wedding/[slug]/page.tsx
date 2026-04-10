@@ -85,13 +85,13 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
 
       {/* Hero */}
-      <div className="relative w-full h-[50vh] min-h-[280px] overflow-hidden">
+      <div className="relative w-full h-[35vh] min-h-[180px] overflow-hidden">
         {wedding.cover_image_url
           ? <img src={wedding.cover_image_url} alt="" className="w-full h-full object-cover" />
           : <div className="w-full h-full bg-[#2d3228]" />
         }
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/75" />
-        <div className="absolute bottom-0 left-0 right-0 px-8 pb-8 text-white">
+        <div className="absolute bottom-0 left-0 right-0 px-4 sm:px-8 pb-6 sm:pb-8 text-white">
           {dateFormatted && (
             <p className="text-xs tracking-[0.35em] uppercase text-white/60 mb-2" style={{ fontWeight: 300 }}>
               {dateFormatted}
@@ -111,7 +111,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
         </a>
       </div>
 
-      <div className="max-w-3xl mx-auto px-6 py-10 space-y-10">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-10">
 
         {/* 1. Checklist */}
         <Checklist
@@ -124,7 +124,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
         <div>
           <p style={{ fontWeight: 300, fontSize: '0.68rem', letterSpacing: '0.2em' }}
              className="text-stone-400 uppercase mb-4">Organisation</p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
             {modules.map(m => (
               m.href ? (
                 <a key={m.label} href={m.href}

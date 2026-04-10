@@ -88,7 +88,7 @@ export default function MessagerieShell({
                   )}
                 </div>
                 {group.lastMsg && (
-                  <span className="text-[10px] text-stone-300 shrink-0">
+                  <span className="text-[10px] text-stone-300 shrink-0 hidden sm:inline">
                     {new Date(group.lastMsg.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 )}
@@ -102,7 +102,7 @@ export default function MessagerieShell({
           <div className="flex flex-wrap gap-1.5 mb-2">
             {SUGGESTED.map(s => (
               <button key={s} onClick={() => handleCreate(s)} disabled={creating}
-                className="text-[10px] px-2 py-1 rounded-md border border-stone-200 text-stone-400 hover:border-[#4a5240] hover:text-[#4a5240] transition cursor-pointer"
+                className="text-xs px-2.5 py-1.5 rounded-md border border-stone-200 text-stone-400 hover:border-[#4a5240] hover:text-[#4a5240] transition cursor-pointer"
                 style={{ fontWeight: 300 }}>
                 {s}
               </button>
@@ -111,11 +111,11 @@ export default function MessagerieShell({
           <div className="flex gap-1.5">
             <input type="text" value={newGroup} onChange={e => setNewGroup(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleCreate(newGroup)}
-              placeholder="@NouveauGroupe…"
-              className="flex-1 border border-stone-200 rounded-lg px-3 py-1.5 text-xs text-stone-700 outline-none focus:border-[#4a5240] transition bg-white"
+              placeholder="@Groupe…"
+              className="flex-1 border border-stone-200 rounded-lg px-3 py-2 text-xs text-stone-700 outline-none focus:border-[#4a5240] transition bg-white"
               style={{ fontWeight: 300 }} />
             <button onClick={() => handleCreate(newGroup)} disabled={creating || !newGroup.trim()}
-              className="bg-[#4a5240] text-white px-3 py-1.5 rounded-lg text-xs hover:bg-[#2d3228] transition disabled:opacity-40 cursor-pointer"
+              className="bg-[#4a5240] text-white px-3 py-2 rounded-lg text-xs hover:bg-[#2d3228] transition disabled:opacity-40 cursor-pointer"
               style={{ fontWeight: 300 }}>
               +
             </button>

@@ -65,7 +65,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
           : <div className="w-full h-full bg-[#2d3228]" />
         }
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/75" />
-        <div className="absolute bottom-0 left-0 right-0 px-8 pb-8 text-white">
+        <div className="absolute bottom-0 left-0 right-0 px-4 sm:px-8 pb-6 sm:pb-8 text-white">
           {dateFormatted && (
             <p className="text-xs tracking-[0.35em] uppercase text-white/60 mb-2" style={{ fontWeight: 300 }}>
               {dateFormatted}
@@ -80,7 +80,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-6 py-8 space-y-6">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
 
         {/* Le mot des mariés */}
         {(wedding.couple_message || (rules && rules.length > 0)) && (
@@ -120,7 +120,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
               </div>
             )}
             {wedding.location && (
-              <div className="bg-white rounded-xl border border-stone-100 px-5 py-4 flex items-center justify-between">
+              <div className="bg-white rounded-xl border border-stone-100 px-5 py-4 flex items-center justify-between gap-4">
                 <div>
                   <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.16em' }}
                      className="text-stone-400 uppercase mb-0.5">Lieu</p>
@@ -142,7 +142,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
         <div>
           <p style={{ fontWeight: 300, fontSize: '0.68rem', letterSpacing: '0.2em' }}
              className="text-stone-400 uppercase mb-3">Navigation</p>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {raccourcis.map(item => (
               <a key={item.label} href={item.href}
                  className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col gap-1 hover:border-[#4a5240]/30 hover:shadow-sm transition-all">

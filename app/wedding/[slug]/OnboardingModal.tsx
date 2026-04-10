@@ -5,28 +5,28 @@ import { useState, useEffect } from 'react'
 const STEPS = [
   {
     icon: '✦',
-    title: 'Bienvenue sur Kaatch',
-    desc: 'Votre espace pour organiser votre mariage et connecter vos invités. Voici comment ça fonctionne.',
+    title: 'Félicitations !',
+    desc: 'Bienvenue sur l\'app qui vous simplifie vraiment l\'organisation du plus beau jour de votre vie. En quelques minutes, tout est au même endroit.',
   },
   {
-    icon: '📋',
-    title: 'Organisez depuis le tableau de bord',
-    desc: 'Ajoutez vos invités, gérez le programme, vos prestataires et vos hébergements depuis les cartes du tableau de bord.',
+    icon: '👥',
+    title: 'Commencez par vos invités',
+    desc: 'Importez votre liste depuis Excel ou Google Sheets en un clic. Gérez les RSVP, les régimes alimentaires, les tables — tout depuis un seul tableau de bord.',
   },
   {
-    icon: '💌',
-    title: 'Partagez avec vos invités',
-    desc: 'Dans "Vue invité ↗", récupérez le lien ou le QR code à partager. Vos invités accèdent sans créer de compte.',
+    icon: '📅',
+    title: 'Construisez votre journée',
+    desc: 'Ajoutez chaque moment du programme avec l\'heure, le lieu et une description. Vos invités voient le déroulé en temps réel, avec la carte et l\'itinéraire.',
   },
   {
     icon: '📸',
-    title: 'Galerie & messagerie partagées',
-    desc: 'Vos invités peuvent uploader des photos et créer des groupes de discussion. Tout s\'affiche en temps réel.',
+    title: 'Le jour J, vivez-le pleinement',
+    desc: 'Vos invités uploadent leurs photos directement dans l\'app, créent des groupes de discussion et retrouvent toutes les infos sans vous déranger.',
   },
   {
-    icon: '✍️',
-    title: 'Le mot des mariés',
-    desc: 'Écrivez un message personnel et vos infos pratiques — ils s\'affichent dès que vos invités arrivent sur l\'app.',
+    icon: '💌',
+    title: 'Un lien, c\'est tout',
+    desc: 'Partagez un simple lien ou un QR code — vos invités accèdent à tout sans créer de compte. Imprimez-le sur les tables le jour J.',
   },
 ]
 

@@ -11,7 +11,8 @@ export default function ProgrammeMap({ steps }: { steps: Step[] }) {
     // Pas d'adresses → rien à faire
     if (stepsWithAddress.length === 0) return
     if (!mapRef.current) return
-    let map: ReturnType<typeof import('leaflet').default.map> | null = null
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let map: any = null
 
     async function init() {
       const L = (await import('leaflet')).default

@@ -1,6 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
-import HotelSuggestionsWrapper from './HotelSuggestionsWrapper.tsx'
+import HotelSuggestionsWrapper from './HotelSuggestionsWrapper'
 
 async function addAccommodation(formData: FormData) {
   'use server'

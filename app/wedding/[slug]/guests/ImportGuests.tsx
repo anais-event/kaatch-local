@@ -86,7 +86,7 @@ export default function ImportGuests({ weddingId, slug }: { weddingId: string; s
       const nonEmpty = raw[i].filter(c => c && c.toString().trim() !== '').length
       if (nonEmpty >= 2) { headerRowIndex = i; break }
     }
-    const parsed = XLSX.utils.sheet_to_json<Record<string, string>>(ws, { defval: '', range: headerRowIndex })
+    const parsed = (XLSX.utils.sheet_to_json(ws, { defval: '', range: headerRowIndex }) as Record<string, string>[])
     if (parsed.length === 0) return
     const hdrs = Object.keys(parsed[0]).filter(h => !h.startsWith('__EMPTY'))
     const cleanRows = parsed.map((row: Record<string, string>) => {

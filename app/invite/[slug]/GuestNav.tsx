@@ -16,9 +16,18 @@ export default function GuestNav({ slug, isPreview }: { slug: string; isPreview?
   }
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[#f5f0e8]/95 backdrop-blur border-b border-stone-200 shadow-sm">
-      <div className="max-w-2xl mx-auto flex items-center justify-between px-4 h-12">
-        <div className="flex gap-1 overflow-x-auto">
-          {tabs.map(tab => (
+      <div className="max-w-3xl mx-auto flex items-center justify-between px-4 h-12">
+
+        {/* Logo / Accueil — gauche */}
+        <a href={`/invite/${slug}`}
+           style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1rem', fontStyle: 'italic' }}
+           className="text-[#2d3228] shrink-0">
+          ✦
+        </a>
+
+        {/* Tabs — droite */}
+        <div className="flex items-center gap-0.5 overflow-x-auto">
+          {tabs.filter(t => t.href !== `/invite/${slug}`).map(tab => (
             <a key={tab.href} href={tab.href}
               className={`text-xs whitespace-nowrap px-2.5 py-1.5 rounded-md transition-colors ${
                 isActive(tab.href)
@@ -30,14 +39,14 @@ export default function GuestNav({ slug, isPreview }: { slug: string; isPreview?
               <span className="hidden sm:inline">{tab.label}</span>
             </a>
           ))}
+          {isPreview && (
+            <a href={`/wedding/${slug}`}
+              className="text-xs text-[#4a5240] border border-[#4a5240] px-2.5 py-1.5 rounded-md hover:bg-[#4a5240] hover:text-white transition whitespace-nowrap shrink-0 ml-1"
+              style={{ fontWeight: 300, letterSpacing: '0.04em' }}>
+              ← Mariés
+            </a>
+          )}
         </div>
-        {isPreview && (
-          <a href={`/wedding/${slug}`}
-            className="text-xs text-[#4a5240] border border-[#4a5240] px-3 py-1 rounded-md hover:bg-[#4a5240] hover:text-white transition whitespace-nowrap shrink-0 ml-2"
-            style={{ fontWeight: 300, letterSpacing: '0.04em' }}>
-            ← Mode mariés
-          </a>
-        )}
       </div>
     </nav>
   )

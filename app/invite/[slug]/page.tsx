@@ -76,7 +76,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
 
       {/* Hero */}
-      <div className="relative w-full h-[50vh] min-h-[280px] overflow-hidden">
+      <div className="relative w-full h-[38vh] min-h-[220px] overflow-hidden">
         {wedding.cover_image_url
           ? <img src={wedding.cover_image_url} alt="" className="w-full h-full object-cover" />
           : <div className="w-full h-full bg-[#2d3228]" />

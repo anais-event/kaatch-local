@@ -17,15 +17,18 @@ export async function createWedding(formData: FormData) {
     return
   }
 
-  const name = formData.get('name') as string
+  const firstName = (formData.get('first_name') as string)?.trim()
+  const partnerName = (formData.get('partner_name') as string)?.trim()
+  const name = `${firstName} et ${partnerName}`
   const date = formData.get('date') as string
   const theme = formData.get('theme') as string
 
   console.log('🔵 Données récupérées:', { name, date, theme })
 
-  // Génère un slug unique
-  const slug = name
+  // Génère un slug unique à partir des deux prénoms
+  const slug = `${firstName}-et-${partnerName}`
     .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '') + '-' + Math.random().toString(36).substring(2, 8)
 

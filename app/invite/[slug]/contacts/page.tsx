@@ -94,9 +94,34 @@ export default async function GuestContactsPage({ params }: { params: Promise<{ 
                   <h3 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.3rem' }}
                       className="text-[#2d3228]">{contact.name}</h3>
                   {contact.note && (
-                    <p style={{ fontWeight: 300, fontSize: '0.85rem' }} className="text-stone-500 mt-1">
+                    <p style={{ fontWeight: 300, fontSize: '0.85rem' }} className="text-stone-500 mt-1 italic">
                       {contact.note}
                     </p>
+                  )}
+                  {(contact.telephone || contact.email || contact.instagram) && (
+                    <div className="flex flex-wrap gap-3 mt-2">
+                      {contact.telephone && (
+                        <a href={`tel:${contact.telephone}`}
+                           className="flex items-center gap-1 text-xs text-stone-500 hover:text-[#4a5240] transition"
+                           style={{ fontWeight: 300 }}>
+                          📞 {contact.telephone}
+                        </a>
+                      )}
+                      {contact.email && (
+                        <a href={`mailto:${contact.email}`}
+                           className="flex items-center gap-1 text-xs text-stone-500 hover:text-[#4a5240] transition"
+                           style={{ fontWeight: 300 }}>
+                          ✉️ {contact.email}
+                        </a>
+                      )}
+                      {contact.instagram && (
+                        <a href={`https://instagram.com/${contact.instagram.replace('@','')}`} target="_blank" rel="noreferrer"
+                           className="flex items-center gap-1 text-xs text-stone-500 hover:text-[#4a5240] transition"
+                           style={{ fontWeight: 300 }}>
+                          📷 {contact.instagram}
+                        </a>
+                      )}
+                    </div>
                   )}
                 </div>
                 <form action={sendMessage} className="flex gap-2">

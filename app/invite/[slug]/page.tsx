@@ -131,7 +131,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
         {rules && rules.length > 0 && (
           <div className="bg-white rounded-xl border border-stone-100 p-5">
             <h3 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.2rem', fontStyle: 'italic' }}
-                className="text-[#2d3228] mb-3">Nos petites attentions</h3>
+                className="text-[#2d3228] mb-3">Le mot des mariés</h3>
             <ul className="space-y-2">
               {rules.map((rule, i) => (
                 <li key={i} className="flex items-start gap-2.5 text-sm text-stone-600" style={{ fontWeight: 300 }}>

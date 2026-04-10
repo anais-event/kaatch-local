@@ -53,9 +53,9 @@ export default async function ReglesPage({ params }: { params: Promise<{ slug: s
           ← Retour
         </a>
         <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.5rem', fontStyle: 'italic' }}
-            className="text-[#2d3228] mb-2">Règles du mariage</h1>
+            className="text-[#2d3228] mb-2">Le mot des mariés</h1>
         <p className="text-stone-400 text-sm mb-8" style={{ fontWeight: 300 }}>
-          Informations pratiques et règles affichées aux invités.
+          Informations pratiques et messages affichés aux invités.
         </p>
 
         {/* Règles existantes */}

@@ -132,9 +132,7 @@ export default async function GuestGroupesPage({ params }: { params: Promise<{ s
                     </p>
                   )}
                 </div>
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-stone-300 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M9 18l6-6-6-6"/>
-                </svg>
+                <span className="text-stone-300 text-sm shrink-0">›</span>
               </a>
             )
           })}

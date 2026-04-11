@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
 import TablesClient from './TablesClient'
+import PageIntro from '../PageIntro'
 
 async function createTable(formData: FormData) {
   'use server'
@@ -74,6 +75,14 @@ export default async function TablesPage({ params }: { params: Promise<{ slug: s
   ])
 
   return (
+    <>
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-8">
+      <PageIntro
+        what="Répartissez vos invités confirmés dans des tables nommées. Chaque table a une capacité définie pour éviter les oublis."
+        how="Créez vos tables (nom + capacité), sélectionnez une table à gauche, puis cliquez sur 'Ajouter' pour y placer un invité. Téléchargez le récap pour le jour J."
+        guests="Les invités ne voient pas le plan de table — c'est uniquement un outil d'organisation pour les mariés."
+      />
+    </div>
     <TablesClient
       slug={slug}
       weddingId={wedding.id}
@@ -85,5 +94,6 @@ export default async function TablesPage({ params }: { params: Promise<{ slug: s
       assignGuest={assignGuest}
       updateTableName={updateTableName}
     />
+    </>
   )
 }

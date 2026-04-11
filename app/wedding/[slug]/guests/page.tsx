@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
+import PageIntro from '../PageIntro'
 import GuestList from './GuestList'
 import ImportGuests from './ImportGuests'
 import CopyLinkButton from '../invitations/CopyLinkButton'
@@ -144,9 +145,15 @@ export default async function GuestsPage({
         </div>
 
         <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.5rem', fontStyle: 'italic' }}
-            className="text-[#2d3228] mb-6">
+            className="text-[#2d3228] mb-4">
           Invités{total > 0 && <span style={{ fontSize: '1.4rem', fontWeight: 300 }} className="text-stone-400 ml-3">({total})</span>}
         </h1>
+
+        <PageIntro
+          what="Gérez toute votre liste d'invités : ajoutez-les un à un ou importez depuis Excel, envoyez-leur un lien d'invitation personnalisé et suivez leurs réponses RSVP en temps réel."
+          how="Ajoutez un invité via le formulaire, ou importez un fichier Excel. Chaque invité reçoit un lien unique pour accéder à l'espace invité et confirmer sa présence."
+          guests="Les invités voient le programme, les photos, les hébergements et peuvent confirmer leur venue via leur lien d'invitation."
+        />
 
         {/* Tabs */}
         <div className="flex gap-2 mb-8">

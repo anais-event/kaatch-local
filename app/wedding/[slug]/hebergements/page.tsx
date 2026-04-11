@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import PageIntro from '../PageIntro'
 import { revalidatePath } from 'next/cache'
 import HotelSuggestionsWrapper from './HotelSuggestionsWrapper'
 
@@ -59,9 +60,14 @@ export default async function HebergementsPage({ params }: { params: Promise<{ s
         </div>
 
         <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.5rem', fontStyle: 'italic' }}
-            className="text-[#2d3228] mb-8">
+            className="text-[#2d3228] mb-4">
           Hébergements
         </h1>
+        <PageIntro
+          what="Suggérez des hébergements proches du lieu de réception pour que vos invités puissent se loger facilement — hôtels, gîtes, campings…"
+          how="Ajoutez des adresses manuellement ou laissez Kaatch vous en suggérer autour de votre lieu de réception."
+          guests="Vos invités verront la liste des hébergements recommandés dans leur espace, avec les adresses et liens utiles."
+        />
 
         {accommodations && accommodations.length > 0 && (
           <div className="mb-8">

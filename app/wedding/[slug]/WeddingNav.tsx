@@ -30,8 +30,7 @@ export default function WeddingNav({ slug, weddingName, weddingId }: { slug: str
       items: [
         { label: 'Invités', sub: 'Faire-part & RSVP', href: `/wedding/${slug}/guests` },
         { label: 'Plan de table', sub: 'Placement & récap', href: `/wedding/${slug}/tables` },
-        { label: 'Budget', sub: 'Devis & acomptes', href: `/wedding/${slug}/budget` },
-        { label: 'Prestataires', sub: 'Sélection & contacts', href: `/wedding/${slug}/contacts` },
+        { label: 'Budget', sub: 'Devis, dépenses & prestataires', href: `/wedding/${slug}/budget` },
       ],
     },
     {

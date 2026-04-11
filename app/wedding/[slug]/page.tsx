@@ -69,9 +69,6 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-10">
 
-        {/* Compte à rebours */}
-        {wedding.date && <Countdown weddingDate={wedding.date} />}
-
         {/* ── PRÉPARATIFS ── */}
         <div>
           <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.22em' }}
@@ -214,6 +211,9 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
 
           </div>
         </div>
+
+        {/* Compte à rebours */}
+        {wedding.date && <Countdown weddingDate={wedding.date} />}
 
         {/* ── INFOS PRATIQUES ── */}
         <div>

@@ -40,6 +40,7 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
   const [addingItemFor, setAddingItemFor] = useState<string | null>(null)
   const [addingQuoteFor, setAddingQuoteFor] = useState<string | null>(null)
   const [editingQuote, setEditingQuote] = useState<string | null>(null)
+  const [editingItem, setEditingItem] = useState<string | null>(null)
 
   // Filtrage search
   const filteredItems = useMemo(() => {
@@ -198,9 +199,9 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
       ) : view === 'liste' ? (
         <ListView
           slug={slug} weddingId={weddingId} categories={categories} items={filteredItems} quotes={quotes} files={files} budgetCurrency={budgetCurrency}
-          expandedCats={expandedCats} expandedItems={expandedItems} addingItemFor={addingItemFor} addingQuoteFor={addingQuoteFor} editingQuote={editingQuote}
+          expandedCats={expandedCats} expandedItems={expandedItems} addingItemFor={addingItemFor} addingQuoteFor={addingQuoteFor} editingQuote={editingQuote} editingItem={editingItem}
           toggleCat={toggleCat} toggleItem={toggleItem}
-          setAddingItemFor={setAddingItemFor} setAddingQuoteFor={setAddingQuoteFor} setEditingQuote={setEditingQuote}
+          setAddingItemFor={setAddingItemFor} setAddingQuoteFor={setAddingQuoteFor} setEditingQuote={setEditingQuote} setEditingItem={setEditingItem}
           itemsForCat={itemsForCat} quotesForItem={quotesForItem} getItemEffective={getItemEffective}
           currencies={CURRENCIES} actions={actions} call={call}
         />
@@ -209,7 +210,7 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
       ) : view === 'colonnes' ? (
         <KanbanView slug={slug} items={filteredItems} quotes={quotes} categories={categories} budgetCurrency={budgetCurrency} getItemEffective={getItemEffective} actions={actions} />
       ) : (
-        <ComparatifView slug={slug} weddingId={weddingId} items={filteredItems} quotes={quotes} categories={categories} budgetCurrency={budgetCurrency} actions={actions} call={call} currencies={CURRENCIES} />
+        <ComparatifView slug={slug} weddingId={weddingId} items={filteredItems} quotes={quotes} categories={categories} budgetCurrency={budgetCurrency} actions={actions} call={call} currencies={CURRENCIES} editingItem={editingItem} setEditingItem={setEditingItem} />
       )}
 
       {/* Ajouter catégorie */}
@@ -267,7 +268,7 @@ const ITEM_PLACEHOLDER: Record<string, string> = {
   'Divers': 'ex: Cadeaux invités',
 }
 
-function ListView({ slug, weddingId, categories, items, quotes, files, budgetCurrency, expandedCats, expandedItems, addingItemFor, addingQuoteFor, editingQuote, toggleCat, toggleItem, setAddingItemFor, setAddingQuoteFor, setEditingQuote, itemsForCat, quotesForItem, getItemEffective, currencies, actions, call }: any) {
+function ListView({ slug, weddingId, categories, items, quotes, files, budgetCurrency, expandedCats, expandedItems, addingItemFor, addingQuoteFor, editingQuote, editingItem, toggleCat, toggleItem, setAddingItemFor, setAddingQuoteFor, setEditingQuote, setEditingItem, itemsForCat, quotesForItem, getItemEffective, currencies, actions, call }: any) {
   const filesForQuote = (quoteId: string) => (files ?? []).filter((f: BudgetFile) => f.quote_id === quoteId)
   return (
     <div className="space-y-3">
@@ -326,41 +327,66 @@ function ListView({ slug, weddingId, categories, items, quotes, files, budgetCur
                       {/* Ligne poste */}
                       <div className="flex items-center gap-3 px-5 py-3 hover:bg-stone-50/50 group transition">
                         <span className={`w-2 h-2 rounded-full shrink-0 ${statusDot(item.status)}`} />
-                        <div className="flex-1 min-w-0 cursor-pointer" onClick={() => toggleItem(item.id)}>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <p style={{ fontWeight: 400, fontSize: '0.88rem' }} className="text-stone-700">{item.label}</p>
-                            {retained?.vendor_name && (
-                              <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">· {retained.vendor_name}</span>
-                            )}
-                            {iQuotes.length > 0 && (
-                              <span style={{ fontWeight: 300, fontSize: '0.68rem' }}
-                                    className="bg-stone-100 text-stone-500 px-1.5 py-0.5 rounded-full">
-                                {iQuotes.length} devis
-                              </span>
-                            )}
+                        {editingItem === item.id ? (
+                          <form className="flex-1 flex gap-2 flex-wrap items-center"
+                            onSubmit={async e => { e.preventDefault(); const fd = new FormData(e.currentTarget); fd.set('slug', slug); fd.set('id', item.id); await actions.updateItem(fd); setEditingItem(null) }}>
+                            <input name="label" defaultValue={item.label} required autoFocus
+                              className="flex-1 min-w-[140px] border border-[#4a5240] rounded-lg px-3 py-1 text-sm outline-none bg-white text-stone-700" style={{ fontWeight: 400 }} />
+                            <input name="estimated" type="number" defaultValue={item.estimated_amount || ''} placeholder="Estimé" min={0}
+                              className="w-28 border border-stone-200 rounded-lg px-3 py-1 text-sm outline-none focus:border-[#4a5240] bg-white text-stone-700" style={{ fontWeight: 300 }} />
+                            <button type="submit" className="bg-[#4a5240] text-white px-3 py-1 rounded-lg text-sm cursor-pointer" style={{ fontWeight: 300 }}>OK</button>
+                            <button type="button" onClick={() => setEditingItem(null)} className="text-stone-400 text-sm cursor-pointer">✕</button>
+                          </form>
+                        ) : (
+                          <div className="flex-1 min-w-0 cursor-pointer" onClick={() => toggleItem(item.id)}>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <p style={{ fontWeight: 400, fontSize: '0.88rem' }}
+                                 className="text-stone-700 hover:text-[#4a5240] transition"
+                                 onDoubleClick={e => { e.stopPropagation(); setEditingItem(item.id) }}
+                                 title="Double-clic pour modifier">
+                                {item.label}
+                              </p>
+                              {retained?.vendor_name && (
+                                <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">· {retained.vendor_name}</span>
+                              )}
+                              {iQuotes.length > 0 && (
+                                <span style={{ fontWeight: 300, fontSize: '0.68rem' }}
+                                      className="bg-stone-100 text-stone-500 px-1.5 py-0.5 rounded-full">
+                                  {iQuotes.length} devis
+                                </span>
+                              )}
+                            </div>
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full ${statusColor(item.status)}`} style={{ fontWeight: 400 }}>
+                              {statusLabel(item.status)}
+                            </span>
                           </div>
-                          <span className={`text-[10px] px-2 py-0.5 rounded-full ${statusColor(item.status)}`} style={{ fontWeight: 400 }}>
-                            {statusLabel(item.status)}
-                          </span>
-                        </div>
-                        <div className="text-right shrink-0">
-                          <p style={{ fontWeight: 500, fontSize: '0.9rem' }} className="text-stone-700">{fmt(eff.amount, eff.currency)}</p>
-                          {eff.paid > 0 && <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-emerald-500">{fmt(eff.paid, eff.currency)} payé</p>}
-                        </div>
-                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition shrink-0">
-                          <button onClick={() => { setAddingQuoteFor(item.id); if (!expandedItems.has(item.id)) toggleItem(item.id) }}
-                            className="p-1.5 text-stone-300 hover:text-[#4a5240] transition cursor-pointer rounded-lg hover:bg-stone-100" title="Ajouter un devis">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3.5 h-3.5">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                            </svg>
-                          </button>
-                          <button onClick={async () => { if (!confirm('Supprimer ce poste ?')) return; await call('deleteItem', { id: item.id }) }}
-                            className="p-1.5 text-stone-300 hover:text-red-400 transition cursor-pointer rounded-lg hover:bg-red-50">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3.5 h-3.5">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
-                        </div>
+                        )}
+                        {editingItem !== item.id && (<>
+                          <div className="text-right shrink-0">
+                            <p style={{ fontWeight: 500, fontSize: '0.9rem' }} className="text-stone-700">{fmt(eff.amount, eff.currency)}</p>
+                            {eff.paid > 0 && <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-emerald-500">{fmt(eff.paid, eff.currency)} payé</p>}
+                          </div>
+                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition shrink-0">
+                            <button onClick={() => setEditingItem(item.id)}
+                              className="p-1.5 text-stone-300 hover:text-[#4a5240] transition cursor-pointer rounded-lg hover:bg-stone-100" title="Modifier le poste">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3.5 h-3.5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+                              </svg>
+                            </button>
+                            <button onClick={() => { setAddingQuoteFor(item.id); if (!expandedItems.has(item.id)) toggleItem(item.id) }}
+                              className="p-1.5 text-stone-300 hover:text-[#4a5240] transition cursor-pointer rounded-lg hover:bg-stone-100" title="Ajouter un devis">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3.5 h-3.5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                              </svg>
+                            </button>
+                            <button onClick={async () => { if (!confirm('Supprimer ce poste ?')) return; await call('deleteItem', { id: item.id }) }}
+                              className="p-1.5 text-stone-300 hover:text-red-400 transition cursor-pointer rounded-lg hover:bg-red-50">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3.5 h-3.5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          </div>
+                        </>)}
                       </div>
 
                       {/* Devis du poste */}
@@ -689,7 +715,7 @@ function KanbanView({ slug, items, quotes, categories, budgetCurrency, getItemEf
 // ════════════════════════════════════════
 // VUE COMPARATIF
 // ════════════════════════════════════════
-function ComparatifView({ slug, weddingId, items, quotes, categories, budgetCurrency, actions, call, currencies }: any) {
+function ComparatifView({ slug, weddingId, items, quotes, categories, budgetCurrency, actions, call, currencies, editingItem, setEditingItem }: any) {
   const [addingQuoteFor, setAddingQuoteFor] = useState<string | null>(null)
   const [editingQuote, setEditingQuote] = useState<string | null>(null)
 
@@ -735,17 +761,34 @@ function ComparatifView({ slug, weddingId, items, quotes, categories, budgetCurr
                   {/* Nom du poste */}
                   <div className="flex items-center gap-2 mb-3">
                     <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusDot(item.status)}`} />
-                    <p style={{ fontWeight: 500, fontSize: '0.88rem' }} className="text-[#2d3228]">{item.label}</p>
-                    {iQuotes.length === 0 && (
+                    {editingItem === item.id ? (
+                      <form className="flex gap-2 items-center flex-1"
+                        onSubmit={async e => { e.preventDefault(); const fd = new FormData(e.currentTarget); fd.set('slug', slug); fd.set('id', item.id); await actions.updateItem(fd); setEditingItem(null) }}>
+                        <input name="label" defaultValue={item.label} required autoFocus
+                          className="flex-1 border border-[#4a5240] rounded-lg px-3 py-1 text-sm outline-none bg-white text-stone-700" style={{ fontWeight: 500 }} />
+                        <input name="estimated" type="number" defaultValue={item.estimated_amount || ''} placeholder="Estimé" min={0}
+                          className="w-24 border border-stone-200 rounded-lg px-3 py-1 text-sm outline-none focus:border-[#4a5240] bg-white text-stone-700" style={{ fontWeight: 300 }} />
+                        <button type="submit" className="bg-[#4a5240] text-white px-3 py-1 rounded-lg text-sm cursor-pointer" style={{ fontWeight: 300 }}>OK</button>
+                        <button type="button" onClick={() => setEditingItem(null)} className="text-stone-400 text-sm cursor-pointer">✕</button>
+                      </form>
+                    ) : (
+                      <p style={{ fontWeight: 500, fontSize: '0.88rem' }}
+                         className="text-[#2d3228] cursor-pointer hover:text-[#4a5240] transition"
+                         onClick={() => setEditingItem(item.id)}
+                         title="Cliquer pour modifier">
+                        {item.label}
+                      </p>
+                    )}
+                    {editingItem !== item.id && iQuotes.length === 0 && (
                       <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-300 italic">Aucun devis</span>
                     )}
-                    {iQuotes.length > 1 && !retained && (
+                    {editingItem !== item.id && iQuotes.length > 1 && !retained && (
                       <span style={{ fontWeight: 300, fontSize: '0.68rem' }}
                             className="bg-amber-50 text-amber-500 px-2 py-0.5 rounded-full">
                         {iQuotes.length} devis · à choisir
                       </span>
                     )}
-                    {retained && (
+                    {editingItem !== item.id && retained && (
                       <span style={{ fontWeight: 300, fontSize: '0.68rem' }}
                             className="bg-[#4a5240]/10 text-[#4a5240] px-2 py-0.5 rounded-full">
                         ✦ Prestataire retenu

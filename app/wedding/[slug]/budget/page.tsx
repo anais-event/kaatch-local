@@ -78,6 +78,18 @@ async function deleteItem(formData: FormData) {
   revalidatePath(`/wedding/${slug}/budget`)
 }
 
+async function updateItem(formData: FormData) {
+  'use server'
+  const supabase = await createSupabaseServerClient()
+  const slug = formData.get('slug') as string
+  await supabase.from('budget_items').update({
+    label: formData.get('label') as string,
+    estimated_amount: Number(formData.get('estimated') ?? 0),
+    description: (formData.get('description') as string) || null,
+  }).eq('id', formData.get('id') as string)
+  revalidatePath(`/wedding/${slug}/budget`)
+}
+
 async function updateItemStatus(formData: FormData) {
   'use server'
   const supabase = await createSupabaseServerClient()
@@ -238,7 +250,7 @@ export default async function BudgetPage({ params }: { params: Promise<{ slug: s
           quotes={quotes ?? []}
           files={files ?? []}
           currencies={CURRENCIES}
-          actions={{ setBudgetTotal, addCategory, deleteCategory, addItem, deleteItem, updateItemStatus, addQuote, updateQuote, deleteQuote, retainQuote, refuseQuote, initDefaultCategories, saveBudgetFileMeta, deleteBudgetFile }}
+          actions={{ setBudgetTotal, addCategory, deleteCategory, addItem, updateItem, deleteItem, updateItemStatus, addQuote, updateQuote, deleteQuote, retainQuote, refuseQuote, initDefaultCategories, saveBudgetFileMeta, deleteBudgetFile }}
         />
       </div>
     </div>

@@ -10,16 +10,15 @@ export async function POST(req: Request) {
 
   const supabase = await createSupabaseServerClient()
 
-  const rows = guests.map((g: Record<string, unknown>) => ({
+  const rows = guests.map((g: Record<string, string>) => ({
     wedding_id: weddingId,
     first_name: g.first_name,
-    last_name: (g.last_name as string) || null,
-    email: (g.email as string) || null,
-    telephone: (g.telephone as string) || null,
-    relation: (g.relation as string) || null,
-    guest_type: (g.guest_type as string) || 'adulte',
+    last_name: g.last_name || null,
+    email: g.email || null,
+    telephone: g.telephone || null,
+    relation: g.relation || null,
+    guest_type: g.guest_type || 'adulte',
     rsvp_status: 'en_attente',
-    metadata: g.metadata || null,
   }))
 
   const { error } = await supabase.from('guests').insert(rows)

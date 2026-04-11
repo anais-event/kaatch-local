@@ -126,7 +126,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
               <a key={m.label} href={m.href!}
                  className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col gap-1.5 hover:border-[#4a5240]/40 hover:shadow-sm transition-all">
                 <div>
-                  <p style={{ fontWeight: 500, fontSize: '0.88rem', letterSpacing: '0.01em' }}
+                  <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.25rem', letterSpacing: '0.01em' }}
                      className="text-[#2d3228]">{m.label}</p>
                   <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">{m.sub}</p>
                 </div>

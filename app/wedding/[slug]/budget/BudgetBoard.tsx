@@ -8,7 +8,7 @@ type Item = { id: string; category_id: string; label: string; estimated_amount: 
 type Quote = { id: string; item_id: string; vendor_name: string | null; amount: number; paid_amount: number; currency: string; status: 'en_attente' | 'retenu' | 'refuse'; notes: string | null }
 type BudgetFile = { id: string; quote_id: string | null; item_id: string | null; file_name: string; file_url: string; file_type: string | null }
 type Actions = Record<string, (f: FormData) => Promise<void>>
-type View = 'liste' | 'tableau' | 'colonnes'
+type View = 'liste' | 'tableau' | 'colonnes' | 'comparatif'
 
 const CURRENCIES = ['EUR', 'USD', 'GBP', 'CHF', 'CAD', 'MAD', 'XOF']
 
@@ -170,7 +170,7 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
         </div>
         {/* Vue toggle */}
         <div className="flex bg-white border border-stone-200 rounded-xl overflow-hidden shrink-0">
-          {([['liste','☰','Liste'],['tableau','⊞','Tableau'],['colonnes','⣿','Colonnes']] as const).map(([v, icon, lbl]) => (
+          {([['liste','☰','Liste'],['tableau','⊞','Tableau'],['colonnes','⣿','Colonnes'],['comparatif','⇔','Comparatif']] as const).map(([v, icon, lbl]) => (
             <button key={v} onClick={() => setView(v as View)}
               className={`px-3 py-2.5 text-xs transition flex items-center gap-1.5 cursor-pointer ${view === v ? 'bg-[#4a5240] text-white' : 'text-stone-400 hover:text-[#4a5240]'}`}
               style={{ fontWeight: 300 }}>
@@ -206,8 +206,10 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
         />
       ) : view === 'tableau' ? (
         <TableView items={filteredItems} quotes={quotes} categories={categories} budgetCurrency={budgetCurrency} getItemEffective={getItemEffective} />
-      ) : (
+      ) : view === 'colonnes' ? (
         <KanbanView slug={slug} items={filteredItems} quotes={quotes} categories={categories} budgetCurrency={budgetCurrency} getItemEffective={getItemEffective} actions={actions} />
+      ) : (
+        <ComparatifView slug={slug} weddingId={weddingId} items={filteredItems} quotes={quotes} categories={categories} budgetCurrency={budgetCurrency} actions={actions} call={call} currencies={CURRENCIES} />
       )}
 
       {/* Ajouter catégorie */}
@@ -684,6 +686,186 @@ function KanbanView({ slug, items, quotes, categories, budgetCurrency, getItemEf
 // ════════════════════════════════════════
 // FORMULAIRE DEVIS
 // ════════════════════════════════════════
+// ════════════════════════════════════════
+// VUE COMPARATIF
+// ════════════════════════════════════════
+function ComparatifView({ slug, weddingId, items, quotes, categories, budgetCurrency, actions, call, currencies }: any) {
+  const [addingQuoteFor, setAddingQuoteFor] = useState<string | null>(null)
+  const [editingQuote, setEditingQuote] = useState<string | null>(null)
+
+  const getCat = (catId: string) => categories.find((c: Category) => c.id === catId)
+  const quotesForItem = (itemId: string) => quotes.filter((q: Quote) => q.item_id === itemId)
+
+  // Grouper par catégorie
+  const byCategory = categories
+    .map((cat: Category) => ({
+      cat,
+      items: items.filter((i: Item) => i.category_id === cat.id),
+    }))
+    .filter((g: { items: Item[] }) => g.items.length > 0)
+
+  if (items.length === 0) return (
+    <p style={{ fontWeight: 300, fontSize: '0.85rem' }} className="text-stone-300 italic text-center py-10">
+      Aucun poste à comparer
+    </p>
+  )
+
+  return (
+    <div className="space-y-2">
+      {byCategory.map(({ cat, items: catItems }: { cat: Category; items: Item[] }) => (
+        <div key={cat.id} className="bg-white rounded-2xl border border-stone-100 overflow-hidden">
+          {/* Header catégorie */}
+          <div className="px-5 py-3 border-b border-stone-50 flex items-center gap-2.5">
+            <div className="w-6 h-6 rounded-full flex items-center justify-center text-sm shrink-0"
+                 style={{ backgroundColor: cat.color + '20' }}>
+              {cat.icon}
+            </div>
+            <span style={{ fontWeight: 400, fontSize: '0.82rem' }} className="text-stone-500">{cat.name}</span>
+          </div>
+
+          {/* Lignes d'items */}
+          <div className="divide-y divide-stone-50">
+            {catItems.map((item: Item) => {
+              const iQuotes = quotesForItem(item.id)
+              const retained = iQuotes.find((q: Quote) => q.status === 'retenu')
+              const sorted = [...iQuotes].sort((a: Quote, b: Quote) => a.amount - b.amount)
+
+              return (
+                <div key={item.id} className="px-5 py-4">
+                  {/* Nom du poste */}
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusDot(item.status)}`} />
+                    <p style={{ fontWeight: 500, fontSize: '0.88rem' }} className="text-[#2d3228]">{item.label}</p>
+                    {iQuotes.length === 0 && (
+                      <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-300 italic">Aucun devis</span>
+                    )}
+                    {iQuotes.length > 1 && !retained && (
+                      <span style={{ fontWeight: 300, fontSize: '0.68rem' }}
+                            className="bg-amber-50 text-amber-500 px-2 py-0.5 rounded-full">
+                        {iQuotes.length} devis · à choisir
+                      </span>
+                    )}
+                    {retained && (
+                      <span style={{ fontWeight: 300, fontSize: '0.68rem' }}
+                            className="bg-[#4a5240]/10 text-[#4a5240] px-2 py-0.5 rounded-full">
+                        ✦ Prestataire retenu
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Devis côte à côte */}
+                  {sorted.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {sorted.map((quote: Quote, idx: number) => {
+                        const isRetenu = quote.status === 'retenu'
+                        const isRefuse = quote.status === 'refuse'
+                        const isCheapest = idx === 0 && sorted.length > 1 && !isRefuse
+
+                        return editingQuote === quote.id ? (
+                          <div key={quote.id} className="w-full">
+                            <QuoteForm slug={slug} itemId={item.id} currencies={currencies} defaultValues={quote}
+                              onSubmit={async e => { e.preventDefault(); const fd = new FormData(e.currentTarget); fd.set('slug', slug); fd.set('id', quote.id); await actions.updateQuote(fd); setEditingQuote(null) }}
+                              onCancel={() => setEditingQuote(null)} />
+                          </div>
+                        ) : (
+                          <div key={quote.id}
+                            onClick={() => setEditingQuote(quote.id)}
+                            className={`relative flex flex-col gap-1 px-4 py-3 rounded-xl border cursor-pointer transition min-w-[160px] ${
+                              isRetenu ? 'bg-[#4a5240] border-[#4a5240] text-white' :
+                              isRefuse ? 'bg-stone-50 border-stone-100 opacity-40' :
+                              'bg-white border-stone-200 hover:border-stone-300'
+                            }`}>
+                            {/* Badge moins cher */}
+                            {isCheapest && !isRefuse && (
+                              <span className="absolute -top-2 left-3 text-[9px] bg-emerald-400 text-white px-1.5 py-0.5 rounded-full" style={{ fontWeight: 500 }}>
+                                moins cher
+                              </span>
+                            )}
+                            {isRetenu && (
+                              <span className="absolute -top-2 left-3 text-[9px] bg-white text-[#4a5240] px-1.5 py-0.5 rounded-full" style={{ fontWeight: 600 }}>
+                                ✦ Retenu
+                              </span>
+                            )}
+                            <p style={{ fontWeight: isRetenu ? 500 : 400, fontSize: '0.82rem' }}
+                               className={isRetenu ? 'text-white' : 'text-stone-700'}>
+                              {quote.vendor_name || <span className="italic opacity-50">Prestataire</span>}
+                            </p>
+                            <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.25rem', lineHeight: 1 }}
+                               className={isRetenu ? 'text-white' : 'text-[#2d3228]'}>
+                              {fmt(quote.amount, quote.currency)}
+                            </p>
+                            {quote.paid_amount > 0 && (
+                              <p style={{ fontWeight: 300, fontSize: '0.65rem' }}
+                                 className={isRetenu ? 'text-white/70' : 'text-emerald-500'}>
+                                {fmt(quote.paid_amount, quote.currency)} payé
+                              </p>
+                            )}
+                            {quote.notes && (
+                              <p style={{ fontWeight: 300, fontSize: '0.65rem' }}
+                                 className={`truncate max-w-[160px] ${isRetenu ? 'text-white/60' : 'text-stone-400'}`}>
+                                {quote.notes}
+                              </p>
+                            )}
+                            {/* Actions au hover */}
+                            {!isRetenu && !isRefuse && (
+                              <button onClick={e => { e.stopPropagation(); call('retainQuote', { id: quote.id, item_id: item.id }) }}
+                                className="mt-1 text-[10px] text-[#4a5240] hover:text-white hover:bg-[#4a5240] border border-[#4a5240]/30 px-2 py-0.5 rounded-full transition cursor-pointer self-start"
+                                style={{ fontWeight: 400 }}>
+                                Retenir
+                              </button>
+                            )}
+                            {isRetenu && (
+                              <button onClick={e => { e.stopPropagation(); call('retainQuote', { id: quote.id, item_id: item.id }) }}
+                                className="mt-1 text-[10px] text-white/60 hover:text-white transition cursor-pointer self-start"
+                                style={{ fontWeight: 300 }}>
+                                Annuler
+                              </button>
+                            )}
+                          </div>
+                        )
+                      })}
+
+                      {/* Bouton + devis */}
+                      {addingQuoteFor !== item.id && (
+                        <button onClick={() => setAddingQuoteFor(item.id)}
+                          className="flex flex-col items-center justify-center gap-1 px-4 py-3 rounded-xl border-2 border-dashed border-stone-200 text-stone-300 hover:border-[#4a5240] hover:text-[#4a5240] transition cursor-pointer min-w-[100px]"
+                          style={{ fontWeight: 300, fontSize: '0.78rem' }}>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                          </svg>
+                          Devis
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Formulaire ajout devis */}
+                  {addingQuoteFor === item.id && (
+                    <QuoteForm slug={slug} itemId={item.id} currencies={currencies}
+                      onSubmit={async e => { e.preventDefault(); const fd = new FormData(e.currentTarget); fd.set('slug', slug); fd.set('item_id', item.id); await actions.addQuote(fd); setAddingQuoteFor(null) }}
+                      onCancel={() => setAddingQuoteFor(null)} />
+                  )}
+
+                  {/* Pas encore de devis — juste le bouton */}
+                  {iQuotes.length === 0 && addingQuoteFor !== item.id && (
+                    <button onClick={() => setAddingQuoteFor(item.id)}
+                      className="flex items-center gap-1.5 text-xs text-stone-400 hover:text-[#4a5240] transition cursor-pointer" style={{ fontWeight: 300 }}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                      </svg>
+                      Ajouter un devis
+                    </button>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function QuoteForm({ slug, itemId, currencies, defaultValues, onSubmit, onCancel }: {
   slug: string; itemId: string; currencies: string[]
   defaultValues?: Quote; onSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>; onCancel: () => void

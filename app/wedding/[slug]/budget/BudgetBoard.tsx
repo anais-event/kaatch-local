@@ -1,10 +1,12 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import FileUploadButton from './FileUploadButton'
 
 type Category = { id: string; name: string; icon: string; color: string; budget_allocated: number }
 type Item = { id: string; category_id: string; label: string; estimated_amount: number; status: string; description: string | null }
 type Quote = { id: string; item_id: string; vendor_name: string | null; amount: number; paid_amount: number; currency: string; status: 'en_attente' | 'retenu' | 'refuse'; notes: string | null; due_date: string | null }
+type BudgetFile = { id: string; quote_id: string | null; item_id: string | null; file_name: string; file_url: string; file_type: string | null }
 type Actions = Record<string, (f: FormData) => Promise<void>>
 type View = 'liste' | 'tableau' | 'colonnes'
 
@@ -25,9 +27,9 @@ function statusDot(s: string) {
   return s === 'solde' ? 'bg-emerald-400' : s === 'acompte' ? 'bg-amber-400' : 'bg-stone-300'
 }
 
-export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurrency, categories, items, quotes, currencies, actions }: {
+export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurrency, categories, items, quotes, files, currencies, actions }: {
   slug: string; weddingId: string; budgetTotal: number; budgetCurrency: string
-  categories: Category[]; items: Item[]; quotes: Quote[]; currencies: string[]; actions: Actions
+  categories: Category[]; items: Item[]; quotes: Quote[]; files: BudgetFile[]; currencies: string[]; actions: Actions
 }) {
   const [view, setView] = useState<View>('liste')
   const [search, setSearch] = useState('')
@@ -195,7 +197,7 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
         </div>
       ) : view === 'liste' ? (
         <ListView
-          slug={slug} categories={categories} items={filteredItems} quotes={quotes} budgetCurrency={budgetCurrency}
+          slug={slug} weddingId={weddingId} categories={categories} items={filteredItems} quotes={quotes} files={files} budgetCurrency={budgetCurrency}
           expandedCats={expandedCats} expandedItems={expandedItems} addingItemFor={addingItemFor} addingQuoteFor={addingQuoteFor} editingQuote={editingQuote}
           toggleCat={toggleCat} toggleItem={toggleItem}
           setAddingItemFor={setAddingItemFor} setAddingQuoteFor={setAddingQuoteFor} setEditingQuote={setEditingQuote}
@@ -250,7 +252,8 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
 // ════════════════════════════════════════
 // VUE LISTE
 // ════════════════════════════════════════
-function ListView({ slug, categories, items, quotes, budgetCurrency, expandedCats, expandedItems, addingItemFor, addingQuoteFor, editingQuote, toggleCat, toggleItem, setAddingItemFor, setAddingQuoteFor, setEditingQuote, itemsForCat, quotesForItem, getItemEffective, currencies, actions, call }: any) {
+function ListView({ slug, weddingId, categories, items, quotes, files, budgetCurrency, expandedCats, expandedItems, addingItemFor, addingQuoteFor, editingQuote, toggleCat, toggleItem, setAddingItemFor, setAddingQuoteFor, setEditingQuote, itemsForCat, quotesForItem, getItemEffective, currencies, actions, call }: any) {
+  const filesForQuote = (quoteId: string) => (files ?? []).filter((f: BudgetFile) => f.quote_id === quoteId)
   return (
     <div className="space-y-3">
       {categories.map((cat: Category) => {
@@ -350,7 +353,26 @@ function ListView({ slug, categories, items, quotes, budgetCurrency, expandedCat
                         <div className="bg-stone-50/50 px-5 pb-3 pt-1 space-y-2 border-t border-stone-50">
                           {iQuotes.map((quote: Quote) => (
                             <div key={quote.id}>
-                              {editingQuote === quote.id ? (
+                              {(() => {
+                              const qFiles = filesForQuote(quote.id)
+                              return qFiles.length > 0 ? (
+                                <div className="flex flex-wrap gap-1.5 px-3 pt-1 pb-0">
+                                  {qFiles.map((f: BudgetFile) => (
+                                    <div key={f.id} className="flex items-center gap-1 bg-stone-100 rounded-lg px-2 py-1">
+                                      <span className="text-xs">{f.file_type?.includes('pdf') ? '📄' : '🖼️'}</span>
+                                      <a href={f.file_url} target="_blank" rel="noopener noreferrer"
+                                         style={{ fontWeight: 300, fontSize: '0.68rem' }}
+                                         className="text-[#4a5240] hover:underline max-w-[120px] truncate">
+                                        {f.file_name}
+                                      </a>
+                                      <button onClick={() => call('deleteBudgetFile', { id: f.id })}
+                                        className="text-stone-300 hover:text-red-400 transition cursor-pointer ml-0.5 text-xs leading-none">×</button>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : null
+                            })()}
+                            {editingQuote === quote.id ? (
                                 <QuoteForm slug={slug} itemId={item.id} currencies={currencies} defaultValues={quote}
                                   onSubmit={async e => { e.preventDefault(); const fd = new FormData(e.currentTarget); fd.set('slug', slug); fd.set('id', quote.id); await actions.updateQuote(fd); setEditingQuote(null) }}
                                   onCancel={() => setEditingQuote(null)} />
@@ -382,7 +404,8 @@ function ListView({ slug, categories, items, quotes, budgetCurrency, expandedCat
                                     {quote.paid_amount > 0 && <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-emerald-500">{fmt(quote.paid_amount, quote.currency)} payé</p>}
                                   </div>
 
-                                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition shrink-0">
+                                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition shrink-0 items-center">
+                                    <FileUploadButton slug={slug} weddingId={weddingId} quoteId={quote.id} onSave={actions.saveBudgetFileMeta} />
                                     {quote.status !== 'retenu' && (
                                       <button onClick={() => call('retainQuote', { id: quote.id, item_id: item.id })}
                                         className="text-[10px] px-2 py-1 rounded-lg bg-[#4a5240]/10 text-[#4a5240] hover:bg-[#4a5240] hover:text-white transition cursor-pointer" style={{ fontWeight: 400 }}>

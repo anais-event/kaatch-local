@@ -148,6 +148,36 @@ async function retainQuote(formData: FormData) {
   revalidatePath(`/wedding/${slug}/budget`)
 }
 
+async function saveBudgetFileMeta(formData: FormData) {
+  'use server'
+  const supabase = await createSupabaseServerClient()
+  const slug = formData.get('slug') as string
+  const { data: wedding } = await supabase.from('weddings').select('id').eq('slug', slug).single()
+  if (!wedding) return
+  await supabase.from('budget_files').insert({
+    wedding_id: wedding.id,
+    quote_id: (formData.get('quote_id') as string) || null,
+    item_id: (formData.get('item_id') as string) || null,
+    file_name: formData.get('file_name') as string,
+    file_url: formData.get('file_url') as string,
+    file_type: (formData.get('file_type') as string) || null,
+  })
+  revalidatePath(`/wedding/${slug}/budget`)
+}
+
+async function deleteBudgetFile(formData: FormData) {
+  'use server'
+  const supabase = await createSupabaseServerClient()
+  const slug = formData.get('slug') as string
+  const fileId = formData.get('id') as string
+  const filePath = formData.get('file_path') as string
+  if (filePath) {
+    await supabase.storage.from('budget-files').remove([filePath])
+  }
+  await supabase.from('budget_files').delete().eq('id', fileId)
+  revalidatePath(`/wedding/${slug}/budget`)
+}
+
 async function refuseQuote(formData: FormData) {
   'use server'
   const supabase = await createSupabaseServerClient()
@@ -185,6 +215,9 @@ export default async function BudgetPage({ params }: { params: Promise<{ slug: s
   const { data: quotes } = await supabase
     .from('budget_quotes').select('*').eq('wedding_id', wedding.id).order('created_at')
 
+  const { data: files } = await supabase
+    .from('budget_files').select('*').eq('wedding_id', wedding.id).order('created_at')
+
   return (
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
@@ -203,8 +236,9 @@ export default async function BudgetPage({ params }: { params: Promise<{ slug: s
           categories={categories ?? []}
           items={items ?? []}
           quotes={quotes ?? []}
+          files={files ?? []}
           currencies={CURRENCIES}
-          actions={{ setBudgetTotal, addCategory, deleteCategory, addItem, deleteItem, updateItemStatus, addQuote, updateQuote, deleteQuote, retainQuote, refuseQuote, initDefaultCategories }}
+          actions={{ setBudgetTotal, addCategory, deleteCategory, addItem, deleteItem, updateItemStatus, addQuote, updateQuote, deleteQuote, retainQuote, refuseQuote, initDefaultCategories, saveBudgetFileMeta, deleteBudgetFile }}
         />
       </div>
     </div>

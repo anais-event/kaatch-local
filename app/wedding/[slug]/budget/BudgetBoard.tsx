@@ -759,7 +759,7 @@ function ComparatifView({ slug, weddingId, items, quotes, categories, budgetCurr
                       {sorted.map((quote: Quote, idx: number) => {
                         const isRetenu = quote.status === 'retenu'
                         const isRefuse = quote.status === 'refuse'
-                        const isCheapest = idx === 0 && sorted.length > 1 && !isRefuse
+                        const isCheapest = false // supprimé — le moins cher n'est pas forcément le meilleur
 
                         return editingQuote === quote.id ? (
                           <div key={quote.id} className="w-full">

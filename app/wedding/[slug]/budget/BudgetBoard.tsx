@@ -252,6 +252,19 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
 // ════════════════════════════════════════
 // VUE LISTE
 // ════════════════════════════════════════
+const ITEM_PLACEHOLDER: Record<string, string> = {
+  'Lieu & réception': 'ex: Domaine de la Roseraie',
+  'Traiteur': 'ex: Buffet cocktail',
+  'Photo & vidéo': 'ex: Photographe',
+  'Fleurs & déco': 'ex: Compositions florales',
+  'Musique & DJ': 'ex: DJ pour la soirée',
+  'Robe & costume': 'ex: Robe de mariée',
+  'Transport': 'ex: Location voiture de prestige',
+  'Faire-part': 'ex: Impressions faire-parts',
+  'Lune de miel': 'ex: Vols aller-retour',
+  'Divers': 'ex: Cadeaux invités',
+}
+
 function ListView({ slug, weddingId, categories, items, quotes, files, budgetCurrency, expandedCats, expandedItems, addingItemFor, addingQuoteFor, editingQuote, toggleCat, toggleItem, setAddingItemFor, setAddingQuoteFor, setEditingQuote, itemsForCat, quotesForItem, getItemEffective, currencies, actions, call }: any) {
   const filesForQuote = (quoteId: string) => (files ?? []).filter((f: BudgetFile) => f.quote_id === quoteId)
   return (
@@ -460,7 +473,7 @@ function ListView({ slug, weddingId, categories, items, quotes, files, budgetCur
                   {addingItemFor === cat.id ? (
                     <form onSubmit={async e => { e.preventDefault(); const fd = new FormData(e.currentTarget); fd.set('slug', slug); fd.set('category_id', cat.id); await actions.addItem(fd); setAddingItemFor(null) }}
                           className="flex gap-2 flex-1 flex-wrap">
-                      <input name="label" type="text" placeholder="Nom du poste (ex: Photographe)" required autoFocus
+                      <input name="label" type="text" placeholder={ITEM_PLACEHOLDER[cat.name] ?? 'Nom du poste'} required autoFocus
                         className="flex-1 min-w-[160px] border border-stone-200 rounded-xl px-3 py-1.5 text-sm outline-none focus:border-[#4a5240] bg-white text-stone-700" style={{ fontWeight: 300 }} />
                       <input name="estimated" type="number" placeholder="Budget estimé" min={0}
                         className="w-32 border border-stone-200 rounded-xl px-3 py-1.5 text-sm outline-none focus:border-[#4a5240] bg-white text-stone-700" style={{ fontWeight: 300 }} />

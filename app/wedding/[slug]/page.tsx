@@ -46,8 +46,14 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
     { label: 'Lien partagé', done: !!wedding.share_code, href: `/wedding/${slug}/partager` },
   ]
 
-  // Modules organisation
-  const modules = [
+  // Modules — 2 groupes
+  const modulesOrga: { label: string; sub: string; href: string; value: number | null; unit: ((n: number) => string) | null; badge?: string | null }[] = [
+    { label: 'Budget', sub: 'Suivi des dépenses', href: `/wedding/${slug}/budget`, value: null, unit: null },
+    { label: 'Prestataires', sub: 'Vos contacts', href: `/wedding/${slug}/contacts`, value: prestataireCount ?? 0, unit: (n: number) => n > 1 ? 'contacts' : 'contact' },
+    { label: 'Invitations', sub: 'Faire-parts digitaux', href: `/wedding/${slug}/invitations`, value: null, unit: null },
+  ]
+
+  const modulesInvites = [
     {
       label: 'Invités',
       sub: 'Liste & RSVP',
@@ -64,21 +70,12 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
       unit: (n: number) => n > 1 ? 'photos' : 'photo',
     },
     {
-      label: 'Prestataires',
-      sub: 'Vos contacts',
-      href: `/wedding/${slug}/contacts`,
-      value: prestataireCount ?? 0,
-      unit: (n: number) => n > 1 ? 'contacts' : 'contact',
-    },
-    {
       label: 'Hébergements',
       sub: 'Suggestions',
       href: `/wedding/${slug}/hebergements`,
       value: hebergementCount ?? 0,
       unit: (n: number) => n > 1 ? 'options' : 'option',
     },
-    { label: 'Budget', sub: 'Suivi des dépenses', href: `/wedding/${slug}/budget`, value: null, unit: null, badge: null },
-    { label: 'Invitations', sub: 'Faire-parts digitaux', href: null, soon: true },
   ]
 
   return (
@@ -120,13 +117,47 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
           customItems={(todosData ?? []).map(t => ({ id: t.id, label: t.label, done: t.done }))}
         />
 
-        {/* 2. Organisation */}
-        <div>
-          <p style={{ fontWeight: 300, fontSize: '0.68rem', letterSpacing: '0.2em' }}
-             className="text-stone-400 uppercase mb-4">Organisation</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            {modules.map(m => (
-              m.href ? (
+        {/* 2. Organisation — 2 groupes */}
+        <div className="space-y-5">
+          {/* Backstage mariés */}
+          <div>
+            <p style={{ fontWeight: 300, fontSize: '0.68rem', letterSpacing: '0.2em' }}
+               className="text-stone-400 uppercase mb-3">Avant le mariage</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {modulesOrga.map(m => (
+                <a key={m.label} href={m.href!}
+                   className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col gap-1.5 hover:border-[#4a5240]/40 hover:shadow-sm transition-all">
+                  <div>
+                    <p style={{ fontWeight: 500, fontSize: '0.88rem', letterSpacing: '0.01em' }}
+                       className="text-[#2d3228]">{m.label}</p>
+                    <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">{m.sub}</p>
+                  </div>
+                  {m.value !== null && (
+                    <div className="flex items-end gap-1.5 mt-1">
+                      <span style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '2rem', lineHeight: 1 }}
+                            className="text-[#2d3228]">{m.value}</span>
+                      <span style={{ fontWeight: 300, fontSize: '0.75rem' }}
+                            className="text-stone-400 mb-0.5">{m.unit?.(m.value ?? 0)}</span>
+                    </div>
+                  )}
+                  {m.badge && (
+                    <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-[#4a5240]">{m.badge}</p>
+                  )}
+                  <p style={{ fontWeight: 300, fontSize: '0.7rem' }}
+                     className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto pt-1">
+                    Gérer →
+                  </p>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Côté invités */}
+          <div>
+            <p style={{ fontWeight: 300, fontSize: '0.68rem', letterSpacing: '0.2em' }}
+               className="text-stone-400 uppercase mb-3">Côté invités</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {modulesInvites.map(m => (
                 <a key={m.label} href={m.href}
                    className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col gap-1.5 hover:border-[#4a5240]/40 hover:shadow-sm transition-all">
                   <div>
@@ -148,18 +179,8 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
                     Gérer →
                   </p>
                 </a>
-              ) : (
-                <div key={m.label}
-                     className="bg-white/40 rounded-xl border border-dashed border-stone-200 p-5 flex flex-col gap-1.5">
-                  <div>
-                    <p style={{ fontWeight: 500, fontSize: '0.88rem' }} className="text-stone-300">{m.label}</p>
-                    <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-300">{m.sub}</p>
-                  </div>
-                  <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '0.85rem' }}
-                     className="text-stone-300 mt-1">Bientôt</p>
-                </div>
-              )
-            ))}
+              ))}
+            </div>
           </div>
         </div>
 

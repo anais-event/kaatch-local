@@ -5,7 +5,7 @@ import FileUploadButton from './FileUploadButton'
 
 type Category = { id: string; name: string; icon: string; color: string; budget_allocated: number }
 type Item = { id: string; category_id: string; label: string; estimated_amount: number; status: string; description: string | null }
-type Quote = { id: string; item_id: string; vendor_name: string | null; amount: number; paid_amount: number; currency: string; status: 'en_attente' | 'retenu' | 'refuse'; notes: string | null; due_date: string | null }
+type Quote = { id: string; item_id: string; vendor_name: string | null; amount: number; paid_amount: number; currency: string; status: 'en_attente' | 'retenu' | 'refuse'; notes: string | null }
 type BudgetFile = { id: string; quote_id: string | null; item_id: string | null; file_name: string; file_url: string; file_type: string | null }
 type Actions = Record<string, (f: FormData) => Promise<void>>
 type View = 'liste' | 'tableau' | 'colonnes'
@@ -390,10 +390,11 @@ function ListView({ slug, weddingId, categories, items, quotes, files, budgetCur
                                   onSubmit={async e => { e.preventDefault(); const fd = new FormData(e.currentTarget); fd.set('slug', slug); fd.set('id', quote.id); await actions.updateQuote(fd); setEditingQuote(null) }}
                                   onCancel={() => setEditingQuote(null)} />
                               ) : (
-                                <div className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border transition group ${
-                                  quote.status === 'retenu' ? 'bg-[#4a5240]/5 border-[#4a5240]/20' :
+                                <div onClick={() => setEditingQuote(quote.id)}
+                                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border transition group cursor-pointer ${
+                                  quote.status === 'retenu' ? 'bg-[#4a5240]/5 border-[#4a5240]/20 hover:border-[#4a5240]/40' :
                                   quote.status === 'refuse' ? 'bg-stone-100/50 border-stone-200 opacity-50' :
-                                  'bg-white border-stone-100'
+                                  'bg-white border-stone-100 hover:border-stone-200 hover:bg-stone-50/50'
                                 }`}>
                                   {quote.status === 'retenu' && <span className="text-[#4a5240] text-xs shrink-0">✦</span>}
                                   {quote.status === 'refuse' && <span className="text-stone-300 text-xs shrink-0">✕</span>}
@@ -409,7 +410,6 @@ function ListView({ slug, weddingId, categories, items, quotes, files, budgetCur
                                       {quote.status === 'refuse' && <span className="text-[10px] text-stone-400" style={{ fontWeight: 300 }}>Refusé</span>}
                                     </div>
                                     {quote.notes && <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400 truncate">{quote.notes}</p>}
-                                    {quote.due_date && <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400">échéance {new Date(quote.due_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}</p>}
                                   </div>
 
                                   <div className="text-right shrink-0">
@@ -417,7 +417,7 @@ function ListView({ slug, weddingId, categories, items, quotes, files, budgetCur
                                     {quote.paid_amount > 0 && <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-emerald-500">{fmt(quote.paid_amount, quote.currency)} payé</p>}
                                   </div>
 
-                                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition shrink-0 items-center">
+                                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition shrink-0 items-center" onClick={e => e.stopPropagation()}>
                                     <FileUploadButton slug={slug} weddingId={weddingId} quoteId={quote.id} onSave={actions.saveBudgetFileMeta} />
                                     {quote.status !== 'retenu' && (
                                       <button onClick={() => call('retainQuote', { id: quote.id, item_id: item.id })}
@@ -426,18 +426,12 @@ function ListView({ slug, weddingId, categories, items, quotes, files, budgetCur
                                       </button>
                                     )}
                                     {quote.status === 'en_attente' && (
-                                      <button onClick={() => call('refuseQuote', { id: quote.id })}
+                                      <button onClick={e => { e.stopPropagation(); call('refuseQuote', { id: quote.id }) }}
                                         className="text-[10px] px-2 py-1 rounded-lg text-stone-400 hover:text-red-400 transition cursor-pointer" style={{ fontWeight: 300 }}>
                                         Refuser
                                       </button>
                                     )}
-                                    <button onClick={() => setEditingQuote(quote.id)}
-                                      className="p-1.5 text-stone-300 hover:text-[#4a5240] cursor-pointer rounded-lg hover:bg-stone-100 transition">
-                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3 h-3">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
-                                      </svg>
-                                    </button>
-                                    <button onClick={() => call('deleteQuote', { id: quote.id })}
+                                    <button onClick={e => { e.stopPropagation(); call('deleteQuote', { id: quote.id }) }}
                                       className="p-1.5 text-stone-300 hover:text-red-400 cursor-pointer rounded-lg hover:bg-red-50 transition">
                                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3 h-3">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -704,13 +698,11 @@ function QuoteForm({ slug, itemId, currencies, defaultValues, onSubmit, onCancel
           {currencies.map(c => <option key={c}>{c}</option>)}
         </select>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 gap-2">
         <input name="amount" type="number" placeholder="Montant devis" min={0} defaultValue={defaultValues?.amount || ''} required
           className="border border-stone-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[#4a5240] bg-white text-stone-700" style={{ fontWeight: 300 }} />
         <input name="paid_amount" type="number" placeholder="Déjà payé" min={0} defaultValue={defaultValues?.paid_amount || ''}
           className="border border-stone-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[#4a5240] bg-white text-stone-700" style={{ fontWeight: 300 }} />
-        <input name="due_date" type="date" defaultValue={defaultValues?.due_date ?? ''}
-          className="border border-stone-200 rounded-lg px-3 py-1.5 text-sm outline-none bg-white text-stone-600" style={{ fontWeight: 300 }} />
       </div>
       <input name="notes" type="text" placeholder="Notes (optionnel)" defaultValue={defaultValues?.notes ?? ''}
         className="w-full border border-stone-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[#4a5240] bg-white text-stone-700" style={{ fontWeight: 300 }} />

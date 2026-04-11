@@ -153,41 +153,61 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
         <div>
           <p style={{ fontWeight: 300, fontSize: '0.68rem', letterSpacing: '0.2em' }}
              className="text-stone-400 uppercase mb-4">Infos pratiques</p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {[
-              {
-                label: 'Date',
-                value: dateFormatted,
-                empty: 'Non renseignée',
-                href: `/wedding/${slug}/edit`,
-              },
-              {
-                label: 'Lieu',
-                value: wedding.location,
-                empty: 'Non renseigné',
-                href: `/wedding/${slug}/edit`,
-              },
-              {
-                label: 'Lien invités',
-                value: wedding.share_code ? `/p/${wedding.share_code}` : null,
-                empty: 'Aucun lien',
-                href: `/wedding/${slug}/partager`,
-              },
-            ].map(row => (
-              <a key={row.label} href={row.href}
-                 className="group bg-white rounded-xl border border-stone-100 px-5 py-4 flex flex-col gap-1 hover:border-[#4a5240]/40 hover:shadow-sm transition-all">
-                <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.16em' }}
-                   className="text-stone-400 uppercase">{row.label}</p>
-                <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1rem' }}
-                   className={`capitalize leading-snug ${row.value ? 'text-stone-700' : 'text-stone-300 italic'}`}>
-                  {row.value ?? row.empty}
+          <div className="bg-white rounded-xl border border-stone-100 divide-y divide-stone-50">
+            {/* Date */}
+            <a href={`/wedding/${slug}/edit`}
+               className="group flex items-center gap-4 px-5 py-4 hover:bg-stone-50/50 transition">
+              <div className="w-8 h-8 rounded-full bg-[#4a5240]/10 flex items-center justify-center shrink-0">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4 text-[#4a5240]">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.14em' }} className="text-stone-400 uppercase">Date</p>
+                <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.05rem' }}
+                   className={`capitalize ${dateFormatted ? 'text-stone-700' : 'text-stone-300 italic'}`}>
+                  {dateFormatted ?? 'Non renseignée'}
                 </p>
-                <p style={{ fontWeight: 300, fontSize: '0.7rem' }}
-                   className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto pt-1">
-                  Modifier →
+              </div>
+              <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition shrink-0">Modifier →</span>
+            </a>
+
+            {/* Lieu */}
+            <a href={`/wedding/${slug}/edit`}
+               className="group flex items-center gap-4 px-5 py-4 hover:bg-stone-50/50 transition">
+              <div className="w-8 h-8 rounded-full bg-[#4a5240]/10 flex items-center justify-center shrink-0">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4 text-[#4a5240]">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.14em' }} className="text-stone-400 uppercase">Lieu</p>
+                <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.05rem' }}
+                   className={`truncate ${wedding.location ? 'text-stone-700' : 'text-stone-300 italic'}`}>
+                  {wedding.location ?? 'Non renseigné'}
                 </p>
-              </a>
-            ))}
+              </div>
+              <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition shrink-0">Modifier →</span>
+            </a>
+
+            {/* Lien invités */}
+            <a href={`/wedding/${slug}/partager`}
+               className="group flex items-center gap-4 px-5 py-4 hover:bg-stone-50/50 transition">
+              <div className="w-8 h-8 rounded-full bg-[#4a5240]/10 flex items-center justify-center shrink-0">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4 text-[#4a5240]">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.14em' }} className="text-stone-400 uppercase">Lien invités</p>
+                <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.05rem' }}
+                   className={wedding.share_code ? 'text-[#4a5240]' : 'text-stone-300 italic'}>
+                  {wedding.share_code ? `/p/${wedding.share_code}` : 'Non configuré'}
+                </p>
+              </div>
+              <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition shrink-0">Voir →</span>
+            </a>
           </div>
         </div>
 

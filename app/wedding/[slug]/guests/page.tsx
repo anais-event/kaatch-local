@@ -248,9 +248,16 @@ export default async function GuestsPage({
           <div style={{ fontFamily: 'var(--font-lato)' }}>
             {/* Explication */}
             <div className="bg-white rounded-2xl border border-stone-100 p-5 sm:p-6 mb-6">
-              <p style={{ fontWeight: 500, fontSize: '0.9rem' }} className="text-[#2d3228] mb-2">
-                Invitations personnalisées
-              </p>
+              <div className="flex items-center justify-between gap-4 mb-2">
+                <p style={{ fontWeight: 500, fontSize: '0.9rem' }} className="text-[#2d3228]">
+                  Invitations personnalisées
+                </p>
+                <a href={`/wedding/${slug}/guests`}
+                   style={{ fontWeight: 300, fontSize: '0.78rem' }}
+                   className="text-[#4a5240] hover:underline shrink-0">
+                  ← Liste des invités
+                </a>
+              </div>
               <p style={{ fontWeight: 300, fontSize: '0.82rem', lineHeight: 1.7 }} className="text-stone-400 mb-4">
                 Chaque invité reçoit un lien unique qui affiche son prénom sur le faire-part.
                 Partagez ces liens par SMS, email ou WhatsApp — l'invité voit directement

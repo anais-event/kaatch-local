@@ -50,13 +50,12 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
   const modulesOrga: { label: string; sub: string; href: string; value: number | null; unit: ((n: number) => string) | null; badge?: string | null }[] = [
     { label: 'Budget', sub: 'Dépenses, devis & acomptes', href: `/wedding/${slug}/budget`, value: null, unit: null },
     { label: 'Prestataires', sub: 'Prestataires sélectionnés', href: `/wedding/${slug}/contacts`, value: prestataireCount ?? 0, unit: (n: number) => n > 1 ? 'contacts' : 'contact' },
-    { label: 'Faire-part', sub: 'Invitations personnalisées', href: `/wedding/${slug}/invitations`, value: null, unit: null },
   ]
 
   const modulesInvites = [
     {
       label: 'Invités',
-      sub: 'Liste, faire-part & RSVP',
+      sub: 'Liste, invitations & RSVP',
       href: `/wedding/${slug}/guests`,
       value: guestCount ?? 0,
       unit: (n: number) => n > 1 ? 'invités' : 'invité',

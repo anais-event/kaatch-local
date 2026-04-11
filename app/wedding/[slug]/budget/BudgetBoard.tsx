@@ -23,11 +23,175 @@ const STATUS_OPTIONS = [
 ]
 const getStatus = (key: string) => STATUS_OPTIONS.find(s => s.key === key) ?? STATUS_OPTIONS[0]
 
+/* ── TableView sub-component ── */
+function TableView({ categories, items, quotes, budgetCurrency, getItemEffective, editingItem, setEditingItem, onCycleStatus, onSwitchToCards, actions, slug }: {
+  categories: Category[]
+  items: Item[]
+  quotes: Quote[]
+  budgetCurrency: string
+  getItemEffective: (item: Item) => { amount: number; paid: number; currency: string; vendor: string | null }
+  editingItem: string | null
+  setEditingItem: (id: string | null) => void
+  onCycleStatus: (item: Item) => Promise<void>
+  onSwitchToCards: (itemId: string) => void
+  actions: Actions
+  slug: string
+}) {
+  const totalEngaged = items.reduce((s, i) => s + getItemEffective(i).amount, 0)
+  const totalPaid    = items.reduce((s, i) => s + getItemEffective(i).paid, 0)
+  const totalRemaining = totalEngaged - totalPaid
+
+  const getCat = (catId: string) => categories.find(c => c.id === catId)
+
+  return (
+    <div className="bg-white rounded-2xl border border-stone-100 overflow-x-auto">
+      <table className="w-full min-w-[700px] border-collapse">
+        <thead>
+          <tr className="border-b border-stone-50">
+            {['Catégorie', 'Poste', 'Statut', 'Prestataire retenu', 'Montant', 'Payé', 'Reste', 'Devis'].map(h => (
+              <th key={h} className="px-4 py-3 text-left"
+                  style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em', color: '#a8a29e', textTransform: 'uppercase' }}>
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {items.map(item => {
+            const cat = getCat(item.category_id)
+            const eff = getItemEffective(item)
+            const st = getStatus(item.status)
+            const iQuotes = quotes.filter(q => q.item_id === item.id && q.status !== 'refuse')
+            const remaining = eff.amount - eff.paid
+
+            return (
+              <tr key={item.id} className="border-b border-stone-50 hover:bg-stone-50/50 transition group">
+                {/* Catégorie */}
+                <td className="px-4 py-3">
+                  {cat && (
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: cat.color }} />
+                      <span style={{ fontWeight: 300, fontSize: '0.8rem', fontFamily: 'var(--font-lato)' }} className="text-stone-500 whitespace-nowrap">
+                        {cat.icon} {cat.name}
+                      </span>
+                    </div>
+                  )}
+                </td>
+
+                {/* Poste (editable) */}
+                <td className="px-4 py-3">
+                  {editingItem === item.id ? (
+                    <form className="flex gap-2 items-center flex-wrap"
+                      onSubmit={async e => {
+                        e.preventDefault()
+                        const fd = new FormData(e.currentTarget)
+                        fd.set('slug', slug)
+                        fd.set('id', item.id)
+                        await actions.updateItem(fd)
+                        setEditingItem(null)
+                      }}>
+                      <input name="label" defaultValue={item.label} required autoFocus
+                        className="border border-[#4a5240] rounded-lg px-2 py-1 text-sm outline-none bg-white text-stone-700 w-36" style={{ fontWeight: 400 }} />
+                      <input name="estimated" type="number" defaultValue={item.estimated_amount || ''} placeholder="Estimé" min={0}
+                        className="w-20 border border-stone-200 rounded-lg px-2 py-1 text-sm outline-none bg-white text-stone-700" style={{ fontWeight: 300 }} />
+                      <button type="submit" className="bg-[#4a5240] text-white px-2 py-1 rounded-lg text-xs cursor-pointer" style={{ fontWeight: 300 }}>OK</button>
+                      <button type="button" onClick={() => setEditingItem(null)} className="text-stone-400 text-xs cursor-pointer">✕</button>
+                    </form>
+                  ) : (
+                    <span onClick={() => setEditingItem(item.id)}
+                      className="cursor-pointer text-stone-700 hover:text-[#4a5240] transition"
+                      style={{ fontWeight: 400, fontSize: '0.85rem', fontFamily: 'var(--font-lato)' }}>
+                      {item.label}
+                    </span>
+                  )}
+                </td>
+
+                {/* Statut */}
+                <td className="px-4 py-3">
+                  <button onClick={() => onCycleStatus(item)}
+                    className={`text-xs px-2 py-0.5 rounded-full cursor-pointer transition ${st.pill}`}
+                    style={{ fontWeight: 300, fontSize: '0.72rem', fontFamily: 'var(--font-lato)' }}>
+                    {st.label}
+                  </button>
+                </td>
+
+                {/* Prestataire retenu */}
+                <td className="px-4 py-3">
+                  <span style={{ fontWeight: 300, fontSize: '0.82rem', fontFamily: 'var(--font-lato)' }} className="text-stone-500">
+                    {eff.vendor ?? <span className="text-stone-300">—</span>}
+                  </span>
+                </td>
+
+                {/* Montant */}
+                <td className="px-4 py-3 text-right">
+                  <span style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1rem' }} className="text-stone-700">
+                    {fmt(eff.amount, eff.currency)}
+                  </span>
+                </td>
+
+                {/* Payé */}
+                <td className="px-4 py-3 text-right">
+                  {eff.paid > 0
+                    ? <span style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1rem' }} className="text-emerald-600">{fmt(eff.paid, eff.currency)}</span>
+                    : <span className="text-stone-300" style={{ fontWeight: 300, fontSize: '0.8rem' }}>—</span>
+                  }
+                </td>
+
+                {/* Reste */}
+                <td className="px-4 py-3 text-right">
+                  {remaining > 0
+                    ? <span style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1rem' }} className="text-amber-500">{fmt(remaining, eff.currency)}</span>
+                    : <span className="text-emerald-500" style={{ fontWeight: 400, fontSize: '0.8rem' }}>✓</span>
+                  }
+                </td>
+
+                {/* Devis */}
+                <td className="px-4 py-3 text-center">
+                  {iQuotes.length > 0
+                    ? <button onClick={() => onSwitchToCards(item.id)}
+                        className="text-xs bg-stone-100 text-stone-500 px-2 py-0.5 rounded-full hover:bg-[#4a5240] hover:text-white transition cursor-pointer"
+                        style={{ fontWeight: 300 }}>
+                        {iQuotes.length}
+                      </button>
+                    : <span className="text-stone-200" style={{ fontWeight: 300, fontSize: '0.8rem' }}>—</span>
+                  }
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+        {items.length > 0 && (
+          <tfoot>
+            <tr className="bg-stone-50/50 border-t border-stone-100">
+              <td colSpan={4} className="px-4 py-3">
+                <span style={{ fontWeight: 300, fontSize: '0.7rem', letterSpacing: '0.12em', fontFamily: 'var(--font-lato)' }} className="text-stone-400 uppercase">
+                  Total — {items.length} poste{items.length > 1 ? 's' : ''}
+                </span>
+              </td>
+              <td className="px-4 py-3 text-right">
+                <span style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.05rem' }} className="text-stone-700">{fmt(totalEngaged, budgetCurrency)}</span>
+              </td>
+              <td className="px-4 py-3 text-right">
+                <span style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.05rem' }} className="text-emerald-600">{fmt(totalPaid, budgetCurrency)}</span>
+              </td>
+              <td className="px-4 py-3 text-right">
+                <span style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.05rem' }} className="text-amber-500">{fmt(totalRemaining, budgetCurrency)}</span>
+              </td>
+              <td />
+            </tr>
+          </tfoot>
+        )}
+      </table>
+    </div>
+  )
+}
+
 export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurrency, categories, items, quotes, files, currencies, actions }: {
   slug: string; weddingId: string; budgetTotal: number; budgetCurrency: string
   categories: Category[]; items: Item[]; quotes: Quote[]; files: BudgetFile[]; currencies: string[]; actions: Actions
 }) {
   const [search, setSearch] = useState('')
+  const [viewMode, setViewMode] = useState<'cartes' | 'tableau'>('cartes')
   const [editBudget, setEditBudget] = useState(false)
   const [addingCat, setAddingCat] = useState(false)
   const [expandedCats, setExpandedCats] = useState<Set<string>>(new Set(categories.map(c => c.id)))
@@ -71,6 +235,20 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
 
   const toggleCat  = (id: string) => setExpandedCats(prev  => { const s = new Set(prev);  s.has(id) ? s.delete(id) : s.add(id); return s })
   const toggleItem = (id: string) => setExpandedItems(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s })
+
+  const handleCycleStatus = async (item: Item) => {
+    const opts = STATUS_OPTIONS.map(s => s.key)
+    const next = opts[(opts.indexOf(item.status) + 1) % opts.length]
+    await call('updateItemStatus', { id: item.id, status: next })
+  }
+
+  const handleSwitchToCards = (itemId: string) => {
+    setViewMode('cartes')
+    setExpandedItems(prev => { const s = new Set(prev); s.add(itemId); return s })
+    // also expand the category containing this item
+    const item = items.find(i => i.id === itemId)
+    if (item) setExpandedCats(prev => { const s = new Set(prev); s.add(item.category_id); return s })
+  }
 
   return (
     <div className="space-y-4">
@@ -138,9 +316,9 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
         )}
       </div>
 
-      {/* ── Barre recherche + bouton catégorie ── */}
-      <div className="flex gap-3 items-center">
-        <div className="flex-1 relative">
+      {/* ── Barre recherche + toggle vue + bouton catégorie ── */}
+      <div className="flex gap-3 items-center flex-wrap">
+        <div className="flex-1 relative min-w-[200px]">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}
                className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -151,6 +329,23 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
             style={{ fontWeight: 300 }} />
           {search && <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-300 hover:text-stone-500 cursor-pointer">✕</button>}
         </div>
+
+        {/* Vue toggle */}
+        {categories.length > 0 && (
+          <div className="flex bg-white border border-stone-200 rounded-xl overflow-hidden shrink-0">
+            <button onClick={() => setViewMode('cartes')}
+              className={`px-3 py-2 text-xs flex items-center gap-1.5 transition cursor-pointer ${viewMode === 'cartes' ? 'bg-[#4a5240] text-white' : 'text-stone-400 hover:text-[#4a5240]'}`}
+              style={{ fontWeight: 300 }}>
+              <span>☰</span><span className="hidden sm:inline">Cartes</span>
+            </button>
+            <button onClick={() => setViewMode('tableau')}
+              className={`px-3 py-2 text-xs flex items-center gap-1.5 transition cursor-pointer border-l border-stone-200 ${viewMode === 'tableau' ? 'bg-[#4a5240] text-white' : 'text-stone-400 hover:text-[#4a5240]'}`}
+              style={{ fontWeight: 300 }}>
+              <span>⊞</span><span className="hidden sm:inline">Tableau</span>
+            </button>
+          </div>
+        )}
+
         {categories.length > 0 && !addingCat && (
           <button onClick={() => setAddingCat(true)}
             className="flex items-center gap-1.5 px-4 py-2.5 bg-white border border-stone-200 rounded-xl text-xs text-stone-400 hover:border-[#4a5240] hover:text-[#4a5240] transition cursor-pointer shrink-0"
@@ -205,9 +400,23 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
             Créer manuellement
           </button>
         </div>
+      ) : viewMode === 'tableau' ? (
+        /* ── Vue Tableau ── */
+        <TableView
+          categories={categories}
+          items={filteredItems}
+          quotes={quotes}
+          budgetCurrency={budgetCurrency}
+          getItemEffective={getItemEffective}
+          editingItem={editingItem}
+          setEditingItem={setEditingItem}
+          onCycleStatus={handleCycleStatus}
+          onSwitchToCards={handleSwitchToCards}
+          actions={actions}
+          slug={slug}
+        />
       ) : (
-
-        /* ── Accordéon catégories ── */
+        /* ── Accordéon catégories (vue Cartes) ── */
         <div className="space-y-3">
           {categories.map(cat => {
             const catItems = filteredItems.filter(i => i.category_id === cat.id)
@@ -276,9 +485,7 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
                             <button title="Changer le statut"
                               onClick={async e => {
                                 e.stopPropagation()
-                                const opts = STATUS_OPTIONS.map(s => s.key)
-                                const next = opts[(opts.indexOf(item.status) + 1) % opts.length]
-                                await call('updateItemStatus', { id: item.id, status: next })
+                                await handleCycleStatus(item)
                               }}
                               className="shrink-0 cursor-pointer group/dot">
                               <span className={`w-2.5 h-2.5 rounded-full block transition group-hover/dot:scale-125 ${st.dot}`} />

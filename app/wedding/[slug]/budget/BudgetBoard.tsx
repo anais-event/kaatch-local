@@ -153,16 +153,16 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
         )}
       </div>
 
-      {/* ── Barre search + toggle vues ── */}
-      <div className="flex gap-3 items-center">
+      {/* ── Barre search + toggle vues + nouvelle catégorie ── */}
+      <div className="flex gap-3 items-center flex-wrap">
         {/* Search */}
-        <div className="flex-1 relative">
+        <div className="flex-1 relative min-w-[160px]">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}
                className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
           </svg>
           <input type="text" value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Rechercher un poste ou un prestataire…"
+            placeholder="Rechercher…"
             className="w-full pl-10 pr-4 py-2.5 bg-white border border-stone-200 rounded-xl outline-none focus:border-[#4a5240] transition text-stone-700 text-sm"
             style={{ fontWeight: 300 }} />
           {search && (
@@ -180,7 +180,47 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
             </button>
           ))}
         </div>
+        {/* Bouton + catégorie — toujours visible */}
+        {categories.length > 0 && !addingCat && (
+          <button onClick={() => setAddingCat(true)}
+            className="flex items-center gap-1.5 px-3 py-2.5 bg-white border border-stone-200 rounded-xl text-xs text-stone-400 hover:border-[#4a5240] hover:text-[#4a5240] transition cursor-pointer shrink-0"
+            style={{ fontWeight: 300 }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            <span className="hidden sm:inline">Catégorie</span>
+          </button>
+        )}
       </div>
+
+      {/* Formulaire nouvelle catégorie — sous la barre, toutes vues */}
+      {addingCat && (
+        <div className="bg-white rounded-2xl border border-stone-100 p-5">
+          <p style={{ fontWeight: 500, fontSize: '0.9rem' }} className="text-[#2d3228] mb-4">Nouvelle catégorie</p>
+          <form onSubmit={async e => { e.preventDefault(); const fd = new FormData(e.currentTarget); fd.set('slug', slug); await actions.addCategory(fd); setAddingCat(false) }} className="space-y-3">
+            <div className="flex gap-2 flex-wrap">
+              <input name="icon" type="text" defaultValue="💰" maxLength={2}
+                className="w-12 border border-stone-200 rounded-xl px-2 py-2 text-center outline-none text-lg bg-white" />
+              <input name="name" type="text" placeholder="Nom de la catégorie" required autoFocus
+                className="flex-1 min-w-[160px] border border-stone-200 rounded-xl px-4 py-2 outline-none focus:border-[#4a5240] transition text-stone-700 text-sm bg-white" style={{ fontWeight: 300 }} />
+              <input name="allocated" type="number" placeholder="Budget alloué (optionnel)" min={0}
+                className="w-44 border border-stone-200 rounded-xl px-3 py-2 outline-none focus:border-[#4a5240] transition text-stone-700 text-sm bg-white" style={{ fontWeight: 300 }} />
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              {['#4a5240','#8b7355','#5c6bc0','#c06b8b','#e07b39','#9c6bb5','#3a8fa0','#b5763a','#888888'].map(c => (
+                <label key={c} className="cursor-pointer">
+                  <input type="radio" name="color" value={c} className="sr-only peer" defaultChecked={c === '#4a5240'} />
+                  <span className="w-7 h-7 rounded-full block border-2 border-transparent peer-checked:border-stone-500 peer-checked:scale-110 transition-all" style={{ backgroundColor: c }} />
+                </label>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <button type="submit" className="bg-[#4a5240] text-white px-5 py-2 rounded-xl text-sm cursor-pointer" style={{ fontWeight: 300 }}>Créer</button>
+              <button type="button" onClick={() => setAddingCat(false)} className="text-stone-400 text-sm px-3 cursor-pointer" style={{ fontWeight: 300 }}>Annuler</button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {/* ── Vues ── */}
       {categories.length === 0 ? (
@@ -213,41 +253,6 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
         <ComparatifView slug={slug} weddingId={weddingId} items={filteredItems} quotes={quotes} categories={categories} budgetCurrency={budgetCurrency} actions={actions} call={call} currencies={CURRENCIES} editingItem={editingItem} setEditingItem={setEditingItem} />
       )}
 
-      {/* Ajouter catégorie */}
-      {categories.length > 0 && (
-        addingCat ? (
-          <div className="bg-white rounded-2xl border border-stone-100 p-5">
-            <p style={{ fontWeight: 500, fontSize: '0.9rem' }} className="text-[#2d3228] mb-4">Nouvelle catégorie</p>
-            <form onSubmit={async e => { e.preventDefault(); const fd = new FormData(e.currentTarget); fd.set('slug', slug); await actions.addCategory(fd); setAddingCat(false) }} className="space-y-3">
-              <div className="flex gap-2 flex-wrap">
-                <input name="icon" type="text" defaultValue="💰" maxLength={2}
-                  className="w-12 border border-stone-200 rounded-xl px-2 py-2 text-center outline-none text-lg bg-white" />
-                <input name="name" type="text" placeholder="Nom de la catégorie" required
-                  className="flex-1 min-w-[160px] border border-stone-200 rounded-xl px-4 py-2 outline-none focus:border-[#4a5240] transition text-stone-700 text-sm bg-white" style={{ fontWeight: 300 }} />
-                <input name="allocated" type="number" placeholder="Budget alloué (optionnel)" min={0}
-                  className="w-44 border border-stone-200 rounded-xl px-3 py-2 outline-none focus:border-[#4a5240] transition text-stone-700 text-sm bg-white" style={{ fontWeight: 300 }} />
-              </div>
-              <div className="flex gap-2 flex-wrap">
-                {['#4a5240','#8b7355','#5c6bc0','#c06b8b','#e07b39','#9c6bb5','#3a8fa0','#b5763a','#888888'].map(c => (
-                  <label key={c} className="cursor-pointer">
-                    <input type="radio" name="color" value={c} className="sr-only peer" defaultChecked={c === '#4a5240'} />
-                    <span className="w-7 h-7 rounded-full block border-2 border-transparent peer-checked:border-stone-500 peer-checked:scale-110 transition-all" style={{ backgroundColor: c }} />
-                  </label>
-                ))}
-              </div>
-              <div className="flex gap-2">
-                <button type="submit" className="bg-[#4a5240] text-white px-5 py-2 rounded-xl text-sm cursor-pointer" style={{ fontWeight: 300 }}>Créer</button>
-                <button type="button" onClick={() => setAddingCat(false)} className="text-stone-400 text-sm px-3 cursor-pointer" style={{ fontWeight: 300 }}>Annuler</button>
-              </div>
-            </form>
-          </div>
-        ) : (
-          <button onClick={() => setAddingCat(true)}
-            className="w-full py-4 rounded-2xl border-2 border-dashed border-stone-200 text-stone-400 hover:border-[#4a5240] hover:text-[#4a5240] transition text-sm cursor-pointer" style={{ fontWeight: 300 }}>
-            + Ajouter une catégorie
-          </button>
-        )
-      )}
     </div>
   )
 }

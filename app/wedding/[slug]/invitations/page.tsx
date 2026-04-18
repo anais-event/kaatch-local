@@ -128,7 +128,7 @@ export default async function InvitationsPage({ params }: { params: Promise<{ sl
                            className="text-stone-400 truncate hidden sm:block max-w-[220px]">
                           /i/{guest.invite_token}
                         </p>
-                        <CopyLinkButton url={link} guestName={`${guest.first_name} ${guest.last_name ?? ''}`} />
+                        <CopyLinkButton url={link} guestName={`${guest.first_name} ${guest.last_name ?? ''}`} slug={slug} />
                         <a href={link} target="_blank" rel="noopener noreferrer"
                            className="text-xs text-stone-300 hover:text-[#4a5240] transition"
                            title="Aperçu">

@@ -39,6 +39,7 @@ export default function WeddingNav({ slug, weddingName, weddingId }: { slug: str
         { label: 'Programme', sub: 'Déroulé de la journée', href: `/wedding/${slug}/programme` },
         { label: 'Photos', sub: 'Album partagé', href: `/wedding/${slug}/photos` },
         { label: 'Hébergements', sub: 'Options aux alentours', href: `/wedding/${slug}/hebergements` },
+        { label: 'QR Code', sub: 'Accès rapide jour J', href: `/wedding/${slug}/partager` },
       ],
     },
     {
@@ -50,7 +51,6 @@ export default function WeddingNav({ slug, weddingName, weddingId }: { slug: str
       items: [
         { label: 'Vue invités', sub: 'Aperçu de votre espace', href: `/invite/${slug}`, target: '_blank' },
         { label: 'Paramètres', sub: 'Infos du mariage', href: `/wedding/${slug}/edit` },
-        { label: 'Partager', sub: 'Lien & QR code', href: `/wedding/${slug}/partager` },
         { label: 'Règles & message', sub: 'Mot des mariés', href: `/wedding/${slug}/regles` },
       ],
     },

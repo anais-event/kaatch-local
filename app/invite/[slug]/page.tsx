@@ -26,6 +26,19 @@ async function respondRsvp(formData: FormData) {
   revalidatePath(`/invite/${slug}`)
 }
 
+async function saveMessage(formData: FormData) {
+  'use server'
+  const { revalidatePath } = await import('next/cache')
+  const slug = formData.get('slug') as string
+  const guestId = formData.get('guest_id') as string
+  const message = (formData.get('message') as string)?.trim()
+  if (!guestId) return
+
+  const supabase = await createSupabaseServerClient()
+  await supabase.from('guests').update({ guest_message: message || null }).eq('id', guestId)
+  revalidatePath(`/invite/${slug}`)
+}
+
 export default async function GuestPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const cookieStore = await cookies()
@@ -57,11 +70,12 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
   const [{ data: rules }, { data: guestData }] = await Promise.all([
     supabase.from('wedding_rules').select('text').eq('wedding_id', wedding.id).order('created_at'),
     guest.id
-      ? supabase.from('guests').select('rsvp_status, first_name').eq('id', guest.id).single()
+      ? supabase.from('guests').select('rsvp_status, first_name, guest_message').eq('id', guest.id).single()
       : Promise.resolve({ data: null }),
   ])
 
   const rsvpStatus = guestData?.rsvp_status ?? null
+  const existingMessage = guestData?.guest_message ?? null
 
   const dateFormatted = wedding.date
     ? new Date(wedding.date).toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })

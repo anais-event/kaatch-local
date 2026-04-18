@@ -62,7 +62,7 @@ export default function ImportGuests({ weddingId, slug }: { weddingId: string; s
     const buffer = await file.arrayBuffer()
     const wb = XLSX.read(buffer, { type: 'array' })
     const ws = wb.Sheets[wb.SheetNames[0]]
-    const parsed = XLSX.utils.sheet_to_json<Record<string, string>>(ws, { defval: '' })
+    const parsed = (XLSX.utils.sheet_to_json(ws, { defval: '' }) as Record<string, string>[])
 
     if (parsed.length === 0) return
     const hdrs = Object.keys(parsed[0])

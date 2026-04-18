@@ -62,6 +62,7 @@ async function updateGuest(formData: FormData) {
     email: (formData.get('email') as string) || null,
     telephone: (formData.get('telephone') as string) || null,
     relation: (formData.get('relation') as string) || null,
+    gender: (formData.get('gender') as string) || null,
   }).eq('id', id)
 
   revalidatePath(`/wedding/${slug}/guests`)
@@ -98,7 +99,7 @@ export default async function GuestsPage({
 
   const { data: wedding } = await supabase
     .from('weddings')
-    .select('id, name')
+    .select('id, name, date, location, cover_image_url, couple_message')
     .eq('slug', slug)
     .single()
 
@@ -332,10 +333,22 @@ export default async function GuestsPage({
                                className="text-stone-400 truncate hidden sm:block max-w-[220px]">
                               /i/{guest.invite_token}
                             </p>
-                            <CopyLinkButton url={link} />
-                            <a href={link} target="_blank" rel="noopener noreferrer"
+                            <CopyLinkButton
+                              url={link}
+                              guestName={`${guest.first_name} ${guest.last_name ?? ''}`}
+                              gender={guest.gender}
+                              slug={slug}
+                              wedding={{
+                                name: wedding.name,
+                                date: wedding.date,
+                                location: wedding.location,
+                                coverImageUrl: wedding.cover_image_url,
+                                coupleMessage: wedding.couple_message,
+                              }}
+                            />
+                            <a href={`/i/${guest.invite_token}`} target="_blank" rel="noopener noreferrer"
                                className="text-xs text-stone-300 hover:text-[#4a5240] transition"
-                               title="Aperçu">
+                               title="Ouvrir le faire-part">
                               ↗
                             </a>
                           </div>

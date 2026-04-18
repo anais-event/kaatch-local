@@ -29,12 +29,15 @@ async function updateWedding(formData: FormData) {
     }
   }
 
+  const couple_message = formData.get('couple_message') as string
+
   await supabase
     .from('weddings')
     .update({
       date,
       location,
       name,
+      couple_message: couple_message || null,
       ...(cover_image_url ? { cover_image_url } : {}),
     })
     .eq('slug', slug)
@@ -138,6 +141,21 @@ export default async function EditWedding({ params }: { params: Promise<{ slug: 
                 placeholder="Ex : Château de Versailles"
                 className="w-full border border-stone-200 rounded-xl px-4 py-3 outline-none focus:border-[#4a5240] transition text-stone-700 bg-white"
                 style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}
+              />
+            </div>
+
+            <div>
+              <label style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.7rem', letterSpacing: '0.15em' }}
+                     className="block text-stone-400 uppercase mb-2">
+                Mot des mariés <span className="normal-case text-stone-300">(affiché sur le faire-part)</span>
+              </label>
+              <textarea
+                name="couple_message"
+                defaultValue={wedding.couple_message || ''}
+                rows={5}
+                placeholder="Ex : Nous sommes fous de joie de vous inviter à partager ce jour si important pour nous..."
+                className="w-full border border-stone-200 rounded-xl px-4 py-3 outline-none focus:border-[#4a5240] transition text-stone-700 bg-white resize-none"
+                style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.9rem', lineHeight: 1.7 }}
               />
             </div>
 

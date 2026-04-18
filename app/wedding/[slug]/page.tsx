@@ -88,8 +88,8 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
 
             {/* PRÉPARATIFS */}
             <div>
-              <p style={{ fontWeight: 300, fontSize: '0.62rem', letterSpacing: '0.22em' }}
-                 className="text-stone-400 uppercase mb-3">Préparatifs</p>
+              <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400, fontSize: '1.3rem', fontStyle: 'italic' }}
+                 className="text-[#4a5240] mb-3">Préparatifs</p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
 
                 {/* Invités */}
@@ -136,8 +136,8 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
 
             {/* JOUR J */}
             <div>
-              <p style={{ fontWeight: 300, fontSize: '0.62rem', letterSpacing: '0.22em' }}
-                 className="text-stone-400 uppercase mb-3">Jour J</p>
+              <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400, fontSize: '1.3rem', fontStyle: 'italic' }}
+                 className="text-[#4a5240] mb-3">Jour J</p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
 
                 {/* Programme */}
@@ -198,8 +198,8 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
 
           {/* ── Colonne droite : mémo ── */}
           <div className="w-full lg:w-64 shrink-0">
-            <p style={{ fontWeight: 300, fontSize: '0.62rem', letterSpacing: '0.22em' }}
-               className="text-stone-400 uppercase mb-3">Notes & suivi</p>
+            <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400, fontSize: '1.3rem', fontStyle: 'italic' }}
+               className="text-[#4a5240] mb-3">Notes & suivi</p>
             <Memo
               slug={slug}
               systemItems={systemChecklist}

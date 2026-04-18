@@ -87,7 +87,7 @@ export default function Memo({
               {item.done ? '✓' : '○'}
             </span>
             <span style={{ fontWeight: 300, fontSize: '0.82rem' }}
-                  className={`transition group-hover:text-[#4a5240] ${item.done ? 'text-stone-400 line-through' : 'text-stone-600'}`}>
+                  className={`transition group-hover:text-[#4a5240] ${item.done ? 'text-stone-300' : 'text-stone-600'}`}>
               {item.label}
             </span>
           </a>
@@ -105,7 +105,7 @@ export default function Memo({
                   {item.done ? '✓' : '○'}
                 </button>
                 <button onClick={() => handleToggle(item.id, item.done)}
-                  className={`flex-1 text-left transition cursor-pointer ${item.done ? 'text-stone-400 line-through' : 'text-stone-600'}`}
+                  className={`flex-1 text-left transition cursor-pointer ${item.done ? 'text-stone-300' : 'text-stone-600'}`}
                   style={{ fontWeight: 300, fontSize: '0.82rem' }}>
                   {item.label}
                 </button>

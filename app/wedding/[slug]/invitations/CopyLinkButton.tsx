@@ -2,7 +2,27 @@
 
 import { useState } from 'react'
 
-export default function CopyLinkButton({ url, guestName }: { url: string; guestName: string }) {
+type WeddingPreview = {
+  name: string
+  date: string | null
+  location: string | null
+  coverImageUrl: string | null
+  coupleMessage: string | null
+}
+
+export default function CopyLinkButton({
+  url,
+  guestName,
+  gender,
+  slug,
+  wedding,
+}: {
+  url: string
+  guestName: string
+  gender?: 'M' | 'F' | null
+  slug?: string
+  wedding?: WeddingPreview
+}) {
   const [copied, setCopied] = useState(false)
   const [preview, setPreview] = useState(false)
 
@@ -12,11 +32,23 @@ export default function CopyLinkButton({ url, guestName }: { url: string; guestN
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const whatsappText = encodeURIComponent(`Votre invitation : ${url}`)
+  const firstName = guestName?.split(' ')[0] ?? guestName
+  const whatsappText = encodeURIComponent(`${firstName}, voici ton invitation : ${url}`)
+
+  const salutation = gender === 'F'
+    ? `Chère ${firstName},`
+    : gender === 'M'
+    ? `Cher ${firstName},`
+    : `Cher(e) ${firstName},`
+
+  const dateFormatted = wedding?.date
+    ? new Date(wedding.date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+    : null
 
   return (
     <>
       <div className="flex items-center gap-2 shrink-0">
+
         {/* Copier */}
         <button onClick={copy}
           className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border transition cursor-pointer text-sm whitespace-nowrap ${
@@ -58,43 +90,119 @@ export default function CopyLinkButton({ url, guestName }: { url: string; guestN
         </button>
       </div>
 
-      {/* Modale d'aperçu */}
+      {/* Modale aperçu faire-part — carte statique */}
       {preview && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm"
           onClick={e => { if (e.target === e.currentTarget) setPreview(false) }}>
-          <div className="relative bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col"
-               style={{ width: '420px', height: '88vh', maxHeight: '800px' }}>
 
-            {/* Header modale */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-stone-100 bg-[#f5f0e8] shrink-0">
-              <div>
-                <p style={{ fontWeight: 400, fontSize: '0.85rem' }} className="text-[#2d3228]">
-                  Aperçu — {guestName}
-                </p>
-                <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400">
-                  C'est exactement ce que verra {guestName.split(' ')[0]}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <a href={url} target="_blank" rel="noopener noreferrer"
-                   className="text-xs text-[#4a5240] border border-[#4a5240]/30 px-2.5 py-1 rounded-lg hover:bg-[#4a5240] hover:text-white transition"
-                   style={{ fontWeight: 300 }}>
-                  Ouvrir ↗
-                </a>
+          <div className="relative flex flex-col shadow-2xl"
+               style={{ width: '360px', maxHeight: '92vh', borderRadius: '24px', overflow: 'hidden' }}>
+
+            {/* Barre d'actions */}
+            <div className="flex items-center justify-between px-4 py-2.5 bg-[#f5f0e8] shrink-0">
+              <p style={{ fontWeight: 300, fontSize: '0.72rem', letterSpacing: '0.1em', color: '#a8a29e' }}>
+                APERÇU — {firstName.toUpperCase()}
+              </p>
+              <div className="flex items-center gap-3">
+                {slug && (
+                  <a href={`/wedding/${slug}/edit`} target="_blank" rel="noopener noreferrer"
+                     style={{ fontWeight: 300, fontSize: '0.72rem', color: '#4a5240' }}
+                     className="hover:underline">
+                    ✏ Modifier
+                  </a>
+                )}
                 <button onClick={() => setPreview(false)}
-                  className="text-stone-400 hover:text-stone-700 transition text-xl leading-none cursor-pointer w-7 h-7 flex items-center justify-center">
+                  className="text-stone-400 hover:text-stone-700 transition text-lg leading-none cursor-pointer">
                   ×
                 </button>
               </div>
             </div>
 
-            {/* iframe faire-part */}
-            <iframe
-              src={url}
-              className="flex-1 w-full border-0"
-              title={`Invitation de ${guestName}`}
-            />
+            {/* Carte faire-part scrollable */}
+            <div className="overflow-y-auto bg-white" style={{ fontFamily: 'Georgia, serif' }}>
+
+              {/* Photo couverture */}
+              <div className="relative w-full" style={{ height: '240px' }}>
+                {wedding?.coverImageUrl
+                  ? <img src={wedding.coverImageUrl} alt="" className="w-full h-full object-cover" />
+                  : <div className="w-full h-full" style={{ background: 'linear-gradient(135deg, #4a5240 0%, #2d3228 100%)' }} />
+                }
+                <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.55) 100%)' }} />
+              </div>
+
+              {/* Corps */}
+              <div className="bg-white px-8 py-8">
+
+                {/* Salutation */}
+                <p className="text-center mb-6"
+                   style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', fontSize: '1.2rem', color: '#4a5240', fontWeight: 400 }}>
+                  {salutation}
+                </p>
+
+                {/* Séparateur */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                  <div style={{ flex: 1, height: '1px', background: '#e7e5e4' }} />
+                  <span style={{ color: '#d6d3d1', fontSize: '10px', letterSpacing: '0.3em' }}>✦</span>
+                  <div style={{ flex: 1, height: '1px', background: '#e7e5e4' }} />
+                </div>
+
+                {/* Noms */}
+                <h1 className="text-center mb-2"
+                    style={{ fontFamily: 'Georgia, serif', fontWeight: 700, fontSize: '2.2rem', color: '#2d3228', lineHeight: 1.1, letterSpacing: '-0.01em' }}>
+                  {wedding?.name ?? '—'}
+                </h1>
+
+                <p className="text-center mb-8"
+                   style={{ fontWeight: 400, fontSize: '0.7rem', letterSpacing: '0.22em', color: '#a8a29e', fontFamily: 'system-ui, sans-serif' }}>
+                  vous invitent à célébrer leur mariage
+                </p>
+
+                {/* Date + Lieu */}
+                <div className="text-center mb-8" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+                  {dateFormatted && (
+                    <p style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', fontSize: '1rem', color: '#4a5240', fontWeight: 400 }}
+                       className="capitalize">
+                      {dateFormatted}
+                    </p>
+                  )}
+                  {wedding?.location && (
+                    <p style={{ fontFamily: 'system-ui, sans-serif', fontWeight: 400, fontSize: '0.68rem', letterSpacing: '0.22em', color: '#a8a29e' }}
+                       className="uppercase">
+                      {wedding.location}
+                    </p>
+                  )}
+                </div>
+
+                {/* Séparateur */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                  <div style={{ flex: 1, height: '1px', background: '#f5f5f4' }} />
+                  <span style={{ color: '#e7e5e4', fontSize: '10px' }}>✦</span>
+                  <div style={{ flex: 1, height: '1px', background: '#f5f5f4' }} />
+                </div>
+
+                {/* Mot des mariés */}
+                {wedding?.coupleMessage && (
+                  <p className="text-center mb-8"
+                     style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', fontSize: '0.95rem', color: '#78716c', lineHeight: 1.9, whiteSpace: 'pre-wrap' }}>
+                    {wedding.coupleMessage}
+                  </p>
+                )}
+
+                {/* CTA */}
+                <div style={{ background: '#4a5240', borderRadius: '12px', padding: '14px', textAlign: 'center' }}>
+                  <p style={{ fontFamily: 'system-ui, sans-serif', fontWeight: 300, fontSize: '0.82rem', color: 'white', letterSpacing: '0.06em' }}>
+                    Accéder à mon espace →
+                  </p>
+                </div>
+
+                {/* Footer */}
+                <p className="text-center mt-6"
+                   style={{ fontFamily: 'system-ui, sans-serif', fontWeight: 300, fontSize: '0.62rem', letterSpacing: '0.12em', color: '#d6d3d1' }}>
+                  Organisé avec Kaatch
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       )}

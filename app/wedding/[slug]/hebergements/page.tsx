@@ -1,7 +1,14 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import PageIntro from '../PageIntro'
 import { revalidatePath } from 'next/cache'
-import HotelSuggestionsWrapper from './HotelSuggestionsWrapper'
+
+const ACCOMMODATION_TYPES = [
+  { value: 'hotel', label: 'Hôtel' },
+  { value: 'gite', label: 'Gîte / Chambre d\'hôtes' },
+  { value: 'airbnb', label: 'Airbnb / Location' },
+  { value: 'camping', label: 'Camping' },
+  { value: 'autre', label: 'Autre' },
+]
 
 async function addAccommodation(formData: FormData) {
   'use server'
@@ -18,6 +25,7 @@ async function addAccommodation(formData: FormData) {
     url: (formData.get('url') as string) || null,
     price_range: (formData.get('price_range') as string) || null,
     note: (formData.get('note') as string) || null,
+    type: (formData.get('type') as string) || null,
   })
 
   revalidatePath(`/wedding/${slug}/hebergements`)
@@ -28,6 +36,14 @@ async function deleteAccommodation(formData: FormData) {
   const supabase = await createSupabaseServerClient()
   await supabase.from('accommodations').delete().eq('id', formData.get('id') as string)
   revalidatePath(`/wedding/${formData.get('slug') as string}/hebergements`)
+}
+
+const TYPE_ICONS: Record<string, string> = {
+  hotel: '🏨',
+  gite: '🏡',
+  airbnb: '🏠',
+  camping: '⛺',
+  autre: '📍',
 }
 
 export default async function HebergementsPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -64,24 +80,79 @@ export default async function HebergementsPage({ params }: { params: Promise<{ s
           Hébergements
         </h1>
         <PageIntro
-          what="Suggérez des hébergements proches du lieu de réception pour que vos invités puissent se loger facilement — hôtels, gîtes, campings…"
-          how="Ajoutez des adresses manuellement ou laissez Kaatch vous en suggérer autour de votre lieu de réception."
-          guests="Vos invités verront la liste des hébergements recommandés dans leur espace, avec les adresses et liens utiles."
+          what="Partagez vos coups de cœur — hôtels, gîtes, airbnb… — pour que vos invités puissent se loger facilement à proximité."
+          how="Ajoutez chaque hébergement avec son lien de réservation et votre note personnelle."
+          guests="Vos invités verront vos recommandations avec les liens directs pour réserver."
         />
 
-        {accommodations && accommodations.length > 0 && (
-          <div className="mb-8">
+        {/* Formulaire d'ajout */}
+        <div className="bg-white/80 rounded-3xl p-6 shadow-sm mb-8">
+          <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.4rem', fontStyle: 'italic' }}
+              className="text-[#4a5240] mb-4">
+            Ajouter un coup de cœur
+          </h2>
+          <form action={addAccommodation} className="space-y-3">
+            <input type="hidden" name="slug" value={slug} />
+            <div className="grid grid-cols-2 gap-3">
+              <input type="text" name="name" placeholder="Nom *" required
+                className="border border-stone-200 rounded-xl px-4 py-2 bg-white outline-none focus:border-[#4a5240] transition text-stone-700"
+                style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.9rem' }} />
+              <select name="type"
+                className="border border-stone-200 rounded-xl px-4 py-2 bg-white outline-none focus:border-[#4a5240] transition text-stone-500"
+                style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.9rem' }}>
+                <option value="">Type…</option>
+                {ACCOMMODATION_TYPES.map(t => (
+                  <option key={t.value} value={t.value}>{t.label}</option>
+                ))}
+              </select>
+            </div>
+            <input type="text" name="address" placeholder="Adresse ou ville"
+              className="w-full border border-stone-200 rounded-xl px-4 py-2 bg-white outline-none focus:border-[#4a5240] transition text-stone-700"
+              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.9rem' }} />
+            <div className="grid grid-cols-2 gap-3">
+              <input type="url" name="url" placeholder="Lien (booking, airbnb…)"
+                className="border border-stone-200 rounded-xl px-4 py-2 bg-white outline-none focus:border-[#4a5240] transition text-stone-700"
+                style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.9rem' }} />
+              <input type="text" name="price_range" placeholder="Prix indicatif (ex: 80-120€)"
+                className="border border-stone-200 rounded-xl px-4 py-2 bg-white outline-none focus:border-[#4a5240] transition text-stone-700"
+                style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.9rem' }} />
+            </div>
+            <textarea name="note" placeholder="Votre note (ex: Super pour les familles, à 5 min à pied…)" rows={2}
+              className="w-full border border-stone-200 rounded-xl px-4 py-2 bg-white outline-none focus:border-[#4a5240] transition text-stone-700 resize-none"
+              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.9rem' }} />
+            <button type="submit"
+              className="w-full bg-[#4a5240] text-white py-3 rounded-full hover:bg-[#2d3228] transition"
+              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem', letterSpacing: '0.08em' }}>
+              + Ajouter
+            </button>
+          </form>
+        </div>
+
+        {/* Liste des hébergements */}
+        {accommodations && accommodations.length > 0 ? (
+          <div>
             <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.4rem', fontStyle: 'italic' }}
                 className="text-[#4a5240] mb-4">
-              ⭐ Nos recommandations
+              ⭐ Vos coups de cœur ({accommodations.length})
             </h2>
             <div className="space-y-3">
               {accommodations.map(acc => (
                 <div key={acc.id} className="bg-white/80 rounded-2xl p-5 shadow-sm">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.2rem' }}
-                         className="text-stone-800">{acc.name}</p>
+                      <div className="flex items-center gap-2 mb-1">
+                        {acc.type && (
+                          <span className="text-base">{TYPE_ICONS[acc.type] ?? '📍'}</span>
+                        )}
+                        <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.2rem' }}
+                           className="text-stone-800">{acc.name}</p>
+                        {acc.type && (
+                          <span className="text-[10px] bg-[#f5f0e8] text-[#4a5240] px-2 py-0.5 rounded-full"
+                                style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
+                            {ACCOMMODATION_TYPES.find(t => t.value === acc.type)?.label ?? acc.type}
+                          </span>
+                        )}
+                      </div>
                       {acc.address && (
                         <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.8rem' }}
                            className="text-stone-400 mt-1">📍 {acc.address}</p>
@@ -92,73 +163,38 @@ export default async function HebergementsPage({ params }: { params: Promise<{ s
                       )}
                       {acc.note && (
                         <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem', fontStyle: 'italic' }}
-                           className="text-stone-500 mt-2">{acc.note}</p>
+                           className="text-stone-500 mt-2">"{acc.note}"</p>
                       )}
                       {acc.url && (
                         <a href={acc.url} target="_blank" rel="noopener noreferrer"
                            className="inline-block mt-2 text-xs text-[#4a5240] hover:underline"
                            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
-                          Réserver →
+                          Voir le lien →
                         </a>
                       )}
                     </div>
                     <form action={deleteAccommodation}>
                       <input type="hidden" name="id" value={acc.id} />
                       <input type="hidden" name="slug" value={slug} />
-                      <button type="submit" className="text-stone-300 hover:text-red-400 transition ml-3">✕</button>
+                      <button type="submit" className="text-stone-300 hover:text-red-400 transition ml-3 text-lg">✕</button>
                     </form>
                   </div>
                 </div>
               ))}
             </div>
           </div>
-        )}
-
-        {wedding.location && (
-          <div className="mb-8">
-            <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.4rem', fontStyle: 'italic' }}
-                className="text-[#4a5240] mb-1">
-              🏨 À proximité
-            </h2>
-            <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.75rem' }}
-               className="text-stone-400 mb-4">
-              Hôtels trouvés automatiquement autour de "{wedding.location}"
+        ) : (
+          <div className="text-center py-12">
+            <p style={{ fontFamily: 'var(--font-cormorant)', fontSize: '1.3rem', fontStyle: 'italic' }}
+               className="text-stone-400">
+              Aucun hébergement ajouté pour l'instant
             </p>
-            <HotelSuggestionsWrapper location={wedding.location} />
+            <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem' }}
+               className="text-stone-300 mt-2">
+              Utilisez le formulaire ci-dessus pour partager vos coups de cœur avec vos invités.
+            </p>
           </div>
         )}
-
-        <div className="bg-white/80 rounded-3xl p-6 shadow-sm">
-          <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.4rem', fontStyle: 'italic' }}
-              className="text-[#4a5240] mb-4">
-            Ajouter un hébergement
-          </h2>
-          <form action={addAccommodation} className="space-y-3">
-            <input type="hidden" name="slug" value={slug} />
-            <div className="grid grid-cols-2 gap-3">
-              <input type="text" name="name" placeholder="Nom *" required
-                className="border border-stone-200 rounded-xl px-4 py-2 bg-white outline-none focus:border-[#4a5240] transition text-stone-700"
-                style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.9rem' }} />
-              <input type="text" name="price_range" placeholder="Prix (ex: 80-120€/nuit)"
-                className="border border-stone-200 rounded-xl px-4 py-2 bg-white outline-none focus:border-[#4a5240] transition text-stone-700"
-                style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.9rem' }} />
-            </div>
-            <input type="text" name="address" placeholder="Adresse"
-              className="w-full border border-stone-200 rounded-xl px-4 py-2 bg-white outline-none focus:border-[#4a5240] transition text-stone-700"
-              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.9rem' }} />
-            <input type="url" name="url" placeholder="Lien de réservation (ex: https://...)"
-              className="w-full border border-stone-200 rounded-xl px-4 py-2 bg-white outline-none focus:border-[#4a5240] transition text-stone-700"
-              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.9rem' }} />
-            <textarea name="note" placeholder="Note (ex: Demandez la chambre côté jardin !)" rows={2}
-              className="w-full border border-stone-200 rounded-xl px-4 py-2 bg-white outline-none focus:border-[#4a5240] transition text-stone-700 resize-none"
-              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.9rem' }} />
-            <button type="submit"
-              className="w-full bg-[#4a5240] text-white py-3 rounded-full hover:bg-[#2d3228] transition"
-              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem', letterSpacing: '0.08em' }}>
-              + Ajouter
-            </button>
-          </form>
-        </div>
 
       </div>
     </div>

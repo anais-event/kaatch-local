@@ -91,7 +91,7 @@ export default async function GuestPhotosPage({ params }: { params: Promise<{ sl
   const photos = (rawPhotos ?? []).map(p => ({
     id: p.id,
     url: p.url,
-    uploader_name: p.uploader_name,
+    uploaded_by_name: p.uploaded_by_name,
     moment_tag: p.moment_tag,
     tagged_guests: p.tagged_guests ?? [],
     created_at: p.created_at,

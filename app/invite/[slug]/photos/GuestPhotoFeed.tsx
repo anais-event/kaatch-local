@@ -5,7 +5,7 @@ import JSZip from 'jszip'
 
 type Comment = { id: string; author_name: string; content: string; created_at: string }
 type Photo = {
-  id: string; url: string; uploader_name: string | null; moment_tag: string | null
+  id: string; url: string; uploaded_by_name: string | null; moment_tag: string | null
   tagged_guests: string[]; created_at: string; likes: number; liked_by: string[]; comments: Comment[]
 }
 
@@ -35,7 +35,8 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
       const s = search.toLowerCase()
       const matchMoment = p.moment_tag?.toLowerCase().includes(s)
       const matchGuest = p.tagged_guests.some(g => g.toLowerCase().includes(s))
-      if (!matchMoment && !matchGuest) return false
+      const matchUploader = p.uploaded_by_name?.toLowerCase().includes(s)
+      if (!matchMoment && !matchGuest && !matchUploader) return false
     }
     return true
   })
@@ -171,9 +172,9 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
                 <p className="text-[10px] text-stone-300 mb-1" style={{ fontWeight: 300 }}>
                   {new Date(photo.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                 </p>
-                {photo.uploader_name && (
+                {photo.uploaded_by_name && (
                   <p className="text-xs text-stone-400 mb-1" style={{ fontWeight: 300 }}>
-                    {photo.uploader_name}
+                    {photo.uploaded_by_name}
                     {photo.moment_tag && <span className="ml-1 text-[#4a5240]">· {photo.moment_tag}</span>}
                   </p>
                 )}

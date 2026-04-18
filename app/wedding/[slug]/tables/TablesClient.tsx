@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 
 type Table = {
   id: string
@@ -41,23 +42,32 @@ export default function TablesClient({
   slug, weddingId, weddingName, tables, guests,
   createTable, deleteTable, assignGuest, updateTableName,
 }: Props) {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
   const [selectedTableId, setSelectedTableId] = useState<string | null>(tables[0]?.id ?? null)
   const [search, setSearch] = useState('')
   const [editingTable, setEditingTable] = useState<string | null>(null)
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [filter, setFilter] = useState<'all' | 'unassigned'>('unassigned')
 
+  function run(action: () => Promise<void>, after?: () => void) {
+    startTransition(async () => {
+      await action()
+      router.refresh()
+      after?.()
+    })
+  }
+
   const unassigned = guests.filter(g => !g.table_id)
   const selectedTable = tables.find(t => t.id === selectedTableId)
   const tableGuests = guests.filter(g => g.table_id === selectedTableId)
 
-  const filteredGuests = guests
-    .filter(g => {
-      const name = `${g.first_name} ${g.last_name ?? ''}`.toLowerCase()
-      const matchSearch = !search || name.includes(search.toLowerCase()) || (g.relation ?? '').toLowerCase().includes(search.toLowerCase())
-      const matchFilter = filter === 'all' || !g.table_id
-      return matchSearch && matchFilter
-    })
+  const filteredGuests = guests.filter(g => {
+    const name = `${g.first_name} ${g.last_name ?? ''}`.toLowerCase()
+    const matchSearch = !search || name.includes(search.toLowerCase()) || (g.relation ?? '').toLowerCase().includes(search.toLowerCase())
+    const matchFilter = filter === 'all' || !g.table_id
+    return matchSearch && matchFilter
+  })
 
   const totalSeated = guests.filter(g => g.table_id).length
 
@@ -72,16 +82,17 @@ export default function TablesClient({
                 className="text-[#2d3228]">Plan de table</h1>
             <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-400">
               {totalSeated} / {guests.length} invités placés · {unassigned.length} sans table
+              {isPending && <span className="ml-2 text-[#4a5240]">Enregistrement…</span>}
             </p>
           </div>
           <button
             onClick={() => window.open(`/wedding/${slug}/tables/recap`, '_blank')}
             className="flex items-center gap-2 bg-[#4a5240] text-white text-sm px-4 py-2 rounded-lg hover:bg-[#2d3228] transition cursor-pointer"
-            style={{ fontWeight: 300, letterSpacing: '0.04em' }}>
+            style={{ fontWeight: 300 }}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
             </svg>
-            Télécharger le récap
+            Récap imprimable
           </button>
         </div>
 
@@ -123,8 +134,13 @@ export default function TablesClient({
 
             {/* Ajouter une table */}
             {showCreateForm ? (
-              <form action={async (fd) => { await createTable(fd); setShowCreateForm(false) }}
-                    className="bg-white rounded-xl border border-stone-200 p-3 space-y-2">
+              <form
+                onSubmit={e => {
+                  e.preventDefault()
+                  const fd = new FormData(e.currentTarget)
+                  run(async () => { await createTable(fd) }, () => setShowCreateForm(false))
+                }}
+                className="bg-white rounded-xl border border-stone-200 p-3 space-y-2">
                 <input type="hidden" name="slug" value={slug} />
                 <input type="hidden" name="wedding_id" value={weddingId} />
                 <input name="name" placeholder="Nom de la table" autoFocus required
@@ -140,8 +156,8 @@ export default function TablesClient({
                   <button type="button" onClick={() => setShowCreateForm(false)}
                     className="flex-1 text-xs text-stone-400 py-1.5 border border-stone-200 rounded-lg hover:border-stone-300 transition cursor-pointer"
                     style={{ fontWeight: 300 }}>Annuler</button>
-                  <button type="submit"
-                    className="flex-1 text-xs bg-[#4a5240] text-white py-1.5 rounded-lg hover:bg-[#2d3228] transition cursor-pointer"
+                  <button type="submit" disabled={isPending}
+                    className="flex-1 text-xs bg-[#4a5240] text-white py-1.5 rounded-lg hover:bg-[#2d3228] transition cursor-pointer disabled:opacity-50"
                     style={{ fontWeight: 300 }}>Créer</button>
                 </div>
               </form>
@@ -154,16 +170,19 @@ export default function TablesClient({
             )}
           </div>
 
-          {/* ── Colonne droite : contenu ── */}
+          {/* ── Colonne droite ── */}
           <div className="flex-1 min-w-0">
 
-            {/* Table sélectionnée */}
             {selectedTable ? (
               <div className="bg-white rounded-xl border border-stone-100 mb-4">
-                {/* Header table */}
                 {editingTable === selectedTable.id ? (
-                  <form action={async (fd) => { await updateTableName(fd); setEditingTable(null) }}
-                        className="flex items-center gap-2 px-5 py-4 border-b border-stone-100">
+                  <form
+                    onSubmit={e => {
+                      e.preventDefault()
+                      const fd = new FormData(e.currentTarget)
+                      run(async () => { await updateTableName(fd) }, () => setEditingTable(null))
+                    }}
+                    className="flex items-center gap-2 px-5 py-4 border-b border-stone-100">
                     <input type="hidden" name="slug" value={slug} />
                     <input type="hidden" name="id" value={selectedTable.id} />
                     <input name="name" defaultValue={selectedTable.name} autoFocus required
@@ -172,8 +191,8 @@ export default function TablesClient({
                     <input name="capacity" type="number" min={1} max={30} defaultValue={selectedTable.capacity}
                       className="w-16 text-sm border border-stone-200 rounded-lg px-2 py-1.5 outline-none focus:border-[#4a5240]"
                       style={{ fontWeight: 300 }} />
-                    <button type="submit"
-                      className="text-xs bg-[#4a5240] text-white px-3 py-1.5 rounded-lg hover:bg-[#2d3228] transition cursor-pointer"
+                    <button type="submit" disabled={isPending}
+                      className="text-xs bg-[#4a5240] text-white px-3 py-1.5 rounded-lg hover:bg-[#2d3228] transition cursor-pointer disabled:opacity-50"
                       style={{ fontWeight: 300 }}>OK</button>
                     <button type="button" onClick={() => setEditingTable(null)}
                       className="text-xs text-stone-400 hover:text-stone-600 transition cursor-pointer"
@@ -188,30 +207,33 @@ export default function TablesClient({
                         {tableGuests.length} / {selectedTable.capacity} places
                       </p>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       <button onClick={() => setEditingTable(selectedTable.id)}
                         className="text-xs text-stone-400 hover:text-[#4a5240] transition cursor-pointer"
                         style={{ fontWeight: 300 }}>Renommer</button>
-                      <form action={deleteTable}>
-                        <input type="hidden" name="slug" value={slug} />
-                        <input type="hidden" name="id" value={selectedTable.id} />
-                        <button type="submit"
-                          className="text-xs text-stone-300 hover:text-red-400 transition cursor-pointer"
-                          style={{ fontWeight: 300 }}
-                          onClick={e => { if (!confirm(`Supprimer "${selectedTable.name}" ?`)) e.preventDefault() }}>
-                          Supprimer
-                        </button>
-                      </form>
+                      <button
+                        disabled={isPending}
+                        onClick={() => {
+                          if (!confirm(`Supprimer "${selectedTable.name}" ?`)) return
+                          const fd = new FormData()
+                          fd.append('slug', slug)
+                          fd.append('id', selectedTable.id)
+                          run(async () => { await deleteTable(fd) }, () => setSelectedTableId(null))
+                        }}
+                        className="text-xs text-stone-300 hover:text-red-400 transition cursor-pointer disabled:opacity-50"
+                        style={{ fontWeight: 300 }}>
+                        Supprimer
+                      </button>
                     </div>
                   </div>
                 )}
 
-                {/* Invités assis à cette table */}
+                {/* Invités à cette table */}
                 <div className="divide-y divide-stone-50">
                   {tableGuests.length === 0 ? (
                     <p style={{ fontWeight: 300, fontStyle: 'italic', fontSize: '0.85rem' }}
                        className="text-stone-300 px-5 py-6 text-center">
-                      Aucun invité à cette table pour l'instant
+                      Utilisez la liste ci-dessous pour ajouter des invités
                     </p>
                   ) : (
                     tableGuests.map(g => (
@@ -221,16 +243,19 @@ export default function TablesClient({
                           {g.first_name} {g.last_name ?? ''}
                           {g.relation && <span className="text-stone-400 ml-1.5 text-xs">· {g.relation}</span>}
                         </span>
-                        <form action={assignGuest}>
-                          <input type="hidden" name="slug" value={slug} />
-                          <input type="hidden" name="guest_id" value={g.id} />
-                          <input type="hidden" name="table_id" value="" />
-                          <button type="submit"
-                            className="text-xs text-stone-300 hover:text-red-400 transition cursor-pointer"
-                            style={{ fontWeight: 300 }}>
-                            Retirer
-                          </button>
-                        </form>
+                        <button
+                          disabled={isPending}
+                          onClick={() => {
+                            const fd = new FormData()
+                            fd.append('slug', slug)
+                            fd.append('guest_id', g.id)
+                            fd.append('table_id', '')
+                            run(() => assignGuest(fd))
+                          }}
+                          className="text-xs text-stone-300 hover:text-red-400 transition cursor-pointer disabled:opacity-50"
+                          style={{ fontWeight: 300 }}>
+                          Retirer
+                        </button>
                       </div>
                     ))
                   )}
@@ -243,12 +268,12 @@ export default function TablesClient({
               </div>
             )}
 
-            {/* Liste invités à assigner */}
+            {/* Liste invités */}
             <div className="bg-white rounded-xl border border-stone-100">
               <div className="flex items-center gap-3 px-5 py-3 border-b border-stone-100 flex-wrap">
                 <input
                   type="text"
-                  placeholder="Rechercher…"
+                  placeholder="Rechercher un invité…"
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   className="flex-1 min-w-[140px] text-sm border border-stone-200 rounded-lg px-3 py-1.5 outline-none focus:border-[#4a5240]"
@@ -267,11 +292,12 @@ export default function TablesClient({
               <div className="divide-y divide-stone-50 max-h-96 overflow-y-auto">
                 {filteredGuests.length === 0 ? (
                   <p style={{ fontWeight: 300, fontSize: '0.85rem' }} className="text-stone-300 px-5 py-6 text-center">
-                    {filter === 'unassigned' ? 'Tous les invités sont placés 🎉' : 'Aucun invité trouvé'}
+                    {filter === 'unassigned' ? '🎉 Tous les invités sont placés !' : 'Aucun invité trouvé'}
                   </p>
                 ) : (
                   filteredGuests.map(g => {
                     const currentTable = tables.find(t => t.id === g.table_id)
+                    const isInSelected = g.table_id === selectedTableId
                     return (
                       <div key={g.id} className="flex items-center gap-3 px-5 py-3">
                         <span className={`w-2 h-2 rounded-full shrink-0 ${RSVP_DOT[g.rsvp_status] ?? 'bg-stone-300'}`} />
@@ -287,20 +313,23 @@ export default function TablesClient({
                           )}
                         </div>
                         {selectedTable && (
-                          <form action={assignGuest}>
-                            <input type="hidden" name="slug" value={slug} />
-                            <input type="hidden" name="guest_id" value={g.id} />
-                            <input type="hidden" name="table_id" value={g.table_id === selectedTable.id ? '' : selectedTable.id} />
-                            <button type="submit"
-                              className={`text-xs px-3 py-1 rounded-lg border transition cursor-pointer ${
-                                g.table_id === selectedTable.id
-                                  ? 'border-stone-200 text-stone-400 hover:text-red-400 hover:border-red-200'
-                                  : 'border-[#4a5240] text-[#4a5240] hover:bg-[#4a5240] hover:text-white'
-                              }`}
-                              style={{ fontWeight: 300 }}>
-                              {g.table_id === selectedTable.id ? 'Retirer' : 'Ajouter'}
-                            </button>
-                          </form>
+                          <button
+                            disabled={isPending}
+                            onClick={() => {
+                              const fd = new FormData()
+                              fd.append('slug', slug)
+                              fd.append('guest_id', g.id)
+                              fd.append('table_id', isInSelected ? '' : selectedTable.id)
+                              run(() => assignGuest(fd))
+                            }}
+                            className={`text-xs px-3 py-1 rounded-lg border transition cursor-pointer disabled:opacity-40 ${
+                              isInSelected
+                                ? 'border-stone-200 text-stone-400 hover:text-red-400 hover:border-red-200'
+                                : 'border-[#4a5240] text-[#4a5240] hover:bg-[#4a5240] hover:text-white'
+                            }`}
+                            style={{ fontWeight: 300 }}>
+                            {isInSelected ? 'Retirer' : 'Ajouter'}
+                          </button>
                         )}
                       </div>
                     )

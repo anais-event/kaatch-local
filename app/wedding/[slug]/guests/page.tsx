@@ -107,11 +107,10 @@ export default async function GuestsPage({
     return <div className="p-8">Mariage introuvable 😢</div>
   }
 
-  const { data: guests } = await supabase
-    .from('guests')
-    .select('*')
-    .eq('wedding_id', wedding.id)
-    .order('created_at', { ascending: false })
+  const [{ data: guests }, { data: tables }] = await Promise.all([
+    supabase.from('guests').select('*').eq('wedding_id', wedding.id).order('created_at', { ascending: false }),
+    supabase.from('seating_tables').select('id, name').eq('wedding_id', wedding.id),
+  ])
 
   const total = guests?.length ?? 0
   const confirmed = guests?.filter(g => g.rsvp_status === 'confirme').length ?? 0
@@ -244,6 +243,7 @@ export default async function GuestsPage({
                   className="text-[#4a5240] mb-4">Invités ({total})</h2>
               <GuestList
                 guests={guests ?? []}
+                tables={tables ?? []}
                 slug={slug}
                 setRsvp={setRsvp}
                 deleteGuest={deleteGuest}

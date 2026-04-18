@@ -50,7 +50,7 @@ export default async function GuestContactsPage({ params }: { params: Promise<{ 
   const cookieStore = await cookies()
   const guestCookie = cookieStore.get(`guest_${slug}`)
 
-  const guest = JSON.parse(guestCookie.value)
+  const guest = guestCookie ? JSON.parse(guestCookie.value) : { firstName: '', lastName: '' }
   const guestName = `${guest.firstName} ${guest.lastName}`
 
   const supabase = await createSupabaseServerClient()

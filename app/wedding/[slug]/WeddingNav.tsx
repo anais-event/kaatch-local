@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation'
 import { useState, useRef, useEffect } from 'react'
 import { logoutMaried } from './logout-action'
+import KaatchChat from './KaatchChat'
 
 type NavItem = { label: string; href: string; sub?: string; target?: string }
 type NavSection = { label: string; href?: string; items?: NavItem[] }
@@ -65,6 +66,7 @@ export default function WeddingNav({ slug, weddingName, weddingId }: { slug: str
   }
 
   return (
+    <>
     <nav ref={navRef} className="fixed top-0 left-0 right-0 z-50 bg-[#f5f0e8]/95 backdrop-blur border-b border-stone-200 shadow-sm">
       <div className="max-w-4xl mx-auto px-4 flex items-center justify-between h-12">
 
@@ -158,5 +160,7 @@ export default function WeddingNav({ slug, weddingName, weddingId }: { slug: str
         </div>
       </div>
     </nav>
+    <KaatchChat />
+    </>
   )
 }

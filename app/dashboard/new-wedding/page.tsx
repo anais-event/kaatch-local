@@ -38,7 +38,7 @@ export default function NewWedding() {
                 <input
                   name="partner_name"
                   type="text"
-                  placeholder="Prénom de l'autre"
+                  placeholder="Son prénom"
                   required
                   className="flex-1 border border-stone-200 rounded-xl px-4 py-3 outline-none focus:border-[#4a5240] transition text-stone-700 bg-white"
                   style={{ fontFamily: 'var(--font-cormorant)', fontSize: '1.1rem' }}

@@ -1,6 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { cookies } from 'next/headers'
-import { redirect, revalidatePath } from 'next/navigation'
+import { redirect } from 'next/navigation'
 import Countdown from './Countdown'
 
 async function logout(formData: FormData) {
@@ -61,7 +61,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
   const supabase = await createSupabaseServerClient()
   const { data: wedding } = await supabase
     .from('weddings')
-    .select('id, name, date, cover_image_url, location')
+    .select('id, name, date, cover_image_url, cover_position_y, location')
     .eq('slug', slug)
     .single()
 
@@ -87,7 +87,8 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
       {/* Hero */}
       <div className="relative w-full h-[45vh] min-h-[260px] overflow-hidden">
         {wedding.cover_image_url
-          ? <img src={wedding.cover_image_url} alt="" className="w-full h-full object-cover" />
+          ? <img src={wedding.cover_image_url} alt="" className="w-full h-full object-cover"
+                 style={{ objectPosition: `center ${wedding.cover_position_y ?? 50}%` }} />
           : <div className="w-full h-full bg-[#4a5240]" />
         }
         <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/70" />
@@ -182,6 +183,45 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Message aux mariés */}
+        {!isPreview && guest.id && (
+          <div className="bg-white rounded-xl border border-stone-100 p-5">
+            <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.15rem', fontStyle: 'italic' }}
+               className="text-[#2d3228] mb-1">
+              {existingMessage ? 'Votre message' : 'Laisser un message aux mariés'}
+            </p>
+            <p style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-400 mb-3">
+              {existingMessage
+                ? 'Vous pouvez modifier votre message à tout moment.'
+                : 'Un petit mot pour Emma & Luc ? Une question, un souhait…'}
+            </p>
+            <form action={saveMessage} className="space-y-3">
+              <input type="hidden" name="slug" value={slug} />
+              <input type="hidden" name="guest_id" value={guest.id} />
+              <textarea
+                name="message"
+                defaultValue={existingMessage ?? ''}
+                rows={3}
+                placeholder="Votre message…"
+                className="w-full border border-stone-200 rounded-xl px-4 py-3 outline-none focus:border-[#4a5240] transition text-stone-700 resize-none bg-[#f5f0e8]"
+                style={{ fontWeight: 300, fontSize: '0.9rem', lineHeight: 1.6 }}
+              />
+              <button type="submit"
+                className="bg-[#4a5240] text-white px-5 py-2.5 rounded-xl hover:bg-[#2d3228] transition text-sm cursor-pointer"
+                style={{ fontWeight: 300, letterSpacing: '0.04em' }}>
+                {existingMessage ? 'Mettre à jour' : 'Envoyer le message'}
+              </button>
+              {existingMessage && (
+                <button type="submit" name="message" value=""
+                  className="ml-3 text-xs text-stone-400 hover:text-red-400 transition cursor-pointer"
+                  style={{ fontWeight: 300 }}>
+                  Supprimer le message
+                </button>
+              )}
+            </form>
           </div>
         )}
 

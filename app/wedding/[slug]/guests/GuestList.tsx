@@ -12,7 +12,11 @@ type Guest = {
   relation: string | null
   rsvp_status: 'en_attente' | 'confirme' | 'decline'
   gender: 'M' | 'F' | null
+  table_id: string | null
+  guest_message: string | null
 }
+
+type Table = { id: string; name: string }
 
 const RELATIONS = ['Ami(e)', 'Frère', 'Sœur', 'Père', 'Mère', 'Oncle', 'Tante', 'Cousin(e)', 'Collègue', 'Autre']
 
@@ -24,13 +28,14 @@ const RSVP_CONFIG = {
 
 type Props = {
   guests: Guest[]
+  tables: Table[]
   slug: string
   setRsvp: (formData: FormData) => Promise<void>
   deleteGuest: (formData: FormData) => Promise<void>
   updateGuest: (formData: FormData) => Promise<void>
 }
 
-export default function GuestList({ guests, slug, setRsvp, deleteGuest, updateGuest }: Props) {
+export default function GuestList({ guests, tables, slug, setRsvp, deleteGuest, updateGuest }: Props) {
   const [search, setSearch] = useState('')
   const [sortBy, setSortBy] = useState<'date' | 'nom' | 'relation' | 'rsvp'>('date')
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -166,9 +171,16 @@ export default function GuestList({ guests, slug, setRsvp, deleteGuest, updateGu
                       {guest.relation && (
                         <span className="ml-2 text-xs bg-rose-100 text-rose-600 px-2 py-0.5 rounded-full">{guest.relation}</span>
                       )}
+                      {guest.table_id && (() => {
+                        const t = tables.find(t => t.id === guest.table_id)
+                        return t ? <span className="ml-2 text-xs bg-[#4a5240]/10 text-[#4a5240] px-2 py-0.5 rounded-full">🪑 {t.name}</span> : null
+                      })()}
                     </p>
                     {guest.email && <p className="text-sm text-gray-400">✉️ {guest.email}</p>}
                     {guest.telephone && <p className="text-sm text-gray-400">📞 {guest.telephone}</p>}
+                    {guest.guest_message && (
+                      <p className="text-xs text-amber-600 mt-0.5 italic">💬 "{guest.guest_message}"</p>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-2">

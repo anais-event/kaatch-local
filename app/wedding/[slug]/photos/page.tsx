@@ -8,6 +8,7 @@ async function uploadPhoto(formData: FormData) {
   const slug = formData.get('slug') as string
   const uploader_name = (formData.get('uploader_name') as string) || 'Anonyme'
   const files = formData.getAll('photo') as File[]
+  const tagged = formData.getAll('tagged') as string[]
 
   const { data: wedding } = await supabase.from('weddings').select('id').eq('slug', slug).single()
   if (!wedding) return
@@ -26,6 +27,7 @@ async function uploadPhoto(formData: FormData) {
       wedding_id: wedding.id,
       url: urlData.publicUrl,
       uploaded_by_name: uploader_name,
+      tagged_guests: tagged.filter(Boolean),
     })
   }))
 
@@ -51,16 +53,24 @@ export default async function PhotosPage({ params }: { params: Promise<{ slug: s
 
   const { data: rawPhotos } = await supabase
     .from('photos')
-    .select('*, photo_likes(id)')
+    .select('*, photo_likes(id), photo_comments(id), tagged_guests, uploaded_by_name')
     .eq('wedding_id', wedding.id)
     .order('created_at', { ascending: false })
+
+  const { data: guestNames } = await supabase
+    .from('guests')
+    .select('first_name, last_name')
+    .eq('wedding_id', wedding.id)
+    .eq('rsvp_status', 'confirme')
 
   const photos = (rawPhotos ?? []).map(p => ({
     id: p.id,
     url: p.url,
-    uploader_name: p.uploaded_by_name,
+    uploaded_by_name: p.uploaded_by_name ?? null,
+    tagged_guests: p.tagged_guests ?? [],
     created_at: p.created_at,
     likes: p.photo_likes?.length ?? 0,
+    comments: p.photo_comments?.length ?? 0,
   }))
 
   return (
@@ -68,6 +78,7 @@ export default async function PhotosPage({ params }: { params: Promise<{ slug: s
       slug={slug}
       weddingName={wedding.name}
       photos={photos}
+      guestNames={(guestNames ?? []).map(g => `${g.first_name} ${g.last_name}`)}
       uploadPhoto={uploadPhoto}
       deletePhoto={deletePhoto}
     />

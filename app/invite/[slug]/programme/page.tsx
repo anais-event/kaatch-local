@@ -8,7 +8,6 @@ import ProgrammeMap from './ProgrammeMap'
 export default async function GuestProgrammePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const cookieStore = await cookies()
-  if (!cookieStore.get(`guest_${slug}`)) redirect(`/invite/${slug}`)
 
   const supabase = await createSupabaseServerClient()
   const { data: wedding } = await supabase

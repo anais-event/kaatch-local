@@ -1,6 +1,5 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import GuestPhotoFeed from './GuestPhotoFeed'
 
@@ -64,7 +63,6 @@ export default async function GuestPhotosPage({ params }: { params: Promise<{ sl
   const { slug } = await params
   const cookieStore = await cookies()
   const guestCookie = cookieStore.get(`guest_${slug}`)
-  if (!guestCookie) redirect(`/invite/${slug}`)
 
   const guest = JSON.parse(guestCookie.value)
   const guestName = [guest.firstName, guest.lastName].filter(Boolean).join(' ')

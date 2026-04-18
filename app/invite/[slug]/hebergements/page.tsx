@@ -1,6 +1,4 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
 
 const TYPE_ICONS: Record<string, string> = {
   hotel: '🏨',
@@ -20,9 +18,6 @@ const TYPE_LABELS: Record<string, string> = {
 
 export default async function GuestHebergementsPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const cookieStore = await cookies()
-  const guestCookie = cookieStore.get(`guest_${slug}`)
-  if (!guestCookie) redirect(`/invite/${slug}`)
 
   const supabase = await createSupabaseServerClient()
 

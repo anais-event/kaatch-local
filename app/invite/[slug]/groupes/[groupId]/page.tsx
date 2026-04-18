@@ -38,7 +38,6 @@ export default async function GroupConversationPage({
   const { slug, groupId } = await params
   const cookieStore = await cookies()
   const guestCookie = cookieStore.get(`guest_${slug}`)
-  if (!guestCookie) redirect(`/invite/${slug}`)
 
   const guest = JSON.parse(guestCookie.value)
   const guestName = [guest.firstName, guest.lastName].filter(Boolean).join(' ')

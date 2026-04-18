@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation'
 import { useState, useRef, useEffect } from 'react'
 import { logoutMaried } from './logout-action'
 
-type NavItem = { label: string; href: string; sub?: string }
+type NavItem = { label: string; href: string; sub?: string; target?: string }
 type NavSection = { label: string; href?: string; items?: NavItem[] }
 
 export default function WeddingNav({ slug, weddingName, weddingId }: { slug: string; weddingName: string; weddingId: string }) {
@@ -48,7 +48,7 @@ export default function WeddingNav({ slug, weddingName, weddingId }: { slug: str
     {
       label: 'Compte',
       items: [
-        { label: 'Vue invités', sub: 'Aperçu de votre espace', href: `/invite/${slug}` },
+        { label: 'Vue invités', sub: 'Aperçu de votre espace', href: `/invite/${slug}`, target: '_blank' },
         { label: 'Paramètres', sub: 'Infos du mariage', href: `/wedding/${slug}/edit` },
         { label: 'Partager', sub: 'Lien & QR code', href: `/wedding/${slug}/partager` },
         { label: 'Règles & message', sub: 'Mot des mariés', href: `/wedding/${slug}/regles` },
@@ -123,6 +123,7 @@ export default function WeddingNav({ slug, weddingName, weddingId }: { slug: str
                       const itemActive = pathname.startsWith(item.href)
                       return (
                         <a key={item.href} href={item.href}
+                           target={item.target}
                            onClick={() => setOpen(null)}
                            className={`flex flex-col px-4 py-2.5 hover:bg-[#f5f0e8] transition ${itemActive ? 'bg-[#f5f0e8]' : ''}`}>
                           <span style={{ fontFamily: 'var(--font-lato)', fontWeight: itemActive ? 400 : 300, fontSize: '0.82rem' }}

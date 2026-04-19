@@ -78,7 +78,7 @@ export default async function PhotosPage({ params }: { params: Promise<{ slug: s
       slug={slug}
       weddingName={wedding.name}
       photos={photos}
-      guestNames={(guestNames ?? []).map(g => `${g.first_name} ${g.last_name}`)}
+      guestNames={(guestNames ?? []).map(g => [g.first_name, g.last_name].filter(v => v && v !== 'null').join(' '))}
       uploadPhoto={uploadPhoto}
       deletePhoto={deletePhoto}
     />

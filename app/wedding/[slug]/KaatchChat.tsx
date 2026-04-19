@@ -60,8 +60,8 @@ export default function KaatchChat() {
       {/* Fenêtre chat */}
       {open && (
         <div
-          className="fixed bottom-24 right-6 z-50 bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
-          style={{ width: 340, height: 480, border: '1px solid #e7e5e4' }}>
+          className="fixed bottom-24 right-4 z-50 bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+          style={{ width: 'min(360px, calc(100vw - 32px))', height: 500, border: '1px solid #e7e5e4' }}>
 
           {/* Header */}
           <div className="px-4 py-3 shrink-0 flex items-center gap-3"

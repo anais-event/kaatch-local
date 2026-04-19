@@ -327,7 +327,7 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
       {/* FAB */}
       <button
         onClick={() => setShowUpload(true)}
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-white text-[#2d3228] shadow-2xl flex items-center justify-center hover:scale-110 transition-transform cursor-pointer z-20"
+        className="fixed bottom-24 right-6 w-14 h-14 rounded-full bg-white text-[#2d3228] shadow-2xl flex items-center justify-center hover:scale-110 transition-transform cursor-pointer z-20"
         title="Ajouter des photos"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-6 h-6">

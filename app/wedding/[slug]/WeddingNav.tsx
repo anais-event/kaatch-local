@@ -11,21 +11,25 @@ type NavSection = { label: string; href?: string; items?: NavItem[] }
 export default function WeddingNav({ slug, weddingName, weddingId }: { slug: string; weddingName: string; weddingId: string }) {
   const pathname = usePathname()
   const [open, setOpen] = useState<string | null>(null)
+  const [mobileOpen, setMobileOpen] = useState(false)
   const navRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     function handler(e: MouseEvent) {
-      if (navRef.current && !navRef.current.contains(e.target as Node)) setOpen(null)
+      if (navRef.current && !navRef.current.contains(e.target as Node)) {
+        setOpen(null)
+        setMobileOpen(false)
+      }
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
+  // Fermer le menu mobile à chaque changement de page
+  useEffect(() => { setMobileOpen(false); setOpen(null) }, [pathname])
+
   const sections: NavSection[] = [
-    {
-      label: 'Accueil',
-      href: `/wedding/${slug}`,
-    },
+    { label: 'Accueil', href: `/wedding/${slug}` },
     {
       label: 'Préparatifs',
       items: [
@@ -43,10 +47,7 @@ export default function WeddingNav({ slug, weddingName, weddingId }: { slug: str
         { label: 'QR Code', sub: 'Accès rapide jour J', href: `/wedding/${slug}/partager` },
       ],
     },
-    {
-      label: 'Messagerie',
-      href: `/wedding/${slug}/messagerie`,
-    },
+    { label: 'Messagerie', href: `/wedding/${slug}/messagerie` },
     {
       label: 'Compte',
       items: [
@@ -70,20 +71,19 @@ export default function WeddingNav({ slug, weddingName, weddingId }: { slug: str
     <nav ref={navRef} className="fixed top-0 left-0 right-0 z-50 bg-[#f5f0e8]/95 backdrop-blur border-b border-stone-200 shadow-sm">
       <div className="max-w-4xl mx-auto px-4 flex items-center justify-between h-12">
 
-        {/* Logo / nom */}
+        {/* Logo */}
         <a href={`/wedding/${slug}`}
            style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.1rem', fontStyle: 'italic' }}
            className="text-[#2d3228] shrink-0 mr-4">
           {weddingName}
         </a>
 
-        {/* Sections */}
-        <div className="flex items-center gap-0.5">
+        {/* Desktop nav */}
+        <div className="hidden md:flex items-center gap-0.5 flex-1">
           {sections.map(section => {
             const active = isActive(section)
 
             if (!section.items) {
-              // Lien simple
               return (
                 <a key={section.label} href={section.href}
                    className={`px-3 py-1 rounded-md text-xs whitespace-nowrap transition ${
@@ -102,7 +102,6 @@ export default function WeddingNav({ slug, weddingName, weddingId }: { slug: str
               )
             }
 
-            // Dropdown
             const isOpen = open === section.label
             return (
               <div key={section.label} className="relative">
@@ -158,7 +157,74 @@ export default function WeddingNav({ slug, weddingName, weddingId }: { slug: str
             )
           })}
         </div>
+
+        {/* Cloche notifications (desktop) + hamburger (mobile) */}
+        <div className="flex items-center gap-1 ml-auto md:ml-2">
+          <button
+            className="p-1.5 rounded-md text-stone-400 hover:text-[#4a5240] transition relative cursor-pointer"
+            title="Notifications">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+            </svg>
+          </button>
+
+          {/* Hamburger mobile */}
+          <button
+            onClick={() => setMobileOpen(o => !o)}
+            className="md:hidden p-1.5 rounded-md text-stone-500 hover:text-[#4a5240] transition cursor-pointer"
+            aria-label="Menu">
+            {mobileOpen ? (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+              </svg>
+            )}
+          </button>
+        </div>
       </div>
+
+      {/* Mobile menu déroulant */}
+      {mobileOpen && (
+        <div className="md:hidden bg-white border-t border-stone-100 shadow-lg max-h-[80vh] overflow-y-auto">
+          {sections.map(section => (
+            <div key={section.label}>
+              {!section.items ? (
+                <a href={section.href}
+                   className={`flex items-center px-5 py-3 text-sm border-b border-stone-50 ${
+                     isActive(section) ? 'text-[#4a5240] font-medium bg-[#f5f0e8]' : 'text-stone-600'
+                   }`}
+                   style={{ fontWeight: isActive(section) ? 400 : 300 }}>
+                  {section.label}
+                </a>
+              ) : (
+                <>
+                  <p className="px-5 pt-3 pb-1 text-[10px] uppercase tracking-widest text-stone-300"
+                     style={{ fontWeight: 300 }}>{section.label}</p>
+                  {section.items.map(item => (
+                    <a key={item.href} href={item.href} target={item.target}
+                       className={`flex flex-col px-6 py-2.5 border-b border-stone-50 ${
+                         pathname.startsWith(item.href) ? 'bg-[#f5f0e8] text-[#4a5240]' : 'text-stone-600'
+                       }`}>
+                      <span style={{ fontWeight: 300, fontSize: '0.85rem' }}>{item.label}</span>
+                      {item.sub && <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400">{item.sub}</span>}
+                    </a>
+                  ))}
+                  {section.label === 'Compte' && (
+                    <form action={logoutMaried} className="px-6 py-3 border-b border-stone-50">
+                      <button type="submit" className="text-sm text-red-400 cursor-pointer" style={{ fontWeight: 300 }}>
+                        Déconnexion
+                      </button>
+                    </form>
+                  )}
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </nav>
     <KaatchChat />
     </>

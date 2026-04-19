@@ -52,8 +52,7 @@ export default function Memo({
   }
 
   return (
-    <div className="rounded-xl border border-amber-100 bg-[#fdfdf8] overflow-hidden"
-         style={{ backgroundImage: 'repeating-linear-gradient(transparent, transparent 27px, #f0ede4 27px, #f0ede4 28px)' }}>
+    <div className="rounded-xl border border-amber-100 bg-[#fdfdf8] overflow-hidden">
 
       {/* Header */}
       <div className="px-5 pt-5 pb-3 bg-[#fdfdf8]">

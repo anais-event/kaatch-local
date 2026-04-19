@@ -33,7 +33,10 @@ async function downloadZip(photos: Photo[]) {
   const JSZip = (await import('jszip')).default
   const zip = new JSZip()
   await Promise.all(photos.map(async (p, i) => {
-    try { zip.file(`photo-${i + 1}.jpg`, await fetch(p.url).then(r => r.blob())) } catch {}
+    try {
+      const blob = await fetch(p.url).then(r => r.blob())
+      zip.file(`photo-${i + 1}.jpg`, blob)
+    } catch {}
   }))
   const a = document.createElement('a')
   a.href = URL.createObjectURL(await zip.generateAsync({ type: 'blob' }))

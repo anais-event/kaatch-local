@@ -115,6 +115,7 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
     setSelectedIds(new Set())
     setSelectMode(false)
   }
+
   // Lightbox state
   const [lbLikes, setLbLikes] = useState(0)
   const [lbComments, setLbComments] = useState<Comment[]>([])
@@ -134,8 +135,8 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
     )
   })
 
-  const cols: Photo[][] = [[], [], []]
-  filteredPhotos.forEach((p, i) => cols[i % 3].push(p))
+  const cols: Photo[][] = [[], []]
+  filteredPhotos.forEach((p, i) => cols[i % 2].push(p))
 
   const currentPhoto = lightbox ? photos.find(p => p.id === lightbox) ?? null : null
   const currentIdx = lightbox ? photos.findIndex(p => p.id === lightbox) : -1
@@ -252,12 +253,12 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
   }
 
   return (
-    <div className="min-h-screen bg-[#1a1a18]">
+    <div className="min-h-screen bg-[#f5f0e8]">
       {/* Header */}
-      <div className="sticky top-0 z-30 bg-[#1a1a18]/90 backdrop-blur-sm border-b border-white/5 px-4 py-3">
+      <div className="sticky top-0 z-30 bg-[#f5f0e8]/90 backdrop-blur-sm border-b border-stone-200/60 px-4 py-3">
         <div className="flex items-center justify-between mb-2.5">
           <a href={`/wedding/${slug}`}
-            className="text-white/40 hover:text-white/80 transition text-sm flex items-center gap-1.5"
+            className="text-stone-400 hover:text-stone-600 transition text-sm flex items-center gap-1.5"
             style={{ fontWeight: 300 }}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4">
               <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
@@ -265,10 +266,10 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
             <span className="hidden sm:inline">Retour</span>
           </a>
           <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400, fontSize: '1.1rem', fontStyle: 'italic' }}
-            className="text-white/70">
+            className="text-[#2d3228]">
             {weddingName} — Photos
           </h1>
-          <span className="text-white/30 text-sm" style={{ fontWeight: 300 }}>
+          <span className="text-stone-400 text-sm" style={{ fontWeight: 300 }}>
             {photos.length} photo{photos.length !== 1 ? 's' : ''}
           </span>
         </div>
@@ -278,13 +279,15 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Rechercher par nom…"
-            className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-1.5 text-white/80 text-sm outline-none focus:border-white/30 placeholder:text-white/25 transition"
+            className="flex-1 bg-white border border-stone-200 rounded-full px-4 py-1.5 text-stone-700 text-sm outline-none focus:border-stone-400 placeholder:text-stone-300 transition"
             style={{ fontWeight: 300 }}
           />
           <button
             onClick={() => { setSelectMode(s => !s); setSelectedIds(new Set()) }}
-            className={`px-3 py-1.5 rounded-xl border text-sm transition cursor-pointer whitespace-nowrap ${
-              selectMode ? 'bg-[#4a5240] border-[#4a5240] text-white' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
+            className={`px-3 py-1.5 rounded-full border text-sm transition cursor-pointer whitespace-nowrap ${
+              selectMode
+                ? 'bg-[#4a5240] border-[#4a5240] text-white'
+                : 'bg-white border-stone-200 text-stone-500 hover:border-[#4a5240] hover:text-[#4a5240]'
             }`}
             style={{ fontWeight: 300 }}
           >
@@ -293,19 +296,32 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
           <button
             onClick={async () => { setZipping(true); await downloadZip(filteredPhotos); setZipping(false) }}
             disabled={zipping || filteredPhotos.length === 0}
-            className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-white/60 text-sm hover:bg-white/10 transition disabled:opacity-40 cursor-pointer whitespace-nowrap"
+            className="px-3 py-1.5 rounded-full bg-white border border-stone-200 text-stone-500 text-sm hover:border-[#4a5240] hover:text-[#4a5240] transition disabled:opacity-40 cursor-pointer whitespace-nowrap"
             style={{ fontWeight: 300 }}
           >
             {zipping ? '…' : '↓ ZIP'}
           </button>
         </div>
+        {/* Download selected bar */}
+        {selectMode && selectedIds.size > 0 && (
+          <div className="mt-2 flex justify-end">
+            <button
+              onClick={downloadSelected}
+              disabled={downloading}
+              className="px-4 py-1.5 rounded-full bg-[#4a5240] text-white text-sm transition disabled:opacity-50 cursor-pointer"
+              style={{ fontWeight: 300 }}
+            >
+              {downloading ? 'Téléchargement…' : `↓ Télécharger (${selectedIds.size})`}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Gallery */}
       {filteredPhotos.length === 0 ? (
         <div className="flex flex-col items-center justify-center min-h-[70vh] gap-4">
           <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.8rem', fontWeight: 300 }}
-            className="text-white/30">
+            className="text-stone-400">
             {search ? 'Aucun résultat' : 'Aucune photo pour l\'instant'}
           </p>
         </div>
@@ -323,76 +339,78 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
               </p>
             </div>
           )}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
-            {cols.map((col, ci) => (
-              <div key={ci} className="flex flex-col gap-2 sm:gap-3">
-                {col.map(photo => (
-                  <div key={photo.id}
-                    onClick={() => selectMode ? toggleSelect(photo.id) : openLightbox(photo.id)}
-                    className={`group relative cursor-pointer rounded-xl overflow-hidden bg-white/5 ${
-                      selectMode && selectedIds.has(photo.id) ? 'ring-2 ring-[#4a5240]' : ''
-                    }`}
-                    style={{ aspectRatio: (ci % 2 === 0) ? '3/4' : '4/3' }}>
-                    <img
-                      src={photo.url}
-                      alt=""
-                      className="w-full h-full object-cover transition duration-300 group-hover:scale-105"
-                      loading="lazy"
-                    />
-                    {/* Checkbox en mode sélection */}
-                    {selectMode && (
-                      <div className="absolute top-2 left-2 z-10">
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition ${
-                          selectedIds.has(photo.id) ? 'bg-[#4a5240] border-[#4a5240]' : 'bg-black/30 border-white/60'
-                        }`}>
-                          {selectedIds.has(photo.id) && (
-                            <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={3} className="w-3 h-3">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                            </svg>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                    {/* Hover overlay */}
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition duration-300 flex flex-col justify-end p-2.5">
-                      <div className="opacity-0 group-hover:opacity-100 transition duration-200 space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-white/80">
-                            {photo.uploaded_by_name ?? 'Anonyme'} · {formatDateShort(photo.created_at)}
-                          </span>
-                          <div className="flex items-center gap-2">
-                            {photo.likes > 0 && (
-                              <span style={{ fontSize: '0.65rem' }} className="text-white/70 flex items-center gap-0.5">
-                                ❤️ {photo.likes}
-                              </span>
-                            )}
-                            {!selectMode && (
-                              <button
-                                onClick={e => { e.stopPropagation(); downloadPhotoBlob(photo.url, `photo-${photo.uploaded_by_name ?? 'kaatch'}.jpg`) }}
-                                className="text-white/50 hover:text-white transition cursor-pointer"
-                                title="Télécharger"
-                              >
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                                </svg>
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                        {photo.tagged_guests.length > 0 && (
-                          <div className="flex flex-wrap gap-1">
-                            {photo.tagged_guests.map(g => (
-                              <span key={g} className="px-1.5 py-0.5 rounded-full bg-white/15 text-white/70"
-                                style={{ fontSize: '0.6rem', fontWeight: 300 }}>
-                                {g}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
+          <div className="columns-2 gap-3">
+            {filteredPhotos.map(photo => (
+              <div key={photo.id}
+                onClick={() => selectMode ? toggleSelect(photo.id) : openLightbox(photo.id)}
+                className={`group relative cursor-pointer rounded-2xl overflow-hidden bg-white shadow-sm mb-3 break-inside-avoid ${
+                  selectMode && selectedIds.has(photo.id) ? 'ring-2 ring-[#4a5240]' : ''
+                }`}
+              >
+                <img
+                  src={photo.url}
+                  alt=""
+                  className="w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+                  loading="lazy"
+                />
+                {/* Checkbox in select mode */}
+                {selectMode && (
+                  <div className="absolute top-2 left-2 z-10">
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition ${
+                      selectedIds.has(photo.id) ? 'bg-[#4a5240] border-[#4a5240]' : 'bg-white/80 border-stone-300'
+                    }`}>
+                      {selectedIds.has(photo.id) && (
+                        <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={3} className="w-3 h-3">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
                     </div>
                   </div>
-                ))}
+                )}
+                {/* Card info */}
+                <div className="px-3 py-2.5 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span style={{ fontWeight: 400, fontSize: '0.75rem' }} className="text-stone-600">
+                      {photo.uploaded_by_name ?? 'Anonyme'}
+                    </span>
+                    <span style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400">
+                      {formatDateShort(photo.created_at)}
+                    </span>
+                  </div>
+                  {photo.tagged_guests.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {photo.tagged_guests.map(g => (
+                        <span key={g} className="px-1.5 py-0.5 rounded-full bg-stone-100 text-stone-500"
+                          style={{ fontSize: '0.6rem', fontWeight: 300 }}>
+                          {g}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <div className="flex items-center gap-3 pt-0.5">
+                    {photo.likes > 0 && (
+                      <span style={{ fontSize: '0.68rem' }} className="text-stone-400 flex items-center gap-0.5">
+                        ❤️ {photo.likes}
+                      </span>
+                    )}
+                    {photo.comments > 0 && (
+                      <span style={{ fontSize: '0.68rem' }} className="text-stone-400 flex items-center gap-0.5">
+                        💬 {photo.comments}
+                      </span>
+                    )}
+                    {!selectMode && (
+                      <button
+                        onClick={e => { e.stopPropagation(); downloadPhotoBlob(photo.url, `photo-${photo.uploaded_by_name ?? 'kaatch'}.jpg`) }}
+                        className="ml-auto text-stone-300 hover:text-[#4a5240] transition cursor-pointer"
+                        title="Télécharger"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -402,7 +420,7 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
       {/* FAB */}
       <button
         onClick={() => setShowUpload(true)}
-        className="fixed bottom-24 right-6 w-14 h-14 rounded-full bg-white text-[#2d3228] shadow-2xl flex items-center justify-center hover:scale-110 transition-transform cursor-pointer z-20"
+        className="fixed bottom-24 right-6 w-14 h-14 rounded-full bg-[#4a5240] text-white shadow-2xl flex items-center justify-center hover:scale-110 transition-transform cursor-pointer z-20"
         title="Ajouter des photos"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-6 h-6">
@@ -412,13 +430,13 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
 
       {/* Upload modal */}
       {showUpload && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-4"
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-4"
           onClick={e => { if (e.target === e.currentTarget) setShowUpload(false) }}>
-          <div className="bg-[#1e1e1c] border border-white/10 rounded-2xl w-full max-w-md p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white border border-stone-200 rounded-2xl w-full max-w-md p-6 space-y-4 max-h-[90vh] overflow-y-auto shadow-xl">
             <div className="flex items-center justify-between">
               <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400, fontSize: '1.4rem', fontStyle: 'italic' }}
-                className="text-white">Ajouter des photos</h2>
-              <button onClick={() => setShowUpload(false)} className="text-white/40 hover:text-white transition cursor-pointer text-xl leading-none">×</button>
+                className="text-[#2d3228]">Ajouter des photos</h2>
+              <button onClick={() => setShowUpload(false)} className="text-stone-400 hover:text-stone-600 transition cursor-pointer text-xl leading-none">×</button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-3">
               {/* Drop zone */}
@@ -426,22 +444,22 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
                 onClick={() => fileRef.current?.click()}
                 onDragOver={e => e.preventDefault()}
                 onDrop={e => { e.preventDefault(); const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')); setPendingFiles(files) }}
-                className="border-2 border-dashed border-white/20 hover:border-white/40 rounded-xl p-8 text-center cursor-pointer transition"
+                className="border-2 border-dashed border-stone-200 hover:border-[#4a5240] rounded-xl p-8 text-center cursor-pointer transition"
               >
                 {pendingFiles.length > 0 ? (
                   <div>
-                    <p style={{ fontWeight: 300, fontSize: '0.95rem' }} className="text-white/80 mb-1">
+                    <p style={{ fontWeight: 300, fontSize: '0.95rem' }} className="text-stone-600 mb-1">
                       {pendingFiles.length} photo{pendingFiles.length > 1 ? 's' : ''} sélectionnée{pendingFiles.length > 1 ? 's' : ''}
                     </p>
-                    <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-white/30">Cliquer pour changer</p>
+                    <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">Cliquer pour changer</p>
                   </div>
                 ) : (
                   <div>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1} className="w-10 h-10 text-white/20 mx-auto mb-3">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1} className="w-10 h-10 text-stone-300 mx-auto mb-3">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
                     </svg>
-                    <p style={{ fontWeight: 300, fontSize: '0.88rem' }} className="text-white/50 mb-1">Cliquer ou glisser des photos</p>
-                    <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-white/25">JPG, PNG, HEIC</p>
+                    <p style={{ fontWeight: 300, fontSize: '0.88rem' }} className="text-stone-500 mb-1">Cliquer ou glisser des photos</p>
+                    <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-300">JPG, PNG, HEIC</p>
                   </div>
                 )}
                 <input ref={fileRef} type="file" name="photo" accept="image/*" multiple className="hidden"
@@ -454,20 +472,20 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
                 value={uploaderName}
                 onChange={e => setUploaderName(e.target.value)}
                 placeholder="Qui publie ? (votre prénom)"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white/80 outline-none focus:border-white/30 transition placeholder:text-white/25 text-sm"
+                className="w-full bg-white border border-stone-200 rounded-xl px-4 py-2.5 text-stone-700 outline-none focus:border-stone-400 transition placeholder:text-stone-300 text-sm"
                 style={{ fontWeight: 300 }}
               />
 
               {/* Tag guests */}
-              <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 space-y-2">
-                <p style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-white/40">Qui voit-on sur la photo ?</p>
+              <div className="bg-stone-50 border border-stone-200 rounded-xl px-4 py-2.5 space-y-2">
+                <p style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-stone-400">Qui voit-on sur la photo ?</p>
                 {tagged.length > 0 && (
                   <div className="flex flex-wrap gap-1.5">
                     {tagged.map(t => (
-                      <span key={t} className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/15 text-white/80"
+                      <span key={t} className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-stone-200 text-stone-600"
                         style={{ fontSize: '0.75rem', fontWeight: 300 }}>
                         {t}
-                        <button type="button" onClick={() => removeTag(t)} className="text-white/40 hover:text-white transition leading-none cursor-pointer">×</button>
+                        <button type="button" onClick={() => removeTag(t)} className="text-stone-400 hover:text-stone-700 transition leading-none cursor-pointer">×</button>
                       </span>
                     ))}
                   </div>
@@ -483,15 +501,15 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
                       if (e.key === 'Escape') { setTagSuggestions([]); setTagInput('') }
                     }}
                     placeholder="Taper un nom…"
-                    className="w-full bg-transparent text-white/70 outline-none placeholder:text-white/25 text-sm"
+                    className="w-full bg-transparent text-stone-600 outline-none placeholder:text-stone-300 text-sm"
                     style={{ fontWeight: 300 }}
                   />
                   {tagSuggestions.length > 0 && (
-                    <div className="absolute left-0 top-full mt-1 bg-[#2a2a28] border border-white/10 rounded-xl overflow-hidden z-10 w-full shadow-xl">
+                    <div className="absolute left-0 top-full mt-1 bg-white border border-stone-200 rounded-xl overflow-hidden z-10 w-full shadow-lg">
                       {tagSuggestions.map(s => (
                         <button key={s} type="button"
                           onMouseDown={e => { e.preventDefault(); addTag(s) }}
-                          className="w-full text-left px-3 py-2 text-white/70 hover:bg-white/10 transition text-sm cursor-pointer"
+                          className="w-full text-left px-3 py-2 text-stone-600 hover:bg-stone-50 transition text-sm cursor-pointer"
                           style={{ fontWeight: 300 }}>
                           {s}
                         </button>
@@ -502,7 +520,7 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
               </div>
 
               <button type="submit" disabled={uploading || (pendingFiles.length === 0 && !fileRef.current?.files?.length)}
-                className="w-full bg-white text-[#2d3228] py-3 rounded-xl text-sm hover:bg-white/90 transition disabled:opacity-40 cursor-pointer font-medium">
+                className="w-full bg-[#4a5240] text-white py-3 rounded-xl text-sm hover:bg-[#2d3228] transition disabled:opacity-40 cursor-pointer font-medium">
                 {uploading ? 'Envoi en cours…' : `Ajouter ${pendingFiles.length > 0 ? `${pendingFiles.length} photo${pendingFiles.length > 1 ? 's' : ''}` : 'les photos'}`}
               </button>
             </form>
@@ -512,7 +530,7 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
 
       {/* Lightbox */}
       {lightbox !== null && currentPhoto && (
-        <div className="fixed inset-0 z-50 bg-black/95 flex" onClick={closeLightbox}>
+        <div className="fixed inset-0 z-50 bg-black/90 flex" onClick={closeLightbox}>
           {/* Left: image */}
           <div className="flex-1 flex items-center justify-center relative" onClick={e => e.stopPropagation()}>
             <img
@@ -524,13 +542,13 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
             {/* Nav arrows */}
             {photos.length > 1 && (<>
               <button onClick={prevPhoto}
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 transition flex items-center justify-center cursor-pointer">
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/30 hover:bg-black/50 transition flex items-center justify-center cursor-pointer">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5 text-white">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                 </svg>
               </button>
               <button onClick={nextPhoto}
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 transition flex items-center justify-center cursor-pointer">
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/30 hover:bg-black/50 transition flex items-center justify-center cursor-pointer">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5 text-white">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                 </svg>
@@ -538,7 +556,7 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
             </>)}
             {/* Counter */}
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
-              <span style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-white/30">
+              <span style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-white/50">
                 {currentIdx + 1} / {photos.length}
               </span>
             </div>
@@ -546,17 +564,17 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
 
           {/* Right panel */}
           <div
-            className="w-72 bg-[#111110] flex flex-col overflow-hidden border-l border-white/5"
+            className="w-72 bg-white flex flex-col overflow-hidden border-l border-stone-200"
             onClick={e => e.stopPropagation()}
           >
-            {/* Close */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
-              <span style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-white/40">
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-stone-100">
+              <span style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-stone-400">
                 {formatDateLong(currentPhoto.created_at)}
               </span>
               <button onClick={closeLightbox}
-                className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 transition flex items-center justify-center cursor-pointer">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5 text-white">
+                className="w-7 h-7 rounded-full bg-stone-100 hover:bg-stone-200 transition flex items-center justify-center cursor-pointer">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5 text-stone-500">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -565,8 +583,8 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {/* Uploader */}
               <div>
-                <p style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-white/40 mb-0.5">Publié par</p>
-                <p style={{ fontWeight: 400, fontSize: '0.9rem' }} className="text-white/80">
+                <p style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-stone-400 mb-0.5">Publié par</p>
+                <p style={{ fontWeight: 400, fontSize: '0.9rem' }} className="text-stone-700">
                   {currentPhoto.uploaded_by_name ?? 'Anonyme'}
                 </p>
               </div>
@@ -574,10 +592,10 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
               {/* Tagged */}
               {currentPhoto.tagged_guests.length > 0 && (
                 <div>
-                  <p style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-white/40 mb-1.5">Qui voit-on ?</p>
+                  <p style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-stone-400 mb-1.5">Qui voit-on ?</p>
                   <div className="flex flex-wrap gap-1.5">
                     {currentPhoto.tagged_guests.map(g => (
-                      <span key={g} className="px-2 py-0.5 rounded-full bg-white/10 text-white/70"
+                      <span key={g} className="px-2 py-0.5 rounded-full bg-stone-100 text-stone-600"
                         style={{ fontSize: '0.75rem', fontWeight: 300 }}>
                         {g}
                       </span>
@@ -591,14 +609,14 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
                 <button
                   onClick={() => handleLike(currentPhoto.id)}
                   disabled={likingId === currentPhoto.id}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 transition cursor-pointer disabled:opacity-50"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-50 border border-stone-200 hover:bg-stone-100 transition cursor-pointer disabled:opacity-50"
                 >
                   <span className="text-sm">❤️</span>
-                  <span style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-white/70">{lbLikes}</span>
+                  <span style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-600">{lbLikes}</span>
                 </button>
                 <button
                   onClick={() => downloadPhotoBlob(currentPhoto.url, `photo-${currentPhoto.uploaded_by_name ?? 'kaatch'}.jpg`)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 transition text-white/60 hover:text-white/80 cursor-pointer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-50 border border-stone-200 hover:bg-stone-100 transition text-stone-500 hover:text-stone-700 cursor-pointer"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
@@ -609,14 +627,14 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
 
               {/* Comments */}
               <div>
-                <p style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-white/40 mb-2">
+                <p style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-stone-400 mb-2">
                   Commentaires {lbComments.length > 0 && `(${lbComments.length})`}
                 </p>
                 <div className="space-y-2 mb-3">
                   {lbComments.map(c => (
-                    <div key={c.id} className="bg-white/5 rounded-xl px-3 py-2">
-                      <p style={{ fontWeight: 400, fontSize: '0.75rem' }} className="text-white/60 mb-0.5">{c.author_name}</p>
-                      <p style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-white/80">{c.content}</p>
+                    <div key={c.id} className="bg-stone-50 border border-stone-100 rounded-xl px-3 py-2">
+                      <p style={{ fontWeight: 400, fontSize: '0.75rem' }} className="text-stone-500 mb-0.5">{c.author_name}</p>
+                      <p style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-700">{c.content}</p>
                     </div>
                   ))}
                 </div>
@@ -626,7 +644,7 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
                     value={lbCommentAuthor}
                     onChange={e => setLbCommentAuthor(e.target.value)}
                     placeholder="Votre prénom"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white/80 text-xs outline-none focus:border-white/30 placeholder:text-white/25 transition"
+                    className="w-full bg-white border border-stone-200 rounded-xl px-3 py-2 text-stone-700 text-xs outline-none focus:border-stone-400 placeholder:text-stone-300 transition"
                     style={{ fontWeight: 300 }}
                   />
                   <textarea
@@ -634,11 +652,11 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
                     onChange={e => setLbCommentText(e.target.value)}
                     placeholder="Écrire un commentaire…"
                     rows={2}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white/80 text-xs outline-none focus:border-white/30 placeholder:text-white/25 transition resize-none"
+                    className="w-full bg-white border border-stone-200 rounded-xl px-3 py-2 text-stone-700 text-xs outline-none focus:border-stone-400 placeholder:text-stone-300 transition resize-none"
                     style={{ fontWeight: 300 }}
                   />
                   <button type="submit" disabled={lbCommenting || !lbCommentText.trim()}
-                    className="w-full bg-white/10 hover:bg-white/15 text-white/70 py-2 rounded-xl text-xs transition disabled:opacity-40 cursor-pointer"
+                    className="w-full bg-stone-100 hover:bg-stone-200 text-stone-600 py-2 rounded-xl text-xs transition disabled:opacity-40 cursor-pointer"
                     style={{ fontWeight: 300 }}>
                     {lbCommenting ? 'Envoi…' : 'Commenter'}
                   </button>
@@ -646,7 +664,7 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
               </div>
 
               {/* Delete */}
-              <div className="pt-2 border-t border-white/5">
+              <div className="pt-2 border-t border-stone-100">
                 <form onSubmit={async e => {
                   e.preventDefault()
                   const fd = new FormData(e.currentTarget)
@@ -657,7 +675,7 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
                   <input type="hidden" name="photo_id" value={currentPhoto.id} />
                   <button type="submit"
                     onClick={e => { if (!confirm('Supprimer cette photo ?')) e.preventDefault() }}
-                    className="w-full py-2 rounded-xl border border-red-500/20 text-red-400/60 hover:bg-red-500/10 hover:text-red-400 transition text-xs cursor-pointer"
+                    className="w-full py-2 rounded-xl border border-red-200 text-red-400 hover:bg-red-50 hover:text-red-500 transition text-xs cursor-pointer"
                     style={{ fontWeight: 300 }}>
                     Supprimer la photo
                   </button>

@@ -81,11 +81,11 @@ export default function WeddingNav({ slug, weddingName, weddingId }: { slug: str
       label: 'Jour J',
       items: [
         { label: 'Programme', sub: 'Déroulé de la journée', href: `/wedding/${slug}/programme` },
-        { label: 'Photos', sub: 'Album partagé', href: `/wedding/${slug}/photos` },
         { label: 'Hébergements', sub: 'Options aux alentours', href: `/wedding/${slug}/hebergements` },
         { label: 'QR Code', sub: 'Accès rapide jour J', href: `/wedding/${slug}/partager` },
       ],
     },
+    { label: 'Photos', href: `/wedding/${slug}/photos` },
     { label: 'Messagerie', href: `/wedding/${slug}/messagerie` },
     {
       label: 'Compte',
@@ -118,7 +118,7 @@ export default function WeddingNav({ slug, weddingName, weddingId }: { slug: str
         </a>
 
         {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-0.5 flex-1">
+        <div className="hidden md:flex items-center gap-0.5 flex-1 justify-center">
           {sections.map(section => {
             const active = isActive(section)
 

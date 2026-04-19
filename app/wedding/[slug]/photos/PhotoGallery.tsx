@@ -53,6 +53,21 @@ async function downloadZip(photos: Photo[]) {
   a.click()
 }
 
+async function downloadPhotoBlob(url: string, filename = 'photo.jpg') {
+  try {
+    const res = await fetch(url)
+    const blob = await res.blob()
+    const blobUrl = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = blobUrl
+    a.download = filename
+    a.click()
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 1000)
+  } catch {
+    window.open(url, '_blank')
+  }
+}
+
 export default function PhotoGallery({ slug, weddingName, photos, guestNames, uploadPhoto, deletePhoto }: Props) {
   const [lightbox, setLightbox] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
@@ -65,6 +80,41 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
   const [tagSuggestions, setTagSuggestions] = useState<string[]>([])
   const [search, setSearch] = useState('')
   const [zipping, setZipping] = useState(false)
+  const [selectMode, setSelectMode] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [downloading, setDownloading] = useState(false)
+
+  function toggleSelect(id: string) {
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  async function downloadSelected() {
+    setDownloading(true)
+    const selected = photos.filter(p => selectedIds.has(p.id))
+    if (selected.length === 1) {
+      await downloadPhotoBlob(selected[0].url, `photo-${selected[0].uploaded_by_name ?? 'kaatch'}.jpg`)
+    } else {
+      const JSZip = (await import('jszip')).default
+      const zip = new JSZip()
+      await Promise.all(selected.map(async (p, i) => {
+        const res = await fetch(p.url)
+        zip.file(`photo-${i + 1}.jpg`, await res.blob())
+      }))
+      const blob = await zip.generateAsync({ type: 'blob' })
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = 'photos-selection.zip'
+      a.click()
+    }
+    setDownloading(false)
+    setSelectedIds(new Set())
+    setSelectMode(false)
+  }
   // Lightbox state
   const [lbLikes, setLbLikes] = useState(0)
   const [lbComments, setLbComments] = useState<Comment[]>([])
@@ -232,6 +282,15 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
             style={{ fontWeight: 300 }}
           />
           <button
+            onClick={() => { setSelectMode(s => !s); setSelectedIds(new Set()) }}
+            className={`px-3 py-1.5 rounded-xl border text-sm transition cursor-pointer whitespace-nowrap ${
+              selectMode ? 'bg-[#4a5240] border-[#4a5240] text-white' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
+            }`}
+            style={{ fontWeight: 300 }}
+          >
+            {selectMode ? `✓ Sélection (${selectedIds.size})` : 'Sélectionner'}
+          </button>
+          <button
             onClick={async () => { setZipping(true); await downloadZip(filteredPhotos); setZipping(false) }}
             disabled={zipping || filteredPhotos.length === 0}
             className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-white/60 text-sm hover:bg-white/10 transition disabled:opacity-40 cursor-pointer whitespace-nowrap"
@@ -269,8 +328,10 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
               <div key={ci} className="flex flex-col gap-2 sm:gap-3">
                 {col.map(photo => (
                   <div key={photo.id}
-                    onClick={() => openLightbox(photo.id)}
-                    className="group relative cursor-pointer rounded-xl overflow-hidden bg-white/5"
+                    onClick={() => selectMode ? toggleSelect(photo.id) : openLightbox(photo.id)}
+                    className={`group relative cursor-pointer rounded-xl overflow-hidden bg-white/5 ${
+                      selectMode && selectedIds.has(photo.id) ? 'ring-2 ring-[#4a5240]' : ''
+                    }`}
                     style={{ aspectRatio: (ci % 2 === 0) ? '3/4' : '4/3' }}>
                     <img
                       src={photo.url}
@@ -278,6 +339,20 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
                       className="w-full h-full object-cover transition duration-300 group-hover:scale-105"
                       loading="lazy"
                     />
+                    {/* Checkbox en mode sélection */}
+                    {selectMode && (
+                      <div className="absolute top-2 left-2 z-10">
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition ${
+                          selectedIds.has(photo.id) ? 'bg-[#4a5240] border-[#4a5240]' : 'bg-black/30 border-white/60'
+                        }`}>
+                          {selectedIds.has(photo.id) && (
+                            <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={3} className="w-3 h-3">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                        </div>
+                      </div>
+                    )}
                     {/* Hover overlay */}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition duration-300 flex flex-col justify-end p-2.5">
                       <div className="opacity-0 group-hover:opacity-100 transition duration-200 space-y-1">
@@ -291,17 +366,17 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
                                 ❤️ {photo.likes}
                               </span>
                             )}
-                            <a
-                              href={photo.url}
-                              download
-                              onClick={e => e.stopPropagation()}
-                              className="text-white/50 hover:text-white transition"
-                              title="Télécharger"
-                            >
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                              </svg>
-                            </a>
+                            {!selectMode && (
+                              <button
+                                onClick={e => { e.stopPropagation(); downloadPhotoBlob(photo.url, `photo-${photo.uploaded_by_name ?? 'kaatch'}.jpg`) }}
+                                className="text-white/50 hover:text-white transition cursor-pointer"
+                                title="Télécharger"
+                              >
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                </svg>
+                              </button>
+                            )}
                           </div>
                         </div>
                         {photo.tagged_guests.length > 0 && (
@@ -521,16 +596,15 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
                   <span className="text-sm">❤️</span>
                   <span style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-white/70">{lbLikes}</span>
                 </button>
-                <a
-                  href={currentPhoto.url}
-                  download
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 transition text-white/60 hover:text-white/80"
+                <button
+                  onClick={() => downloadPhotoBlob(currentPhoto.url, `photo-${currentPhoto.uploaded_by_name ?? 'kaatch'}.jpg`)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 transition text-white/60 hover:text-white/80 cursor-pointer"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
                   </svg>
                   <span style={{ fontWeight: 300, fontSize: '0.8rem' }}>Télécharger</span>
-                </a>
+                </button>
               </div>
 
               {/* Comments */}

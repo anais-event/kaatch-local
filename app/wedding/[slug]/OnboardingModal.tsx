@@ -58,7 +58,7 @@ export default function OnboardingModal({ slug }: { slug: string }) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/40 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden">
 
         {/* Barre de progression */}
         <div className="flex gap-1 p-4">
@@ -71,9 +71,9 @@ export default function OnboardingModal({ slug }: { slug: string }) {
         {/* Contenu */}
         <div className="px-8 pb-8 text-center">
           <div className="text-4xl mb-5">{current.icon}</div>
-          <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.5rem', fontStyle: 'italic' }}
+          <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.8rem', fontStyle: 'italic' }}
               className="text-[#2d3228] mb-3">{current.title}</h2>
-          <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.9rem', lineHeight: 1.7 }}
+          <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.95rem', lineHeight: 1.8 }}
              className="text-stone-500 mb-8">{current.desc}</p>
 
           <div className="flex gap-3">

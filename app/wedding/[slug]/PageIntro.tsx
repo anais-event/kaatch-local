@@ -9,7 +9,7 @@ type PageIntroProps = {
 }
 
 export default function PageIntro({ what, how, guests }: PageIntroProps) {
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
 
   if (!open) return (
     <button onClick={() => setOpen(true)}

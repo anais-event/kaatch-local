@@ -194,10 +194,10 @@ export default function CopyLinkButton({
                     ✏ Modifier
                   </a>
                 )}
-                <button onClick={() => window.print()}
+                <button onClick={() => window.open(url, '_blank')}
                   className="text-xs text-stone-400 hover:text-[#4a5240] transition cursor-pointer"
                   style={{ fontWeight: 300 }}
-                  title="Imprimer le faire-part">
+                  title="Ouvrir le faire-part dans un nouvel onglet pour imprimer">
                   🖨 Imprimer
                 </button>
                 <button onClick={() => setPreview(false)}

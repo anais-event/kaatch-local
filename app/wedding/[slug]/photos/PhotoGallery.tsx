@@ -6,10 +6,16 @@ type Photo = {
   id: string
   url: string
   uploaded_by_name: string | null
+  moment_tag: string | null
   tagged_guests: string[]
   created_at: string
   likes: number
   comments: number
+}
+
+function cleanName(name: string | null | undefined): string {
+  if (!name) return ''
+  return name.split(' ').filter(p => p && p !== 'null').join(' ')
 }
 
 type Comment = {
@@ -23,6 +29,7 @@ type Props = {
   slug: string
   weddingName: string
   photos: Photo[]
+  moments: string[]
   guestNames: string[]
   uploadPhoto: (f: FormData) => Promise<void>
   deletePhoto: (f: FormData) => Promise<void>
@@ -68,7 +75,7 @@ async function downloadPhotoBlob(url: string, filename = 'photo.jpg') {
   }
 }
 
-export default function PhotoGallery({ slug, weddingName, photos, guestNames, uploadPhoto, deletePhoto }: Props) {
+export default function PhotoGallery({ slug, weddingName, photos, moments, guestNames, uploadPhoto, deletePhoto }: Props) {
   const [lightbox, setLightbox] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
   const [showUpload, setShowUpload] = useState(false)
@@ -79,6 +86,7 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
   const [tagInput, setTagInput] = useState('')
   const [tagSuggestions, setTagSuggestions] = useState<string[]>([])
   const [search, setSearch] = useState('')
+  const [momentFilter, setMomentFilter] = useState('')
   const [zipping, setZipping] = useState(false)
   const [selectMode, setSelectMode] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -127,12 +135,14 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
   const tagRef = useRef<HTMLInputElement>(null)
 
   const filteredPhotos = photos.filter(p => {
-    if (!search.trim()) return true
-    const q = search.toLowerCase()
-    return (
-      p.uploaded_by_name?.toLowerCase().includes(q) ||
-      p.tagged_guests.some(g => g.toLowerCase().includes(q))
-    )
+    if (momentFilter && p.moment_tag !== momentFilter) return false
+    if (search.trim()) {
+      const q = search.toLowerCase()
+      return cleanName(p.uploaded_by_name).toLowerCase().includes(q) ||
+        p.tagged_guests.some(g => cleanName(g).toLowerCase().includes(q)) ||
+        (p.moment_tag?.toLowerCase().includes(q) ?? false)
+    }
+    return true
   })
 
   const cols: Photo[][] = [[], []]
@@ -278,7 +288,7 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Rechercher par nom…"
+            placeholder="Rechercher par nom ou moment…"
             className="flex-1 bg-white border border-stone-200 rounded-full px-4 py-1.5 text-stone-700 text-sm outline-none focus:border-stone-400 placeholder:text-stone-300 transition"
             style={{ fontWeight: 300 }}
           />
@@ -302,6 +312,19 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
             {zipping ? '…' : '↓ ZIP'}
           </button>
         </div>
+        {/* Moment filter pills */}
+        {moments.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            <button onClick={() => setMomentFilter('')}
+              className={`px-3 py-0.5 rounded-full text-xs transition cursor-pointer ${!momentFilter ? 'bg-[#4a5240] text-white' : 'text-stone-400 hover:text-stone-600'}`}
+              style={{ fontWeight: 300 }}>Tous</button>
+            {moments.map(m => (
+              <button key={m} onClick={() => setMomentFilter(momentFilter === m ? '' : m)}
+                className={`px-3 py-0.5 rounded-full text-xs transition cursor-pointer ${momentFilter === m ? 'bg-[#4a5240] text-white' : 'text-stone-400 hover:text-stone-600'}`}
+                style={{ fontWeight: 300 }}>{m}</button>
+            ))}
+          </div>
+        )}
         {/* Download selected bar */}
         {selectMode && selectedIds.size > 0 && (
           <div className="mt-2 flex justify-end">
@@ -319,15 +342,15 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
 
       {/* Gallery */}
       {filteredPhotos.length === 0 ? (
-        <div className="flex flex-col items-center justify-center min-h-[70vh] gap-4">
+        <div className="flex flex-col items-center justify-center min-h-[50vh]">
           <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.8rem', fontWeight: 300 }}
-            className="text-stone-400">
-            {search ? 'Aucun résultat' : 'Aucune photo pour l\'instant'}
+            className="text-stone-300 text-center">
+            {search || momentFilter ? 'Aucun résultat…' : 'Aucune photo pour l\'instant…'}
           </p>
         </div>
       ) : (
         <div
-          className="p-3 sm:p-4"
+          className="p-3 max-w-2xl mx-auto"
           onDragOver={e => { e.preventDefault(); setDragOver(true) }}
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}
@@ -368,21 +391,22 @@ export default function PhotoGallery({ slug, weddingName, photos, guestNames, up
                   </div>
                 )}
                 {/* Card info */}
-                <div className="px-3 py-2.5 space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <span style={{ fontWeight: 400, fontSize: '0.75rem' }} className="text-stone-600">
-                      {photo.uploaded_by_name ?? 'Anonyme'}
-                    </span>
-                    <span style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400">
+                <div className="bg-white px-3 py-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-xs text-stone-500 truncate flex-1" style={{ fontWeight: 300 }}>
+                      {cleanName(photo.uploaded_by_name) || 'Anonyme'}
+                      {photo.moment_tag && <span className="text-[#4a5240] ml-1">· {photo.moment_tag}</span>}
+                    </p>
+                    <span style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300">
                       {formatDateShort(photo.created_at)}
                     </span>
                   </div>
-                  {photo.tagged_guests.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {photo.tagged_guests.map(g => (
-                        <span key={g} className="px-1.5 py-0.5 rounded-full bg-stone-100 text-stone-500"
-                          style={{ fontSize: '0.6rem', fontWeight: 300 }}>
-                          {g}
+                  {photo.tagged_guests.filter(g => cleanName(g)).length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {photo.tagged_guests.filter(g => cleanName(g)).map(g => (
+                        <span key={g} className="text-[10px] bg-[#f5f0e8] text-[#4a5240] px-2 py-0.5 rounded-full"
+                          style={{ fontWeight: 300 }}>
+                          {cleanName(g)}
                         </span>
                       ))}
                     </div>

@@ -53,7 +53,7 @@ export default async function PhotosPage({ params }: { params: Promise<{ slug: s
 
   const { data: rawPhotos } = await supabase
     .from('photos')
-    .select('*, photo_likes(id), photo_comments(id), tagged_guests, uploaded_by_name')
+    .select('*, photo_likes(id), photo_comments(id), tagged_guests, uploaded_by_name, moment_tag')
     .eq('wedding_id', wedding.id)
     .order('created_at', { ascending: false })
 
@@ -61,12 +61,16 @@ export default async function PhotosPage({ params }: { params: Promise<{ slug: s
     .from('guests')
     .select('first_name, last_name')
     .eq('wedding_id', wedding.id)
-    .eq('rsvp_status', 'confirme')
+
+  const { data: steps } = await supabase
+    .from('program_steps').select('title').eq('wedding_id', wedding.id).order('position')
+  const moments = steps?.map(s => s.title) ?? []
 
   const photos = (rawPhotos ?? []).map(p => ({
     id: p.id,
     url: p.url,
     uploaded_by_name: p.uploaded_by_name ?? null,
+    moment_tag: p.moment_tag ?? null,
     tagged_guests: p.tagged_guests ?? [],
     created_at: p.created_at,
     likes: p.photo_likes?.length ?? 0,
@@ -78,6 +82,7 @@ export default async function PhotosPage({ params }: { params: Promise<{ slug: s
       slug={slug}
       weddingName={wedding.name}
       photos={photos}
+      moments={moments}
       guestNames={(guestNames ?? []).map(g => [g.first_name, g.last_name].filter(v => v && v !== 'null').join(' '))}
       uploadPhoto={uploadPhoto}
       deletePhoto={deletePhoto}

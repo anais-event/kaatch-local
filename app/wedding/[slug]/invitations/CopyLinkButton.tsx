@@ -264,9 +264,12 @@ export default function CopyLinkButton({
                       <span style={{ color: '#e7e5e4', fontSize: '10px' }}>✦</span>
                       <div style={{ flex: 1, height: '1px', background: '#f5f5f4' }} />
                     </div>
+                    <p style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.22em', color: '#c5bfba', textAlign: 'center', marginBottom: '14px', fontFamily: 'system-ui, sans-serif' }}>
+                      LE MOT DES MARIÉS
+                    </p>
                     <p className="text-center mb-8"
                        style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', fontSize: '0.95rem', color: '#78716c', lineHeight: 1.9, whiteSpace: 'pre-wrap' }}>
-                      {wedding.coupleMessage}
+                      «&nbsp;{wedding.coupleMessage}&nbsp;»
                     </p>
                   </>
                 )}

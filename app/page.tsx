@@ -32,6 +32,30 @@ export default function Home() {
     },
   ]
 
+  const avis = [
+    {
+      nom: 'Camille & Théo',
+      date: 'Mariés en septembre 2024',
+      photo: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120&q=80&auto=format&fit=crop&crop=face',
+      note: '★★★★★',
+      texte: 'On avait 4 groupes WhatsApp différents avant de découvrir Kaatch. Le jour du mariage, mes invités avaient tout — le programme, le plan de table, le QR code photo. Moi je n\'ai répondu à aucun message ce soir-là.',
+    },
+    {
+      nom: 'Laura & Maxime',
+      date: 'Mariés en juin 2024',
+      photo: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=120&q=80&auto=format&fit=crop&crop=face',
+      note: '★★★★★',
+      texte: 'Le plan de table en glisse-dépose, les faire-parts personnalisés avec le prénom de chaque invité… C\'est tellement bien pensé. Et mes parents ont réussi à l\'utiliser sans que je leur explique — c\'est dire !',
+    },
+    {
+      nom: 'Sophie & Julien',
+      date: 'Mariés en mai 2025',
+      photo: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=120&q=80&auto=format&fit=crop&crop=face',
+      note: '★★★★★',
+      texte: 'L\'album partagé, c\'est LA fonctionnalité. J\'ai récupéré 600 photos sans courir après personne. Mes invités ont joué le jeu parce que c\'était vraiment simple pour eux.',
+    },
+  ]
+
   return (
     <main className="bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, color: '#2d3228' }}>
 
@@ -45,6 +69,9 @@ export default function Home() {
           <div className="hidden md:flex items-center gap-8">
             <a href="#comment" className="text-sm text-stone-500 hover:text-[#4a5240] transition" style={{ fontWeight: 300 }}>
               Comment ça marche
+            </a>
+            <a href="#avis" className="text-sm text-stone-500 hover:text-[#4a5240] transition" style={{ fontWeight: 300 }}>
+              Avis
             </a>
             <a href="#offres" className="text-sm text-stone-500 hover:text-[#4a5240] transition" style={{ fontWeight: 300 }}>
               Offres
@@ -65,24 +92,19 @@ export default function Home() {
 
       {/* ── HERO ── */}
       <section className="pt-16 min-h-screen grid md:grid-cols-2">
-
-        {/* Texte */}
         <div className="flex flex-col justify-center px-8 md:px-16 py-20 max-w-xl mx-auto md:mx-0 md:ml-auto">
           <p className="text-xs tracking-[0.25em] uppercase text-[#4a5240] mb-6" style={{ fontWeight: 300 }}>
             Organisation de mariage
           </p>
-
           <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: 'clamp(2.4rem, 4vw, 3.5rem)', fontStyle: 'italic', lineHeight: 1.15 }}
               className="text-[#2d3228] mb-6">
             Combien de groupes WhatsApp tu as créés pour ce mariage ?
           </h1>
-
           <p className="text-stone-600 mb-8" style={{ fontSize: '1rem', lineHeight: 1.9 }}>
             Les infos éparpillées, les tableurs jamais à jour, les invités qui n'ont pas vu le message…
             <br />
             Kaatch regroupe tout — pour toi, et pour eux.
           </p>
-
           <div className="flex flex-col sm:flex-row gap-3">
             <a href="/auth"
                className="inline-block bg-[#4a5240] text-white px-8 py-3.5 rounded-xl hover:bg-[#2d3228] transition text-sm text-center"
@@ -95,14 +117,11 @@ export default function Home() {
               Je suis invité(e)
             </a>
           </div>
-
-          {/* Petite social proof discrète */}
           <p className="mt-8 text-xs text-stone-400" style={{ fontWeight: 300 }}>
             Aucune carte bleue demandée. Ton espace est prêt en 2 minutes.
           </p>
         </div>
 
-        {/* Photo */}
         <div className="hidden md:block relative">
           <img
             src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=1200&q=85&auto=format&fit=crop"
@@ -110,9 +129,7 @@ export default function Home() {
             className="absolute inset-0 w-full h-full object-cover"
           />
           <div className="absolute inset-0" style={{ background: 'rgba(30,28,24,0.15)' }} />
-
-          {/* Petite carte flottante — preuve de concept */}
-          <div className="absolute bottom-12 left-8 bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl px-5 py-4 max-w-[220px]">
+          <div className="absolute bottom-12 left-8 bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl px-5 py-4 max-w-[230px]">
             <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1rem', fontStyle: 'italic' }}
                className="text-[#2d3228] mb-1">Emma & Luc 💍</p>
             <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-500">
@@ -155,12 +172,8 @@ export default function Home() {
                   <img src={item.photo} alt="" className="w-full h-full object-cover hover:scale-105 transition duration-700" />
                 </div>
                 <h3 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.35rem', fontStyle: 'italic' }}
-                    className="text-[#2d3228] mb-2">
-                  {item.title}
-                </h3>
-                <p style={{ fontSize: '0.9rem', lineHeight: 1.85 }} className="text-stone-500">
-                  {item.desc}
-                </p>
+                    className="text-[#2d3228] mb-2">{item.title}</h3>
+                <p style={{ fontSize: '0.9rem', lineHeight: 1.85 }} className="text-stone-500">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -170,8 +183,6 @@ export default function Home() {
       {/* ── COMMENT ÇA MARCHE ── */}
       <section id="comment" className="py-24 px-8">
         <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-16 items-start">
-
-          {/* Sticky intro */}
           <div className="md:sticky md:top-24">
             <p className="text-xs tracking-[0.25em] uppercase text-[#4a5240] mb-3" style={{ fontWeight: 300 }}>Comment ça marche</p>
             <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontStyle: 'italic', lineHeight: 1.2 }}
@@ -190,7 +201,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Timeline */}
           <div className="space-y-10">
             {steps.map((step, i) => (
               <div key={i} className="flex gap-6">
@@ -200,17 +210,12 @@ export default function Home() {
                   </div>
                   {i < steps.length - 1 && <div className="w-px flex-1 bg-stone-200 mt-2 min-h-[2rem]" />}
                 </div>
-
                 <div className="flex-1 pb-2">
                   <h3 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.2rem' }}
-                      className="text-[#2d3228] mb-2">
-                    {step.title}
-                  </h3>
-
+                      className="text-[#2d3228] mb-2">{step.title}</h3>
                   {'desc' in step && step.desc && (
                     <p style={{ fontSize: '0.9rem', lineHeight: 1.8 }} className="text-stone-500">{step.desc}</p>
                   )}
-
                   {'sub' in step && step.sub && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">
                       {step.sub.map((s) => (
@@ -231,8 +236,42 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── AVIS ── */}
+      <section id="avis" className="py-24 px-8 bg-white">
+        <div className="max-w-5xl mx-auto">
+          <div className="mb-14">
+            <p className="text-xs tracking-[0.25em] uppercase text-[#4a5240] mb-3" style={{ fontWeight: 300 }}>Ils l'ont utilisé</p>
+            <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontStyle: 'italic' }}
+                className="text-[#2d3228]">
+              Ce qu'ils en disent.
+            </h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {avis.map((a, i) => (
+              <div key={i} className="bg-[#f5f0e8] rounded-2xl p-6 flex flex-col gap-4">
+                {/* Étoiles */}
+                <p className="text-amber-400 text-sm tracking-widest">{a.note}</p>
+                {/* Texte */}
+                <p style={{ fontSize: '0.9rem', lineHeight: 1.85, fontStyle: 'italic' }} className="text-stone-600 flex-1">
+                  "{a.texte}"
+                </p>
+                {/* Auteur */}
+                <div className="flex items-center gap-3 pt-2 border-t border-stone-200">
+                  <img src={a.photo} alt="" className="w-10 h-10 rounded-full object-cover" />
+                  <div>
+                    <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1rem', fontStyle: 'italic' }}
+                       className="text-[#2d3228]">{a.nom}</p>
+                    <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">{a.date}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── OFFRES ── */}
-      <section id="offres" className="py-24 px-8 bg-white">
+      <section id="offres" className="py-24 px-8">
         <div className="max-w-5xl mx-auto">
           <div className="mb-12">
             <p className="text-xs tracking-[0.25em] uppercase text-[#4a5240] mb-3" style={{ fontWeight: 300 }}>Offres</p>
@@ -244,9 +283,7 @@ export default function Home() {
               Nos formules arrivent bientôt. En attendant, tout est disponible sans engagement et sans te demander ta carte bleue.
             </p>
           </div>
-
-          {/* Carte unique placeholder */}
-          <div className="bg-[#f5f0e8] rounded-2xl border border-stone-200 p-8 max-w-sm">
+          <div className="bg-white rounded-2xl border border-stone-200 p-8 max-w-sm">
             <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.4rem', fontStyle: 'italic' }}
                className="text-[#2d3228] mb-2">Accès complet</p>
             <p style={{ fontSize: '0.85rem', lineHeight: 1.8 }} className="text-stone-500 mb-6">
@@ -262,11 +299,9 @@ export default function Home() {
       </section>
 
       {/* ── CTA FINAL ── */}
-      <section className="py-28 px-8">
+      <section className="py-28 px-8 bg-white">
         <div className="max-w-2xl mx-auto text-center">
-          <p className="text-xs tracking-[0.25em] uppercase text-[#4a5240] mb-4" style={{ fontWeight: 300 }}>
-            Alors ?
-          </p>
+          <p className="text-xs tracking-[0.25em] uppercase text-[#4a5240] mb-4" style={{ fontWeight: 300 }}>Alors ?</p>
           <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: 'clamp(2rem, 4vw, 3rem)', fontStyle: 'italic', lineHeight: 1.2 }}
               className="text-[#2d3228] mb-5">
             Ton mariage mérite une organisation aux petits oignons.
@@ -280,28 +315,23 @@ export default function Home() {
             Créer mon espace mariage →
           </a>
           <p className="mt-5 text-sm text-stone-400" style={{ fontWeight: 300 }}>
-            <a href="/rejoindre" className="hover:text-[#4a5240] transition">
-              Tu es invité(e) ? Rejoindre un mariage →
-            </a>
+            <a href="/rejoindre" className="hover:text-[#4a5240] transition">Tu es invité(e) ? Rejoindre un mariage →</a>
           </p>
         </div>
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="border-t border-stone-200 py-10 px-8">
+      <footer className="border-t border-stone-200 py-10 px-8 bg-[#f5f0e8]">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <span style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '1.4rem', fontStyle: 'italic' }}
-                className="text-stone-400">
-            Kaatch
-          </span>
+                className="text-stone-400">Kaatch</span>
           <div className="flex items-center gap-6">
             <a href="#comment" className="text-sm text-stone-400 hover:text-[#4a5240] transition" style={{ fontWeight: 300 }}>Comment ça marche</a>
+            <a href="#avis" className="text-sm text-stone-400 hover:text-[#4a5240] transition" style={{ fontWeight: 300 }}>Avis</a>
             <a href="#offres" className="text-sm text-stone-400 hover:text-[#4a5240] transition" style={{ fontWeight: 300 }}>Offres</a>
             <a href="/rejoindre" className="text-sm text-stone-400 hover:text-[#4a5240] transition" style={{ fontWeight: 300 }}>Espace invités</a>
           </div>
-          <a href="/auth" className="text-sm text-[#4a5240] hover:underline" style={{ fontWeight: 300 }}>
-            Connexion →
-          </a>
+          <a href="/auth" className="text-sm text-[#4a5240] hover:underline" style={{ fontWeight: 300 }}>Connexion →</a>
         </div>
       </footer>
     </main>

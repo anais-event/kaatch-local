@@ -2,6 +2,8 @@ import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
 import GuestList from './GuestList'
 import ImportGuests from './ImportGuests'
+import AddGuestForm from './AddGuestForm'
+import ExportGuestsButton from './ExportGuestsButton'
 
 async function addGuest(formData: FormData) {
   'use server'
@@ -116,10 +118,13 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
           </a>
         </div>
 
-        <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2rem', fontStyle: 'italic' }}
-            className="text-[#2d3228] mb-5">
-          Invités {total > 0 && <span style={{ fontSize: '1.2rem' }} className="text-stone-400">({total})</span>}
-        </h1>
+        <div className="flex items-center justify-between mb-5">
+          <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2rem', fontStyle: 'italic' }}
+              className="text-[#2d3228]">
+            Invités {total > 0 && <span style={{ fontSize: '1.2rem' }} className="text-stone-400">({total})</span>}
+          </h1>
+          {total > 0 && <ExportGuestsButton guests={guests ?? []} weddingName={wedding.name} />}
+        </div>
 
         {/* ── RSVP Stats ── */}
         <div className="grid grid-cols-3 gap-3 mb-6">
@@ -159,44 +164,8 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
         {/* ── Import Excel ── */}
         <ImportGuests weddingId={wedding.id} slug={slug} />
 
-        {/* ── Formulaire d'ajout ── */}
-        <div className="bg-white rounded-xl border border-stone-100 p-4 md:p-6 mb-4">
-          <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.2rem', fontStyle: 'italic' }}
-              className="text-[#4a5240] mb-4">Ajouter un invité</h2>
-          <form action={addGuest} className="grid grid-cols-2 gap-2 md:gap-3">
-            <input type="hidden" name="wedding_id" value={wedding.id} />
-            <input type="hidden" name="slug" value={slug} />
-            {[
-              { name: 'first_name', placeholder: 'Prénom *', required: true, type: 'text' },
-              { name: 'last_name', placeholder: 'Nom', required: false, type: 'text' },
-              { name: 'nickname', placeholder: 'Surnom (optionnel)', required: false, type: 'text' },
-              { name: 'email', placeholder: 'Email', required: false, type: 'email' },
-              { name: 'telephone', placeholder: 'Téléphone', required: false, type: 'tel' },
-            ].map(f => (
-              <input key={f.name} type={f.type} name={f.name} placeholder={f.placeholder} required={f.required}
-                className="border border-stone-200 rounded-xl px-3 py-2 bg-white outline-none focus:border-[#4a5240] transition text-stone-700 text-sm"
-                style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }} />
-            ))}
-            <select name="relation"
-              className="border border-stone-200 rounded-xl px-3 py-2 bg-white text-stone-500 outline-none focus:border-[#4a5240] transition text-sm"
-              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
-              <option value="">Lien de parenté</option>
-              {RELATIONS.map(r => <option key={r} value={r}>{r}</option>)}
-            </select>
-            <select name="guest_type"
-              className="border border-stone-200 rounded-xl px-3 py-2 bg-white text-stone-500 outline-none focus:border-[#4a5240] transition text-sm"
-              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
-              <option value="adulte">Adulte</option>
-              <option value="enfant">Enfant</option>
-              <option value="animal">Animal</option>
-            </select>
-            <button type="submit"
-              className="col-span-2 bg-[#4a5240] text-white px-6 py-2 rounded-xl hover:bg-[#2d3228] transition cursor-pointer text-sm"
-              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
-              + Ajouter
-            </button>
-          </form>
-        </div>
+        {/* ── Formulaire d'ajout (collapsible) ── */}
+        <AddGuestForm weddingId={wedding.id} slug={slug} addGuest={addGuest} />
 
         {/* ── Tableau unifié invités ── */}
         <div className="bg-white rounded-xl border border-stone-100 p-4 md:p-6">

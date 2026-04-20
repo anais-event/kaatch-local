@@ -47,14 +47,17 @@ async function createGroup(formData: FormData) {
     .eq('wedding_id', wedding.id)
     .eq('name', name)
     .single()
-  if (existing) { revalidatePath(`/invite/${slug}/groupes`); return }
+
+  if (existing) {
+    redirect(`/invite/${slug}/groupes/${existing.id}`)
+  }
 
   // Créer le groupe
-  await supabase.from('message_groups').insert({
+  const { data: newGroup } = await supabase.from('message_groups').insert({
     wedding_id: wedding.id,
     name,
-    created_by: author,
-  })
+    created_by: author || 'invité',
+  }).select('id').single()
 
   // Notif dans @ToutLeMonde
   const { data: general } = await supabase
@@ -68,11 +71,14 @@ async function createGroup(formData: FormData) {
     await supabase.from('messages').insert({
       group_id: general.id,
       wedding_id: wedding.id,
-      content: `📢 ${author} vient de créer le groupe ${name}. Rejoignez-le !`,
+      content: `📢 ${author || 'Quelqu\'un'} vient de créer le groupe ${name}. Rejoignez-le !`,
       author_name: 'Kaatch',
     })
   }
 
+  if (newGroup) {
+    redirect(`/invite/${slug}/groupes/${newGroup.id}`)
+  }
   revalidatePath(`/invite/${slug}/groupes`)
 }
 

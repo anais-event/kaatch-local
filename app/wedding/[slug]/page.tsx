@@ -53,29 +53,40 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
 
       {/* Hero */}
-      <div className="relative w-full h-[38vh] min-h-[200px] overflow-hidden">
+      <div className="relative w-full h-[42vh] min-h-[220px] overflow-hidden">
         {wedding.cover_image_url
           ? <img src={wedding.cover_image_url} alt="" className="w-full h-full object-cover" />
           : <div className="w-full h-full bg-[#2d3228]" />
         }
-        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/75" />
-        <div className="absolute bottom-0 left-0 right-0 px-6 pb-6 text-white">
-          {dateFormatted && (
-            <p className="text-xs tracking-[0.35em] uppercase text-white/60 mb-1" style={{ fontWeight: 300 }}>
-              {dateFormatted}
-            </p>
-          )}
-          <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: 'clamp(1.3rem, 3vw, 2rem)', fontStyle: 'italic', lineHeight: 1.1 }}>
-            Mariage de
-          </h1>
-          <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: 'clamp(1.7rem, 4.5vw, 3rem)', lineHeight: 1 }}>
-            {wedding.name}
-          </h2>
-        </div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/70" />
+
+        {/* Encadré central date + lieu */}
+        {(dateFormatted || wedding.location) && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="border border-white/30 backdrop-blur-sm bg-black/20 rounded-xl px-6 py-4 text-center text-white max-w-xs mx-4">
+              <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: 'clamp(1.3rem, 4vw, 2rem)', lineHeight: 1.1 }}>
+                {wedding.name}
+              </h2>
+              {dateFormatted && (
+                <p className="capitalize mt-2" style={{ fontWeight: 300, fontSize: '0.75rem', letterSpacing: '0.05em', opacity: 0.85 }}>
+                  {dateFormatted}
+                </p>
+              )}
+              {wedding.location && (
+                <p style={{ fontWeight: 300, fontSize: '0.72rem', opacity: 0.7 }} className="mt-0.5">
+                  {wedding.location}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
+
+
         <a href={`/wedding/${slug}/edit`}
            className="absolute top-4 right-4 text-xs text-white/70 hover:text-white border border-white/30 hover:border-white/60 px-3 py-1.5 rounded-lg backdrop-blur transition"
            style={{ fontWeight: 300 }}>
-          Modifier la couverture
+          Modifier
         </a>
       </div>
 
@@ -90,45 +101,61 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
             <div>
               <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400, fontSize: '1.3rem', fontStyle: 'italic' }}
                  className="text-[#4a5240] mb-3">Préparatifs</p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
 
                 {/* Invités */}
                 <a href={`/wedding/${slug}/guests`}
-                   className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
-                  <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Invités</p>
-                  <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-3">Faire-part & RSVP</p>
+                   className="group bg-white rounded-xl border border-stone-100 p-4 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                  <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.1rem' }} className="text-[#2d3228]">Invités</p>
+                  <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400 mb-2">Faire-part & RSVP</p>
                   <div className="flex items-end gap-1 mt-auto">
-                    <span style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '2rem', lineHeight: 1 }} className="text-[#2d3228]">{guestCount ?? 0}</span>
-                    <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400 mb-0.5">invités</span>
+                    <span style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.8rem', lineHeight: 1 }} className="text-[#2d3228]">{guestCount ?? 0}</span>
+                    <span style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400 mb-0.5">invités</span>
                   </div>
                   {(confirmedCount ?? 0) > 0 && (
-                    <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-emerald-600 mt-0.5">{confirmedCount} confirmé{(confirmedCount ?? 0) > 1 ? 's' : ''}</p>
+                    <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-emerald-600 mt-0.5">{confirmedCount} confirmé{(confirmedCount ?? 0) > 1 ? 's' : ''}</p>
                   )}
-                  <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-2">Gérer →</p>
+                  <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-1.5">Gérer →</p>
                 </a>
 
                 {/* Plan de table */}
                 <a href={`/wedding/${slug}/tables`}
-                   className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
-                  <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Plan de table</p>
-                  <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-3">Placement & récap</p>
+                   className="group bg-white rounded-xl border border-stone-100 p-4 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                  <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.1rem' }} className="text-[#2d3228]">Plan de table</p>
+                  <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400 mb-2">Placement & récap</p>
                   <div className="flex items-end gap-1 mt-auto">
-                    <span style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '2rem', lineHeight: 1 }} className="text-[#2d3228]">{tableCount ?? 0}</span>
-                    <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400 mb-0.5">table{(tableCount ?? 0) > 1 ? 's' : ''}</span>
+                    <span style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.8rem', lineHeight: 1 }} className="text-[#2d3228]">{tableCount ?? 0}</span>
+                    <span style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400 mb-0.5">table{(tableCount ?? 0) > 1 ? 's' : ''}</span>
                   </div>
-                  <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-2">Gérer →</p>
+                  <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-1.5">Gérer →</p>
                 </a>
 
                 {/* Budget */}
                 <a href={`/wedding/${slug}/budget`}
-                   className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
-                  <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Budget</p>
-                  <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-3">Devis, dépenses & prestataires</p>
+                   className="group bg-white rounded-xl border border-stone-100 p-4 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                  <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.1rem' }} className="text-[#2d3228]">Budget</p>
+                  <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400 mb-2">Suivi des dépenses</p>
                   <div className="flex items-end gap-1 mt-auto">
-                    <span style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '2rem', lineHeight: 1 }} className="text-[#2d3228]">{budgetCount ?? 0}</span>
-                    <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400 mb-0.5">poste{(budgetCount ?? 0) > 1 ? 's' : ''}</span>
+                    <span style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.8rem', lineHeight: 1 }} className="text-[#2d3228]">{budgetCount ?? 0}</span>
+                    <span style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400 mb-0.5">poste{(budgetCount ?? 0) > 1 ? 's' : ''}</span>
                   </div>
-                  <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-2">Gérer →</p>
+                  <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-1.5">Gérer →</p>
+                </a>
+
+                {/* Prestataires */}
+                <a href={`/wedding/${slug}/prestataires`}
+                   className="group bg-white rounded-xl border border-stone-100 p-4 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                  <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.1rem' }} className="text-[#2d3228]">Prestataires</p>
+                  <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400 mb-2">Contacts & contrats</p>
+                  <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto">Gérer →</p>
+                </a>
+
+                {/* Mot des mariés */}
+                <a href={`/wedding/${slug}/regles`}
+                   className="group bg-white rounded-xl border border-stone-100 p-4 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                  <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.1rem' }} className="text-[#2d3228]">Mot des mariés</p>
+                  <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400 mb-2">Message & infos pratiques</p>
+                  <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto">Gérer →</p>
                 </a>
 
               </div>
@@ -191,8 +218,6 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
               </div>
             </div>
 
-            {/* Countdown */}
-            {wedding.date && <Countdown weddingDate={wedding.date} />}
 
           </div>
 
@@ -208,26 +233,6 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
 
             {/* Infos rapides */}
             <div className="mt-4 bg-white rounded-xl border border-stone-100 divide-y divide-stone-50">
-              <a href={`/wedding/${slug}/edit`} className="group flex items-center justify-between px-4 py-3 hover:bg-stone-50/50 transition">
-                <div>
-                  <p style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.14em' }} className="text-stone-400 uppercase">Date</p>
-                  <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '0.95rem' }}
-                     className={`capitalize ${dateFormatted ? 'text-stone-700' : 'text-stone-300 italic'}`}>
-                    {dateFormatted ?? 'Non renseignée'}
-                  </p>
-                </div>
-                <span style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition">→</span>
-              </a>
-              <a href={`/wedding/${slug}/edit`} className="group flex items-center justify-between px-4 py-3 hover:bg-stone-50/50 transition">
-                <div className="min-w-0">
-                  <p style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.14em' }} className="text-stone-400 uppercase">Lieu</p>
-                  <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '0.95rem' }}
-                     className={`truncate ${wedding.location ? 'text-stone-700' : 'text-stone-300 italic'}`}>
-                    {wedding.location ?? 'Non renseigné'}
-                  </p>
-                </div>
-                <span style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition shrink-0 ml-2">→</span>
-              </a>
               <a href={`/wedding/${slug}/partager`} className="group flex items-center justify-between px-4 py-3 hover:bg-stone-50/50 transition">
                 <div>
                   <p style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.14em' }} className="text-stone-400 uppercase">Lien invités</p>

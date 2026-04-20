@@ -24,6 +24,20 @@ async function addComment(formData: FormData) {
   revalidatePath(`/invite/${formData.get('slug')}/photos`)
 }
 
+async function deletePhoto(formData: FormData) {
+  'use server'
+  const supabase = await createSupabaseServerClient()
+  const slug = formData.get('slug') as string
+  const photo_id = formData.get('photo_id') as string
+  const uploader_name = formData.get('uploader_name') as string
+  // Vérifier que c'est bien la photo de cet invité
+  const { data: photo } = await supabase.from('photos').select('uploaded_by_name').eq('id', photo_id).single()
+  if (photo?.uploaded_by_name === uploader_name) {
+    await supabase.from('photos').delete().eq('id', photo_id)
+  }
+  revalidatePath(`/invite/${slug}/photos`)
+}
+
 async function uploadPhoto(formData: FormData) {
   'use server'
   const supabase = await createSupabaseServerClient()
@@ -107,6 +121,7 @@ export default async function GuestPhotosPage({ params }: { params: Promise<{ sl
       addLike={addLike}
       addComment={addComment}
       uploadPhoto={uploadPhoto}
+      deletePhoto={deletePhoto}
       slug={slug}
     />
   )

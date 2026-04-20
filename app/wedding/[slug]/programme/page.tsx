@@ -28,6 +28,7 @@ async function addStep(formData: FormData) {
     time: (formData.get('time') as string) || null,
     icon: (formData.get('icon') as string) || '✨',
     position: last ? last.position + 1 : 0,
+    visible_to_guests: true,
   })
 
   revalidatePath(`/wedding/${slug}/programme`)
@@ -45,12 +46,14 @@ async function updateStep(formData: FormData) {
   const supabase = await createSupabaseServerClient()
   const slug = formData.get('slug') as string
 
+  const visibleRaw = formData.get('visible_to_guests') as string
   await supabase.from('program_steps').update({
     title: formData.get('title') as string,
     description: (formData.get('description') as string) || null,
     address: (formData.get('address') as string) || null,
     time: (formData.get('time') as string) || null,
     icon: (formData.get('icon') as string) || '✨',
+    visible_to_guests: visibleRaw === 'false' ? false : true,
   }).eq('id', formData.get('id') as string)
 
   revalidatePath(`/wedding/${slug}/programme`)

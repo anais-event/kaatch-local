@@ -38,6 +38,14 @@ const RSVP_DOT: Record<string, string> = {
   en_attente: 'bg-stone-300',
 }
 
+type RsvpFilter = 'all' | 'confirme' | 'en_attente'
+
+const RSVP_LABELS: Record<RsvpFilter, string> = {
+  all: 'Tous',
+  confirme: '✓ Confirmés',
+  en_attente: '? En attente',
+}
+
 export default function TablesClient({
   slug, weddingId, weddingName, tables, guests,
   createTable, deleteTable, assignGuest, updateTableName,
@@ -49,6 +57,8 @@ export default function TablesClient({
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [editingTable, setEditingTable] = useState<string | null>(null)
   const [search, setSearch] = useState('')
+  const [selectedGuestId, setSelectedGuestId] = useState<string | null>(null)
+  const [rsvpFilter, setRsvpFilter] = useState<RsvpFilter>('all')
 
   function run(action: () => Promise<void>, after?: () => void) {
     startTransition(async () => {
@@ -60,15 +70,11 @@ export default function TablesClient({
 
   function assign(guestId: string, tableId: string | null) {
     startTransition(async () => {
-      const res = await fetch('/api/assign-guest', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ guestId, tableId }),
-      })
-      if (!res.ok) {
-        const { error } = await res.json()
-        console.error('assign error:', error)
-      }
+      const fd = new FormData()
+      fd.append('guest_id', guestId)
+      fd.append('slug', slug)
+      if (tableId !== null) fd.append('table_id', tableId)
+      await assignGuest(fd)
       router.refresh()
     })
   }
@@ -77,6 +83,7 @@ export default function TablesClient({
   const totalSeated = guests.filter(g => g.table_id).length
 
   const filteredUnassigned = unassigned.filter(g => {
+    if (rsvpFilter !== 'all' && g.rsvp_status !== rsvpFilter) return false
     if (!search) return true
     return `${g.first_name} ${g.last_name ?? ''}`.toLowerCase().includes(search.toLowerCase())
   })
@@ -84,6 +91,7 @@ export default function TablesClient({
   // Drag handlers
   function onDragStart(guestId: string) {
     setDraggedGuestId(guestId)
+    setSelectedGuestId(null)
   }
 
   function onDragEnd() {
@@ -99,14 +107,34 @@ export default function TablesClient({
   function onDrop(e: React.DragEvent, tableId: string) {
     e.preventDefault()
     if (draggedGuestId) {
-      assign(draggedGuestId, tableId)
+      const table = tables.find(t => t.id === tableId)
+      const seated = guests.filter(g => g.table_id === tableId).length
+      if (table && seated < table.capacity) {
+        assign(draggedGuestId, tableId)
+      }
     }
     setDraggedGuestId(null)
     setDragOverTableId(null)
   }
 
-  function onDragLeave() {
-    setDragOverTableId(null)
+  function onDragLeave(e: React.DragEvent) {
+    if (!(e.currentTarget as HTMLElement).contains(e.relatedTarget as Node)) {
+      setDragOverTableId(null)
+    }
+  }
+
+  function handleTableClick(tableId: string) {
+    if (!selectedGuestId) return
+    const table = tables.find(t => t.id === tableId)
+    const seated = guests.filter(g => g.table_id === tableId).length
+    if (table && seated < table.capacity) {
+      assign(selectedGuestId, tableId)
+      setSelectedGuestId(null)
+    }
+  }
+
+  function toggleSelectGuest(guestId: string) {
+    setSelectedGuestId(prev => prev === guestId ? null : guestId)
   }
 
   return (
@@ -147,6 +175,19 @@ export default function TablesClient({
               <div className="px-4 py-3 border-b border-stone-100">
                 <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.2em' }}
                    className="text-stone-400 uppercase mb-2">Sans table ({unassigned.length})</p>
+                {/* Filtres RSVP */}
+                <div className="flex gap-1 mb-2 flex-wrap">
+                  {(['all', 'confirme', 'en_attente'] as RsvpFilter[]).map(f => (
+                    <button key={f} onClick={() => setRsvpFilter(f)}
+                      className={`text-xs px-2 py-0.5 rounded-full transition cursor-pointer ${
+                        rsvpFilter === f
+                          ? 'bg-[#4a5240] text-white'
+                          : 'bg-stone-100 text-stone-400 hover:bg-stone-200'
+                      }`} style={{ fontWeight: 300 }}>
+                      {RSVP_LABELS[f]}
+                    </button>
+                  ))}
+                </div>
                 <input
                   type="text"
                   placeholder="Rechercher…"
@@ -155,7 +196,7 @@ export default function TablesClient({
                   className="w-full text-xs border border-stone-200 rounded-lg px-3 py-1.5 outline-none focus:border-[#4a5240]"
                   style={{ fontWeight: 300 }} />
               </div>
-              <div className="p-3 space-y-1.5 max-h-[calc(100vh-220px)] overflow-y-auto">
+              <div className="p-3 space-y-1.5 max-h-[calc(100vh-260px)] overflow-y-auto">
                 {filteredUnassigned.length === 0 && unassigned.length > 0 && (
                   <p style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-300 text-center py-4">Aucun résultat</p>
                 )}
@@ -164,31 +205,45 @@ export default function TablesClient({
                     🎉 Tous placés !
                   </p>
                 )}
-                {filteredUnassigned.map(g => (
-                  <div
-                    key={g.id}
-                    draggable
-                    onDragStart={() => onDragStart(g.id)}
-                    onDragEnd={onDragEnd}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-xl border border-stone-100 bg-[#f5f0e8] cursor-grab active:cursor-grabbing select-none transition ${
-                      draggedGuestId === g.id ? 'opacity-40' : 'hover:border-[#4a5240]/40 hover:shadow-sm'
-                    }`}>
-                    <span className={`w-2 h-2 rounded-full shrink-0 ${RSVP_DOT[g.rsvp_status] ?? 'bg-stone-300'}`} />
-                    <div className="min-w-0">
-                      <p style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-700 truncate">
-                        {g.first_name} {g.last_name ?? ''}
-                      </p>
-                      {g.relation && (
-                        <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-400 truncate">{g.relation}</p>
-                      )}
+                {filteredUnassigned.map(g => {
+                  const isSelected = selectedGuestId === g.id
+                  return (
+                    <div
+                      key={g.id}
+                      draggable
+                      onDragStart={() => onDragStart(g.id)}
+                      onDragEnd={onDragEnd}
+                      onClick={() => toggleSelectGuest(g.id)}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-xl border cursor-pointer select-none transition ${
+                        draggedGuestId === g.id
+                          ? 'opacity-40'
+                          : isSelected
+                          ? 'border-[#4a5240] bg-[#4a5240]/10 ring-1 ring-[#4a5240]/30'
+                          : 'border-stone-100 bg-[#f5f0e8] hover:border-[#4a5240]/40 hover:shadow-sm'
+                      }`}>
+                      <span className={`w-2 h-2 rounded-full shrink-0 ${RSVP_DOT[g.rsvp_status] ?? 'bg-stone-300'}`} />
+                      <div className="min-w-0">
+                        <p style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-700 truncate">
+                          {g.first_name} {g.last_name ?? ''}
+                        </p>
+                        {g.relation && (
+                          <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-400 truncate">{g.relation}</p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
-            <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 text-center mt-3 italic">
-              Glissez un invité sur une table →
-            </p>
+            {selectedGuestId ? (
+              <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-[#4a5240] text-center mt-3 italic">
+                Tapez une table pour placer →
+              </p>
+            ) : (
+              <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 text-center mt-3 italic">
+                Glissez ou tapez un invité →
+              </p>
+            )}
           </div>
 
           {/* ── Zone tables ── */}
@@ -242,6 +297,7 @@ export default function TablesClient({
                 const isFull = tableGuests.length >= table.capacity
                 const isOver = dragOverTableId === table.id
                 const isEditing = editingTable === table.id
+                const isClickTarget = !!selectedGuestId && !isFull
 
                 return (
                   <div
@@ -249,9 +305,12 @@ export default function TablesClient({
                     onDragOver={e => onDragOver(e, table.id)}
                     onDrop={e => onDrop(e, table.id)}
                     onDragLeave={onDragLeave}
+                    onClick={() => handleTableClick(table.id)}
                     className={`bg-white rounded-2xl border-2 transition-all duration-150 overflow-hidden ${
                       isOver
                         ? 'border-[#4a5240] shadow-lg scale-[1.02] bg-[#f5f0e8]/50'
+                        : isClickTarget
+                        ? 'border-[#4a5240]/50 shadow-md cursor-pointer'
                         : isFull
                         ? 'border-amber-200'
                         : 'border-stone-100'
@@ -266,6 +325,7 @@ export default function TablesClient({
                             const fd = new FormData(e.currentTarget)
                             run(async () => { await updateTableName(fd) }, () => setEditingTable(null))
                           }}
+                          onClick={e => e.stopPropagation()}
                           className="flex items-center gap-2">
                           <input type="hidden" name="slug" value={slug} />
                           <input type="hidden" name="id" value={table.id} />
@@ -284,6 +344,10 @@ export default function TablesClient({
                       ) : (
                         <div className="flex items-center justify-between">
                           <div>
+                            {table.position_order > 0 && (
+                              <p style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.15em' }}
+                                 className="text-stone-300 uppercase mb-0.5">N°{table.position_order}</p>
+                            )}
                             <h3 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.1rem' }}
                                 className="text-[#2d3228]">{table.name}</h3>
                             <p style={{ fontWeight: 300, fontSize: '0.68rem' }}
@@ -292,7 +356,7 @@ export default function TablesClient({
                               {isFull && ' · Table complète'}
                             </p>
                           </div>
-                          <div className="flex gap-2">
+                          <div className="flex gap-2" onClick={e => e.stopPropagation()}>
                             <button onClick={() => setEditingTable(table.id)}
                               className="text-xs text-stone-300 hover:text-[#4a5240] transition cursor-pointer"
                               style={{ fontWeight: 300 }}>✏</button>
@@ -315,10 +379,12 @@ export default function TablesClient({
                     <div className={`min-h-[80px] p-2 space-y-1 ${isOver && !isFull ? 'bg-[#4a5240]/5' : ''}`}>
                       {tableGuests.length === 0 && (
                         <div className={`flex items-center justify-center h-16 rounded-xl border-2 border-dashed transition ${
-                          isOver ? 'border-[#4a5240]/40 text-[#4a5240]' : 'border-stone-100 text-stone-300'
+                          isOver ? 'border-[#4a5240]/40 text-[#4a5240]'
+                          : isClickTarget ? 'border-[#4a5240]/30 text-[#4a5240]'
+                          : 'border-stone-100 text-stone-300'
                         }`}>
                           <p style={{ fontWeight: 300, fontSize: '0.75rem' }}>
-                            {isOver ? 'Déposer ici' : 'Glissez des invités ici'}
+                            {isOver || isClickTarget ? 'Déposer ici' : 'Glissez des invités ici'}
                           </p>
                         </div>
                       )}
@@ -331,7 +397,7 @@ export default function TablesClient({
                           </p>
                           <button
                             disabled={isPending}
-                            onClick={() => assign(g.id, null)}
+                            onClick={e => { e.stopPropagation(); assign(g.id, null) }}
                             className="opacity-0 group-hover:opacity-100 text-stone-300 hover:text-red-400 transition cursor-pointer text-xs"
                             title="Retirer">
                             ✕

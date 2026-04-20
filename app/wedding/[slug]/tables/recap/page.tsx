@@ -86,7 +86,14 @@ export default async function TablesRecapPage({ params }: { params: Promise<{ sl
               <div key={table.id} className="border border-stone-200 rounded-xl overflow-hidden break-inside-avoid">
                 {/* En-tête de table */}
                 <div className="bg-[#4a5240] px-5 py-3 flex items-center justify-between">
-                  <h2 className="text-white text-lg font-light italic">{table.name}</h2>
+                  <div>
+                    {table.position_order > 0 && (
+                      <p className="text-white/50 text-xs tracking-widest uppercase mb-0.5" style={{ fontWeight: 300 }}>
+                        N°{table.position_order}
+                      </p>
+                    )}
+                    <h2 className="text-white text-lg font-light italic">{table.name}</h2>
+                  </div>
                   <span className={`text-xs px-2 py-0.5 rounded-full ${
                     isFull ? 'bg-amber-400/20 text-amber-200' : 'bg-white/10 text-white/70'
                   }`} style={{ fontWeight: 300 }}>
@@ -148,6 +155,33 @@ export default async function TablesRecapPage({ params }: { params: Promise<{ sl
                   </span>
                 ))}
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Index alphabétique */}
+        {(guests ?? []).filter(g => g.table_id).length > 0 && (
+          <div className="mt-8 break-inside-avoid">
+            <h2 className="text-sm font-medium text-stone-500 uppercase tracking-widest mb-4" style={{ fontWeight: 400 }}>
+              Index alphabétique
+            </h2>
+            <div className="grid grid-cols-2 gap-x-8 gap-y-1.5">
+              {(guests ?? [])
+                .filter(g => g.table_id)
+                .sort((a, b) => `${a.last_name ?? ''} ${a.first_name}`.localeCompare(`${b.last_name ?? ''} ${b.first_name}`, 'fr'))
+                .map(g => {
+                  const table = (tables ?? []).find(t => t.id === g.table_id)
+                  return (
+                    <div key={g.id} className="flex items-baseline gap-2 text-sm">
+                      <span className="flex-1 text-stone-700" style={{ fontWeight: 400 }}>
+                        {g.last_name ? `${g.last_name}, ${g.first_name}` : g.first_name}
+                      </span>
+                      <span className="text-stone-400 shrink-0 text-xs" style={{ fontWeight: 300 }}>
+                        {table ? (table.position_order > 0 ? `N°${table.position_order}` : table.name) : '—'}
+                      </span>
+                    </div>
+                  )
+                })}
             </div>
           </div>
         )}

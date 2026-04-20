@@ -66,7 +66,7 @@ export default async function ReglesPage({ params }: { params: Promise<{ slug: s
     <div className="min-h-screen bg-[#f5f0e8] p-8" style={{ fontFamily: 'var(--font-lato)' }}>
       <div className="max-w-2xl mx-auto">
         <a href={`/wedding/${slug}`} className="text-sm text-[#4a5240] hover:underline mb-6 block" style={{ fontWeight: 300 }}>
-          ← Retour
+          ← Retour aux préparatifs
         </a>
         <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.5rem', fontStyle: 'italic' }}
             className="text-[#2d3228] mb-2">Le mot des mariés</h1>

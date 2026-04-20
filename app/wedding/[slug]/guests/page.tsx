@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
 import GuestList from './GuestList'
+import GuestListSection from './GuestListSection'
 import ImportGuests from './ImportGuests'
 import AddGuestForm from './AddGuestForm'
 import ExportGuestsButton from './ExportGuestsButton'
@@ -9,6 +10,7 @@ async function addGuest(formData: FormData) {
   'use server'
   const supabase = await createSupabaseServerClient()
   const slug = formData.get('slug') as string
+  const parts = formData.getAll('invited_parts') as string[]
   await supabase.from('guests').insert({
     wedding_id: formData.get('wedding_id') as string,
     first_name: formData.get('first_name') as string,
@@ -18,6 +20,7 @@ async function addGuest(formData: FormData) {
     telephone: (formData.get('telephone') as string) || null,
     relation: (formData.get('relation') as string) || null,
     guest_type: (formData.get('guest_type') as string) || 'adulte',
+    invited_parts: parts.length > 0 ? parts : ['ceremonie', 'vin_honneur', 'reception'],
   })
   revalidatePath(`/wedding/${slug}/guests`)
 }
@@ -46,6 +49,7 @@ async function updateGuest(formData: FormData) {
   const supabase = await createSupabaseServerClient()
   const id = formData.get('id') as string
   const slug = formData.get('slug') as string
+  const parts = formData.getAll('invited_parts') as string[]
   await supabase.from('guests').update({
     first_name: formData.get('first_name') as string,
     last_name: (formData.get('last_name') as string) || null,
@@ -54,6 +58,7 @@ async function updateGuest(formData: FormData) {
     telephone: (formData.get('telephone') as string) || null,
     relation: (formData.get('relation') as string) || null,
     gender: (formData.get('gender') as string) || null,
+    invited_parts: parts.length > 0 ? parts : ['ceremonie', 'vin_honneur', 'reception'],
   }).eq('id', id)
   revalidatePath(`/wedding/${slug}/guests`)
 }
@@ -114,7 +119,7 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
         <div className="mb-4">
           <a href={`/wedding/${slug}`} className="text-sm text-[#4a5240] hover:underline"
              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
-            ← Retour au mariage
+            ← Retour aux préparatifs
           </a>
         </div>
 
@@ -168,11 +173,7 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
         <AddGuestForm weddingId={wedding.id} slug={slug} addGuest={addGuest} />
 
         {/* ── Tableau unifié invités ── */}
-        <div className="bg-white rounded-xl border border-stone-100 p-4 md:p-6">
-          <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.2rem', fontStyle: 'italic' }}
-              className="text-[#4a5240] mb-4">
-            Liste ({total})
-          </h2>
+        <GuestListSection total={total}>
           <GuestList
             guests={guests ?? []}
             tables={tables ?? []}
@@ -183,7 +184,7 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
             deleteGuest={deleteGuest}
             updateGuest={updateGuest}
           />
-        </div>
+        </GuestListSection>
 
       </div>
     </div>

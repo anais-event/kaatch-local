@@ -43,7 +43,7 @@ export default function KaatchChat() {
       {/* Bulle flottante */}
       <button
         onClick={() => setOpen(o => !o)}
-        className="fixed bottom-6 right-6 z-50 w-13 h-13 rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-105 cursor-pointer"
+        className="fixed bottom-20 sm:bottom-6 right-6 z-50 w-13 h-13 rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-105 cursor-pointer"
         style={{ width: 52, height: 52, background: 'linear-gradient(135deg, #4a5240, #2d3228)' }}
         title="Aide Kaatch">
         {open ? (
@@ -60,7 +60,7 @@ export default function KaatchChat() {
       {/* Fenêtre chat */}
       {open && (
         <div
-          className="fixed bottom-24 right-4 z-50 bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+          className="fixed bottom-[88px] sm:bottom-24 right-4 z-50 bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
           style={{ width: 'min(360px, calc(100vw - 32px))', height: 500, border: '1px solid #e7e5e4' }}>
 
           {/* Header */}

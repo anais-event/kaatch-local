@@ -24,7 +24,7 @@ export default function NewWedding() {
                      className="block text-stone-400 uppercase mb-3">
                 Vos prénoms
               </label>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
                 <input
                   name="first_name"
                   type="text"
@@ -34,7 +34,7 @@ export default function NewWedding() {
                   style={{ fontFamily: 'var(--font-cormorant)', fontSize: '1.1rem' }}
                 />
                 <span style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.1rem' }}
-                      className="text-stone-300 shrink-0">et</span>
+                      className="text-stone-300 text-center shrink-0">et</span>
                 <input
                   name="partner_name"
                   type="text"

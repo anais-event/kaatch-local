@@ -43,11 +43,12 @@ async function downloadZip(photos: Photo[]) {
   a.download = 'photos-mariage.zip'; a.click()
 }
 
-export default function GuestPhotoFeed({ photos, moments, guestName, guestNames, addLike, addComment, uploadPhoto, slug }: {
+export default function GuestPhotoFeed({ photos, moments, guestName, guestNames, addLike, addComment, uploadPhoto, deletePhoto, slug }: {
   photos: Photo[]; moments: string[]; guestNames: string[]; guestName: string; slug: string
   addLike: (fd: FormData) => Promise<void>
   addComment: (fd: FormData) => Promise<void>
   uploadPhoto: (fd: FormData) => Promise<void>
+  deletePhoto: (fd: FormData) => Promise<void>
 }) {
   const [search, setSearch] = useState('')
   const [momentFilter, setMomentFilter] = useState('')
@@ -227,8 +228,10 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
                   className={`break-inside-avoid rounded-2xl overflow-hidden cursor-pointer group shadow-sm transition ${isSelected ? 'ring-2 ring-[#4a5240]' : ''}`}>
                   <div className="relative">
                     <img src={photo.url} alt="" className="w-full object-cover transition duration-300 group-hover:brightness-90" />
-                    {/* Checkbox */}
-                    <div className={`absolute top-2 left-2 w-5 h-5 rounded-full border-2 flex items-center justify-center transition shadow ${isSelected ? 'bg-[#4a5240] border-[#4a5240]' : 'bg-white/80 border-stone-300 opacity-0 group-hover:opacity-100'}`}>
+                    {/* Checkbox — cliquer active le mode sélection */}
+                    <div
+                      onClick={e => { e.stopPropagation(); if (!selectMode) setSelectMode(true); toggleSelect(photo.id) }}
+                      className={`absolute top-2 left-2 w-6 h-6 rounded-full border-2 flex items-center justify-center transition shadow cursor-pointer z-10 ${isSelected ? 'bg-[#4a5240] border-[#4a5240]' : 'bg-white/80 border-stone-300 opacity-0 group-hover:opacity-100'}`}>
                       {isSelected && <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={3} className="w-3 h-3"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
                     </div>
                     {/* Download on hover */}
@@ -425,7 +428,7 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
                   </div>
                 </div>
               )}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <button onClick={handleLike}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-50 hover:bg-stone-100 transition cursor-pointer ${lbLikedBy.includes(myName) ? 'text-red-400' : 'text-stone-400'}`}>
                   <span>❤️</span><span className="text-sm" style={{ fontWeight: 300 }}>{lbLikes}</span>
@@ -435,6 +438,24 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
                   <span className="text-xs" style={{ fontWeight: 300 }}>Télécharger</span>
                 </button>
+                {/* Supprimer — uniquement sa propre photo */}
+                {myName && currentPhoto.uploaded_by_name === myName && (
+                  <form onSubmit={e => {
+                    e.preventDefault()
+                    const fd = new FormData(e.currentTarget)
+                    closeLightbox()
+                    startTransition(() => deletePhoto(fd))
+                  }}>
+                    <input type="hidden" name="slug" value={slug} />
+                    <input type="hidden" name="photo_id" value={currentPhoto.id} />
+                    <input type="hidden" name="uploader_name" value={myName} />
+                    <button type="submit"
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-red-50 hover:bg-red-100 transition text-red-400 cursor-pointer text-xs"
+                      style={{ fontWeight: 300 }}>
+                      🗑 Supprimer
+                    </button>
+                  </form>
+                )}
               </div>
               {/* Comments */}
               <div>

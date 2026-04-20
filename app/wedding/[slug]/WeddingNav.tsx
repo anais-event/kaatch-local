@@ -16,11 +16,10 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-export default function WeddingNav({ slug, weddingName, weddingId }: { slug: string; weddingName: string; weddingId: string }) {
+export default function WeddingNav({ slug, weddingName, weddingId, userEmail }: { slug: string; weddingName: string; weddingId: string; userEmail: string }) {
   const pathname = usePathname()
   const [open, setOpen] = useState<string | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [notifOpen, setNotifOpen] = useState(false)
   const [unread, setUnread] = useState(0)
   const [log, setLog] = useState<LogEntry[]>([])
   const [toasts, setToasts] = useState<Toast[]>([])
@@ -58,7 +57,6 @@ export default function WeddingNav({ slug, weddingName, weddingId }: { slug: str
       if (navRef.current && !navRef.current.contains(e.target as Node)) {
         setOpen(null)
         setMobileOpen(false)
-        setNotifOpen(false)
       }
     }
     document.addEventListener('mousedown', handler)
@@ -74,27 +72,22 @@ export default function WeddingNav({ slug, weddingName, weddingId }: { slug: str
       items: [
         { label: 'Invités', sub: 'Faire-part & RSVP', href: `/wedding/${slug}/guests` },
         { label: 'Plan de table', sub: 'Placement & récap', href: `/wedding/${slug}/tables` },
-        { label: 'Budget', sub: 'Devis, dépenses & prestataires', href: `/wedding/${slug}/budget` },
+        { label: 'Budget', sub: 'Suivi des dépenses', href: `/wedding/${slug}/budget` },
+        { label: 'Prestataires', sub: 'Contacts & contrats', href: `/wedding/${slug}/prestataires` },
+        { label: 'Mot des mariés', sub: 'Message & règles', href: `/wedding/${slug}/regles` },
       ],
     },
     {
       label: 'Jour J',
       items: [
         { label: 'Programme', sub: 'Déroulé de la journée', href: `/wedding/${slug}/programme` },
+        { label: 'Musique', sub: 'Playlist & suggestions', href: `/wedding/${slug}/musique` },
         { label: 'Hébergements', sub: 'Options aux alentours', href: `/wedding/${slug}/hebergements` },
         { label: 'QR Code', sub: 'Accès rapide jour J', href: `/wedding/${slug}/partager` },
       ],
     },
     { label: 'Photos', href: `/wedding/${slug}/photos` },
     { label: 'Messagerie', href: `/wedding/${slug}/messagerie` },
-    {
-      label: 'Compte',
-      items: [
-        { label: 'Vue invités', sub: 'Aperçu de votre espace', href: `/invite/${slug}`, target: '_blank' },
-        { label: 'Paramètres', sub: 'Infos du mariage', href: `/wedding/${slug}/edit` },
-        { label: 'Règles & message', sub: 'Mot des mariés', href: `/wedding/${slug}/regles` },
-      ],
-    },
   ]
 
   const isActive = (section: NavSection): boolean => {
@@ -133,6 +126,13 @@ export default function WeddingNav({ slug, weddingName, weddingId }: { slug: str
                     <span className="flex items-center gap-1">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3.5 h-3.5">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+                      </svg>
+                      {section.label}
+                    </span>
+                  ) : section.label === 'Photos' ? (
+                    <span className="flex items-center gap-1">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3.5 h-3.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
                       </svg>
                       {section.label}
                     </span>
@@ -178,6 +178,26 @@ export default function WeddingNav({ slug, weddingName, weddingId }: { slug: str
                     {section.label === 'Compte' && (
                       <>
                         <div className="border-t border-stone-100 my-1" />
+                        {/* Activité récente */}
+                        <div className="px-4 py-2">
+                          <p className="text-[10px] uppercase tracking-widest text-stone-300 mb-2" style={{ fontWeight: 300 }}>Activité récente</p>
+                          {log.length === 0 ? (
+                            <p className="text-xs text-stone-300 italic" style={{ fontWeight: 300 }}>Aucune activité</p>
+                          ) : (
+                            <ul className="space-y-1.5 max-h-32 overflow-y-auto">
+                              {log.slice(0, 5).map((entry, i) => (
+                                <li key={i} className="flex items-start gap-2">
+                                  <span className="text-sm shrink-0">{entry.icon}</span>
+                                  <div className="min-w-0">
+                                    <p className="text-xs text-stone-600 leading-snug" style={{ fontWeight: 300 }}>{entry.message}</p>
+                                    <p className="text-[10px] text-stone-400">{entry.time}</p>
+                                  </div>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                        <div className="border-t border-stone-100 my-1" />
                         <form action={logoutMaried} className="px-4 py-2">
                           <button type="submit"
                             className="text-xs text-stone-400 hover:text-red-400 transition cursor-pointer w-full text-left"
@@ -194,46 +214,76 @@ export default function WeddingNav({ slug, weddingName, weddingId }: { slug: str
           })}
         </div>
 
-        {/* Cloche + hamburger */}
+        {/* Mon espace + hamburger */}
         <div className="flex items-center gap-1 ml-auto md:ml-2">
 
-          {/* 🔔 Cloche notifications */}
-          <div className="relative">
+          {/* Mon espace dropdown */}
+          <div className="hidden md:block relative">
             <button
-              onClick={() => { setNotifOpen(o => !o); setUnread(0) }}
-              className="p-1.5 rounded-md text-stone-400 hover:text-[#4a5240] transition relative cursor-pointer"
-              title="Notifications">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+              onClick={() => setOpen(open === 'monespace' ? null : 'monespace')}
+              className={`flex items-center gap-1 px-3 py-1 rounded-md text-xs whitespace-nowrap transition cursor-pointer ${
+                open === 'monespace' ? 'bg-[#4a5240] text-white' : 'text-stone-500 hover:text-[#4a5240]'
+              }`}
+              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, letterSpacing: '0.04em' }}>
+              {unread > 0 && <span className="w-1.5 h-1.5 rounded-full bg-red-400 shrink-0" />}
+              Mon espace
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
+                   className={`w-2.5 h-2.5 transition-transform ${open === 'monespace' ? 'rotate-180' : ''}`}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
-              {unread > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] font-bold rounded-full w-3.5 h-3.5 flex items-center justify-center leading-none">
-                  {unread > 9 ? '9+' : unread}
-                </span>
-              )}
             </button>
 
-            {notifOpen && (
-              <div className="absolute right-0 top-full mt-1.5 w-72 bg-white rounded-xl shadow-xl border border-stone-100 z-50 overflow-hidden">
-                <div className="px-4 py-2.5 border-b border-stone-100 flex items-center justify-between">
-                  <span className="text-xs text-stone-500 uppercase tracking-wider" style={{ fontWeight: 300 }}>Activité récente</span>
-                  <button onClick={() => setNotifOpen(false)} className="text-stone-300 hover:text-stone-500 text-lg leading-none cursor-pointer">×</button>
+            {open === 'monespace' && (
+              <div className="absolute right-0 top-full mt-1.5 bg-white rounded-xl shadow-lg border border-stone-100 py-1.5 min-w-[220px] z-50">
+                {/* Vue invités */}
+                <a href={`/invite/${slug}`} target="_blank" onClick={() => setOpen(null)}
+                   className="flex flex-col px-4 py-2.5 hover:bg-[#f5f0e8] transition">
+                  <span style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-700">Vue invités</span>
+                  <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400">Aperçu de votre espace</span>
+                </a>
+                {/* Paramètres */}
+                <a href={`/wedding/${slug}/edit`} onClick={() => setOpen(null)}
+                   className="flex flex-col px-4 py-2.5 hover:bg-[#f5f0e8] transition">
+                  <span style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-700">Paramètres</span>
+                  <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400">Infos du mariage</span>
+                </a>
+                <div className="border-t border-stone-100 my-1" />
+                {/* Identifiants */}
+                <div className="px-4 py-2.5">
+                  <p style={{ fontWeight: 300, fontSize: '0.62rem', letterSpacing: '0.15em' }} className="text-stone-400 uppercase mb-2">Connexion</p>
+                  {userEmail && (
+                    <p style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-500 truncate mb-2">{userEmail}</p>
+                  )}
+                  <a href="/auth/update-password"
+                     style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-[#4a5240] hover:underline block">
+                    Changer le mot de passe →
+                  </a>
                 </div>
-                {log.length === 0 ? (
-                  <div className="px-4 py-6 text-center text-stone-400 text-sm" style={{ fontWeight: 300 }}>Aucune activité pour l'instant</div>
-                ) : (
-                  <ul className="max-h-64 overflow-y-auto divide-y divide-stone-50">
-                    {log.map((entry, i) => (
-                      <li key={i} className="px-4 py-2.5 flex items-start gap-2.5 hover:bg-stone-50 transition">
-                        <span className="text-base shrink-0">{entry.icon}</span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs text-stone-700 leading-snug" style={{ fontWeight: 300 }}>{entry.message}</p>
-                          <p className="text-[10px] text-stone-400 mt-0.5">{entry.time}</p>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
+                <div className="border-t border-stone-100 my-1" />
+                {/* Activité */}
+                {log.length > 0 && (
+                  <div className="px-4 py-2">
+                    <p style={{ fontWeight: 300, fontSize: '0.62rem', letterSpacing: '0.15em' }} className="text-stone-400 uppercase mb-2">Activité récente</p>
+                    <ul className="space-y-1.5 max-h-28 overflow-y-auto">
+                      {log.slice(0, 4).map((entry, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <span className="text-sm shrink-0">{entry.icon}</span>
+                          <div className="min-w-0">
+                            <p className="text-xs text-stone-600 leading-snug" style={{ fontWeight: 300 }}>{entry.message}</p>
+                            <p className="text-[10px] text-stone-400">{entry.time}</p>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 )}
+                {log.length > 0 && <div className="border-t border-stone-100 my-1" />}
+                {/* Déconnexion */}
+                <form action={logoutMaried} className="px-4 py-2">
+                  <button type="submit" className="text-xs text-stone-400 hover:text-red-400 transition cursor-pointer w-full text-left" style={{ fontWeight: 300 }}>
+                    Déconnexion
+                  </button>
+                </form>
               </div>
             )}
           </div>
@@ -270,6 +320,7 @@ export default function WeddingNav({ slug, weddingName, weddingId }: { slug: str
                   {section.label}
                 </a>
               ) : (
+
                 <>
                   <p className="px-5 pt-3 pb-1 text-[10px] uppercase tracking-widest text-stone-300" style={{ fontWeight: 300 }}>{section.label}</p>
                   {section.items.map(item => (
@@ -281,15 +332,30 @@ export default function WeddingNav({ slug, weddingName, weddingId }: { slug: str
                       {item.sub && <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400">{item.sub}</span>}
                     </a>
                   ))}
-                  {section.label === 'Compte' && (
-                    <form action={logoutMaried} className="px-6 py-3 border-b border-stone-50">
-                      <button type="submit" className="text-sm text-red-400 cursor-pointer" style={{ fontWeight: 300 }}>Déconnexion</button>
-                    </form>
-                  )}
                 </>
               )}
             </div>
           ))}
+          {/* Mon espace mobile */}
+          <div>
+            <p className="px-5 pt-3 pb-1 text-[10px] uppercase tracking-widest text-stone-300" style={{ fontWeight: 300 }}>Mon espace</p>
+            <a href={`/invite/${slug}`} target="_blank" className="flex flex-col px-6 py-2.5 border-b border-stone-50 text-stone-600">
+              <span style={{ fontWeight: 300, fontSize: '0.85rem' }}>Vue invités</span>
+              <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400">Aperçu de votre espace</span>
+            </a>
+            <a href={`/wedding/${slug}/edit`} className="flex flex-col px-6 py-2.5 border-b border-stone-50 text-stone-600">
+              <span style={{ fontWeight: 300, fontSize: '0.85rem' }}>Paramètres</span>
+              <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400">Infos du mariage</span>
+            </a>
+            {userEmail && (
+              <div className="px-6 py-2.5 border-b border-stone-50">
+                <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400">Connecté : {userEmail}</p>
+              </div>
+            )}
+            <form action={logoutMaried} className="px-6 py-3 border-b border-stone-50">
+              <button type="submit" className="text-sm text-red-400 cursor-pointer" style={{ fontWeight: 300 }}>Déconnexion</button>
+            </form>
+          </div>
         </div>
       )}
     </nav>

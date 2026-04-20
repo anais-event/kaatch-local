@@ -97,13 +97,15 @@ export default function CopyLinkButton({
               : 'border-stone-200 text-stone-600 hover:border-[#4a5240] hover:text-[#4a5240]'
           }`}
           style={{ fontWeight: 300 }}>
-          {copied ? '✓ Copié !' : (
+          {copied ? (
+            <span className="text-emerald-600">✓</span>
+          ) : (
             <>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3.5 h-3.5">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3.5 h-3.5 shrink-0">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
               </svg>
-              Partager
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={`w-3 h-3 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}>
+              <span className="hidden sm:inline">Partager</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={`w-3 h-3 transition-transform hidden sm:block ${dropdownOpen ? 'rotate-180' : ''}`}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
             </>
@@ -112,7 +114,7 @@ export default function CopyLinkButton({
 
         {/* Dropdown */}
         {dropdownOpen && (
-          <div className="absolute right-0 top-full mt-1.5 bg-white rounded-xl shadow-xl border border-stone-100 py-1.5 z-50 min-w-[200px]">
+          <div className="absolute right-0 top-full mt-1.5 bg-white rounded-xl shadow-xl border border-stone-100 py-1.5 z-50 w-[220px] max-w-[calc(100vw-2rem)]">
 
             {/* Copier le lien */}
             <button onClick={copy}

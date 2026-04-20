@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 
 type Diff = { months: number; days: number; hours: number; minutes: number; past: boolean }
 
-export default function Countdown({ weddingDate }: { weddingDate: string }) {
+export default function Countdown({ weddingDate, compact = false }: { weddingDate: string; compact?: boolean }) {
   const [diff, setDiff] = useState<Diff | null>(null)
 
   useEffect(() => {
@@ -35,21 +35,41 @@ export default function Countdown({ weddingDate }: { weddingDate: string }) {
   // Rien avant hydration (évite l'affichage de "00 Jours")
   if (!diff) return null
 
-  if (diff.past) return (
-    <div className="flex items-center gap-4 p-5 rounded-2xl bg-[#4a5240] text-white text-center justify-center">
-      <span style={{ fontFamily: 'var(--font-cormorant)', fontSize: '1.5rem', fontStyle: 'italic' }}>✨ C'est aujourd'hui !</span>
-    </div>
-  )
+  if (diff.past) {
+    if (compact) return (
+      <div className="text-white/90 text-center">
+        <span style={{ fontFamily: 'var(--font-cormorant)', fontSize: '1rem', fontStyle: 'italic' }}>✨ C'est aujourd'hui !</span>
+      </div>
+    )
+    return (
+      <div className="flex items-center gap-4 p-5 rounded-2xl bg-[#4a5240] text-white text-center justify-center">
+        <span style={{ fontFamily: 'var(--font-cormorant)', fontSize: '1.5rem', fontStyle: 'italic' }}>✨ C'est aujourd'hui !</span>
+      </div>
+    )
+  }
 
   const units = [
-    { value: diff.months, label: 'Mois' },
-    { value: diff.days, label: 'Jours' },
-    { value: diff.hours, label: 'Heures' },
-    { value: diff.minutes, label: 'Min' },
+    { value: diff.months, label: 'mois' },
+    { value: diff.days, label: diff.days > 1 ? 'jours' : 'jour' },
+    { value: diff.hours, label: 'h' },
+    { value: diff.minutes, label: 'min' },
   ].filter(u => u.value > 0)
 
-  // Toujours afficher au moins "Jours" si tout est à 0 (rare)
-  const displayed = units.length > 0 ? units : [{ value: diff.days, label: 'Jours' }]
+  const displayed = units.length > 0 ? units : [{ value: diff.days, label: 'jour' }]
+
+  // Version compacte (dans le hero de la cover)
+  if (compact) {
+    return (
+      <div className="flex items-center gap-1.5 text-white/90">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3 h-3 shrink-0 opacity-70">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span style={{ fontWeight: 300, fontSize: '0.72rem', letterSpacing: '0.04em' }}>
+          {displayed.map(({ value, label }) => `${value} ${label}`).join(' ')}
+        </span>
+      </div>
+    )
+  }
 
   return (
     <div className="p-5 rounded-2xl bg-white/80">

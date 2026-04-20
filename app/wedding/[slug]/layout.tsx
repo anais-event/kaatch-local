@@ -20,9 +20,11 @@ export default async function WeddingLayout({
     .eq('slug', slug)
     .single()
 
+  const { data: { user } } = await supabase.auth.getUser()
+
   return (
     <>
-      <WeddingNav slug={slug} weddingName={wedding?.name ?? ''} weddingId={wedding?.id ?? ''} />
+      <WeddingNav slug={slug} weddingName={wedding?.name ?? ''} weddingId={wedding?.id ?? ''} userEmail={user?.email ?? ''} />
       <div className="pt-12 pb-20 sm:pb-0">
         {children}
       </div>

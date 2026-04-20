@@ -2,9 +2,18 @@
 
 import { useState, useTransition } from 'react'
 import CopyLinkButton from '../invitations/CopyLinkButton'
+import PublipostagePanel from './PublipostagePanel'
+
+const PARTS_LABELS: Record<string, string> = {
+  ceremonie: '💒 Cérémonie',
+  vin_honneur: '🥂 Vin d\'honneur',
+  reception: '🎉 Réception',
+}
+const ALL_PARTS = ['ceremonie', 'vin_honneur', 'reception']
 
 type Guest = {
   id: string
+  wedding_id: string
   first_name: string
   last_name: string | null
   nickname: string | null
@@ -17,6 +26,7 @@ type Guest = {
   guest_message: string | null
   invite_token: string | null
   invite_sent_at: string | null
+  invited_parts: string[] | null
 }
 
 type Table = { id: string; name: string }
@@ -72,6 +82,7 @@ export default function GuestList({ guests, tables, slug, baseUrl, wedding, setR
   const [editingId, setEditingId] = useState<string | null>(null)
   const [showAll, setShowAll] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const weddingId = guests[0]?.wedding_id ?? ''
 
   const filtered = guests
     .filter(g => {
@@ -98,6 +109,8 @@ export default function GuestList({ guests, tables, slug, baseUrl, wedding, setR
 
   return (
     <div>
+      <PublipostagePanel guests={guests} weddingId={weddingId} slug={slug} />
+
       {/* Barre recherche + tri */}
       <div className="flex gap-2 mb-4">
         <div className="relative flex-1">
@@ -159,7 +172,7 @@ export default function GuestList({ guests, tables, slug, baseUrl, wedding, setR
                 <form action={setRsvp} onClick={e => e.stopPropagation()} className="shrink-0">
                   <input type="hidden" name="id" value={guest.id} />
                   <input type="hidden" name="slug" value={slug} />
-                  <select name="rsvp_status" defaultValue={guest.rsvp_status}
+                  <select key={guest.rsvp_status} name="rsvp_status" defaultValue={guest.rsvp_status}
                     onChange={e => { const form = e.target.closest('form') as HTMLFormElement; form.requestSubmit() }}
                     className={`text-xs px-2.5 py-1 rounded-full border-0 cursor-pointer outline-none appearance-none ${rsvp.bg} ${rsvp.text}`}
                     style={{ fontWeight: 300 }}>
@@ -221,6 +234,17 @@ export default function GuestList({ guests, tables, slug, baseUrl, wedding, setR
                       <p className="text-xs text-stone-300 italic" style={{ fontWeight: 300 }}>Aucune coordonnée renseignée</p>
                     )}
                   </div>
+
+                  {/* Moments d'invitation */}
+                  {guest.invited_parts && guest.invited_parts.length < 3 && (
+                    <div className="mb-3 flex flex-wrap gap-1.5">
+                      {guest.invited_parts.map(p => (
+                        <span key={p} className="text-xs bg-[#f5f0e8] text-[#4a5240] px-2.5 py-0.5 rounded-full" style={{ fontWeight: 300 }}>
+                          {PARTS_LABELS[p] ?? p}
+                        </span>
+                      ))}
+                    </div>
+                  )}
 
                   {guest.guest_message && (
                     <div className="mb-3 bg-amber-50 rounded-xl px-3 py-2">
@@ -287,6 +311,21 @@ export default function GuestList({ guests, tables, slug, baseUrl, wedding, setR
                     <option value="F">👩 Féminin (Chère…)</option>
                     <option value="M">👨 Masculin (Cher…)</option>
                   </select>
+                  {/* Moments */}
+                  <div className="col-span-2 border border-stone-200 rounded-xl px-3 py-2.5 bg-white">
+                    <p className="text-xs text-stone-400 mb-2" style={{ fontWeight: 300 }}>Invité à…</p>
+                    <div className="flex flex-wrap gap-3">
+                      {ALL_PARTS.map(p => (
+                        <label key={p} className="flex items-center gap-1.5 text-sm text-stone-600 cursor-pointer" style={{ fontWeight: 300 }}>
+                          <input type="checkbox" name="invited_parts" value={p}
+                            defaultChecked={(guest.invited_parts ?? ALL_PARTS).includes(p)}
+                            className="rounded" />
+                          {PARTS_LABELS[p]}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
                   <div className="col-span-2 flex gap-2 pt-1">
                     <button type="submit" disabled={isPending}
                       className="flex-1 bg-[#4a5240] text-white rounded-xl py-2 text-sm hover:bg-[#2d3228] transition disabled:opacity-50 cursor-pointer"

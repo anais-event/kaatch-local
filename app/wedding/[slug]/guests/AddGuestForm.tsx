@@ -53,6 +53,13 @@ export default function AddGuestForm({ weddingId, slug, addGuest }: Props) {
             <option value="">Lien de parenté</option>
             {RELATIONS.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
+          <select name="gender"
+            className="border border-stone-200 rounded-xl px-3 py-2 bg-white text-stone-500 outline-none focus:border-[#4a5240] transition text-sm"
+            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
+            <option value="">Genre…</option>
+            <option value="F">👩 Féminin (Chère…)</option>
+            <option value="M">👨 Masculin (Cher…)</option>
+          </select>
           <select name="guest_type"
             className="border border-stone-200 rounded-xl px-3 py-2 bg-white text-stone-500 outline-none focus:border-[#4a5240] transition text-sm"
             style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
@@ -60,6 +67,23 @@ export default function AddGuestForm({ weddingId, slug, addGuest }: Props) {
             <option value="enfant">Enfant</option>
             <option value="animal">Animal</option>
           </select>
+          {/* Moments d'invitation */}
+          <div className="col-span-2 border border-stone-200 rounded-xl px-3 py-2.5 bg-white">
+            <p className="text-xs text-stone-400 mb-2" style={{ fontWeight: 300 }}>Invité à…</p>
+            <div className="flex flex-wrap gap-3">
+              {[
+                { value: 'ceremonie', label: '💒 Cérémonie' },
+                { value: 'vin_honneur', label: '🥂 Vin d\'honneur' },
+                { value: 'reception', label: '🎉 Réception' },
+              ].map(p => (
+                <label key={p.value} className="flex items-center gap-1.5 text-sm text-stone-600 cursor-pointer" style={{ fontWeight: 300 }}>
+                  <input type="checkbox" name="invited_parts" value={p.value} defaultChecked
+                    className="rounded" />
+                  {p.label}
+                </label>
+              ))}
+            </div>
+          </div>
           <button type="submit"
             className="col-span-2 bg-[#4a5240] text-white px-6 py-2 rounded-xl hover:bg-[#2d3228] transition cursor-pointer text-sm"
             style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>

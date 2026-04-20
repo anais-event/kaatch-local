@@ -234,6 +234,10 @@ export default async function BudgetPage({ params }: { params: Promise<{ slug: s
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         <div className="mb-8">
+          <a href={`/wedding/${slug}`} className="text-sm text-[#4a5240] hover:underline mb-4 block"
+             style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
+            ← Retour aux préparatifs
+          </a>
           <p style={{ fontWeight: 300, fontSize: '0.68rem', letterSpacing: '0.2em' }}
              className="text-stone-400 uppercase mb-1">Budget</p>
           <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.2rem', fontStyle: 'italic' }}

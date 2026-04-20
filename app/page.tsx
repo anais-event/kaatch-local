@@ -1,33 +1,35 @@
+import KaatchChatLanding from './_components/KaatchChatLanding'
+
 export default function Home() {
   const steps = [
     {
       n: '01',
-      title: 'Tu crées ton espace en deux minutes',
-      desc: 'Tes prénoms, la date, le lieu, une photo de couverture — et c\'est parti. Pas de paramétrage complexe, pas de manuel à lire.',
+      title: 'Un espace créé en deux minutes',
+      desc: 'Les prénoms, la date, le lieu, une photo de couverture — et c\'est parti. Aucun paramétrage complexe, aucun manuel à lire.',
     },
     {
       n: '02',
-      title: 'Tu configures ton mariage',
+      title: 'Un mariage configuré à sa mesure',
       sub: [
         { icon: '💌', label: 'Invités & faire-parts', detail: 'Liste, RSVP, faire-parts personnalisés à chaque prénom' },
         { icon: '🪑', label: 'Plan de table', detail: 'Glisse-dépose, récap imprimable, mise à jour instantanée' },
         { icon: '💰', label: 'Budget', detail: 'Devis, dépenses, prestataires — tout au même endroit' },
-        { icon: '📅', label: 'Programme & Jour J', detail: 'Déroulé de la journée visible par tes invités en temps réel' },
+        { icon: '📅', label: 'Programme & Jour J', detail: 'Déroulé de la journée visible par les invités en temps réel' },
       ],
     },
     {
       n: '03',
-      title: 'Tes invités reçoivent leur lien personnel',
-      desc: 'Chaque invité accède à un espace à son prénom — RSVP, programme, messagerie, album. Sans créer de compte. Sans t\'appeler pour savoir où se garer.',
+      title: 'Chaque invité reçoit son lien personnel',
+      desc: 'Chaque invité accède à un espace à son prénom — RSVP, programme, messagerie, album. Sans créer de compte. Sans appeler les mariés pour savoir où se garer.',
     },
     {
       n: '04',
-      title: 'Le jour J, tu lèves les yeux',
-      desc: 'Un QR code posé sur les tables, tes invités déposent leurs photos, le programme est accessible depuis leur téléphone. Toi, tu profites.',
+      title: 'Le jour J, on lève les yeux',
+      desc: 'Un QR code posé sur les tables, les invités déposent leurs photos, le programme est accessible depuis leur téléphone. Les mariés profitent.',
     },
     {
       n: '05',
-      title: 'Après le mariage, tu gardes tout',
+      title: 'Après le mariage, tout reste',
       desc: 'Photos, messages, souvenirs — tout est centralisé, consultable, téléchargeable. Pour toujours.',
     },
   ]
@@ -38,7 +40,7 @@ export default function Home() {
       date: 'Mariés en septembre 2024',
       photo: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120&q=80&auto=format&fit=crop&crop=face',
       note: '★★★★★',
-      texte: 'On avait 4 groupes WhatsApp différents avant de découvrir Kaatch. Le jour du mariage, mes invités avaient tout — le programme, le plan de table, le QR code photo. Moi je n\'ai répondu à aucun message ce soir-là.',
+      texte: 'On avait 4 groupes WhatsApp différents avant de découvrir Kaatch. Le jour du mariage, mes invités avaient tout — le programme, le plan de table, le QR code photo.',
     },
     {
       nom: 'Laura & Maxime',
@@ -98,27 +100,30 @@ export default function Home() {
           </p>
           <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: 'clamp(2.4rem, 4vw, 3.5rem)', fontStyle: 'italic', lineHeight: 1.15 }}
               className="text-[#2d3228] mb-6">
-            Combien de groupes WhatsApp tu as créés pour ce mariage ?
+            Combien de groupes WhatsApp pour ce mariage ?
           </h1>
           <p className="text-stone-600 mb-8" style={{ fontSize: '1rem', lineHeight: 1.9 }}>
             Les infos éparpillées, les tableurs jamais à jour, les invités qui n'ont pas vu le message…
             <br />
-            Kaatch regroupe tout — pour toi, et pour eux.
+            Kaatch regroupe tout — pour les mariés, et pour les invités.
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
             <a href="/auth"
                className="inline-block bg-[#4a5240] text-white px-8 py-3.5 rounded-xl hover:bg-[#2d3228] transition text-sm text-center"
                style={{ fontWeight: 300, letterSpacing: '0.06em' }}>
-              Créer mon espace mariage →
+              Créer son espace mariage →
             </a>
-            <a href="/rejoindre"
+            <a href="https://app.supademo.com/video/cmo6zgf590l9037n2na9km76d" target="_blank" rel="noopener noreferrer"
                className="inline-block border border-stone-300 text-stone-500 px-8 py-3.5 rounded-xl hover:border-[#4a5240] hover:text-[#4a5240] transition text-sm text-center"
                style={{ fontWeight: 300 }}>
-              Je suis invité(e)
+              ▶ Voir la démo
             </a>
           </div>
+          <p className="mt-3 text-xs text-stone-400" style={{ fontWeight: 300 }}>
+            <a href="/rejoindre" className="hover:text-[#4a5240] transition">Invité(e) à un mariage ? →</a>
+          </p>
           <p className="mt-8 text-xs text-stone-400" style={{ fontWeight: 300 }}>
-            Aucune carte bleue demandée. Ton espace est prêt en 2 minutes.
+            Aucune carte bleue demandée. L'espace est prêt en 2 minutes.
           </p>
         </div>
 
@@ -139,6 +144,30 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── VIDÉO DÉMO ── */}
+      <section className="py-20 px-8 bg-white border-t border-stone-100">
+        <div className="max-w-3xl mx-auto text-center">
+          <p className="text-xs tracking-[0.25em] uppercase text-[#4a5240] mb-3" style={{ fontWeight: 300 }}>En action</p>
+          <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: 'clamp(1.8rem, 3vw, 2.4rem)', fontStyle: 'italic', lineHeight: 1.2 }}
+              className="text-[#2d3228] mb-8">
+            Kaatch en 2 minutes
+          </h2>
+          <div className="relative w-full rounded-2xl overflow-hidden shadow-2xl border border-stone-200"
+               style={{ paddingBottom: '56.25%' }}>
+            <iframe
+              src="https://app.supademo.com/embed/cmo6zgf590l9037n2na9km76d"
+              className="absolute inset-0 w-full h-full"
+              allow="fullscreen"
+              style={{ border: 0 }}
+            />
+          </div>
+          <a href="/auth" className="inline-block mt-8 bg-[#4a5240] text-white px-8 py-3.5 rounded-xl hover:bg-[#2d3228] transition text-sm"
+             style={{ fontWeight: 300 }}>
+            Créer son espace gratuitement →
+          </a>
+        </div>
+      </section>
+
       {/* ── 3 BÉNÉFICES ── */}
       <section className="py-24 px-8 bg-white">
         <div className="max-w-5xl mx-auto">
@@ -146,7 +175,7 @@ export default function Home() {
             <p className="text-xs tracking-[0.25em] uppercase text-[#4a5240] mb-3" style={{ fontWeight: 300 }}>Ce que ça change</p>
             <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: 'clamp(1.8rem, 3vw, 2.6rem)', fontStyle: 'italic', lineHeight: 1.2 }}
                 className="text-[#2d3228] max-w-xl">
-              Ton mariage mérite une organisation aux petits oignons.
+              Un mariage mérite une organisation aux petits oignons.
             </h2>
           </div>
           <div className="grid md:grid-cols-3 gap-10">
@@ -190,13 +219,13 @@ export default function Home() {
               Simple comme bonjour.
             </h2>
             <p style={{ fontSize: '0.9rem', lineHeight: 1.8 }} className="text-stone-500">
-              Pas de formation, pas de manuel. Tu commences et tu comprends. Tes invités aussi — ils n'ont même pas besoin de créer un compte.
+              Aucune formation, aucun manuel. On commence et on comprend. Les invités aussi — sans même créer un compte.
             </p>
             <div className="mt-8">
               <a href="/auth"
                  className="inline-block bg-[#4a5240] text-white px-8 py-3.5 rounded-xl hover:bg-[#2d3228] transition text-sm"
                  style={{ fontWeight: 300 }}>
-                C'est parti →
+                Commencer →
               </a>
             </div>
           </div>
@@ -280,7 +309,7 @@ export default function Home() {
               Aucune mauvaise surprise.
             </h2>
             <p style={{ fontSize: '0.9rem', lineHeight: 1.8 }} className="text-stone-500 max-w-lg">
-              Nos formules arrivent bientôt. En attendant, tout est disponible sans engagement et sans te demander ta carte bleue.
+              Nos formules arrivent bientôt. En attendant, tout est disponible sans engagement et sans carte bleue.
             </p>
           </div>
           <div className="bg-white rounded-2xl border border-stone-200 p-8 max-w-sm">
@@ -304,10 +333,10 @@ export default function Home() {
           <p className="text-xs tracking-[0.25em] uppercase text-[#4a5240] mb-4" style={{ fontWeight: 300 }}>Alors ?</p>
           <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: 'clamp(2rem, 4vw, 3rem)', fontStyle: 'italic', lineHeight: 1.2 }}
               className="text-[#2d3228] mb-5">
-            Ton mariage mérite une organisation aux petits oignons.
+            Un mariage mérite une organisation aux petits oignons.
           </h2>
           <p style={{ fontSize: '0.9rem', lineHeight: 1.8 }} className="text-stone-500 mb-8">
-            Ton espace est prêt en deux minutes. Tes invités n'ont pas besoin de créer un compte. Et toi, tu pourras enfin fermer quelques groupes WhatsApp.
+            L'espace est prêt en deux minutes. Les invités n'ont pas besoin de créer un compte. Et quelques groupes WhatsApp de moins, ça ne fait pas de mal.
           </p>
           <a href="/auth"
              className="inline-block bg-[#4a5240] text-white px-12 py-4 rounded-xl hover:bg-[#2d3228] transition text-sm"
@@ -319,6 +348,9 @@ export default function Home() {
           </p>
         </div>
       </section>
+
+      {/* ── CHATBOT ── */}
+      <KaatchChatLanding />
 
       {/* ── FOOTER ── */}
       <footer className="border-t border-stone-200 py-10 px-8 bg-[#f5f0e8]">

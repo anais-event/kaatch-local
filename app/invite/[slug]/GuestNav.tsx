@@ -8,6 +8,7 @@ export default function GuestNav({ slug, isPreview }: { slug: string; isPreview?
     { label: 'Programme', short: 'Programme', href: `/invite/${slug}/programme` },
     { label: 'Photos', short: 'Photos', href: `/invite/${slug}/photos` },
     { label: 'Messagerie', short: 'Chat', href: `/invite/${slug}/groupes` },
+    { label: '🎉 Surprises', short: '🎉', href: `/invite/${slug}/surprises` },
     { label: 'Prestataires', short: 'Contacts', href: `/invite/${slug}/contacts` },
   ]
   const isActive = (href: string) => {

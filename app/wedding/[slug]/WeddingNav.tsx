@@ -81,6 +81,7 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail }: 
       label: 'Jour J',
       items: [
         { label: 'Programme', sub: 'Déroulé de la journée', href: `/wedding/${slug}/programme` },
+        { label: 'Jeux & animations', sub: 'Idées pour la fête', href: `/wedding/${slug}/jeux` },
         { label: 'Musique', sub: 'Playlist & suggestions', href: `/wedding/${slug}/musique` },
         { label: 'Hébergements', sub: 'Options aux alentours', href: `/wedding/${slug}/hebergements` },
         { label: 'QR Code', sub: 'Accès rapide jour J', href: `/wedding/${slug}/partager` },

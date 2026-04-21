@@ -78,6 +78,9 @@ export default function Home() {
             <a href="#offres" className="text-sm text-stone-500 hover:text-[#4a5240] transition" style={{ fontWeight: 300 }}>
               Offres
             </a>
+            <a href="/guide" className="text-sm text-stone-500 hover:text-[#4a5240] transition" style={{ fontWeight: 300 }}>
+              Guide
+            </a>
           </div>
           <div className="flex items-center gap-4">
             <a href="/auth" className="text-sm text-stone-500 hover:text-[#4a5240] transition hidden sm:block" style={{ fontWeight: 300 }}>
@@ -459,6 +462,7 @@ export default function Home() {
             <a href="#comment" className="text-sm text-stone-400 hover:text-[#4a5240] transition" style={{ fontWeight: 300 }}>Comment ça marche</a>
             <a href="#avis" className="text-sm text-stone-400 hover:text-[#4a5240] transition" style={{ fontWeight: 300 }}>Avis</a>
             <a href="#offres" className="text-sm text-stone-400 hover:text-[#4a5240] transition" style={{ fontWeight: 300 }}>Offres</a>
+            <a href="/guide" className="text-sm text-stone-400 hover:text-[#4a5240] transition" style={{ fontWeight: 300 }}>Guide</a>
             <a href="/rejoindre" className="text-sm text-stone-400 hover:text-[#4a5240] transition" style={{ fontWeight: 300 }}>Espace invités</a>
           </div>
           <a href="/auth" className="text-sm text-[#4a5240] hover:underline" style={{ fontWeight: 300 }}>Connexion →</a>

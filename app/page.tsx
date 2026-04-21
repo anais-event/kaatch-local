@@ -305,25 +305,129 @@ export default function Home() {
           <div className="mb-12">
             <p className="text-xs tracking-[0.25em] uppercase text-[#4a5240] mb-3" style={{ fontWeight: 300 }}>Offres</p>
             <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontStyle: 'italic' }}
-                className="text-[#2d3228] mb-4">
+                className="text-[#2d3228] mb-2">
               Aucune mauvaise surprise.
             </h2>
-            <p style={{ fontSize: '0.9rem', lineHeight: 1.8 }} className="text-stone-500 max-w-lg">
-              Nos formules arrivent bientôt. En attendant, tout est disponible sans engagement et sans carte bleue.
+            <p style={{ fontSize: '0.9rem', lineHeight: 1.8 }} className="text-stone-500">
+              Un tarif unique, un seul paiement. Aucun abonnement caché.
             </p>
           </div>
-          <div className="bg-white rounded-2xl border border-stone-200 p-8 max-w-sm">
-            <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.4rem', fontStyle: 'italic' }}
-               className="text-[#2d3228] mb-2">Accès complet</p>
-            <p style={{ fontSize: '0.85rem', lineHeight: 1.8 }} className="text-stone-500 mb-6">
-              Invités, plan de table, budget, programme, photos, messagerie — tout, maintenant.
-            </p>
-            <a href="/auth"
-               className="inline-block bg-[#4a5240] text-white px-8 py-3 rounded-xl hover:bg-[#2d3228] transition text-sm w-full text-center"
-               style={{ fontWeight: 300 }}>
-              Créer mon espace →
-            </a>
+
+          <div className="grid md:grid-cols-3 gap-6 items-start">
+
+            {/* Gratuit */}
+            <div className="bg-white rounded-2xl border border-stone-200 p-7 flex flex-col">
+              <div className="mb-5">
+                <p className="text-xs tracking-widest uppercase text-stone-400 mb-3" style={{ fontWeight: 300 }}>Gratuit</p>
+                <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '2.2rem', lineHeight: 1 }}
+                   className="text-[#2d3228]">0 €</p>
+                <p style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-400 mt-1">Pour découvrir</p>
+              </div>
+              <ul className="space-y-2.5 flex-1 mb-6">
+                {[
+                  '1 événement',
+                  '30 invités maximum',
+                  '20 photos',
+                  'RSVP basique',
+                ].map(f => (
+                  <li key={f} className="flex items-start gap-2 text-sm text-stone-600" style={{ fontWeight: 300 }}>
+                    <span className="text-[#4a5240] mt-0.5 shrink-0">✓</span>{f}
+                  </li>
+                ))}
+                {[
+                  'Plan de table',
+                  'Gestion budget',
+                ].map(f => (
+                  <li key={f} className="flex items-start gap-2 text-sm text-stone-300" style={{ fontWeight: 300 }}>
+                    <span className="mt-0.5 shrink-0">—</span>{f}
+                  </li>
+                ))}
+                <li className="flex items-start gap-2 text-xs text-stone-400 italic" style={{ fontWeight: 300 }}>
+                  <span className="mt-0.5 shrink-0 text-stone-300">·</span>Branding Kaatch visible
+                </li>
+              </ul>
+              <a href="/auth"
+                 className="w-full text-center border border-stone-300 text-stone-500 px-6 py-2.5 rounded-xl hover:border-[#4a5240] hover:text-[#4a5240] transition text-sm"
+                 style={{ fontWeight: 300 }}>
+                Commencer gratuitement
+              </a>
+            </div>
+
+            {/* Mariage — mis en avant */}
+            <div className="bg-[#4a5240] rounded-2xl p-7 flex flex-col relative shadow-xl">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                <span className="bg-amber-400 text-amber-900 text-xs px-3 py-1 rounded-full whitespace-nowrap"
+                      style={{ fontWeight: 400 }}>
+                  ✦ Prix de lancement
+                </span>
+              </div>
+              <div className="mb-5">
+                <p className="text-xs tracking-widest uppercase text-white/50 mb-3" style={{ fontWeight: 300 }}>💍 Mariage</p>
+                <div className="flex items-end gap-2">
+                  <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '2.2rem', lineHeight: 1 }}
+                     className="text-white">45 €</p>
+                  <p style={{ fontWeight: 300, fontSize: '0.82rem', textDecoration: 'line-through' }}
+                     className="text-white/40 mb-1">65 €</p>
+                </div>
+                <p style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-white/60 mt-1">Paiement unique · 1 mariage</p>
+              </div>
+              <ul className="space-y-2.5 flex-1 mb-6">
+                {[
+                  'Invités illimités',
+                  'Photos illimitées',
+                  'RSVP complet',
+                  'Plan de table',
+                  'Gestion budget',
+                  'Site personnalisé',
+                  'Sans branding Kaatch',
+                ].map(f => (
+                  <li key={f} className="flex items-start gap-2 text-sm text-white/90" style={{ fontWeight: 300 }}>
+                    <span className="text-amber-300 mt-0.5 shrink-0">✓</span>{f}
+                  </li>
+                ))}
+              </ul>
+              <a href="/auth"
+                 className="w-full text-center bg-white text-[#4a5240] px-6 py-2.5 rounded-xl hover:bg-[#f5f0e8] transition text-sm"
+                 style={{ fontWeight: 400 }}>
+                Créer mon espace →
+              </a>
+            </div>
+
+            {/* Pro */}
+            <div className="bg-white rounded-2xl border border-stone-200 p-7 flex flex-col">
+              <div className="mb-5">
+                <p className="text-xs tracking-widest uppercase text-stone-400 mb-3" style={{ fontWeight: 300 }}>👔 Planificateur Pro</p>
+                <div>
+                  <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '2.2rem', lineHeight: 1 }}
+                     className="text-[#2d3228]">49 €<span style={{ fontSize: '1rem', fontWeight: 300 }} className="text-stone-400">/mois</span></p>
+                  <p style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-400 mt-1">ou 399 €/an — 2 mois offerts</p>
+                </div>
+              </div>
+              <ul className="space-y-2.5 flex-1 mb-6">
+                {[
+                  'Mariages illimités',
+                  'Tout ce qui est dans Mariage',
+                  'Dashboard multi-événements',
+                  'Support prioritaire',
+                  'Accès anticipé aux nouvelles features',
+                ].map(f => (
+                  <li key={f} className="flex items-start gap-2 text-sm text-stone-600" style={{ fontWeight: 300 }}>
+                    <span className="text-[#4a5240] mt-0.5 shrink-0">✓</span>{f}
+                  </li>
+                ))}
+              </ul>
+              <a href="/auth"
+                 className="w-full text-center bg-[#4a5240] text-white px-6 py-2.5 rounded-xl hover:bg-[#2d3228] transition text-sm"
+                 style={{ fontWeight: 300 }}>
+                Essayer Pro →
+              </a>
+            </div>
+
           </div>
+
+          <p className="text-center mt-8 text-xs text-stone-400" style={{ fontWeight: 300 }}>
+            Aucune carte bleue requise pour le plan gratuit · Paiement sécurisé · Accès immédiat
+          </p>
         </div>
       </section>
 

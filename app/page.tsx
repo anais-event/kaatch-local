@@ -9,7 +9,7 @@ export default function Home() {
     },
     {
       n: '02',
-      title: 'Un mariage configuré à sa mesure',
+      title: 'Un mariage organisé sur mesure',
       sub: [
         { icon: '💌', label: 'Invités & faire-parts', detail: 'Liste, RSVP, faire-parts personnalisés à chaque prénom' },
         { icon: '🪑', label: 'Plan de table', detail: 'Glisse-dépose, récap imprimable, mise à jour instantanée' },
@@ -25,7 +25,7 @@ export default function Home() {
     {
       n: '04',
       title: 'Le jour J, on lève les yeux',
-      desc: 'Un QR code posé sur les tables, les invités déposent leurs photos, le programme est accessible depuis leur téléphone. Les mariés profitent.',
+      desc: 'Un QR code posé sur les tables, les invités déposent leurs photos, le programme est accessible depuis leur téléphone. Tout le monde profite.',
     },
     {
       n: '05',
@@ -113,7 +113,7 @@ export default function Home() {
                style={{ fontWeight: 300, letterSpacing: '0.06em' }}>
               Créer son espace mariage →
             </a>
-            <a href="https://app.supademo.com/video/cmo6zgf590l9037n2na9km76d" target="_blank" rel="noopener noreferrer"
+            <a href="#video"
                className="inline-block border border-stone-300 text-stone-500 px-8 py-3.5 rounded-xl hover:border-[#4a5240] hover:text-[#4a5240] transition text-sm text-center"
                style={{ fontWeight: 300 }}>
               ▶ Voir la démo
@@ -145,7 +145,7 @@ export default function Home() {
       </section>
 
       {/* ── VIDÉO DÉMO ── */}
-      <section className="py-20 px-8 bg-white border-t border-stone-100">
+      <section id="video" className="py-20 px-8 bg-white border-t border-stone-100">
         <div className="max-w-3xl mx-auto text-center">
           <p className="text-xs tracking-[0.25em] uppercase text-[#4a5240] mb-3" style={{ fontWeight: 300 }}>En action</p>
           <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: 'clamp(1.8rem, 3vw, 2.4rem)', fontStyle: 'italic', lineHeight: 1.2 }}
@@ -269,7 +269,7 @@ export default function Home() {
       <section id="avis" className="py-24 px-8 bg-white">
         <div className="max-w-5xl mx-auto">
           <div className="mb-14">
-            <p className="text-xs tracking-[0.25em] uppercase text-[#4a5240] mb-3" style={{ fontWeight: 300 }}>Ils l'ont utilisé</p>
+            <p className="text-xs tracking-[0.25em] uppercase text-[#4a5240] mb-3" style={{ fontWeight: 300 }}>Ils ont utilisé Kaatch</p>
             <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontStyle: 'italic' }}
                 className="text-[#2d3228]">
               Ce qu'ils en disent.
@@ -309,7 +309,7 @@ export default function Home() {
               Aucune mauvaise surprise.
             </h2>
             <p style={{ fontSize: '0.9rem', lineHeight: 1.8 }} className="text-stone-500">
-              Un tarif unique, un seul paiement. Aucun abonnement caché.
+              Un tarif unique, un seul paiement. Aucun abonnement caché. Prix en euros.
             </p>
           </div>
 
@@ -320,7 +320,7 @@ export default function Home() {
               <div className="mb-5">
                 <p className="text-xs tracking-widest uppercase text-stone-400 mb-3" style={{ fontWeight: 300 }}>Gratuit</p>
                 <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '2.2rem', lineHeight: 1 }}
-                   className="text-[#2d3228]">0 €</p>
+                   className="text-[#2d3228]">0</p>
                 <p style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-400 mt-1">Pour découvrir</p>
               </div>
               <ul className="space-y-2.5 flex-1 mb-6">
@@ -329,21 +329,14 @@ export default function Home() {
                   '30 invités maximum',
                   '20 photos',
                   'RSVP basique',
+                  'Gestion budget',
                 ].map(f => (
                   <li key={f} className="flex items-start gap-2 text-sm text-stone-600" style={{ fontWeight: 300 }}>
                     <span className="text-[#4a5240] mt-0.5 shrink-0">✓</span>{f}
                   </li>
                 ))}
-                {[
-                  'Plan de table',
-                  'Gestion budget',
-                ].map(f => (
-                  <li key={f} className="flex items-start gap-2 text-sm text-stone-300" style={{ fontWeight: 300 }}>
-                    <span className="mt-0.5 shrink-0">—</span>{f}
-                  </li>
-                ))}
                 <li className="flex items-start gap-2 text-xs text-stone-400 italic" style={{ fontWeight: 300 }}>
-                  <span className="mt-0.5 shrink-0 text-stone-300">·</span>Branding Kaatch visible
+                  <span className="mt-0.5 shrink-0 text-stone-300">·</span>Logo Kaatch visible <span className="not-italic">(mais discret !&nbsp;😉)</span>
                 </li>
               </ul>
               <a href="/auth"
@@ -365,9 +358,9 @@ export default function Home() {
                 <p className="text-xs tracking-widest uppercase text-white/50 mb-3" style={{ fontWeight: 300 }}>💍 Mariage</p>
                 <div className="flex items-end gap-2">
                   <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '2.2rem', lineHeight: 1 }}
-                     className="text-white">45 €</p>
+                     className="text-white">45</p>
                   <p style={{ fontWeight: 300, fontSize: '0.82rem', textDecoration: 'line-through' }}
-                     className="text-white/40 mb-1">65 €</p>
+                     className="text-white/40 mb-1">65</p>
                 </div>
                 <p style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-white/60 mt-1">Paiement unique · 1 mariage</p>
               </div>
@@ -376,6 +369,7 @@ export default function Home() {
                   'Invités illimités',
                   'Photos illimitées',
                   'RSVP complet',
+                  'Invitation à plusieurs moments de la fête',
                   'Plan de table',
                   'Gestion budget',
                   'Site personnalisé',
@@ -399,8 +393,8 @@ export default function Home() {
                 <p className="text-xs tracking-widest uppercase text-stone-400 mb-3" style={{ fontWeight: 300 }}>👔 Planificateur Pro</p>
                 <div>
                   <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '2.2rem', lineHeight: 1 }}
-                     className="text-[#2d3228]">49 €<span style={{ fontSize: '1rem', fontWeight: 300 }} className="text-stone-400">/mois</span></p>
-                  <p style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-400 mt-1">ou 399 €/an — 2 mois offerts</p>
+                     className="text-[#2d3228]">49<span style={{ fontSize: '1rem', fontWeight: 300 }} className="text-stone-400">/mois</span></p>
+                  <p style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-400 mt-1">ou 399/an — 2 mois offerts</p>
                 </div>
               </div>
               <ul className="space-y-2.5 flex-1 mb-6">
@@ -426,7 +420,7 @@ export default function Home() {
           </div>
 
           <p className="text-center mt-8 text-xs text-stone-400" style={{ fontWeight: 300 }}>
-            Aucune carte bleue requise pour le plan gratuit · Paiement sécurisé · Accès immédiat
+            Aucune carte bleue requise pour le plan gratuit · Paiement sécurisé · Accès immédiat · Prix en euros
           </p>
         </div>
       </section>
@@ -448,7 +442,7 @@ export default function Home() {
             Créer mon espace mariage →
           </a>
           <p className="mt-5 text-sm text-stone-400" style={{ fontWeight: 300 }}>
-            <a href="/rejoindre" className="hover:text-[#4a5240] transition">Tu es invité(e) ? Rejoindre un mariage →</a>
+            <a href="/rejoindre" className="hover:text-[#4a5240] transition">Invité(e) à un mariage ? Rejoindre →</a>
           </p>
         </div>
       </section>

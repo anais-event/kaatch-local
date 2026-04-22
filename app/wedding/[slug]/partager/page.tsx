@@ -1,6 +1,5 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
-import { headers } from 'next/headers'
 import QRCodeDisplay from './QRCodeDisplay'
 import CopyButton from './CopyButton'
 
@@ -26,11 +25,9 @@ export default async function PartagerPage({ params }: { params: Promise<{ slug:
 
   if (!wedding) return <div className="p-8">Mariage introuvable</div>
 
-  const headersList = await headers()
-  const host = headersList.get('host') ?? 'localhost:3000'
-  const protocol = host.includes('localhost') ? 'http' : 'https'
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://kaatch.fr'
   const shareUrl = wedding.share_code
-    ? `${protocol}://${host}/p/${wedding.share_code}`
+    ? `${baseUrl}/p/${wedding.share_code}`
     : null
 
   return (

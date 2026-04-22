@@ -425,6 +425,17 @@ export default function Home() {
           <p className="text-center mt-8 text-xs text-stone-400" style={{ fontWeight: 300 }}>
             Aucune carte bleue requise pour le plan gratuit · Paiement sécurisé · Accès immédiat · Prix en euros
           </p>
+          <div className="mt-8 text-center border-t border-stone-200 pt-8">
+            <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.1rem', fontWeight: 400 }}
+               className="text-stone-500 mb-2">
+              Vous êtes wedding planner ou professionnel de l'événementiel ?
+            </p>
+            <a href="mailto:groupe.cogitium@gmail.com?subject=Kaatch Pro — Parlons-en"
+               className="text-sm text-[#4a5240] hover:underline"
+               style={{ fontWeight: 300 }}>
+              Parlons-en → groupe.cogitium@gmail.com
+            </a>
+          </div>
         </div>
       </section>
 

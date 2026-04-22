@@ -80,6 +80,7 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail }: 
     {
       label: 'Jour J',
       items: [
+        { label: 'Rétro-planning', sub: 'Checklist chronologique', href: `/wedding/${slug}/retro-planning` },
         { label: 'Programme', sub: 'Déroulé de la journée', href: `/wedding/${slug}/programme` },
         { label: 'Jeux & animations', sub: 'Idées pour la fête', href: `/wedding/${slug}/jeux` },
         { label: 'Musique', sub: 'Playlist & suggestions', href: `/wedding/${slug}/musique` },

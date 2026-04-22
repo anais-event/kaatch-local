@@ -15,7 +15,7 @@ export default async function UpgradePage({ params }: { params: Promise<{ slug: 
   if (wedding.plan === 'mariage' || wedding.plan === 'pro') redirect(`/wedding/${slug}`)
 
   // URL Lemon Squeezy avec les données du mariage pré-remplies
-  const baseUrl = process.env.LEMONSQUEEZY_CHECKOUT_URL ?? '#'
+  const baseUrl = process.env.LEMONSQUEEZY_CHECKOUT_URL ?? 'https://kaatch-mariage.lemonsqueezy.com/checkout/buy/a9a7912e-a499-41a4-83ee-a885e4d3855c'
   const checkoutUrl = `${baseUrl}?checkout[custom][wedding_id]=${wedding.id}&checkout[custom][plan]=mariage`
 
   return (

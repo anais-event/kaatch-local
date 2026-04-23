@@ -381,10 +381,10 @@ export default function Home() {
                className="text-stone-500 mb-2">
               Vous êtes wedding planner ou professionnel de l'événementiel ?
             </p>
-            <a href="mailto:groupe.cogitium@gmail.com?subject=Kaatch Pro — Parlons-en"
+            <a href="mailto:bonjour@kaatch.fr?subject=Kaatch%20Pro%20%E2%80%94%20Parlons-en"
                className="text-sm text-[#2C3B2E] hover:underline"
                style={{ fontWeight: 400 }}>
-              Parlons-en → groupe.cogitium@gmail.com
+              Parlons-en → bonjour@kaatch.fr
             </a>
           </div>
         </div>
@@ -418,23 +418,43 @@ export default function Home() {
 
       {/* ── FOOTER ── */}
       <footer className="border-t border-stone-200 py-12 px-10 bg-[#f5f0e8]">
-        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-5">
-          <span style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '1.1rem', letterSpacing: '-0.02em' }}
-                className="text-stone-400">Kaatch</span>
-          <div className="flex items-center gap-6 flex-wrap justify-center">
-            {[
-              { label: 'Comment ça marche', href: '#comment' },
-              { label: 'Offres', href: '#offres' },
-              { label: 'Guide', href: '/guide' },
-              { label: 'Espace invités', href: '/rejoindre' },
-            ].map(l => (
-              <a key={l.href} href={l.href}
-                 className="text-sm text-stone-400 hover:text-[#2C3B2E] transition" style={{ fontWeight: 300 }}>
-                {l.label}
-              </a>
-            ))}
+        <div className="max-w-5xl mx-auto">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-5 mb-8">
+            <span style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '1.1rem', letterSpacing: '-0.02em' }}
+                  className="text-stone-500">Kaatch</span>
+            <div className="flex items-center gap-5 flex-wrap justify-center">
+              {[
+                { label: 'Comment ça marche', href: '#comment' },
+                { label: 'Offres', href: '#offres' },
+                { label: 'Guide', href: '/guide' },
+                { label: 'Espace invités', href: '/rejoindre' },
+              ].map(l => (
+                <a key={l.href} href={l.href}
+                   className="text-sm text-stone-400 hover:text-[#2C3B2E] transition" style={{ fontWeight: 300 }}>
+                  {l.label}
+                </a>
+              ))}
+            </div>
+            <a href="/auth" className="text-sm text-[#2C3B2E] hover:underline" style={{ fontWeight: 400 }}>Connexion →</a>
           </div>
-          <a href="/auth" className="text-sm text-[#2C3B2E] hover:underline" style={{ fontWeight: 400 }}>Connexion →</a>
+          {/* Barre légale */}
+          <div className="border-t border-stone-200 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="text-xs text-stone-400" style={{ fontWeight: 300 }}>
+              © 2025 Kaatch — <a href="mailto:bonjour@kaatch.fr" className="hover:text-[#2C3B2E] transition">bonjour@kaatch.fr</a>
+            </p>
+            <div className="flex items-center gap-4">
+              {[
+                { label: 'Mentions légales', href: '/mentions-legales' },
+                { label: 'CGV', href: '/cgv' },
+                { label: 'Confidentialité', href: '/politique-de-confidentialite' },
+              ].map(l => (
+                <a key={l.href} href={l.href}
+                   className="text-xs text-stone-400 hover:text-[#2C3B2E] transition" style={{ fontWeight: 300 }}>
+                  {l.label}
+                </a>
+              ))}
+            </div>
+          </div>
         </div>
       </footer>
     </main>

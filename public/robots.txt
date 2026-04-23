@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /wedding/
+Disallow: /invite/
+Disallow: /p/
+Disallow: /register
+
+Sitemap: https://kaatch.fr/sitemap.xml

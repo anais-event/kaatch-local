@@ -45,7 +45,7 @@ export default async function GuestHebergementsPage({ params }: { params: Promis
           </a>
         </div>
 
-        <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.5rem', fontStyle: 'italic' }}
+        <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 700, fontSize: '2rem' }}
             className="text-[#2d3228] mb-2">
           Hébergements
         </h1>
@@ -63,7 +63,7 @@ export default async function GuestHebergementsPage({ params }: { params: Promis
                       {acc.type && (
                         <span className="text-xl">{TYPE_ICONS[acc.type] ?? '📍'}</span>
                       )}
-                      <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.3rem' }}
+                      <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 700, fontSize: '1.1rem' }}
                          className="text-stone-800">{acc.name}</p>
                       {acc.type && (
                         <span className="text-[10px] bg-[#f5f0e8] text-[#4a5240] px-2 py-0.5 rounded-full"
@@ -102,7 +102,7 @@ export default async function GuestHebergementsPage({ params }: { params: Promis
           </div>
         ) : (
           <div className="text-center py-16 bg-white/60 rounded-3xl">
-            <p style={{ fontFamily: 'var(--font-cormorant)', fontSize: '1.4rem', fontStyle: 'italic' }}
+            <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 700, fontSize: '1.1rem' }}
                className="text-stone-400 mb-2">
               Aucune recommandation pour l'instant
             </p>

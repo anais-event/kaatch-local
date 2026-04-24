@@ -202,10 +202,9 @@ export default function FairePartEnvelope({ weddingName, dateStr, location, coup
             <p
               className="text-fade-up text-stone-400 uppercase mb-3"
               style={{
-                fontFamily: 'var(--font-cormorant)',
-                fontWeight: 300,
-                fontSize: '0.8rem',
-                fontStyle: 'italic',
+                fontFamily: 'var(--font-lato)',
+                fontWeight: 600,
+                fontSize: '0.72rem',
                 letterSpacing: '0.15em',
               }}
             >
@@ -215,9 +214,9 @@ export default function FairePartEnvelope({ weddingName, dateStr, location, coup
             <h1
               className="text-fade-up text-[#2d3228] mb-5"
               style={{
-                fontFamily: 'var(--font-cormorant)',
-                fontWeight: 600,
-                fontSize: 'clamp(1.8rem, 7vw, 2.6rem)',
+                fontFamily: 'var(--font-lato)',
+                fontWeight: 700,
+                fontSize: 'clamp(1.5rem, 7vw, 2.2rem)',
                 lineHeight: 1.1,
                 animationDelay: '0.45s',
               }}
@@ -246,10 +245,9 @@ export default function FairePartEnvelope({ weddingName, dateStr, location, coup
               <p
                 className="text-stone-600 mb-6"
                 style={{
-                  fontFamily: 'var(--font-cormorant)',
+                  fontFamily: 'var(--font-lato)',
                   fontWeight: 300,
-                  fontSize: '1.1rem',
-                  fontStyle: 'italic',
+                  fontSize: '0.95rem',
                   lineHeight: 1.6,
                 }}
               >
@@ -290,7 +288,7 @@ export default function FairePartEnvelope({ weddingName, dateStr, location, coup
             style={{ fontWeight: 300 }}
           >
             Envoyé avec ♥ via{' '}
-            <span style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '0.85rem' }}>
+            <span style={{ fontFamily: 'var(--font-lato)', fontWeight: 700, fontSize: '0.75rem' }}>
               Kaatch
             </span>
           </p>

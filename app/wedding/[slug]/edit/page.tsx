@@ -74,7 +74,7 @@ export default async function EditWedding({ params }: { params: Promise<{ slug: 
         </div>
 
         <div className="text-center mb-8">
-          <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.8rem', fontStyle: 'italic' }}
+          <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 700, fontSize: '2rem' }}
               className="text-[#2d3228]">
             Modifier les infos
           </h1>

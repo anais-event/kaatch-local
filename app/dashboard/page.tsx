@@ -28,7 +28,7 @@ export default async function Dashboard() {
              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
             Bienvenue
           </p>
-          <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '3rem', fontStyle: 'italic' }}
+          <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 700, fontSize: '2.2rem' }}
               className="text-[#2d3228]">
             {weddings.length === 1 ? 'Votre mariage' : 'Vos mariages'}
           </h1>
@@ -54,7 +54,7 @@ export default async function Dashboard() {
                          style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
                         {dateFormatted}
                       </p>
-                      <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.8rem' }}>
+                      <h2 style={{ fontFamily: 'var(--font-lato)', fontWeight: 700, fontSize: '1.5rem' }}>
                         {wedding.name}
                       </h2>
                       {(wedding.photos?.length ?? 0) > 0 && (

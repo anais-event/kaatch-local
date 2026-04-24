@@ -105,7 +105,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
               {dateFormatted}
             </p>
           )}
-          <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: 'clamp(2rem, 6vw, 3.5rem)', lineHeight: 1 }}>
+          <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 700, fontSize: 'clamp(2rem, 6vw, 3.5rem)', lineHeight: 1 }}>
             {wedding.name}
           </h1>
           {wedding.location && (
@@ -130,7 +130,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
           }`}>
             {rsvpStatus === 'confirme' ? (
               <div>
-                <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.2rem' }}
+                <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 700, fontSize: '1.1rem' }}
                    className="text-emerald-700 mb-1">✓ Vous avez confirmé votre présence</p>
                 <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-emerald-600 mb-3">
                   Les mariés ont hâte de vous voir !
@@ -148,7 +148,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
               </div>
             ) : rsvpStatus === 'decline' ? (
               <div>
-                <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.2rem' }}
+                <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 700, fontSize: '1.1rem' }}
                    className="text-red-500 mb-1">Vous avez décliné l'invitation</p>
                 <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-red-400 mb-3">
                   Vous nous manquerez…
@@ -166,7 +166,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
               </div>
             ) : (
               <div>
-                <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.25rem' }}
+                <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 700, fontSize: '1.1rem' }}
                    className="text-[#2d3228] mb-1">Serez-vous des nôtres ?</p>
                 {isPartialInvite && (
                   <div className="flex flex-wrap gap-1.5 mb-3">
@@ -210,7 +210,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
         {/* Message aux mariés */}
         {!isPreview && guest.id && (
           <div className="bg-white rounded-xl border border-stone-100 p-5">
-            <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.15rem', fontStyle: 'italic' }}
+            <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 700, fontSize: '1rem' }}
                className="text-[#2d3228] mb-1">
               {existingMessage ? 'Votre message' : 'Laisser un message aux mariés'}
             </p>
@@ -270,7 +270,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
             <a key={item.label} href={item.href}
                className="p-4 rounded-xl bg-white border border-stone-100 text-center hover:border-[#4a5240]/30 hover:shadow-sm transition">
               <p className="text-xl mb-1">{item.emoji}</p>
-              <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1rem' }}
+              <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '0.9rem' }}
                  className="text-[#2d3228]">{item.label}</p>
             </a>
           ))}
@@ -279,7 +279,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
         {/* Nos petites attentions */}
         {rules && rules.length > 0 && (
           <div className="bg-white rounded-xl border border-stone-100 p-5">
-            <h3 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.2rem', fontStyle: 'italic' }}
+            <h3 style={{ fontFamily: 'var(--font-lato)', fontWeight: 700, fontSize: '1rem' }}
                 className="text-[#2d3228] mb-3">Nos petites attentions</h3>
             <ul className="space-y-2">
               {rules.map((rule, i) => (

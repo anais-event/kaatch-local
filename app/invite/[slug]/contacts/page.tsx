@@ -74,12 +74,12 @@ export default async function GuestContactsPage({ params }: { params: Promise<{ 
           </a>
         </div>
 
-        <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.5rem', fontStyle: 'italic' }}
+        <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 700, fontSize: '2rem' }}
             className="text-[#2d3228] mb-8">Prestataires</h1>
 
         {(!contacts || contacts.length === 0) ? (
           <div className="p-8 rounded-2xl bg-white/80 text-center">
-            <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.1rem' }}
+            <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '1rem' }}
                className="text-stone-400">Aucun contact disponible pour le moment.</p>
           </div>
         ) : (
@@ -89,7 +89,7 @@ export default async function GuestContactsPage({ params }: { params: Promise<{ 
                 <div className="mb-3">
                   <p style={{ fontWeight: 300, fontSize: '0.7rem', letterSpacing: '0.12em' }}
                      className="text-stone-400 uppercase mb-1">{contact.role}</p>
-                  <h3 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.3rem' }}
+                  <h3 style={{ fontFamily: 'var(--font-lato)', fontWeight: 700, fontSize: '1.1rem' }}
                       className="text-[#2d3228]">{contact.name}</h3>
                   {contact.note && (
                     <p style={{ fontWeight: 300, fontSize: '0.85rem' }} className="text-stone-500 mt-1 italic">

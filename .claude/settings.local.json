@@ -71,7 +71,10 @@
       "Bash(cmd.exe /c \"if not exist C:\\\\Users\\\\anais\\\\Desktop\\\\kaatch\\\\app\\\\politique-de-confidentialite mkdir C:\\\\Users\\\\anais\\\\Desktop\\\\kaatch\\\\app\\\\politique-de-confidentialite\")",
       "Bash(cmd.exe /c \"echo test > C:\\\\Users\\\\anais\\\\Desktop\\\\kaatch\\\\app\\\\mentions-legales\\\\page.tsx && echo ok\")",
       "Bash(cmd.exe /c \"dir C:\\\\Users\\\\anais\\\\Desktop\\\\kaatch\\\\.claude\\\\worktrees\\\\tender-sinoussi\\\\app\")",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(git merge *)",
+      "Bash(git checkout *)",
+      "Bash(git commit *)"
     ]
   }
 }

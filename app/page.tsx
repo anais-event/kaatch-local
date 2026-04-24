@@ -1,4 +1,5 @@
 import KaatchChatLanding from './_components/KaatchChatLanding'
+import ContactForm from './_components/ContactForm'
 
 // Police display moderne : Geist Sans (= Inter/Satoshi déjà chargé dans layout.tsx)
 const DISPLAY = 'var(--font-geist-sans)'
@@ -70,7 +71,7 @@ export default function Home() {
             <a href="/auth"
                className="text-sm bg-[#2C3B2E] text-white px-5 py-2.5 rounded-2xl hover:bg-[#1a2419] transition"
                style={{ fontWeight: 500 }}>
-              Créer mon espace
+              Mon espace
             </a>
           </div>
         </div>
@@ -95,7 +96,7 @@ export default function Home() {
             <a href="/auth"
                className="inline-block bg-[#2C3B2E] text-white px-8 py-4 rounded-2xl hover:bg-[#1a2419] transition text-sm text-center"
                style={{ fontWeight: 500, letterSpacing: '0.01em' }}>
-              Créer son espace mariage →
+              Mon espace →
             </a>
             <a href="#video"
                className="inline-block border border-stone-300 text-stone-500 px-8 py-4 rounded-2xl hover:border-[#2C3B2E] hover:text-[#2C3B2E] transition text-sm text-center"
@@ -285,10 +286,10 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 items-start">
+          <div className="md:grid md:grid-cols-3 md:gap-6 md:items-start flex overflow-x-auto gap-5 snap-x snap-mandatory pb-4 -mx-2 px-2">
 
             {/* Gratuit */}
-            <div className="bg-[#f5f0e8] rounded-2xl p-8 flex flex-col"
+            <div className="bg-[#f5f0e8] rounded-2xl p-8 flex flex-col min-w-[280px] snap-start md:min-w-0"
                  style={{ boxShadow: SHADOW }}>
               <div className="mb-6">
                 <p className="text-xs tracking-widest uppercase text-stone-400 mb-3" style={{ fontWeight: 500 }}>Gratuit</p>
@@ -314,7 +315,7 @@ export default function Home() {
             </div>
 
             {/* Mariage — mis en avant */}
-            <div className="rounded-2xl p-8 flex flex-col relative"
+            <div className="rounded-2xl p-8 flex flex-col relative min-w-[280px] snap-start md:min-w-0"
                  style={{ background: '#2C3B2E', boxShadow: '0 8px 40px rgba(44,59,46,0.25), 0 2px 8px rgba(44,59,46,0.12)' }}>
               <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
                 <span className="bg-[#f5f0e8] text-[#2C3B2E] text-xs px-4 py-1.5 rounded-full whitespace-nowrap border border-[#2C3B2E]/20"
@@ -347,7 +348,7 @@ export default function Home() {
             </div>
 
             {/* Pro */}
-            <div className="bg-[#f5f0e8] rounded-2xl p-8 flex flex-col"
+            <div className="bg-[#f5f0e8] rounded-2xl p-8 flex flex-col min-w-[280px] snap-start md:min-w-0"
                  style={{ boxShadow: SHADOW }}>
               <div className="mb-6">
                 <p className="text-xs tracking-widest uppercase text-stone-400 mb-3" style={{ fontWeight: 500 }}>👔 Planificateur Pro</p>
@@ -405,7 +406,7 @@ export default function Home() {
           <a href="/auth"
              className="inline-block bg-[#2C3B2E] text-white px-14 py-4.5 rounded-2xl hover:bg-[#1a2419] transition text-sm"
              style={{ fontWeight: 500, letterSpacing: '0.01em', padding: '1rem 3.5rem' }}>
-            Créer mon espace mariage →
+            Mon espace →
           </a>
           <p className="mt-6 text-sm text-stone-400" style={{ fontWeight: 300 }}>
             <a href="/rejoindre" className="hover:text-[#2C3B2E] transition">Invité(e) à un mariage ? Rejoindre →</a>
@@ -415,6 +416,25 @@ export default function Home() {
 
       {/* ── CHATBOT ── */}
       <KaatchChatLanding />
+
+      {/* ── CONTACT ── */}
+      <section className="py-24 px-10 bg-[#f5f0e8] border-t border-stone-200">
+        <div className="max-w-xl mx-auto text-center">
+          <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-4" style={{ fontWeight: 500 }}>Contact</p>
+          <h2
+            style={{ fontFamily: 'var(--font-geist-sans)', fontWeight: 800, fontSize: 'clamp(1.5rem, 3vw, 2rem)', lineHeight: 1.15, letterSpacing: '-0.02em' }}
+            className="text-[#2C3B2E] mb-2"
+          >
+            Une question ?
+          </h2>
+          <p className="text-stone-500 mb-10" style={{ fontSize: '0.95rem', lineHeight: 1.8, fontWeight: 300 }}>
+            On vous répond dans la journée.
+          </p>
+          <div className="bg-white/70 rounded-2xl p-8 shadow-sm border border-stone-100">
+            <ContactForm />
+          </div>
+        </div>
+      </section>
 
       {/* ── FOOTER ── */}
       <footer className="border-t border-stone-200 py-12 px-10 bg-[#f5f0e8]">

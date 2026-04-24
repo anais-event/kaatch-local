@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import MarkMessagesSeen from './MarkMessagesSeen'
 
 const SUGGESTED_GROUPS = [
   '@EntreTemoinsMariee',
@@ -125,6 +126,7 @@ export default async function GuestGroupesPage({ params }: { params: Promise<{ s
 
   return (
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
+      <MarkMessagesSeen slug={slug} />
       <div className="max-w-2xl mx-auto px-6 pt-8 pb-24">
 
         <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.2rem', fontStyle: 'italic' }}

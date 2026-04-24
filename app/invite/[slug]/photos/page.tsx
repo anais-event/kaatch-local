@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import GuestPhotoFeed from './GuestPhotoFeed'
+import MarkPhotosSeen from './MarkPhotosSeen'
 
 async function addLike(formData: FormData) {
   'use server'
@@ -113,6 +114,8 @@ export default async function GuestPhotosPage({ params }: { params: Promise<{ sl
   }))
 
   return (
+    <>
+    <MarkPhotosSeen slug={slug} />
     <GuestPhotoFeed
       photos={photos}
       moments={moments}
@@ -124,5 +127,6 @@ export default async function GuestPhotosPage({ params }: { params: Promise<{ sl
       deletePhoto={deletePhoto}
       slug={slug}
     />
+    </>
   )
 }

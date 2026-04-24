@@ -1,9 +1,11 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import { useBadges } from './NotificationBadges'
 
 export default function BottomNavGuest({ slug }: { slug: string }) {
   const pathname = usePathname()
+  const badges = useBadges()
 
   const isActive = (href: string) => {
     if (href === `/invite/${slug}`) return pathname === href
@@ -20,6 +22,7 @@ export default function BottomNavGuest({ slug }: { slug: string }) {
       label: 'Photos',
       href: `/invite/${slug}/photos`,
       emoji: '📸',
+      badge: badges.photos,
     },
     {
       label: 'Accueil',
@@ -31,6 +34,7 @@ export default function BottomNavGuest({ slug }: { slug: string }) {
       label: 'Messagerie',
       href: `/invite/${slug}/groupes`,
       emoji: '💬',
+      badge: badges.messages,
     },
     {
       label: 'Faire-part',
@@ -57,8 +61,13 @@ export default function BottomNavGuest({ slug }: { slug: string }) {
                   {tab.emoji}
                 </div>
               ) : (
-                <span className={`text-xl transition-all ${active ? 'scale-110' : 'opacity-60'}`}>
-                  {tab.emoji}
+                <span className="relative inline-flex">
+                  <span className={`text-xl transition-all ${active ? 'scale-110' : 'opacity-60'}`}>
+                    {tab.emoji}
+                  </span>
+                  {tab.badge && !active && (
+                    <span className="absolute top-0 right-0 w-2 h-2 rounded-full bg-red-500 translate-x-1 -translate-y-0.5" />
+                  )}
                 </span>
               )}
               <span

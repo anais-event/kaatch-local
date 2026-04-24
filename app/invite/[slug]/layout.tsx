@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import GuestNav from './GuestNav'
 import BottomNavGuest from './BottomNavGuest'
+import { NotificationBadgesProvider } from './NotificationBadges'
 
 export default async function InviteLayout({
   children,
@@ -16,9 +17,10 @@ export default async function InviteLayout({
   const guestCookie = cookieStore.get(`guest_${slug}`)
   const isPreview = !guestCookie
 
+  const supabase = await createSupabaseServerClient()
+
   // Si pas de cookie invité → vérifier si c'est un marié en prévisualisation
   if (isPreview) {
-    const supabase = await createSupabaseServerClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       // Ni invité ni marié → rediriger vers l'entrée
@@ -29,13 +31,17 @@ export default async function InviteLayout({
     }
   }
 
+  const { data: wedding } = await supabase
+    .from('weddings').select('id').eq('slug', slug).single()
+  const weddingId = wedding?.id ?? ''
+
   return (
-    <>
+    <NotificationBadgesProvider slug={slug} weddingId={weddingId}>
       <GuestNav slug={slug} isPreview={isPreview} />
       <div className="pt-12 pb-20 sm:pb-0">
         {children}
       </div>
       <BottomNavGuest slug={slug} />
-    </>
+    </NotificationBadgesProvider>
   )
 }

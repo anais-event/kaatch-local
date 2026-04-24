@@ -104,6 +104,7 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail }: 
       ],
     },
     { label: '📸 Photos', href: `/wedding/${slug}/photos` },
+    { label: '📖 Livre d\'Or', href: `/wedding/${slug}/livre-dor` },
     { label: '💬 Messagerie', href: `/wedding/${slug}/messagerie` },
   ]
 

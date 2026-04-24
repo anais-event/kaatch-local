@@ -28,7 +28,7 @@ export default function BottomNavGuest({ slug }: { slug: string }) {
       center: true,
     },
     {
-      label: 'Chat',
+      label: 'Messagerie',
       href: `/invite/${slug}/groupes`,
       emoji: '💬',
     },

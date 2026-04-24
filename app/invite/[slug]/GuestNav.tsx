@@ -8,7 +8,7 @@ export default function GuestNav({ slug, isPreview }: { slug: string; isPreview?
   const tabs = [
     { label: '📋 Programme', href: `/invite/${slug}/programme` },
     { label: '📸 Photos',    href: `/invite/${slug}/photos` },
-    { label: '💬 Chat',      href: `/invite/${slug}/groupes` },
+    { label: '💬 Messagerie', href: `/invite/${slug}/groupes` },
     { label: '🏡 Héberg.',   href: `/invite/${slug}/hebergements` },
     { label: '💌 Faire-part',href: `/invite/${slug}/faire-part` },
     { label: '🎉 Surprises', href: `/invite/${slug}/surprises` },

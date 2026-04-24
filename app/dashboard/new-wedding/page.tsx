@@ -21,17 +21,32 @@ export default function NewWedding() {
 
             <div>
               <label style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.7rem', letterSpacing: '0.15em' }}
-                     className="block text-stone-400 uppercase mb-2">
-                Nom du mariage
+                     className="block text-stone-400 uppercase mb-3">
+                Vos prénoms
               </label>
-              <input
-                name="name"
-                type="text"
-                placeholder="Ex : Mariage Julie & Thomas"
-                required
-                className="w-full border border-stone-200 rounded-xl px-4 py-3 outline-none focus:border-[#4a5240] transition text-stone-700 bg-white"
-                style={{ fontFamily: 'var(--font-cormorant)', fontSize: '1.1rem' }}
-              />
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+                <input
+                  name="first_name"
+                  type="text"
+                  placeholder="Votre prénom"
+                  required
+                  className="flex-1 border border-stone-200 rounded-xl px-4 py-3 outline-none focus:border-[#4a5240] transition text-stone-700 bg-white"
+                  style={{ fontFamily: 'var(--font-cormorant)', fontSize: '1.1rem' }}
+                />
+                <span style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.1rem' }}
+                      className="text-stone-300 text-center shrink-0">et</span>
+                <input
+                  name="partner_name"
+                  type="text"
+                  placeholder="Son prénom"
+                  required
+                  className="flex-1 border border-stone-200 rounded-xl px-4 py-3 outline-none focus:border-[#4a5240] transition text-stone-700 bg-white"
+                  style={{ fontFamily: 'var(--font-cormorant)', fontSize: '1.1rem' }}
+                />
+              </div>
+              <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-300 mt-2">
+                Apparaîtra comme <em>"Prénom et Prénom"</em> pour vos invités
+              </p>
             </div>
 
             <div>

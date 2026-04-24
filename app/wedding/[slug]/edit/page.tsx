@@ -29,12 +29,17 @@ async function updateWedding(formData: FormData) {
     }
   }
 
+  const couple_message = formData.get('couple_message') as string
+  const cover_position_y = parseInt(formData.get('cover_position_y') as string) || 50
+
   await supabase
     .from('weddings')
     .update({
       date,
       location,
       name,
+      couple_message: couple_message || null,
+      cover_position_y,
       ...(cover_image_url ? { cover_image_url } : {}),
     })
     .eq('slug', slug)
@@ -101,7 +106,8 @@ export default async function EditWedding({ params }: { params: Promise<{ slug: 
               </label>
               {wedding.cover_image_url && (
                 <img src={wedding.cover_image_url} alt="Couverture actuelle"
-                     className="w-full h-40 object-cover rounded-xl mb-3" />
+                     className="w-full h-40 object-cover rounded-xl mb-3"
+                     style={{ objectPosition: `center ${wedding.cover_position_y ?? 50}%` }} />
               )}
               <input
                 type="file"
@@ -110,6 +116,29 @@ export default async function EditWedding({ params }: { params: Promise<{ slug: 
                 className="w-full border border-stone-200 rounded-xl px-4 py-3 text-stone-500 bg-white file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:bg-[#f5f0e8] file:text-[#4a5240] hover:file:bg-stone-200 transition"
                 style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem' }}
               />
+              {wedding.cover_image_url && (
+                <div className="mt-3">
+                  <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.7rem', letterSpacing: '0.1em' }}
+                     className="text-stone-400 uppercase mb-1">
+                    Position verticale de la photo
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-300">Haut</span>
+                    <input
+                      type="range"
+                      name="cover_position_y"
+                      min={0}
+                      max={100}
+                      defaultValue={wedding.cover_position_y ?? 50}
+                      className="flex-1 accent-[#4a5240]"
+                    />
+                    <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-300">Bas</span>
+                  </div>
+                  <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-300 mt-1">
+                    Glissez pour recadrer l'image — sauvegardez pour voir le résultat
+                  </p>
+                </div>
+              )}
             </div>
 
             <div>
@@ -138,6 +167,21 @@ export default async function EditWedding({ params }: { params: Promise<{ slug: 
                 placeholder="Ex : Château de Versailles"
                 className="w-full border border-stone-200 rounded-xl px-4 py-3 outline-none focus:border-[#4a5240] transition text-stone-700 bg-white"
                 style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}
+              />
+            </div>
+
+            <div>
+              <label style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.7rem', letterSpacing: '0.15em' }}
+                     className="block text-stone-400 uppercase mb-2">
+                Mot des mariés <span className="normal-case text-stone-300">(affiché sur le faire-part)</span>
+              </label>
+              <textarea
+                name="couple_message"
+                defaultValue={wedding.couple_message || ''}
+                rows={5}
+                placeholder="Ex : Nous sommes fous de joie de vous inviter à partager ce jour si important pour nous..."
+                className="w-full border border-stone-200 rounded-xl px-4 py-3 outline-none focus:border-[#4a5240] transition text-stone-700 bg-white resize-none"
+                style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.9rem', lineHeight: 1.7 }}
               />
             </div>
 

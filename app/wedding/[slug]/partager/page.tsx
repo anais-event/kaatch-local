@@ -1,6 +1,5 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
-import { headers } from 'next/headers'
 import QRCodeDisplay from './QRCodeDisplay'
 import CopyButton from './CopyButton'
 
@@ -20,21 +19,19 @@ export default async function PartagerPage({ params }: { params: Promise<{ slug:
 
   const { data: wedding } = await supabase
     .from('weddings')
-    .select('id, name, share_code')
+    .select('id, name, share_code, date')
     .eq('slug', slug)
     .single()
 
   if (!wedding) return <div className="p-8">Mariage introuvable</div>
 
-  const headersList = await headers()
-  const host = headersList.get('host') ?? 'localhost:3000'
-  const protocol = host.includes('localhost') ? 'http' : 'https'
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://kaatch.fr'
   const shareUrl = wedding.share_code
-    ? `${protocol}://${host}/p/${wedding.share_code}`
+    ? `${baseUrl}/p/${wedding.share_code}`
     : null
 
   return (
-    <div className="min-h-screen bg-[#f5f0e8] p-8">
+    <div className="min-h-screen bg-[#f5f0e8] p-4 md:p-8">
       <div className="max-w-lg mx-auto">
 
         <div className="mb-6">
@@ -44,70 +41,82 @@ export default async function PartagerPage({ params }: { params: Promise<{ slug:
           </a>
         </div>
 
-        <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.5rem', fontStyle: 'italic' }}
-            className="text-[#2d3228] mb-2">
-          Partager avec vos invités
+        <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2rem', fontStyle: 'italic' }}
+            className="text-[#2d3228] mb-1">
+          Partager avec tes invités
         </h1>
-        <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.9rem' }}
-           className="text-stone-400 mb-8">
-          Vos invités pourront accéder aux photos, au programme et à la messagerie sans créer de compte.
+        <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem' }}
+           className="text-stone-400 mb-6">
+          Tes invités accèdent aux photos, au programme et à la messagerie — sans créer de compte.
         </p>
 
-        {/* Formulaire code */}
-        <div className="bg-white/80 rounded-3xl p-6 mb-8 shadow-sm">
-          <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.4rem', fontStyle: 'italic' }}
-              className="text-[#4a5240] mb-4">
-            Votre code de partage
-          </h2>
-          <form action={saveShareCode} className="flex gap-3">
+        {/* Code de partage */}
+        <div className="bg-white rounded-2xl p-5 mb-4 border border-stone-100">
+          <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.1rem', fontStyle: 'italic' }}
+             className="text-[#4a5240] mb-3">
+            Code de partage
+          </p>
+          <form action={saveShareCode} className="flex gap-2">
             <input type="hidden" name="slug" value={slug} />
             <input type="text" name="share_code"
               defaultValue={wedding.share_code ?? ''}
-              placeholder="Ex: SOPHIE-JULIEN-2028"
+              placeholder="Ex: EMMA-LUC-2025"
               required
               maxLength={30}
-              className="flex-1 border border-stone-200 rounded-xl px-4 py-2 bg-white outline-none focus:border-[#4a5240] transition text-stone-700"
+              className="flex-1 border border-stone-200 rounded-xl px-3 py-2 bg-white outline-none focus:border-[#4a5240] transition text-stone-700 text-sm"
               style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, letterSpacing: '0.05em', textTransform: 'uppercase' }} />
             <button type="submit"
-              className="bg-[#4a5240] text-white px-5 py-2 rounded-xl hover:bg-[#2d3228] transition text-sm"
+              className="bg-[#4a5240] text-white px-4 py-2 rounded-xl hover:bg-[#2d3228] transition text-sm cursor-pointer"
               style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
               Enregistrer
             </button>
           </form>
-          <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.75rem' }}
-             className="text-stone-400 mt-2">
-            Choisissez un code simple à retenir.
+          <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.72rem' }}
+             className="text-stone-400 mt-1.5">
+            Choisis un code simple à retenir — tes invités le saisiront pour accéder à l'espace.
           </p>
         </div>
 
-        {shareUrl && (
+        {shareUrl ? (
           <>
-            {/* Lien */}
-            <div className="bg-white/80 rounded-3xl p-6 mb-6 shadow-sm">
-              <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.4rem', fontStyle: 'italic' }}
-                  className="text-[#4a5240] mb-3">
-                🔗 Lien à partager
-              </h2>
-              <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.8rem' }}
-                 className="text-stone-400 mb-3">Envoyez ce lien par SMS, email, WhatsApp…</p>
-              <div className="bg-[#f5f0e8] rounded-xl px-4 py-3 mb-3">
-                <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem' }}
-                   className="text-[#4a5240] break-all">{shareUrl}</p>
+            {/* Lien + partage */}
+            <div className="bg-white rounded-2xl p-5 mb-4 border border-stone-100">
+              <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.1rem', fontStyle: 'italic' }}
+                 className="text-[#4a5240] mb-3">
+                Lien à partager
+              </p>
+
+              {/* URL display */}
+              <div className="bg-[#f5f0e8] rounded-xl px-3 py-2.5 mb-3 flex items-center justify-between gap-2">
+                <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.8rem' }}
+                   className="text-[#4a5240] break-all">
+                  {shareUrl}
+                </p>
               </div>
-              <CopyButton url={shareUrl} />
+
+              <CopyButton url={shareUrl} weddingName={wedding.name} />
             </div>
 
             {/* QR Code */}
-            <div className="bg-white/80 rounded-3xl p-6 shadow-sm text-center">
-              <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.4rem', fontStyle: 'italic' }}
-                  className="text-[#4a5240] mb-2">
-                📱 QR Code
-              </h2>
-              <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.8rem' }}
-                 className="text-stone-400 mb-6">À imprimer sur les tables le jour J</p>
-              <QRCodeDisplay url={shareUrl} />
+            <div className="bg-white rounded-2xl p-5 border border-stone-100 text-center">
+              <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.1rem', fontStyle: 'italic' }}
+                 className="text-[#4a5240] mb-1">
+                QR Code
+              </p>
+              <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.78rem' }}
+                 className="text-stone-400 mb-5">
+                À imprimer sur les tables le jour J
+              </p>
+              <QRCodeDisplay url={shareUrl} weddingName={wedding.name} weddingDate={wedding.date} />
             </div>
           </>
+        ) : (
+          <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5 text-center">
+            <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem' }}
+               className="text-amber-700">
+              Enregistre d'abord un code de partage pour générer ton lien.
+            </p>
+          </div>
         )}
 
       </div>

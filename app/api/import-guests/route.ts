@@ -18,7 +18,8 @@ export async function POST(req: Request) {
     telephone: g.telephone || null,
     relation: g.relation || null,
     guest_type: g.guest_type || 'adulte',
-    rsvp_status: 'en_attente',
+    gender: g.gender || null,
+    rsvp_status: 'confirme',
   }))
 
   const { error } = await supabase.from('guests').insert(rows)

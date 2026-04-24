@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
 import TablesClient from './TablesClient'
+import PageIntro from '../PageIntro'
 
 async function createTable(formData: FormData) {
   'use server'
@@ -10,7 +11,11 @@ async function createTable(formData: FormData) {
   const name = (formData.get('name') as string)?.trim()
   const capacity = parseInt(formData.get('capacity') as string) || 8
   if (!name) return
-  await supabase.from('seating_tables').insert({ wedding_id: weddingId, name, capacity })
+  const { count } = await supabase
+    .from('seating_tables')
+    .select('*', { count: 'exact', head: true })
+    .eq('wedding_id', weddingId)
+  await supabase.from('seating_tables').insert({ wedding_id: weddingId, name, capacity, position_order: (count ?? 0) + 1 })
   revalidatePath(`/wedding/${slug}/tables`)
 }
 
@@ -74,6 +79,18 @@ export default async function TablesPage({ params }: { params: Promise<{ slug: s
   ])
 
   return (
+    <>
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-8">
+      <a href={`/wedding/${slug}`} className="text-sm text-[#4a5240] hover:underline mb-4 block"
+         style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
+        ← Retour aux préparatifs
+      </a>
+      <PageIntro
+        what="Répartissez vos invités confirmés dans des tables nommées. Chaque table a une capacité définie pour éviter les oublis."
+        how="Créez vos tables (nom + capacité), sélectionnez une table à gauche, puis cliquez sur 'Ajouter' pour y placer un invité. Téléchargez le récap pour le jour J."
+        guests="Les invités ne voient pas le plan de table — c'est uniquement un outil d'organisation pour les mariés."
+      />
+    </div>
     <TablesClient
       slug={slug}
       weddingId={wedding.id}
@@ -85,5 +102,6 @@ export default async function TablesPage({ params }: { params: Promise<{ slug: s
       assignGuest={assignGuest}
       updateTableName={updateTableName}
     />
+    </>
   )
 }

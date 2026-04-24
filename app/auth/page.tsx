@@ -6,257 +6,239 @@ import { useState } from 'react'
 
 export default function Auth() {
   const router = useRouter()
+  const [mode, setMode] = useState<'login' | 'signup' | 'reset'>('login')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  const [resetMode, setResetMode] = useState(false)
   const [resetSent, setResetSent] = useState(false)
-  const [resetLoading, setResetLoading] = useState(false)
-  const [mode, setMode] = useState<'choice' | 'married' | 'guest'>('married')
-  const [guestCode, setGuestCode] = useState('')
-  const [guestFirst, setGuestFirst] = useState('')
-  const [guestLast, setGuestLast] = useState('')
-  const [guestNickname, setGuestNickname] = useState('')
-  const [guestLoading, setGuestLoading] = useState(false)
-  const [guestError, setGuestError] = useState('')
+  const [error, setError] = useState('')
 
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
+    setError('')
     const formData = new FormData(e.currentTarget)
     const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({
+    const { error: err } = await supabase.auth.signInWithPassword({
       email: formData.get('email') as string,
       password: formData.get('password') as string,
     })
-    if (error) { alert('Erreur : ' + error.message); setLoading(false); return }
+    if (err) {
+      setError('Email ou mot de passe incorrect.')
+      setLoading(false)
+      return
+    }
     router.push('/dashboard')
     router.refresh()
   }
 
+  async function handleSignup(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+    const formData = new FormData(e.currentTarget)
+    const password = formData.get('password') as string
+    const confirm = formData.get('confirm') as string
+    if (password !== confirm) {
+      setError('Les mots de passe ne correspondent pas.')
+      setLoading(false)
+      return
+    }
+    const supabase = createClient()
+    const { error: err } = await supabase.auth.signUp({
+      email: formData.get('email') as string,
+      password,
+    })
+    if (err) {
+      setError(err.message)
+      setLoading(false)
+      return
+    }
+    // Auto sign in après signup
+    const { error: loginErr } = await supabase.auth.signInWithPassword({
+      email: formData.get('email') as string,
+      password,
+    })
+    if (!loginErr) {
+      router.push('/dashboard')
+      router.refresh()
+    } else {
+      setError('Compte créé ! Vérifiez votre email pour confirmer votre inscription.')
+      setLoading(false)
+    }
+  }
+
   async function handleReset(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    setResetLoading(true)
+    setLoading(true)
+    setError('')
     const formData = new FormData(e.currentTarget)
     const supabase = createClient()
-    const { error } = await supabase.auth.resetPasswordForEmail(
+    const { error: err } = await supabase.auth.resetPasswordForEmail(
       formData.get('email') as string,
       { redirectTo: `${window.location.origin}/auth/update-password` }
     )
-    if (error) { alert('Erreur : ' + error.message); setResetLoading(false); return }
+    if (err) {
+      setError('Une erreur est survenue. Vérifiez votre email.')
+      setLoading(false)
+      return
+    }
     setResetSent(true)
-    setResetLoading(false)
-  }
-
-  async function handleGuestAccess(e: React.FormEvent) {
-    e.preventDefault()
-    setGuestLoading(true)
-    setGuestError('')
-
-    const supabase = createClient()
-
-    const { data: wedding } = await supabase
-      .from('weddings')
-      .select('id, slug, partner1_name, partner2_name')
-      .eq('guest_code', guestCode.toUpperCase().trim())
-      .single()
-
-    if (!wedding) {
-      setGuestError('Code introuvable. Vérifiez le code sur votre invitation.')
-      setGuestLoading(false)
-      return
-    }
-
-    let query = supabase
-      .from('guests')
-      .select('id, first_name, last_name, nickname')
-      .eq('wedding_id', wedding.id)
-      .ilike('first_name', guestFirst.trim())
-      .ilike('last_name', guestLast.trim())
-
-    if (guestNickname.trim()) {
-      query = query.ilike('nickname', guestNickname.trim())
-    }
-
-    const { data: guest } = await query.single()
-
-    if (!guest) {
-      setGuestError("Nous ne vous trouvons pas sur la liste. Vérifiez l'orthographe ou contactez les mariés.")
-      setGuestLoading(false)
-      return
-    }
-
-    router.push(`/rsvp/${wedding.slug}?guest=${guest.id}`)
+    setLoading(false)
   }
 
   const fontCormorant = { fontFamily: 'var(--font-cormorant)' }
-  const fontLato = { fontFamily: 'var(--font-lato)', fontWeight: 300 }
+  const fontLato = { fontFamily: 'var(--font-lato)', fontWeight: 300 as const }
+
+  const subtitle = mode === 'login' ? 'Connexion' : mode === 'signup' ? 'Créer un compte' : 'Mot de passe oublié'
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-[#f5f0e8]">
       <div className="w-full max-w-sm px-6">
 
         {/* Logo */}
-        <div className="text-center mb-10">
-          <h1 style={{ ...fontCormorant, fontWeight: 300, fontSize: '3.5rem', fontStyle: 'italic' }}
-            className="text-[#2d3228]">Kaatch</h1>
+        <div className="text-center mb-8">
+          <a href="/" style={{ ...fontCormorant, fontWeight: 300, fontSize: '3.5rem', fontStyle: 'italic' }}
+            className="text-[#2d3228]">Kaatch</a>
           <p style={{ ...fontLato, fontSize: '0.8rem', letterSpacing: '0.1em' }}
             className="text-stone-400 uppercase mt-1">
-            {mode === 'choice' ? 'Bienvenue' : mode === 'married' ? 'Espace mariés' : 'Accès invité'}
+            Espace organisateurs
           </p>
         </div>
 
-        {/* CHOIX INITIAL */}
-        {mode === 'choice' && (
-          <div className="space-y-4">
+        {/* Toggle login / signup */}
+        {mode !== 'reset' && !resetSent && (
+          <div className="flex rounded-xl border border-stone-200 bg-white/60 p-1 mb-6">
             <button
-              onClick={() => setMode('guest')}
-              className="w-full bg-[#4a5240] text-white py-4 rounded-2xl hover:bg-[#2d3228] transition"
-              style={{ ...fontLato, letterSpacing: '0.08em', fontSize: '0.9rem' }}>
-              Je suis invité(e) 💌
+              type="button"
+              onClick={() => { setMode('login'); setError('') }}
+              className={`flex-1 py-2 rounded-lg text-xs transition cursor-pointer ${mode === 'login' ? 'bg-[#4a5240] text-white' : 'text-stone-400 hover:text-stone-600'}`}
+              style={fontLato}>
+              Se connecter
             </button>
             <button
-              onClick={() => setMode('married')}
-              className="w-full border border-[#4a5240] text-[#4a5240] py-4 rounded-2xl hover:bg-[#4a5240] hover:text-white transition"
-              style={{ ...fontLato, letterSpacing: '0.08em', fontSize: '0.9rem' }}>
-              Je suis marié(e) 💍
+              type="button"
+              onClick={() => { setMode('signup'); setError('') }}
+              className={`flex-1 py-2 rounded-lg text-xs transition cursor-pointer ${mode === 'signup' ? 'bg-[#4a5240] text-white' : 'text-stone-400 hover:text-stone-600'}`}
+              style={fontLato}>
+              Créer un compte
             </button>
           </div>
         )}
 
-        {/* ESPACE MARIÉS */}
-        {mode === 'married' && (
-          <>
-            {resetSent ? (
-              <div className="text-center space-y-4">
-                <p style={fontCormorant} className="text-stone-600 text-lg italic">
-                  Un lien de réinitialisation a été envoyé à votre adresse email.
-                </p>
-                <button onClick={() => { setResetSent(false); setResetMode(false) }}
-                  className="text-stone-400 hover:text-stone-600 text-sm" style={fontLato}>
-                  ← Retour à la connexion
-                </button>
-              </div>
-            ) : !resetMode ? (
-              <form onSubmit={handleLogin} className="space-y-4">
-                <input name="email" type="email" placeholder="Email" required
-                  className="w-full border border-stone-300 rounded-xl px-4 py-3 bg-white/80 outline-none focus:border-[#4a5240] transition text-stone-700"
-                  style={fontLato} />
-                <div className="relative">
-                  <input name="password" type={showPassword ? 'text' : 'password'} placeholder="Mot de passe" required
-                    className="w-full border border-stone-300 rounded-xl px-4 py-3 bg-white/80 outline-none focus:border-[#4a5240] transition text-stone-700"
-                    style={fontLato} />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 text-xs"
-                    style={fontLato}>
-                    {showPassword ? 'Masquer' : 'Afficher'}
-                  </button>
-                </div>
-                <button type="submit" disabled={loading}
-                  className="w-full bg-[#4a5240] text-white py-3 rounded-full hover:bg-[#2d3228] transition disabled:opacity-50"
-                  style={{ ...fontLato, letterSpacing: '0.08em', fontSize: '0.85rem' }}>
-                  {loading ? 'Connexion...' : 'Se connecter'}
-                </button>
-                <p className="text-center">
-                  <button type="button" onClick={() => setResetMode(true)}
-                    className="text-stone-400 hover:text-stone-600 text-sm" style={fontLato}>
-                    Mot de passe oublié ?
-                  </button>
-                </p>
-                <p className="text-center text-sm" style={fontLato}>
-                  <span className="text-stone-400">Vous êtes invité(e) ? </span>
-                  <a href="/rejoindre" className="text-[#4a5240] hover:underline">Rejoindre un mariage</a>
-                </p>
-                <p className="text-center">
-                  <a href="/" className="text-stone-400 hover:text-stone-600 text-sm" style={fontLato}>
-                    ← Retour
-                  </a>
-                </p>
-              </form>
-            ) : (
-              <form onSubmit={handleReset} className="space-y-4">
-                <input name="email" type="email" placeholder="Votre email" required
-                  className="w-full border border-stone-300 rounded-xl px-4 py-3 bg-white/80 outline-none focus:border-[#4a5240] transition text-stone-700"
-                  style={fontLato} />
-                <button type="submit" disabled={resetLoading}
-                  className="w-full bg-[#4a5240] text-white py-3 rounded-full hover:bg-[#2d3228] transition disabled:opacity-50"
-                  style={{ ...fontLato, letterSpacing: '0.08em', fontSize: '0.85rem' }}>
-                  {resetLoading ? 'Envoi...' : 'Envoyer le lien'}
-                </button>
-                <p className="text-center">
-                  <button type="button" onClick={() => setResetMode(false)}
-                    className="text-stone-400 hover:text-stone-600 text-sm" style={fontLato}>
-                    ← Retour
-                  </button>
-                </p>
-              </form>
-            )}
-          </>
+        {/* CONNEXION */}
+        {mode === 'login' && (
+          <form onSubmit={handleLogin} className="space-y-4">
+            <input name="email" type="email" placeholder="Email" required
+              className="w-full border border-stone-300 rounded-xl px-4 py-3 bg-white/80 outline-none focus:border-[#4a5240] transition text-stone-700"
+              style={fontLato} />
+            <div className="relative">
+              <input name="password" type={showPassword ? 'text' : 'password'} placeholder="Mot de passe" required
+                className="w-full border border-stone-300 rounded-xl px-4 py-3 bg-white/80 outline-none focus:border-[#4a5240] transition text-stone-700"
+                style={fontLato} />
+              <button type="button" onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 text-xs cursor-pointer"
+                style={fontLato}>
+                {showPassword ? 'Masquer' : 'Afficher'}
+              </button>
+            </div>
+            {error && <p style={{ ...fontLato, fontSize: '0.82rem' }} className="text-red-400 bg-red-50 border border-red-100 rounded-xl px-4 py-2">{error}</p>}
+            <button type="submit" disabled={loading}
+              className="w-full bg-[#4a5240] text-white py-3 rounded-full hover:bg-[#2d3228] transition disabled:opacity-50 cursor-pointer"
+              style={{ ...fontLato, letterSpacing: '0.08em', fontSize: '0.85rem' }}>
+              {loading ? 'Connexion…' : 'Se connecter'}
+            </button>
+            <p className="text-center">
+              <button type="button" onClick={() => { setMode('reset'); setError('') }}
+                className="text-stone-400 hover:text-[#4a5240] text-sm transition cursor-pointer"
+                style={fontLato}>
+                Mot de passe oublié ?
+              </button>
+            </p>
+            <p className="text-center text-sm" style={fontLato}>
+              <span className="text-stone-400">Vous êtes invité(e) ? </span>
+              <a href="/rejoindre" className="text-[#4a5240] hover:underline">Rejoindre un mariage</a>
+            </p>
+            <p className="text-center">
+              <a href="/" className="text-stone-400 hover:text-stone-600 text-sm" style={fontLato}>← Retour</a>
+            </p>
+          </form>
         )}
 
-        {/* ESPACE INVITÉ */}
-        {mode === 'guest' && (
-          <>
-            <form onSubmit={handleGuestAccess} className="space-y-4">
-              <div className="bg-white/80 rounded-2xl p-5 border border-stone-200 space-y-3">
-                <p style={{ ...fontCormorant, fontSize: '1rem', fontStyle: 'italic' }} className="text-stone-500 mb-1">
-                  Le code figure sur votre invitation
-                </p>
-                <input
-                  value={guestCode}
-                  onChange={e => setGuestCode(e.target.value)}
-                  placeholder="Code mariage (ex: EMMA-THOMAS-2025)"
-                  required
-                  className="w-full border border-stone-300 rounded-xl px-4 py-3 bg-white outline-none focus:border-[#4a5240] transition text-stone-700 uppercase tracking-widest text-sm"
-                  style={fontLato}
-                />
-              </div>
-
-              <div className="space-y-3">
-                <input
-                  value={guestFirst}
-                  onChange={e => setGuestFirst(e.target.value)}
-                  placeholder="Votre prénom"
-                  required
-                  className="w-full border border-stone-300 rounded-xl px-4 py-3 bg-white/80 outline-none focus:border-[#4a5240] transition text-stone-700"
-                  style={fontLato}
-                />
-                <input
-                  value={guestLast}
-                  onChange={e => setGuestLast(e.target.value)}
-                  placeholder="Votre nom de famille"
-                  required
-                  className="w-full border border-stone-300 rounded-xl px-4 py-3 bg-white/80 outline-none focus:border-[#4a5240] transition text-stone-700"
-                  style={fontLato}
-                />
-                <input
-                  value={guestNickname}
-                  onChange={e => setGuestNickname(e.target.value)}
-                  placeholder="Surnom (optionnel, si deux personnes portent le même nom)"
-                  className="w-full border border-stone-300 rounded-xl px-4 py-3 bg-white/80 outline-none focus:border-[#4a5240] transition text-stone-700"
-                  style={fontLato}
-                />
-              </div>
-
-              {guestError && (
-                <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-                  <p style={{ ...fontLato, fontSize: '0.82rem' }} className="text-red-500">{guestError}</p>
-                </div>
-              )}
-
-              <button type="submit" disabled={guestLoading}
-                className="w-full bg-[#4a5240] text-white py-3 rounded-full hover:bg-[#2d3228] transition disabled:opacity-50"
-                style={{ ...fontLato, letterSpacing: '0.08em', fontSize: '0.85rem' }}>
-                {guestLoading ? 'Recherche...' : 'Accéder à mon invitation →'}
+        {/* INSCRIPTION */}
+        {mode === 'signup' && (
+          <form onSubmit={handleSignup} className="space-y-4">
+            <input name="email" type="email" placeholder="Votre email" required
+              className="w-full border border-stone-300 rounded-xl px-4 py-3 bg-white/80 outline-none focus:border-[#4a5240] transition text-stone-700"
+              style={fontLato} />
+            <div className="relative">
+              <input name="password" type={showPassword ? 'text' : 'password'} placeholder="Choisir un mot de passe" required minLength={6}
+                className="w-full border border-stone-300 rounded-xl px-4 py-3 bg-white/80 outline-none focus:border-[#4a5240] transition text-stone-700"
+                style={fontLato} />
+              <button type="button" onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 text-xs cursor-pointer"
+                style={fontLato}>
+                {showPassword ? 'Masquer' : 'Afficher'}
               </button>
-            </form>
+            </div>
+            <input name="confirm" type={showPassword ? 'text' : 'password'} placeholder="Confirmer le mot de passe" required minLength={6}
+              className="w-full border border-stone-300 rounded-xl px-4 py-3 bg-white/80 outline-none focus:border-[#4a5240] transition text-stone-700"
+              style={fontLato} />
+            {error && <p style={{ ...fontLato, fontSize: '0.82rem' }} className="text-red-400 bg-red-50 border border-red-100 rounded-xl px-4 py-2">{error}</p>}
+            <button type="submit" disabled={loading}
+              className="w-full bg-[#4a5240] text-white py-3 rounded-full hover:bg-[#2d3228] transition disabled:opacity-50 cursor-pointer"
+              style={{ ...fontLato, letterSpacing: '0.08em', fontSize: '0.85rem' }}>
+              {loading ? 'Création…' : 'Créer mon compte'}
+            </button>
+            <p className="text-center text-xs text-stone-400" style={fontLato}>
+              En créant un compte, vous acceptez nos conditions d'utilisation.
+            </p>
+            <p className="text-center">
+              <a href="/" className="text-stone-400 hover:text-stone-600 text-sm" style={fontLato}>← Retour</a>
+            </p>
+          </form>
+        )}
 
-            <p className="text-center mt-6">
-              <button onClick={() => { setMode('choice'); setGuestError('') }}
-                className="text-stone-400 hover:text-stone-600 text-sm" style={fontLato}>
+        {/* MOT DE PASSE OUBLIÉ */}
+        {mode === 'reset' && !resetSent && (
+          <form onSubmit={handleReset} className="space-y-4">
+            <p style={{ ...fontCormorant, fontSize: '0.95rem', fontStyle: 'italic' }} className="text-stone-500 text-center mb-2">
+              Entrez votre email, on vous envoie un lien.
+            </p>
+            <input name="email" type="email" placeholder="Votre email" required
+              className="w-full border border-stone-300 rounded-xl px-4 py-3 bg-white/80 outline-none focus:border-[#4a5240] transition text-stone-700"
+              style={fontLato} />
+            {error && <p style={{ ...fontLato, fontSize: '0.82rem' }} className="text-red-400">{error}</p>}
+            <button type="submit" disabled={loading}
+              className="w-full bg-[#4a5240] text-white py-3 rounded-full hover:bg-[#2d3228] transition disabled:opacity-50 cursor-pointer"
+              style={{ ...fontLato, letterSpacing: '0.08em', fontSize: '0.85rem' }}>
+              {loading ? 'Envoi…' : 'Envoyer le lien'}
+            </button>
+            <p className="text-center">
+              <button type="button" onClick={() => { setMode('login'); setError('') }}
+                className="text-stone-400 hover:text-stone-600 text-sm cursor-pointer" style={fontLato}>
                 ← Retour
               </button>
             </p>
-          </>
+          </form>
+        )}
+
+        {/* CONFIRMATION RESET */}
+        {resetSent && (
+          <div className="text-center space-y-4">
+            <div className="w-14 h-14 rounded-full bg-[#4a5240]/10 flex items-center justify-center mx-auto mb-4">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#4a5240" strokeWidth={1.5} className="w-7 h-7">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+              </svg>
+            </div>
+            <p style={fontCormorant} className="text-stone-600 text-lg italic">Un lien vous a été envoyé.</p>
+            <p style={{ ...fontLato, fontSize: '0.82rem' }} className="text-stone-400">
+              Vérifiez votre boîte de réception (et vos spams, on ne sait jamais 😉).
+            </p>
+            <button onClick={() => { setResetSent(false); setMode('login') }}
+              className="text-stone-400 hover:text-stone-600 text-sm cursor-pointer" style={fontLato}>
+              ← Retour à la connexion
+            </button>
+          </div>
         )}
 
       </div>

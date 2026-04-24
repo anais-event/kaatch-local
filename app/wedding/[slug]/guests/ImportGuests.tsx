@@ -10,6 +10,7 @@ type ParsedGuest = {
   telephone?: string
   relation?: string
   guest_type?: string
+  gender?: string
 }
 
 const KAATCH_FIELDS = [
@@ -19,6 +20,7 @@ const KAATCH_FIELDS = [
   { key: 'telephone', label: 'Téléphone', required: false },
   { key: 'relation', label: 'Lien de parenté', required: false },
   { key: 'guest_type', label: 'Type (adulte/enfant/animal)', required: false },
+  { key: 'gender', label: 'Genre (homme/femme)', required: false },
 ]
 
 // Tentative d'auto-détection par mots-clés
@@ -31,6 +33,7 @@ function autoDetect(headers: string[]): Record<string, string> {
     telephone: ['tel', 'phone', 'portable', 'mobile', 'gsm'],
     relation: ['relation', 'lien', 'parenté', 'parente', 'famille'],
     guest_type: ['type', 'catégorie', 'categorie'],
+    gender: ['genre', 'gender', 'sexe', 'civilité', 'civilite'],
   }
   for (const [field, keywords] of Object.entries(matchers)) {
     for (const h of headers) {
@@ -62,7 +65,7 @@ export default function ImportGuests({ weddingId, slug }: { weddingId: string; s
     const buffer = await file.arrayBuffer()
     const wb = XLSX.read(buffer, { type: 'array' })
     const ws = wb.Sheets[wb.SheetNames[0]]
-    const parsed = XLSX.utils.sheet_to_json<Record<string, string>>(ws, { defval: '' })
+    const parsed = (XLSX.utils.sheet_to_json(ws, { defval: '' }) as Record<string, string>[])
 
     if (parsed.length === 0) return
     const hdrs = Object.keys(parsed[0])
@@ -86,6 +89,7 @@ export default function ImportGuests({ weddingId, slug }: { weddingId: string; s
         telephone: get('telephone'),
         relation: get('relation'),
         guest_type: get('guest_type') || 'adulte',
+        gender: get('gender'),
       }
     }).filter(g => g.first_name)
   }

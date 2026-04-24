@@ -1,6 +1,5 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import GuestPhotoFeed from './GuestPhotoFeed'
 
@@ -23,6 +22,20 @@ async function addComment(formData: FormData) {
     content: formData.get('content') as string,
   })
   revalidatePath(`/invite/${formData.get('slug')}/photos`)
+}
+
+async function deletePhoto(formData: FormData) {
+  'use server'
+  const supabase = await createSupabaseServerClient()
+  const slug = formData.get('slug') as string
+  const photo_id = formData.get('photo_id') as string
+  const uploader_name = formData.get('uploader_name') as string
+  // Vérifier que c'est bien la photo de cet invité
+  const { data: photo } = await supabase.from('photos').select('uploaded_by_name').eq('id', photo_id).single()
+  if (photo?.uploaded_by_name === uploader_name) {
+    await supabase.from('photos').delete().eq('id', photo_id)
+  }
+  revalidatePath(`/invite/${slug}/photos`)
 }
 
 async function uploadPhoto(formData: FormData) {
@@ -52,7 +65,7 @@ async function uploadPhoto(formData: FormData) {
       wedding_id: wedding.id,
       url: urlData.publicUrl,
       uploaded_by_name: uploader_name,
-      caption: moment_tag,
+      moment_tag: moment_tag,
       tagged_guests: tagged_guests.length > 0 ? tagged_guests : null,
     })
   }))
@@ -64,10 +77,9 @@ export default async function GuestPhotosPage({ params }: { params: Promise<{ sl
   const { slug } = await params
   const cookieStore = await cookies()
   const guestCookie = cookieStore.get(`guest_${slug}`)
-  if (!guestCookie) redirect(`/invite/${slug}`)
 
-  const guest = JSON.parse(guestCookie.value)
-  const guestName = [guest.firstName, guest.lastName].filter(Boolean).join(' ')
+  const guest = guestCookie ? JSON.parse(guestCookie.value) : { firstName: "", lastName: "", id: null }
+  const guestName = [guest.firstName, guest.lastName].filter(v => v && v !== 'null').join(' ')
 
   const supabase = await createSupabaseServerClient()
   const { data: wedding } = await supabase.from('weddings').select('id, name').eq('slug', slug).single()
@@ -80,7 +92,7 @@ export default async function GuestPhotosPage({ params }: { params: Promise<{ sl
   const { data: guests } = await supabase
     .from('guests').select('id, first_name, last_name, guest_type').eq('wedding_id', wedding.id).order('first_name')
   const guestList = guests ?? []
-  const guestNames = guestList.map(g => [g.first_name, g.last_name].filter(Boolean).join(' '))
+  const guestNames = guestList.map(g => [g.first_name, g.last_name].filter(v => v && v !== 'null').join(' '))
 
   const { data: rawPhotos } = await supabase
     .from('photos')
@@ -91,7 +103,7 @@ export default async function GuestPhotosPage({ params }: { params: Promise<{ sl
   const photos = (rawPhotos ?? []).map(p => ({
     id: p.id,
     url: p.url,
-    uploader_name: p.uploader_name,
+    uploaded_by_name: p.uploaded_by_name,
     moment_tag: p.moment_tag,
     tagged_guests: p.tagged_guests ?? [],
     created_at: p.created_at,
@@ -101,65 +113,16 @@ export default async function GuestPhotosPage({ params }: { params: Promise<{ sl
   }))
 
   return (
-    <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
-      <div className="max-w-2xl mx-auto px-6 py-8">
-
-        <div className="flex items-center justify-between mb-6">
-          <a href={`/invite/${slug}`} className="text-sm text-[#4a5240] hover:underline" style={{ fontWeight: 300 }}>
-            ← Retour
-          </a>
-        </div>
-
-        <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.5rem', fontStyle: 'italic' }}
-            className="text-[#2d3228] mb-6">Photos</h1>
-
-        {/* Upload */}
-        <div className="bg-white/80 rounded-3xl p-6 mb-8 shadow-sm">
-          <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.4rem', fontStyle: 'italic' }}
-              className="text-[#4a5240] mb-4">Partager une photo</h2>
-          <form action={uploadPhoto} className="space-y-3">
-            <input type="hidden" name="slug" value={slug} />
-            <input type="hidden" name="uploader_name" value={guestName} />
-            {moments.length > 0 && (
-              <select name="moment_tag"
-                className="w-full border border-stone-200 rounded-xl px-4 py-2 bg-white text-stone-500 outline-none focus:border-[#4a5240] transition"
-                style={{ fontWeight: 300, fontSize: '0.9rem' }}>
-                <option value="">Quel moment ?</option>
-                {moments.map(m => <option key={m} value={m}>{m}</option>)}
-              </select>
-            )}
-            {guestList.length > 0 && (
-              <div>
-                <p style={{ fontWeight: 300, fontSize: '0.75rem', letterSpacing: '0.1em' }}
-                   className="text-stone-400 uppercase mb-2">Qui voit-on ? (séparé par virgules)</p>
-                <input
-                  type="text"
-                  name="tagged_guests_raw"
-                  list="guest-suggestions"
-                  placeholder="Ex: Marie Dupont, Jean Martin…"
-                  className="w-full border border-stone-200 rounded-xl px-4 py-2 bg-white outline-none focus:border-[#4a5240] transition text-stone-700 text-sm"
-                  style={{ fontWeight: 300 }}
-                />
-                <datalist id="guest-suggestions">
-                  {guestList.map(g => (
-                    <option key={g.id} value={`${g.first_name} ${g.last_name ?? ''}`.trim()} />
-                  ))}
-                </datalist>
-              </div>
-            )}
-            <input type="file" name="photo" accept="image/*" required multiple
-              className="w-full border border-stone-200 rounded-xl px-4 py-2 text-stone-500 bg-white file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:bg-[#f5f0e8] file:text-[#4a5240] transition"
-              style={{ fontWeight: 300, fontSize: '0.85rem' }} />
-            <button type="submit"
-              className="w-full bg-[#4a5240] text-white py-3 rounded-full hover:bg-[#2d3228] transition"
-              style={{ fontWeight: 300, fontSize: '0.85rem', letterSpacing: '0.08em' }}>
-              Partager
-            </button>
-          </form>
-        </div>
-
-        <GuestPhotoFeed photos={photos} moments={moments} guestName={guestName} guestNames={guestNames} addLike={addLike} addComment={addComment} slug={slug} />
-      </div>
-    </div>
+    <GuestPhotoFeed
+      photos={photos}
+      moments={moments}
+      guestName={guestName}
+      guestNames={guestNames}
+      addLike={addLike}
+      addComment={addComment}
+      uploadPhoto={uploadPhoto}
+      deletePhoto={deletePhoto}
+      slug={slug}
+    />
   )
 }

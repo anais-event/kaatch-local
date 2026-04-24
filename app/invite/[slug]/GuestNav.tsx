@@ -11,6 +11,7 @@ export default function GuestNav({ slug, isPreview }: { slug: string; isPreview?
     { label: '💬 Messagerie', href: `/invite/${slug}/groupes` },
     { label: '🏡 Héberg.',   href: `/invite/${slug}/hebergements` },
     { label: '💌 Faire-part',href: `/invite/${slug}/faire-part` },
+    { label: '📖 Livre d\'Or', href: `/invite/${slug}/livre-dor` },
     { label: '🎉 Surprises', href: `/invite/${slug}/surprises` },
     { label: '👤 Mon compte',href: `/invite/${slug}/compte` },
   ]

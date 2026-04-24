@@ -59,6 +59,9 @@ export default function TablesClient({
   const [search, setSearch] = useState('')
   const [selectedGuestId, setSelectedGuestId] = useState<string | null>(null)
   const [rsvpFilter, setRsvpFilter] = useState<RsvpFilter>('all')
+  // Mobile-only state
+  const [expandedTableId, setExpandedTableId] = useState<string | null>(null)
+  const [mobileSearch, setMobileSearch] = useState('')
 
   function run(action: () => Promise<void>, after?: () => void) {
     startTransition(async () => {
@@ -167,7 +170,196 @@ export default function TablesClient({
           </div>
         </div>
 
-        <div className="flex gap-5 items-start">
+        {/* ── Mobile view (hidden on sm+) ── */}
+        <div className="sm:hidden">
+          {/* Create table form — mobile */}
+          {showCreateForm && (
+            <form
+              onSubmit={e => {
+                e.preventDefault()
+                const fd = new FormData(e.currentTarget)
+                run(async () => { await createTable(fd) }, () => setShowCreateForm(false))
+              }}
+              className="bg-white rounded-2xl border border-stone-200 p-4 mb-4 space-y-3">
+              <input type="hidden" name="slug" value={slug} />
+              <input type="hidden" name="wedding_id" value={weddingId} />
+              <input name="name" placeholder="Nom de la table" autoFocus required
+                className="w-full text-sm border border-stone-200 rounded-xl px-4 py-2.5 outline-none focus:border-[#4a5240]"
+                style={{ fontFamily: 'var(--font-cormorant)', fontSize: '1rem' }} />
+              <div className="flex items-center gap-3">
+                <label style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-stone-400">Capacité</label>
+                <input name="capacity" type="number" min={1} max={30} defaultValue={8}
+                  className="w-20 text-sm border border-stone-200 rounded-xl px-3 py-2 outline-none focus:border-[#4a5240]"
+                  style={{ fontWeight: 300 }} />
+              </div>
+              <div className="flex gap-2 justify-end">
+                <button type="button" onClick={() => setShowCreateForm(false)}
+                  className="text-sm text-stone-400 px-4 py-2 border border-stone-200 rounded-xl cursor-pointer"
+                  style={{ fontWeight: 300 }}>Annuler</button>
+                <button type="submit" disabled={isPending}
+                  className="text-sm bg-[#4a5240] text-white px-4 py-2 rounded-xl cursor-pointer disabled:opacity-50"
+                  style={{ fontWeight: 300 }}>Créer</button>
+              </div>
+            </form>
+          )}
+
+          {tables.length === 0 && (
+            <div className="bg-white rounded-2xl border border-dashed border-stone-200 py-16 text-center mb-4">
+              <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.2rem' }}
+                 className="text-stone-300 mb-2">Aucune table pour l'instant</p>
+              <p style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-300">
+                Tapez "+ Nouvelle table" pour commencer
+              </p>
+            </div>
+          )}
+
+          {/* Tables accordion */}
+          <div className="space-y-3 mb-6">
+            {tables.map(table => {
+              const tableGuests = guests.filter(g => g.table_id === table.id)
+              const unassignedFiltered = guests.filter(g => !g.table_id).filter(g =>
+                !mobileSearch || `${g.first_name} ${g.last_name ?? ''}`.toLowerCase().includes(mobileSearch.toLowerCase())
+              )
+              const isFull = tableGuests.length >= table.capacity
+              const isExpanded = expandedTableId === table.id
+
+              return (
+                <div key={table.id} className="bg-white rounded-2xl border border-stone-100 overflow-hidden">
+                  {/* Table header — tap to expand */}
+                  <button
+                    type="button"
+                    className="w-full px-4 py-3 flex items-center justify-between text-left cursor-pointer"
+                    onClick={() => setExpandedTableId(isExpanded ? null : table.id)}>
+                    <div>
+                      <h3 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.05rem' }}
+                          className="text-[#2d3228]">{table.name}</h3>
+                      <p style={{ fontWeight: 300, fontSize: '0.7rem' }}
+                         className={isFull ? 'text-amber-500' : 'text-stone-400'}>
+                        {tableGuests.length}/{table.capacity} invités
+                        {isFull && ' · Complète'}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={e => {
+                          e.stopPropagation()
+                          if (!confirm(`Supprimer "${table.name}" ?`)) return
+                          const fd = new FormData()
+                          fd.append('slug', slug)
+                          fd.append('id', table.id)
+                          run(() => deleteTable(fd))
+                        }}
+                        className="text-stone-300 hover:text-red-400 transition text-sm cursor-pointer px-1"
+                        style={{ fontWeight: 300 }}>✕</button>
+                      <span className="text-stone-300 text-lg">{isExpanded ? '▲' : '▼'}</span>
+                    </div>
+                  </button>
+
+                  {/* Expanded content */}
+                  {isExpanded && (
+                    <div className="border-t border-stone-100 px-4 py-3 space-y-3">
+                      {/* Assigned guests */}
+                      {tableGuests.length === 0 ? (
+                        <p style={{ fontWeight: 300, fontSize: '0.8rem', fontStyle: 'italic' }} className="text-stone-300 text-center py-2">
+                          Aucun invité assigné
+                        </p>
+                      ) : (
+                        <div className="space-y-1.5">
+                          {tableGuests.map(g => (
+                            <div key={g.id} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#f5f0e8]">
+                              <span className={`w-2 h-2 rounded-full shrink-0 ${RSVP_DOT[g.rsvp_status] ?? 'bg-stone-300'}`} />
+                              <p style={{ fontWeight: 300, fontSize: '0.82rem' }} className="flex-1 text-stone-700 truncate">
+                                {g.first_name} {g.last_name ?? ''}
+                              </p>
+                              <button
+                                disabled={isPending}
+                                onClick={() => assign(g.id, null)}
+                                className="text-xs text-stone-400 hover:text-red-400 transition cursor-pointer px-2 py-1 rounded-lg border border-stone-200 bg-white"
+                                style={{ fontWeight: 300 }}>
+                                Retirer
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Add guest dropdown */}
+                      {!isFull && unassignedFiltered.length + guests.filter(g => !g.table_id).length > 0 && (
+                        <div className="pt-1 border-t border-stone-100 space-y-2">
+                          <p style={{ fontWeight: 300, fontSize: '0.7rem', letterSpacing: '0.1em' }} className="text-stone-400 uppercase">
+                            Ajouter un invité
+                          </p>
+                          <input
+                            type="text"
+                            placeholder="Rechercher un invité…"
+                            value={mobileSearch}
+                            onChange={e => setMobileSearch(e.target.value)}
+                            className="w-full text-sm border border-stone-200 rounded-xl px-3 py-2 outline-none focus:border-[#4a5240]"
+                            style={{ fontWeight: 300 }} />
+                          <div className="space-y-1 max-h-48 overflow-y-auto">
+                            {guests.filter(g => !g.table_id).filter(g =>
+                              !mobileSearch || `${g.first_name} ${g.last_name ?? ''}`.toLowerCase().includes(mobileSearch.toLowerCase())
+                            ).length === 0 ? (
+                              <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-300 text-center py-2 italic">
+                                {guests.filter(g => !g.table_id).length === 0 ? 'Tous les invités sont placés !' : 'Aucun résultat'}
+                              </p>
+                            ) : (
+                              guests.filter(g => !g.table_id).filter(g =>
+                                !mobileSearch || `${g.first_name} ${g.last_name ?? ''}`.toLowerCase().includes(mobileSearch.toLowerCase())
+                              ).map(g => (
+                                <button
+                                  key={g.id}
+                                  type="button"
+                                  disabled={isPending}
+                                  onClick={() => { assign(g.id, table.id); setMobileSearch('') }}
+                                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl border border-stone-100 bg-[#f5f0e8] hover:border-[#4a5240]/40 text-left cursor-pointer disabled:opacity-50 transition">
+                                  <span className={`w-2 h-2 rounded-full shrink-0 ${RSVP_DOT[g.rsvp_status] ?? 'bg-stone-300'}`} />
+                                  <p style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-700 truncate">
+                                    {g.first_name} {g.last_name ?? ''}
+                                  </p>
+                                  <span className="ml-auto text-xs text-[#4a5240]" style={{ fontWeight: 300 }}>+ Ajouter</span>
+                                </button>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      {isFull && (
+                        <p style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-amber-500 text-center py-1 italic">
+                          Table complète
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Unassigned summary */}
+          {unassigned.length > 0 && (
+            <div className="bg-white rounded-2xl border border-stone-100 px-4 py-3 mb-4">
+              <p style={{ fontWeight: 300, fontSize: '0.7rem', letterSpacing: '0.15em' }} className="text-stone-400 uppercase mb-2">
+                Sans table ({unassigned.length})
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {unassigned.map(g => (
+                  <span key={g.id}
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#f5f0e8] border border-stone-100">
+                    <span className={`w-1.5 h-1.5 rounded-full ${RSVP_DOT[g.rsvp_status] ?? 'bg-stone-300'}`} />
+                    <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-600">
+                      {g.first_name} {(g.last_name && g.last_name !== 'null') ? g.last_name : ''}
+                    </span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── Desktop view (hidden on mobile) ── */}
+        <div className="hidden sm:flex gap-5 items-start">
 
           {/* ── Colonne gauche : invités non placés ── */}
           <div className="w-56 shrink-0">
@@ -415,7 +607,7 @@ export default function TablesClient({
               })}
             </div>
           </div>
-        </div>
+        </div>{/* end hidden sm:flex */}
       </div>
     </div>
   )

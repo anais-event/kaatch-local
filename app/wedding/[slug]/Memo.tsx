@@ -17,7 +17,7 @@ export default function Memo({
   const [customItems, setCustomItems] = useState(initialCustomItems)
   const [adding, setAdding] = useState(false)
   const [newLabel, setNewLabel] = useState('')
-  const [collapsed, setCollapsed] = useState(false)
+  const [collapsed, setCollapsed] = useState(true)
 
   const doneCount = systemItems.filter(i => i.done).length + customItems.filter(i => i.done).length
   const total = systemItems.length + customItems.length

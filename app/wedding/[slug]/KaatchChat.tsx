@@ -64,7 +64,7 @@ export default function KaatchChat() {
           style={{ width: 'min(360px, calc(100vw - 32px))', height: 500, border: '1px solid #e7e5e4' }}>
 
           {/* Header */}
-          <div className="px-4 py-3 shrink-0 flex items-center gap-3"
+          <div className="px-4 py-3 shrink-0 flex items-center gap-3 relative"
                style={{ background: 'linear-gradient(135deg, #4a5240, #2d3228)' }}>
             <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0">
               <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={1.8} className="w-4 h-4">
@@ -79,6 +79,12 @@ export default function KaatchChat() {
                 Je réponds à toutes vos questions
               </p>
             </div>
+            <button
+              onClick={() => setOpen(false)}
+              className="absolute top-0 right-0 text-white/70 hover:text-white cursor-pointer text-lg font-light p-1 mr-1"
+              aria-label="Fermer">
+              ×
+            </button>
           </div>
 
           {/* Messages */}

@@ -20,6 +20,9 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail }: 
   const pathname = usePathname()
   const [open, setOpen] = useState<string | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [mobileExpanded, setMobileExpanded] = useState<string | null>(null)
+  const [navHidden, setNavHidden] = useState(false)
+  const lastScrollY = useRef(0)
   const [unread, setUnread] = useState(0)
   const [log, setLog] = useState<LogEntry[]>([])
   const [toasts, setToasts] = useState<Toast[]>([])
@@ -65,6 +68,18 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail }: 
 
   useEffect(() => { setMobileOpen(false); setOpen(null) }, [pathname])
 
+  useEffect(() => {
+    function handleScroll() {
+      const current = window.scrollY
+      if (current < 10) { setNavHidden(false) }
+      else if (current > lastScrollY.current + 5) { setNavHidden(true) }
+      else if (current < lastScrollY.current - 5) { setNavHidden(false) }
+      lastScrollY.current = current
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   const sections: NavSection[] = [
     { label: '🏠 Accueil', href: `/wedding/${slug}` },
     {
@@ -102,7 +117,7 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail }: 
 
   return (
     <>
-    <nav ref={navRef} className="fixed top-0 left-0 right-0 z-50 bg-[#f5f0e8]/95 backdrop-blur border-b border-stone-200 shadow-sm">
+    <nav ref={navRef} className={`fixed top-0 left-0 right-0 z-50 bg-[#f5f0e8]/95 backdrop-blur border-b border-stone-200 shadow-sm transition-transform duration-300 ${navHidden ? '-translate-y-full' : ''}`}>
       <div className="max-w-4xl mx-auto px-4 flex items-center justify-between h-12">
 
         {/* Logo */}
@@ -308,10 +323,20 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail }: 
                   {section.label}
                 </a>
               ) : (
-
                 <>
-                  <p className="px-5 pt-3 pb-1 text-[10px] uppercase tracking-widest text-stone-300" style={{ fontWeight: 300 }}>{section.label}</p>
-                  {section.items.map(item => (
+                  <button
+                    onClick={() => setMobileExpanded(mobileExpanded === section.label ? null : section.label)}
+                    className={`w-full flex items-center justify-between px-5 py-3 text-sm border-b border-stone-50 cursor-pointer transition ${
+                      isActive(section) ? 'text-[#4a5240] bg-[#f5f0e8]' : 'text-stone-600'
+                    }`}
+                    style={{ fontWeight: isActive(section) ? 400 : 300 }}>
+                    <span>{section.label}</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
+                         className={`w-3.5 h-3.5 text-stone-300 transition-transform ${mobileExpanded === section.label ? 'rotate-180' : ''}`}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {mobileExpanded === section.label && section.items.map(item => (
                     <a key={item.href} href={item.href} target={item.target}
                        className={`flex flex-col px-6 py-2.5 border-b border-stone-50 ${
                          pathname.startsWith(item.href) ? 'bg-[#f5f0e8] text-[#4a5240]' : 'text-stone-600'

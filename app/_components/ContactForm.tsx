@@ -4,6 +4,7 @@ import { useState } from 'react'
 
 export default function ContactForm() {
   const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
   const [message, setMessage] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
 
@@ -14,7 +15,7 @@ export default function ContactForm() {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, message }),
+        body: JSON.stringify({ name, email, message }),
       })
       if (res.ok) {
         setStatus('success')
@@ -44,6 +45,15 @@ export default function ContactForm() {
         placeholder="Votre prénom"
         value={name}
         onChange={e => setName(e.target.value)}
+        required
+        className="bg-white border border-stone-200 rounded-xl px-4 py-3 text-stone-700 placeholder-stone-400 outline-none focus:border-[#2C3B2E] transition"
+        style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}
+      />
+      <input
+        type="email"
+        placeholder="Votre email"
+        value={email}
+        onChange={e => setEmail(e.target.value)}
         required
         className="bg-white border border-stone-200 rounded-xl px-4 py-3 text-stone-700 placeholder-stone-400 outline-none focus:border-[#2C3B2E] transition"
         style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}

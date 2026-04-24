@@ -78,6 +78,8 @@ export default async function TablesPage({ params }: { params: Promise<{ slug: s
       .order('first_name'),
   ])
 
+  const visibleGuests = (guests ?? []).filter(g => g.rsvp_status !== 'declined')
+
   return (
     <>
     <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-8">
@@ -96,7 +98,7 @@ export default async function TablesPage({ params }: { params: Promise<{ slug: s
       weddingId={wedding.id}
       weddingName={wedding.name}
       tables={tables ?? []}
-      guests={guests ?? []}
+      guests={visibleGuests}
       createTable={createTable}
       deleteTable={deleteTable}
       assignGuest={assignGuest}

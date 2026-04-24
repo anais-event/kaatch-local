@@ -6,14 +6,14 @@ export default function GuestNav({ slug, isPreview }: { slug: string; isPreview?
   const pathname = usePathname()
 
   const tabs = [
-    { label: '📋 Programme', href: `/invite/${slug}/programme` },
-    { label: '📸 Photos',    href: `/invite/${slug}/photos` },
-    { label: '💬 Messagerie', href: `/invite/${slug}/groupes` },
-    { label: '🏡 Héberg.',   href: `/invite/${slug}/hebergements` },
-    { label: '💌 Faire-part',href: `/invite/${slug}/faire-part` },
-    { label: '📖 Livre d\'Or', href: `/invite/${slug}/livre-dor` },
-    { label: '🎉 Surprises', href: `/invite/${slug}/surprises` },
-    { label: '👤 Mon compte',href: `/invite/${slug}/compte` },
+    { emoji: '📋', label: 'Programme',  href: `/invite/${slug}/programme` },
+    { emoji: '📸', label: 'Photos',     href: `/invite/${slug}/photos` },
+    { emoji: '💬', label: 'Messagerie', href: `/invite/${slug}/groupes` },
+    { emoji: '🏡', label: 'Hébergements', href: `/invite/${slug}/hebergements` },
+    { emoji: '💌', label: 'Faire-part', href: `/invite/${slug}/faire-part` },
+    { emoji: '📖', label: 'Livre d\'Or', href: `/invite/${slug}/livre-dor` },
+    { emoji: '🎉', label: 'Surprises',  href: `/invite/${slug}/surprises` },
+    { emoji: '👤', label: 'Mon compte', href: `/invite/${slug}/compte` },
   ]
 
   const isActive = (href: string) => pathname.startsWith(href)
@@ -33,13 +33,14 @@ export default function GuestNav({ slug, isPreview }: { slug: string; isPreview?
         <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-hide flex-1 ml-2">
           {tabs.map(tab => (
             <a key={tab.href} href={tab.href}
-              className={`text-xs whitespace-nowrap px-2.5 py-1.5 rounded-md transition-colors shrink-0 ${
+              className={`whitespace-nowrap px-2 py-1.5 rounded-md transition-colors shrink-0 flex items-center gap-1 ${
                 isActive(tab.href)
                   ? 'bg-[#4a5240] text-white'
                   : 'text-stone-400 hover:text-[#4a5240]'
               }`}
-              style={{ fontWeight: 400, letterSpacing: '0.02em' }}>
-              {tab.label}
+              style={{ fontWeight: 400, fontSize: '0.75rem', letterSpacing: '0.02em' }}>
+              <span>{tab.emoji}</span>
+              <span className="hidden sm:inline">{tab.label}</span>
             </a>
           ))}
           {isPreview && (

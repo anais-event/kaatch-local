@@ -1,7 +1,15 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createClient } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import GuestbookViewer from './GuestbookViewer'
+
+function createServiceClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+}
 
 export default async function LivreDorPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -18,7 +26,9 @@ export default async function LivreDorPage({ params }: { params: Promise<{ slug:
 
   if (!wedding) return <div className="p-8 text-stone-500">Mariage introuvable.</div>
 
-  const { data: entries } = await supabase
+  // Use service role to bypass RLS — auth already verified above
+  const admin = createServiceClient()
+  const { data: entries } = await admin
     .from('guestbook_entries')
     .select('id, author_name, message, photo_url, created_at, is_approved')
     .eq('wedding_id', wedding.id)
@@ -26,8 +36,8 @@ export default async function LivreDorPage({ params }: { params: Promise<{ slug:
 
   async function toggleApproval(entryId: string, currentValue: boolean) {
     'use server'
-    const supabase = await createSupabaseServerClient()
-    await supabase
+    const admin = createServiceClient()
+    await admin
       .from('guestbook_entries')
       .update({ is_approved: !currentValue })
       .eq('id', entryId)

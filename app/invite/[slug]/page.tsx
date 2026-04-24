@@ -261,11 +261,14 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
         {/* Raccourcis */}
         <div className="grid grid-cols-2 gap-3 pt-2">
           {[
-            { label: 'Programme', href: `/invite/${slug}/programme`, emoji: '📋' },
-            { label: 'Photos', href: `/invite/${slug}/photos`, emoji: '📸' },
-            { label: 'Messagerie', href: `/invite/${slug}/groupes`, emoji: '💬' },
+            { label: 'Programme',    href: `/invite/${slug}/programme`,    emoji: '📋' },
+            { label: 'Photos',       href: `/invite/${slug}/photos`,       emoji: '📸' },
+            { label: 'Messagerie',   href: `/invite/${slug}/groupes`,      emoji: '💬' },
             { label: 'Hébergements', href: `/invite/${slug}/hebergements`, emoji: '🏡' },
-            { label: 'Faire-part', href: `/invite/${slug}/faire-part`, emoji: '💌' },
+            { label: 'Faire-part',   href: `/invite/${slug}/faire-part`,   emoji: '💌' },
+            { label: 'Livre d\'Or',  href: `/invite/${slug}/livre-dor`,    emoji: '📖' },
+            { label: 'Surprises',    href: `/invite/${slug}/surprises`,    emoji: '🎉' },
+            { label: 'Mon compte',   href: `/invite/${slug}/compte`,       emoji: '👤' },
           ].map(item => (
             <a key={item.label} href={item.href}
                className="p-4 rounded-xl bg-white border border-stone-100 text-center hover:border-[#4a5240]/30 hover:shadow-sm transition">

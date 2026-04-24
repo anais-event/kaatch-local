@@ -20,6 +20,7 @@ export default async function GuestProgrammePage({ params }: { params: Promise<{
     .from('program_steps')
     .select('*')
     .eq('wedding_id', wedding.id)
+    .eq('visible_to_guests', true)
     .order('position', { ascending: true })
 
   return (

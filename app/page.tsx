@@ -57,6 +57,7 @@ export default function Home() {
               { label: 'Comment ça marche', href: '#comment' },
               { label: 'Offres', href: '#offres' },
               { label: 'Guide', href: '/guide' },
+              { label: 'Tarifs', href: '/pricing' },
             ].map(l => (
               <a key={l.href} href={l.href}
                  className="text-sm text-stone-500 hover:text-[#2C3B2E] transition" style={{ fontWeight: 400 }}>

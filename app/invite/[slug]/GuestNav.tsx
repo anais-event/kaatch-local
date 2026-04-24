@@ -29,18 +29,16 @@ export default function GuestNav({ slug, isPreview }: { slug: string; isPreview?
           ✦
         </a>
 
-        {/* Tabs scrollables */}
-        <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-hide flex-1 ml-2">
+        {/* Tabs — emoji uniquement, label en tooltip */}
+        <div className="flex items-center gap-1 flex-1 ml-3 justify-end">
           {tabs.map(tab => (
-            <a key={tab.href} href={tab.href}
-              className={`whitespace-nowrap px-2 py-1.5 rounded-md transition-colors shrink-0 flex items-center gap-1 ${
+            <a key={tab.href} href={tab.href} title={tab.label}
+              className={`w-9 h-9 rounded-xl flex items-center justify-center text-lg transition-all shrink-0 ${
                 isActive(tab.href)
-                  ? 'bg-[#4a5240] text-white'
-                  : 'text-stone-400 hover:text-[#4a5240]'
-              }`}
-              style={{ fontWeight: 400, fontSize: '0.75rem', letterSpacing: '0.02em' }}>
-              <span>{tab.emoji}</span>
-              <span className="hidden sm:inline">{tab.label}</span>
+                  ? 'bg-[#4a5240] shadow-sm'
+                  : 'hover:bg-stone-200/60'
+              }`}>
+              {tab.emoji}
             </a>
           ))}
           {isPreview && (

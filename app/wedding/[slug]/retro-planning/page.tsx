@@ -98,7 +98,7 @@ export default async function RetroPlanningPage({ params }: { params: Promise<{ 
   const { slug } = await params
   const supabase = await createSupabaseServerClient()
 
-  const { data: wedding } = await supabase.from('weddings').select('id').eq('slug', slug).single()
+  const { data: wedding } = await supabase.from('weddings').select('id, date').eq('slug', slug).single()
   if (!wedding) return <div className="p-8">Mariage introuvable</div>
 
   // Charger les tâches cochées
@@ -116,7 +116,7 @@ export default async function RetroPlanningPage({ params }: { params: Promise<{ 
 
   return (
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
-      <RetroPlanningClient weddingId={wedding.id} initialPeriods={initialPeriods} />
+      <RetroPlanningClient weddingId={wedding.id} initialPeriods={initialPeriods} weddingDate={wedding.date ?? null} />
     </div>
   )
 }

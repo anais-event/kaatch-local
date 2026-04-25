@@ -34,7 +34,7 @@ export default async function InvitationsPage({ params }: { params: Promise<{ sl
     .eq('wedding_id', wedding.id)
     .order('last_name').order('first_name')
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://kaatch.app'
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://kaatch.fr'
   const withToken = (guests ?? []).filter(g => g.invite_token)
   const withoutToken = (guests ?? []).filter(g => !g.invite_token)
 

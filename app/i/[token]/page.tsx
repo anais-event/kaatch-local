@@ -40,5 +40,5 @@ export default async function InviteTokenPage({ params }: { params: Promise<{ to
     .eq('id', guest.id)
     .is('invited_at', null)
 
-  redirect(`/invite/${slug}`)
+  redirect(`/invite/${slug}/faire-part`)
 }

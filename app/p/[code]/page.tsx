@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import GuestAuthForm from './GuestAuthForm'
 import PrintButton from './PrintButton'
+import QRCodeImg from './QRCodeImg'
 
 export default async function PublicPage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params
@@ -173,6 +174,16 @@ export default async function PublicPage({ params }: { params: Promise<{ code: s
               <div className="flex-1 h-px bg-stone-100" />
               <span className="text-stone-200 text-xs">✦</span>
               <div className="flex-1 h-px bg-stone-100" />
+            </div>
+
+            {/* QR code — version numérique */}
+            <div className="no-print mb-8 text-center">
+              <p className="text-stone-300 mb-3" style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.2em' }}>
+                SCANNEZ POUR REJOINDRE
+              </p>
+              <div className="inline-flex p-3 bg-[#f5f0e8] rounded-xl">
+                <QRCodeImg url={`https://kaatch.fr/p/${code.toUpperCase()}`} />
+              </div>
             </div>
 
             {/* ─── RSVP / Accès ─── */}

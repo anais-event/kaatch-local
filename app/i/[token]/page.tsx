@@ -1,10 +1,17 @@
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
+function serviceClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+}
+
 export default async function InviteTokenPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params
-  const supabase = await createSupabaseServerClient()
+  const supabase = serviceClient()
 
   const { data: guest } = await supabase
     .from('guests')
@@ -32,6 +39,7 @@ export default async function InviteTokenPage({ params }: { params: Promise<{ to
 
   cookieStore.set(`guest_${slug}`, JSON.stringify({
     firstName: guest.first_name,
+    lastName: guest.last_name,
     id: guest.id,
   }), { maxAge: 60 * 60 * 24 * 90, path: '/' })
 
@@ -40,5 +48,5 @@ export default async function InviteTokenPage({ params }: { params: Promise<{ to
     .eq('id', guest.id)
     .is('invited_at', null)
 
-  redirect(`/invite/${slug}`)
+  redirect(`/invite/${slug}/faire-part`)
 }

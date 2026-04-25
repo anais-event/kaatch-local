@@ -313,8 +313,9 @@ export default function RetroPlanningClient({
 }) {
   const [periods, setPeriods] = useState(initialPeriods)
   const [saving, setSaving] = useState<string | null>(null)
-  const [view, setView] = useState<'liste' | 'calendrier' | 'cartes'>('liste')
+  const [view, setView] = useState<'liste' | 'cartes' | 'calendrier'>('cartes')
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
+  const [selectedMonthKey, setSelectedMonthKey] = useState<string>('')
 
   const parsedWeddingDate = weddingDate ? new Date(weddingDate) : null
 
@@ -352,6 +353,22 @@ export default function RetroPlanningClient({
 
   const calendarMonths = view === 'calendrier' ? buildMonthRange(parsedWeddingDate, periods) : []
 
+  // Data for "cartes" view
+  const cartesMonths = (() => {
+    if (!parsedWeddingDate) return []
+    const months = buildMonthRange(parsedWeddingDate, periods)
+    return months.map(month => {
+      const tasks = getTasksForMonth(month, parsedWeddingDate, periods)
+      const remaining = tasks.filter(({ task }) => !task.done).length
+      const key = `${month.getFullYear()}-${month.getMonth()}`
+      const label = month.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+      return { month, tasks, remaining, total: tasks.length, key, label }
+    })
+  })()
+
+  const activeCartesKey = selectedMonthKey || cartesMonths.find(m => m.remaining > 0)?.key || cartesMonths[0]?.key || ''
+  const selectedCarteData = cartesMonths.find(m => m.key === activeCartesKey)
+
   return (
     <div className="max-w-3xl mx-auto px-6 pt-8 pb-24">
       <h1
@@ -364,16 +381,14 @@ export default function RetroPlanningClient({
         Toutes les étapes clés, dans l'ordre. Cochez au fur et à mesure.
       </p>
 
-      {/* Toggle Liste / Cartes / Calendrier */}
+      {/* Toggle */}
       <div className="flex items-center gap-1 bg-white border border-stone-100 rounded-xl p-1 w-fit mb-6 shadow-sm">
-        {([['liste', 'Liste'], ['cartes', 'Cartes'], ['calendrier', 'Calendrier']] as const).map(([v, label]) => (
+        {([['cartes', 'Mois'], ['liste', 'Liste'], ['calendrier', 'Calendrier']] as const).map(([v, label]) => (
           <button
             key={v}
             onClick={() => { setView(v); setSelectedDay(null) }}
             className={`px-4 py-1.5 rounded-lg transition-all text-sm ${
-              view === v
-                ? 'bg-[#4a5240] text-white shadow-sm'
-                : 'text-stone-400 hover:text-stone-600'
+              view === v ? 'bg-[#4a5240] text-white shadow-sm' : 'text-stone-400 hover:text-stone-600'
             }`}
             style={{ fontWeight: 300 }}
           >
@@ -473,61 +488,114 @@ export default function RetroPlanningClient({
         </div>
       )}
 
-      {/* CARDS VIEW */}
+      {/* CARTES VIEW — par mois */}
       {view === 'cartes' && (
-        <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory -mx-6 px-6">
-          {periods.map(period => {
-            const done = period.tasks.filter(t => t.done).length
-            const total = period.tasks.length
-            const pct = total > 0 ? Math.round((done / total) * 100) : 0
-            return (
-              <div
-                key={period.id}
-                className="shrink-0 snap-start w-72 bg-white rounded-2xl border border-stone-100 shadow-sm flex flex-col"
-              >
-                {/* Card header */}
-                <div className="px-5 pt-5 pb-3 border-b border-stone-50">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xl">{period.emoji}</span>
-                    <h3 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.1rem', fontStyle: 'italic' }}
-                        className="text-[#2d3228] leading-tight">{period.label}</h3>
-                  </div>
-                  <div className="flex items-center gap-2 mt-2">
-                    <div className="flex-1 h-1.5 bg-stone-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-[#4a5240] rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
-                    </div>
-                    <span style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400 shrink-0">{done}/{total}</span>
-                  </div>
-                </div>
-                {/* Tasks */}
-                <div className="flex-1 divide-y divide-stone-50 overflow-y-auto max-h-96">
-                  {period.tasks.map(task => (
-                    <label key={task.key}
-                           className="flex items-start gap-3 px-5 py-3 cursor-pointer hover:bg-stone-50/50 transition-colors">
-                      <input
-                        type="checkbox"
-                        checked={task.done}
-                        disabled={saving === task.key}
-                        onChange={() => toggleTask(period.id, task.key, task.done)}
-                        className="mt-0.5 shrink-0 w-4 h-4 rounded border-stone-300 accent-[#4a5240] cursor-pointer"
-                      />
-                      <span style={{ fontSize: '0.85rem', fontWeight: 300, lineHeight: 1.4 }}
-                            className={task.done ? 'text-stone-300 line-through' : 'text-stone-600'}>
-                        {task.label}
+        <div>
+          {!parsedWeddingDate ? (
+            <div className="bg-white rounded-2xl border border-stone-100 p-5 text-center">
+              <p style={{ fontWeight: 300, fontSize: '0.88rem' }} className="text-stone-400">
+                Ajoutez la date du mariage pour voir les tâches mois par mois.
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* Sélecteur de mois avec badges */}
+              <div className="flex gap-2 overflow-x-auto pb-3 -mx-1 px-1 mb-5 scrollbar-hide">
+                {cartesMonths.map(m => {
+                  const isSelected = m.key === activeCartesKey
+                  const hasTasks = m.total > 0
+                  const allDone = hasTasks && m.remaining === 0
+                  return (
+                    <button
+                      key={m.key}
+                      onClick={() => setSelectedMonthKey(m.key)}
+                      className={`shrink-0 flex flex-col items-center px-3 py-2 rounded-xl border transition-all cursor-pointer ${
+                        isSelected
+                          ? 'bg-[#4a5240] border-[#4a5240] text-white shadow-sm'
+                          : hasTasks
+                            ? allDone
+                              ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                              : 'bg-white border-[#4a5240]/30 text-[#2d3228]'
+                            : 'bg-white border-stone-100 text-stone-300'
+                      }`}
+                    >
+                      <span style={{ fontWeight: 400, fontSize: '0.72rem', textTransform: 'capitalize', whiteSpace: 'nowrap' }}>
+                        {m.month.toLocaleDateString('fr-FR', { month: 'short' })}
                       </span>
-                    </label>
-                  ))}
-                </div>
-                {/* Footer */}
-                {pct === 100 && (
-                  <div className="px-5 py-3 border-t border-stone-50 text-center">
-                    <span style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '0.85rem' }}
-                          className="text-[#4a5240]">✓ Période complète</span>
-                  </div>
-                )}
+                      <span style={{ fontWeight: 600, fontSize: '0.62rem' }}>
+                        {m.month.getFullYear()}
+                      </span>
+                      {hasTasks && (
+                        <span className={`mt-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none ${
+                          isSelected ? 'bg-white/20 text-white' :
+                          allDone ? 'bg-emerald-100 text-emerald-700' :
+                          'bg-[#4a5240]/10 text-[#4a5240]'
+                        }`}>
+                          {allDone ? '✓' : m.remaining}
+                        </span>
+                      )}
+                    </button>
+                  )
+                })}
               </div>
-            )
-          })}
+
+              {/* Carte du mois sélectionné */}
+              {selectedCarteData && (
+                <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
+                  <div className="px-5 py-4 border-b border-stone-50 flex items-center justify-between">
+                    <h3 style={{ fontWeight: 700, fontSize: '1rem' }} className="text-[#2d3228] capitalize">
+                      {selectedCarteData.label}
+                    </h3>
+                    {selectedCarteData.total > 0 ? (
+                      <span style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-stone-400">
+                        {selectedCarteData.total - selectedCarteData.remaining}/{selectedCarteData.total} fait{selectedCarteData.total - selectedCarteData.remaining > 1 ? 'es' : ''}
+                      </span>
+                    ) : (
+                      <span style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-stone-300 italic">Rien ce mois</span>
+                    )}
+                  </div>
+
+                  {selectedCarteData.total === 0 ? (
+                    <div className="px-5 py-10 text-center">
+                      <p style={{ fontWeight: 300, fontSize: '0.85rem' }} className="text-stone-300">Aucune tâche prévue ce mois.</p>
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-stone-50">
+                      {selectedCarteData.tasks.map(({ task, period }) => (
+                        <label key={task.key}
+                               className="flex items-start gap-4 px-5 py-3.5 cursor-pointer hover:bg-stone-50/50 transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={task.done}
+                            disabled={saving === task.key}
+                            onChange={() => toggleTask(period.id, task.key, task.done)}
+                            className="mt-0.5 shrink-0 w-4 h-4 rounded border-stone-300 accent-[#4a5240] cursor-pointer"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p style={{ fontSize: '0.9rem', fontWeight: 300, lineHeight: 1.5 }}
+                               className={task.done ? 'text-stone-300 line-through' : 'text-stone-700'}>
+                              {task.label}
+                            </p>
+                            {task.detail && (
+                              <p style={{ fontSize: '0.75rem', fontWeight: 300 }} className="text-stone-400 mt-0.5">{task.detail}</p>
+                            )}
+                          </div>
+                          {task.done && <span className="text-[#4a5240] shrink-0 mt-0.5 text-sm">✓</span>}
+                        </label>
+                      ))}
+                    </div>
+                  )}
+
+                  {selectedCarteData.total > 0 && selectedCarteData.remaining === 0 && (
+                    <div className="px-5 py-3 border-t border-stone-50 text-center">
+                      <span style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '0.9rem' }}
+                            className="text-[#4a5240]">✓ Toutes les tâches de ce mois sont faites !</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
+          )}
         </div>
       )}
 

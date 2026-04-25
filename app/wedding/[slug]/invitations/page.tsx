@@ -2,7 +2,7 @@ import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
-import CopyLinkButton from './CopyLinkButton'
+import InvitationsList from './InvitationsList'
 
 async function generateTokens(formData: FormData) {
   'use server'
@@ -26,7 +26,7 @@ export default async function InvitationsPage({ params }: { params: Promise<{ sl
   if (!user) redirect('/auth')
 
   const { data: wedding } = await supabase
-    .from('weddings').select('id, name').eq('slug', slug).single()
+    .from('weddings').select('id, name, date, location').eq('slug', slug).single()
   if (!wedding) redirect(`/wedding/${slug}`)
 
   const { data: guests } = await supabase
@@ -38,15 +38,7 @@ export default async function InvitationsPage({ params }: { params: Promise<{ sl
   const h = await headers()
   const host = h.get('host') ?? 'kaatch.fr'
   const baseUrl = `https://${host}`
-  const withToken = (guests ?? []).filter(g => g.invite_token)
   const withoutToken = (guests ?? []).filter(g => !g.invite_token)
-
-  const rsvpColor = (s: string) =>
-    s === 'confirme' ? 'bg-emerald-50 text-emerald-600' :
-    s === 'decline' ? 'bg-red-50 text-red-400' :
-    'bg-stone-100 text-stone-400'
-  const rsvpLabel = (s: string) =>
-    s === 'confirme' ? 'Confirmé' : s === 'decline' ? 'Décliné' : 'En attente'
 
   return (
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
@@ -87,68 +79,12 @@ export default async function InvitationsPage({ params }: { params: Promise<{ sl
         </div>
 
         {/* Liste */}
-        {(guests ?? []).length === 0 ? (
-          <div className="text-center py-14 bg-white rounded-2xl border border-stone-100">
-            <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.3rem' }}
-               className="text-stone-400 mb-2">Aucun invité</p>
-            <p style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-300">
-              Ajoutez des invités d'abord depuis la page{' '}
-              <a href={`/wedding/${slug}/guests`} className="text-[#4a5240] hover:underline">Invités</a>
-            </p>
-          </div>
-        ) : (
-          <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden">
-            <div className="px-5 py-3 border-b border-stone-50 flex items-center justify-between">
-              <p style={{ fontWeight: 300, fontSize: '0.68rem', letterSpacing: '0.15em' }}
-                 className="text-stone-400 uppercase">
-                {(guests ?? []).length} invité{(guests ?? []).length > 1 ? 's' : ''}
-              </p>
-              <p style={{ fontWeight: 300, fontSize: '0.68rem', letterSpacing: '0.12em' }}
-                 className="text-stone-400 uppercase hidden sm:block">
-                Lien personnalisé
-              </p>
-            </div>
-            <div className="divide-y divide-stone-50">
-              {(guests ?? []).map(guest => {
-                const link = guest.invite_token ? `${baseUrl}/i/${guest.invite_token}` : null
-                return (
-                  <div key={guest.id} className="flex items-center gap-4 px-5 py-3.5">
-                    {/* Nom */}
-                    <div className="flex-1 min-w-0">
-                      <p style={{ fontWeight: 400, fontSize: '0.88rem' }} className="text-stone-700">
-                        {guest.first_name} {guest.last_name}
-                      </p>
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full ${rsvpColor(guest.rsvp_status)}`}
-                            style={{ fontWeight: 400 }}>
-                        {rsvpLabel(guest.rsvp_status)}
-                      </span>
-                    </div>
-
-                    {/* Lien */}
-                    {link ? (
-                      <div className="flex items-center gap-2 min-w-0">
-                        <p style={{ fontWeight: 300, fontSize: '0.7rem' }}
-                           className="text-stone-400 truncate hidden sm:block max-w-[220px]">
-                          /i/{guest.invite_token}
-                        </p>
-                        <CopyLinkButton url={link} guestName={`${guest.first_name} ${guest.last_name ?? ''}`} slug={slug} />
-                        <a href={link} target="_blank" rel="noopener noreferrer"
-                           className="text-xs text-stone-300 hover:text-[#4a5240] transition"
-                           title="Aperçu">
-                          ↗
-                        </a>
-                      </div>
-                    ) : (
-                      <span style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-stone-300 italic">
-                        Pas de lien
-                      </span>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        )}
+        <InvitationsList
+          guests={guests ?? []}
+          baseUrl={baseUrl}
+          slug={slug}
+          wedding={{ name: wedding.name, date: wedding.date ?? null, location: wedding.location ?? null }}
+        />
       </div>
     </div>
   )

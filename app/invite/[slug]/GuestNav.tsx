@@ -6,14 +6,14 @@ export default function GuestNav({ slug, isPreview }: { slug: string; isPreview?
   const pathname = usePathname()
 
   const tabs = [
-    { label: '📋 Programme', href: `/invite/${slug}/programme` },
-    { label: '📸 Photos',    href: `/invite/${slug}/photos` },
+    { label: '💌 Faire-part', href: `/invite/${slug}/faire-part` },
     { label: '💬 Messagerie', href: `/invite/${slug}/groupes` },
-    { label: '🏡 Héberg.',   href: `/invite/${slug}/hebergements` },
-    { label: '💌 Faire-part',href: `/invite/${slug}/faire-part` },
+    { label: '🏡 Héberg.',    href: `/invite/${slug}/hebergements` },
+    { label: '📋 Programme',  href: `/invite/${slug}/programme` },
+    { label: '🎉 Surprises',  href: `/invite/${slug}/surprises` },
     { label: '📖 Livre d\'Or', href: `/invite/${slug}/livre-dor` },
-    { label: '🎉 Surprises', href: `/invite/${slug}/surprises` },
-    { label: '👤 Mon compte',href: `/invite/${slug}/compte` },
+    { label: '📸 Photos',     href: `/invite/${slug}/photos` },
+    { label: '👤 Mon compte', href: `/invite/${slug}/compte` },
   ]
 
   const isActive = (href: string) => pathname.startsWith(href)

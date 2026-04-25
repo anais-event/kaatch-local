@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { cookies, headers } from 'next/headers'
 import FairePartEnvelope from './FairePartEnvelope'
 
 export default async function FairePartPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -12,6 +13,23 @@ export default async function FairePartPage({ params }: { params: Promise<{ slug
     .single()
 
   if (!wedding) return <div className="p-8">Mariage introuvable</div>
+
+  // Read guest cookie to get their personal invite token for the QR code
+  const cookieStore = await cookies()
+  const guestCookie = cookieStore.get(`guest_${slug}`)
+  const guestData = guestCookie ? JSON.parse(guestCookie.value) : null
+
+  let inviteToken: string | null = null
+  if (guestData?.id) {
+    const { data: guestRow } = await supabase
+      .from('guests').select('invite_token').eq('id', guestData.id).single()
+    inviteToken = guestRow?.invite_token ?? null
+  }
+
+  const h = await headers()
+  const host = h.get('host') ?? 'kaatch.fr'
+  const baseUrl = `https://${host}`
+  const personalUrl = inviteToken ? `${baseUrl}/i/${inviteToken}` : `${baseUrl}/invite/${slug}`
 
   const dateStr = wedding.date
     ? new Date(wedding.date).toLocaleDateString('fr-FR', {
@@ -27,6 +45,7 @@ export default async function FairePartPage({ params }: { params: Promise<{ slug
       coupleMessage={wedding.couple_message}
       coverImageUrl={wedding.cover_image_url}
       slug={slug}
+      personalUrl={personalUrl}
     />
   )
 }

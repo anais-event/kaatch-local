@@ -313,7 +313,7 @@ export default function RetroPlanningClient({
 }) {
   const [periods, setPeriods] = useState(initialPeriods)
   const [saving, setSaving] = useState<string | null>(null)
-  const [view, setView] = useState<'liste' | 'calendrier'>('liste')
+  const [view, setView] = useState<'liste' | 'calendrier' | 'cartes'>('liste')
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
 
   const parsedWeddingDate = weddingDate ? new Date(weddingDate) : null
@@ -364,9 +364,9 @@ export default function RetroPlanningClient({
         Toutes les étapes clés, dans l'ordre. Cochez au fur et à mesure.
       </p>
 
-      {/* Toggle Liste / Calendrier */}
+      {/* Toggle Liste / Cartes / Calendrier */}
       <div className="flex items-center gap-1 bg-white border border-stone-100 rounded-xl p-1 w-fit mb-6 shadow-sm">
-        {(['liste', 'calendrier'] as const).map(v => (
+        {([['liste', 'Liste'], ['cartes', 'Cartes'], ['calendrier', 'Calendrier']] as const).map(([v, label]) => (
           <button
             key={v}
             onClick={() => { setView(v); setSelectedDay(null) }}
@@ -377,7 +377,7 @@ export default function RetroPlanningClient({
             }`}
             style={{ fontWeight: 300 }}
           >
-            {v === 'liste' ? 'Liste' : 'Calendrier'}
+            {label}
           </button>
         ))}
       </div>
@@ -467,6 +467,64 @@ export default function RetroPlanningClient({
                     </label>
                   ))}
                 </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* CARDS VIEW */}
+      {view === 'cartes' && (
+        <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory -mx-6 px-6">
+          {periods.map(period => {
+            const done = period.tasks.filter(t => t.done).length
+            const total = period.tasks.length
+            const pct = total > 0 ? Math.round((done / total) * 100) : 0
+            return (
+              <div
+                key={period.id}
+                className="shrink-0 snap-start w-72 bg-white rounded-2xl border border-stone-100 shadow-sm flex flex-col"
+              >
+                {/* Card header */}
+                <div className="px-5 pt-5 pb-3 border-b border-stone-50">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xl">{period.emoji}</span>
+                    <h3 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.1rem', fontStyle: 'italic' }}
+                        className="text-[#2d3228] leading-tight">{period.label}</h3>
+                  </div>
+                  <div className="flex items-center gap-2 mt-2">
+                    <div className="flex-1 h-1.5 bg-stone-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-[#4a5240] rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
+                    </div>
+                    <span style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400 shrink-0">{done}/{total}</span>
+                  </div>
+                </div>
+                {/* Tasks */}
+                <div className="flex-1 divide-y divide-stone-50 overflow-y-auto max-h-96">
+                  {period.tasks.map(task => (
+                    <label key={task.key}
+                           className="flex items-start gap-3 px-5 py-3 cursor-pointer hover:bg-stone-50/50 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={task.done}
+                        disabled={saving === task.key}
+                        onChange={() => toggleTask(period.id, task.key, task.done)}
+                        className="mt-0.5 shrink-0 w-4 h-4 rounded border-stone-300 accent-[#4a5240] cursor-pointer"
+                      />
+                      <span style={{ fontSize: '0.85rem', fontWeight: 300, lineHeight: 1.4 }}
+                            className={task.done ? 'text-stone-300 line-through' : 'text-stone-600'}>
+                        {task.label}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+                {/* Footer */}
+                {pct === 100 && (
+                  <div className="px-5 py-3 border-t border-stone-50 text-center">
+                    <span style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '0.85rem' }}
+                          className="text-[#4a5240]">✓ Période complète</span>
+                  </div>
+                )}
               </div>
             )
           })}

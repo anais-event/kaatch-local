@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import Countdown from './Countdown'
 import Memo from './Memo'
+import PlanningWidget from './PlanningWidget'
 
 export default async function WeddingPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -97,6 +98,9 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
           {/* ── Colonne gauche : modules ── */}
           <div className="flex-1 min-w-0 space-y-8">
 
+            {/* PLANNING WIDGET */}
+            <PlanningWidget slug={slug} weddingId={wedding.id} weddingDate={wedding.date ?? null} />
+
             {/* PRÉPARATIFS */}
             <div>
               <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400, fontSize: '1.3rem', fontStyle: 'italic' }}
@@ -165,7 +169,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
             <div>
               <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400, fontSize: '1.3rem', fontStyle: 'italic' }}
                  className="text-[#4a5240] mb-3">Jour J</p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
 
                 {/* Programme */}
                 <a href={`/wedding/${slug}/programme`}
@@ -213,6 +217,38 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
                     <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400 mb-0.5">option{(hebergementCount ?? 0) > 1 ? 's' : ''}</span>
                   </div>
                   <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-2">Gérer →</p>
+                </a>
+
+                {/* Musique */}
+                <a href={`/wedding/${slug}/musique`}
+                   className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                  <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Musique</p>
+                  <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-3">Playlist &amp; ambiance</p>
+                  <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto">Gérer →</p>
+                </a>
+
+                {/* Jeux & anim. */}
+                <a href={`/wedding/${slug}/jeux`}
+                   className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                  <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Jeux &amp; anim.</p>
+                  <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-3">Idées pour la fête</p>
+                  <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto">Gérer →</p>
+                </a>
+
+                {/* QR Code */}
+                <a href={`/wedding/${slug}/partager`}
+                   className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                  <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">QR Code</p>
+                  <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-3">Accès rapide jour J</p>
+                  <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto">Gérer →</p>
+                </a>
+
+                {/* Livre d'Or */}
+                <a href={`/wedding/${slug}/livre-dor`}
+                   className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                  <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Livre d&apos;Or</p>
+                  <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-3">Messages des invités</p>
+                  <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto">Gérer →</p>
                 </a>
 
               </div>

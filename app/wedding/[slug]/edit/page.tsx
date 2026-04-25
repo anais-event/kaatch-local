@@ -1,54 +1,70 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
+import SlugField from './SlugField'
+
+function toSlug(str: string) {
+  return str
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60)
+}
 
 async function updateWedding(formData: FormData) {
   'use server'
 
   const supabase = await createSupabaseServerClient()
-  const slug = formData.get('slug') as string
+  const currentSlug = formData.get('slug') as string
   const date = formData.get('date') as string
   const location = formData.get('location') as string
   const name = formData.get('name') as string
+  const couple_message = formData.get('couple_message') as string
+  const cover_position_y = parseInt(formData.get('cover_position_y') as string) || 50
+
+  const rawNewSlug = (formData.get('new_slug') as string ?? '').trim()
+  const newSlug = rawNewSlug ? toSlug(rawNewSlug) : currentSlug
 
   const file = formData.get('cover_image') as File
-
   let cover_image_url: string | undefined
 
   if (file && file.size > 0) {
     const ext = file.name.split('.').pop()
-    const path = `${slug}-${Date.now()}.${ext}`
+    const path = `${currentSlug}-${Date.now()}.${ext}`
     const { error: uploadError } = await supabase.storage
       .from('wedding-covers')
       .upload(path, file, { upsert: true })
-
     if (!uploadError) {
-      const { data: urlData } = supabase.storage
-        .from('wedding-covers')
-        .getPublicUrl(path)
+      const { data: urlData } = supabase.storage.from('wedding-covers').getPublicUrl(path)
       cover_image_url = urlData.publicUrl
     }
   }
 
-  const couple_message = formData.get('couple_message') as string
-  const cover_position_y = parseInt(formData.get('cover_position_y') as string) || 50
+  if (newSlug !== currentSlug) {
+    const { data: existing } = await supabase
+      .from('weddings').select('id').eq('slug', newSlug).single()
+    if (existing) {
+      redirect(`/wedding/${currentSlug}/edit?error=slug-taken`)
+    }
+  }
 
   await supabase
     .from('weddings')
     .update({
-      date,
-      location,
-      name,
+      date, location, name,
       couple_message: couple_message || null,
       cover_position_y,
+      slug: newSlug,
       ...(cover_image_url ? { cover_image_url } : {}),
     })
-    .eq('slug', slug)
+    .eq('slug', currentSlug)
 
-  redirect(`/wedding/${slug}`)
+  redirect(`/wedding/${newSlug}`)
 }
 
-export default async function EditWedding({ params }: { params: Promise<{ slug: string }> }) {
+export default async function EditWedding({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ error?: string }> }) {
   const { slug } = await params
+  const { error } = await searchParams
   const supabase = await createSupabaseServerClient()
 
   const { data: wedding } = await supabase
@@ -80,6 +96,14 @@ export default async function EditWedding({ params }: { params: Promise<{ slug: 
           </h1>
         </div>
 
+        {error === 'slug-taken' && (
+          <div className="mb-4 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+            <p style={{ fontWeight: 300, fontSize: '0.85rem' }} className="text-red-600">
+              Cette URL est déjà prise. Choisissez-en une autre.
+            </p>
+          </div>
+        )}
+
         <div className="bg-white/80 rounded-3xl shadow-sm p-8">
           <form action={updateWedding} className="space-y-6">
             <input type="hidden" name="slug" value={slug} />
@@ -98,6 +122,8 @@ export default async function EditWedding({ params }: { params: Promise<{ slug: 
                 style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}
               />
             </div>
+
+            <SlugField currentSlug={slug} />
 
             <div>
               <label style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.7rem', letterSpacing: '0.15em' }}

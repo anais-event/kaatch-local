@@ -98,22 +98,30 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
                  style={{ objectPosition: `center ${wedding.cover_position_y ?? 50}%` }} />
           : <div className="w-full h-full bg-[#4a5240]" />
         }
-        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/70" />
-        <div className="absolute bottom-0 left-0 right-0 p-8 text-center text-white">
-          {dateFormatted && (
-            <p className="text-xs tracking-[0.4em] uppercase text-stone-300 mb-2" style={{ fontWeight: 300 }}>
-              {dateFormatted}
-            </p>
-          )}
-          <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 700, fontSize: 'clamp(2rem, 6vw, 3.5rem)', lineHeight: 1 }}>
-            {wedding.name}
-          </h1>
-          {wedding.location && (
-            <p className="text-stone-300 mt-1.5 flex items-center justify-center gap-1.5" style={{ fontWeight: 300, fontSize: '0.82rem' }}>
-              <span>📍</span>{wedding.location}
-            </p>
-          )}
-          <p style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-300/80 mt-2">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/70" />
+
+        {/* Encadré central date + lieu — même style que côté mariés */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="border border-white/30 backdrop-blur-sm bg-black/20 rounded-xl px-6 py-4 text-center text-white max-w-xs mx-4">
+            <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 700, fontSize: 'clamp(1.3rem, 4vw, 2rem)', lineHeight: 1.1 }}>
+              {wedding.name}
+            </h1>
+            {dateFormatted && (
+              <p className="capitalize mt-2" style={{ fontWeight: 300, fontSize: '0.75rem', letterSpacing: '0.05em', opacity: 0.85 }}>
+                {dateFormatted}
+              </p>
+            )}
+            {wedding.location && (
+              <p style={{ fontWeight: 300, fontSize: '0.72rem', opacity: 0.7 }} className="mt-0.5">
+                📍 {wedding.location}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Bienvenue — en bas à gauche */}
+        <div className="absolute bottom-0 left-0 right-0 px-6 pb-4 text-center">
+          <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-white/70">
             Bienvenue, {guest.firstName} 👋
           </p>
         </div>

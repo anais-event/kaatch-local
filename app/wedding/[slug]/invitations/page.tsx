@@ -33,58 +33,62 @@ export default async function InvitationsPage({ params }: { params: Promise<{ sl
     .from('guests')
     .select('id, first_name, last_name, rsvp_status, invite_token')
     .eq('wedding_id', wedding.id)
-    .order('last_name').order('first_name')
+    .order('first_name')
 
   const h = await headers()
   const host = h.get('host') ?? 'kaatch.fr'
   const baseUrl = `https://${host}`
+
   const withoutToken = (guests ?? []).filter(g => !g.invite_token)
 
   return (
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
 
-        <div className="mb-8">
-          <p style={{ fontWeight: 300, fontSize: '0.68rem', letterSpacing: '0.2em' }}
-             className="text-stone-400 uppercase mb-1">Invitations</p>
-          <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.2rem', fontStyle: 'italic' }}
-              className="text-[#2d3228] leading-none">{wedding.name}</h1>
+        <div className="mb-6">
+          <a href={`/wedding/${slug}`}
+             style={{ fontWeight: 300, fontSize: '0.8rem' }}
+             className="text-[#4a5240] hover:underline">
+            ← Retour
+          </a>
+          <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 700, fontSize: '1.6rem', letterSpacing: '-0.02em' }}
+              className="text-[#2d3228] mt-2">
+            INVITATIONS
+          </h1>
+          <p style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-400 mt-1">
+            Partagez un lien personnalisé à chaque invité — il verra son prénom sur le faire-part.
+          </p>
         </div>
 
-        {/* Explication */}
-        <div className="bg-white rounded-2xl border border-stone-100 p-5 sm:p-6 mb-6">
-          <p style={{ fontWeight: 500, fontSize: '0.9rem' }} className="text-[#2d3228] mb-2">
-            Invitations personnalisées
-          </p>
-          <p style={{ fontWeight: 300, fontSize: '0.82rem', lineHeight: 1.7 }} className="text-stone-400 mb-4">
-            Chaque invité reçoit un lien unique qui affiche son prénom sur le faire-part.
-            Partagez ces liens par SMS, email ou WhatsApp — l'invité voit directement
-            <em> "Chère Sophie,"</em> en arrivant sur la page.
-          </p>
-          {withoutToken.length > 0 && (
+        {/* Banner: liens manquants */}
+        {withoutToken.length > 0 && (
+          <div className="mb-4 flex items-center justify-between bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 gap-3 flex-wrap">
+            <p style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-amber-700">
+              {withoutToken.length} invité{withoutToken.length > 1 ? 's' : ''} sans lien d'invitation
+            </p>
             <form action={generateTokens}>
               <input type="hidden" name="slug" value={slug} />
               <button type="submit"
-                className="bg-[#4a5240] text-white px-5 py-2.5 rounded-xl text-sm hover:bg-[#2d3228] transition cursor-pointer"
-                style={{ fontWeight: 300 }}>
-                Générer les liens manquants ({withoutToken.length})
+                className="bg-[#4a5240] text-white px-4 py-1.5 rounded-xl text-xs hover:bg-[#2d3228] transition cursor-pointer whitespace-nowrap"
+                style={{ fontWeight: 400, letterSpacing: '0.04em' }}>
+                GÉNÉRER LES LIENS ({withoutToken.length})
               </button>
             </form>
-          )}
-          {withoutToken.length === 0 && guests && guests.length > 0 && (
-            <p style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-emerald-600">
-              ✓ Tous les invités ont un lien personnalisé
-            </p>
-          )}
-        </div>
+          </div>
+        )}
+        {withoutToken.length === 0 && (guests ?? []).length > 0 && (
+          <p style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-emerald-600 mb-4">
+            ✓ Tous les liens sont prêts
+          </p>
+        )}
 
-        {/* Liste */}
         <InvitationsList
           guests={guests ?? []}
           baseUrl={baseUrl}
           slug={slug}
-          wedding={{ name: wedding.name, date: wedding.date ?? null, location: wedding.location ?? null }}
+          wedding={{ name: wedding.name, date: wedding.date, location: wedding.location }}
         />
+
       </div>
     </div>
   )

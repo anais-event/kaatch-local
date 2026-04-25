@@ -6,14 +6,14 @@ export default function GuestNav({ slug, isPreview }: { slug: string; isPreview?
   const pathname = usePathname()
 
   const tabs = [
-    { emoji: '📋', label: 'Programme',  href: `/invite/${slug}/programme` },
-    { emoji: '📸', label: 'Photos',     href: `/invite/${slug}/photos` },
-    { emoji: '💬', label: 'Messagerie', href: `/invite/${slug}/groupes` },
-    { emoji: '🏡', label: 'Hébergements', href: `/invite/${slug}/hebergements` },
-    { emoji: '💌', label: 'Faire-part', href: `/invite/${slug}/faire-part` },
-    { emoji: '📖', label: 'Livre d\'Or', href: `/invite/${slug}/livre-dor` },
-    { emoji: '🎉', label: 'Surprises',  href: `/invite/${slug}/surprises` },
-    { emoji: '👤', label: 'Mon compte', href: `/invite/${slug}/compte` },
+    { label: '💌 Faire-part', href: `/invite/${slug}/faire-part` },
+    { label: '💬 Messagerie', href: `/invite/${slug}/groupes` },
+    { label: '🏡 Héberg.',    href: `/invite/${slug}/hebergements` },
+    { label: '📋 Programme',  href: `/invite/${slug}/programme` },
+    { label: '🎉 Surprises',  href: `/invite/${slug}/surprises` },
+    { label: '📖 Livre d\'Or', href: `/invite/${slug}/livre-dor` },
+    { label: '📸 Photos',     href: `/invite/${slug}/photos` },
+    { label: '👤 Mon compte', href: `/invite/${slug}/compte` },
   ]
 
   const isActive = (href: string) => pathname.startsWith(href)
@@ -29,16 +29,17 @@ export default function GuestNav({ slug, isPreview }: { slug: string; isPreview?
           ✦
         </a>
 
-        {/* Tabs — emoji uniquement, label en tooltip */}
-        <div className="flex items-center gap-1 flex-1 ml-3 justify-end">
+        {/* Tabs scrollables */}
+        <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-hide flex-1 ml-2">
           {tabs.map(tab => (
-            <a key={tab.href} href={tab.href} title={tab.label}
-              className={`w-9 h-9 rounded-xl flex items-center justify-center text-lg transition-all shrink-0 ${
+            <a key={tab.href} href={tab.href}
+              className={`text-xs whitespace-nowrap px-2.5 py-1.5 rounded-md transition-colors shrink-0 ${
                 isActive(tab.href)
-                  ? 'bg-[#4a5240] shadow-sm'
-                  : 'hover:bg-stone-200/60'
-              }`}>
-              {tab.emoji}
+                  ? 'bg-[#4a5240] text-white'
+                  : 'text-stone-400 hover:text-[#4a5240]'
+              }`}
+              style={{ fontWeight: 400, letterSpacing: '0.02em' }}>
+              {tab.label}
             </a>
           ))}
           {isPreview && (

@@ -14,6 +14,23 @@ export default function BottomNavGuest({ slug }: { slug: string }) {
 
   const tabs = [
     {
+      label: 'Faire-part',
+      href: `/invite/${slug}/faire-part`,
+      emoji: '💌',
+    },
+    {
+      label: 'Messagerie',
+      href: `/invite/${slug}/groupes`,
+      emoji: '💬',
+      badge: badges.messages,
+    },
+    {
+      label: 'Accueil',
+      href: `/invite/${slug}`,
+      emoji: '🏠',
+      center: true,
+    },
+    {
       label: 'Programme',
       href: `/invite/${slug}/programme`,
       emoji: '📋',
@@ -23,23 +40,6 @@ export default function BottomNavGuest({ slug }: { slug: string }) {
       href: `/invite/${slug}/photos`,
       emoji: '📸',
       badge: badges.photos,
-    },
-    {
-      label: 'Accueil',
-      href: `/invite/${slug}`,
-      emoji: '🏡',
-      center: true,
-    },
-    {
-      label: 'Messagerie',
-      href: `/invite/${slug}/groupes`,
-      emoji: '💬',
-      badge: badges.messages,
-    },
-    {
-      label: 'Faire-part',
-      href: `/invite/${slug}/faire-part`,
-      emoji: '💌',
     },
   ]
 

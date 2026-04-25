@@ -9,6 +9,7 @@ type Props = {
   coupleMessage: string | null
   coverImageUrl: string | null
   slug: string
+  personalUrl: string
 }
 
 type Phase = 'curtain-closed' | 'opening' | 'revealed'
@@ -35,6 +36,7 @@ export default function FairePartEnvelope({
   coupleMessage,
   coverImageUrl,
   slug,
+  personalUrl,
 }: Props) {
   const [phase, setPhase] = useState<Phase>('curtain-closed')
   const [sparksVisible, setSparksVisible] = useState(false)
@@ -52,20 +54,19 @@ export default function FairePartEnvelope({
     }
   }, [])
 
-  // QR code generation
+  // QR code generation — pointe vers le lien personnel de l'invité
   useEffect(() => {
     if (phase !== 'revealed' || !qrRef.current) return
-    const url = `${typeof window !== 'undefined' ? window.location.origin : 'https://kaatch.fr'}/invite/${slug}`
     import('qrcode')
       .then((QRCode) => {
-        QRCode.toCanvas(qrRef.current!, url, {
+        QRCode.toCanvas(qrRef.current!, personalUrl, {
           width: 120,
           margin: 1,
           color: { dark: '#2d3228', light: '#ffffff' },
         })
       })
       .catch(() => {})
-  }, [phase, slug])
+  }, [phase, personalUrl])
 
   const handleDownload = async () => {
     const canvas = document.createElement('canvas')

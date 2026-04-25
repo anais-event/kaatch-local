@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
+import { headers } from 'next/headers'
 import GuestList from './GuestList'
 import GuestListSection from './GuestListSection'
 import ImportGuests from './ImportGuests'
@@ -102,7 +103,9 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
   const pending = guests?.filter(g => g.rsvp_status === 'en_attente').length ?? 0
   const withoutToken = (guests ?? []).filter(g => !g.invite_token)
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://kaatch-app.vercel.app'
+  const h = await headers()
+  const host = h.get('host') ?? 'kaatch.fr'
+  const baseUrl = `https://${host}`
 
   const weddingPreview = {
     name: wedding.name,

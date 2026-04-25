@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import CopyLinkButton from './CopyLinkButton'
 
 async function generateTokens(formData: FormData) {
@@ -34,7 +35,9 @@ export default async function InvitationsPage({ params }: { params: Promise<{ sl
     .eq('wedding_id', wedding.id)
     .order('last_name').order('first_name')
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://kaatch.fr'
+  const h = await headers()
+  const host = h.get('host') ?? 'kaatch.fr'
+  const baseUrl = `https://${host}`
   const withToken = (guests ?? []).filter(g => g.invite_token)
   const withoutToken = (guests ?? []).filter(g => !g.invite_token)
 

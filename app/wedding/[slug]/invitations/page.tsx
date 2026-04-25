@@ -31,7 +31,7 @@ export default async function InvitationsPage({ params }: { params: Promise<{ sl
 
   const { data: guests } = await supabase
     .from('guests')
-    .select('id, first_name, last_name, rsvp_status, invite_token')
+    .select('id, first_name, last_name, email, telephone, rsvp_status, invite_token')
     .eq('wedding_id', wedding.id)
     .order('first_name')
 

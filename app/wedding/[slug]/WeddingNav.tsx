@@ -85,8 +85,8 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail }: 
     {
       label: 'Préparatifs',
       items: [
-        { label: 'Invités', sub: 'Liste & RSVP', href: `/wedding/${slug}/guests` },
-        { label: 'Invitations', sub: 'Faire-part & envoi', href: `/wedding/${slug}/invitations` },
+        { label: 'Invités & RSVP', sub: 'Liste des invités', href: `/wedding/${slug}/guests` },
+        { label: 'Faire-part', sub: 'Envoyer les invitations', href: `/wedding/${slug}/invitations` },
         { label: 'Plan de table', sub: 'Placement & récap', href: `/wedding/${slug}/tables` },
         { label: 'Budget', sub: 'Suivi des dépenses', href: `/wedding/${slug}/budget` },
         { label: 'Prestataires', sub: 'Contacts & contrats', href: `/wedding/${slug}/prestataires` },

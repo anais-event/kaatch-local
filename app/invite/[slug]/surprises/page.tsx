@@ -123,6 +123,44 @@ export default async function SurprisesPage({ params }: { params: Promise<{ slug
           ))}
         </div>
 
+        {/* Jeux */}
+        <div className="mt-10">
+          <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.3rem', fontStyle: 'italic' }}
+              className="text-[#2d3228] mb-1">Jeux & animations</h2>
+          <p style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-400 mb-4">
+            Des idées pour animer la soirée et créer des souvenirs.
+          </p>
+          <div className="space-y-3">
+            {[
+              { emoji: '📝', titre: 'Quiz sur les mariés', desc: 'Qui connaît le mieux Sophie et Clément ? Questions sur leurs premières fois, leurs anecdotes, leurs goûts… Les tables s\'affrontent.', tag: 'Préparer à l\'avance' },
+              { emoji: '🎯', titre: 'Bingo du mariage', desc: 'Chaque invité reçoit une grille avec des cases (\"quelqu\'un pleure\", \"le DJ joue YMCA\", \"la mariée perd une chaussure\"…). Premier qui complète une rangée gagne !', tag: 'Facile à organiser' },
+              { emoji: '📸', titre: 'Chasse photo', desc: 'Une liste de photos à prendre pendant la soirée : un selfie avec les mariés, une photo floutée de danse, le gâteau… La meilleure série gagne.', tag: 'Très populaire' },
+              { emoji: '🎤', titre: 'Blind test musical', desc: 'Des extraits de chansons qui ont marqué la vie des mariés. Les invités deviennent les jurés.', tag: 'Besoin d\'un animateur' },
+              { emoji: '💌', titre: 'Roue des défis', desc: 'Une liste de défis sympas tirés au sort : improviser un discours, chanter une chanson, imiter quelqu\'un… Bonne humeur garantie.', tag: 'Facile à organiser' },
+              { emoji: '🃏', titre: 'Blanc Manger Poulet', desc: 'Le classique du mariage. Des cartes, des situations absurdes, beaucoup de fous rires. Parfait pour animer les tables pendant le dîner.', tag: 'Commander à l\'avance' },
+            ].map(jeu => (
+              <div key={jeu.titre} className="bg-white rounded-2xl border border-stone-100 p-5">
+                <div className="flex items-start gap-4">
+                  <span className="text-2xl mt-0.5 shrink-0">{jeu.emoji}</span>
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <h3 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.1rem', fontStyle: 'italic' }}
+                          className="text-[#2d3228]">{jeu.titre}</h3>
+                      <span className="text-xs bg-[#4a5240]/8 text-[#4a5240] px-2.5 py-1 rounded-full shrink-0"
+                            style={{ fontWeight: 300 }}>
+                        {jeu.tag}
+                      </span>
+                    </div>
+                    <p style={{ fontSize: '0.88rem', lineHeight: 1.75, fontWeight: 300 }} className="text-stone-500">
+                      {jeu.desc}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Rappel */}
         <div className="mt-10 text-center">
           <p style={{ fontSize: '0.8rem', fontWeight: 300 }} className="text-stone-300">

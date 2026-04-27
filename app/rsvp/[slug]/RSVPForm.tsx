@@ -2,92 +2,93 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase'
-import { useRouter } from 'next/navigation'
 
 export default function RSVPForm({ guest }: { guest: any }) {
   const supabase = createClient()
-  const router = useRouter()
-  const [status, setStatus] = useState(guest.rsvp_status || '')
-  const [plusOne, setPlusOne] = useState(guest.plus_one_count || 0)
+  const [status, setStatus] = useState<'confirme' | 'decline' | ''>(guest.rsvp_status || '')
   const [dietary, setDietary] = useState(guest.dietary_restrictions || '')
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (!status) return
     setLoading(true)
-
     await supabase
       .from('guests')
       .update({
         rsvp_status: status,
-        plus_one_count: plusOne,
-        dietary_restrictions: dietary,
+        dietary_restrictions: dietary || null,
         rsvp_at: new Date().toISOString(),
       })
       .eq('id', guest.id)
-
     setDone(true)
     setLoading(false)
   }
 
   if (done) return (
-    <div className="text-center text-green-600 font-medium text-lg">
-      ✅ Merci, votre réponse a bien été enregistrée !
+    <div className="text-center py-8">
+      <p className="text-5xl mb-4">{status === 'confirme' ? '🥂' : '💌'}</p>
+      <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '1.8rem', fontStyle: 'italic' }}
+          className="text-[#2d3228] mb-2">
+        {status === 'confirme' ? 'À très bientôt !' : 'Réponse enregistrée'}
+      </h2>
+      <p className="text-stone-400 text-sm" style={{ fontWeight: 300 }}>
+        {status === 'confirme'
+          ? 'Votre présence a bien été confirmée. Les mariés sont ravis !'
+          : 'Votre réponse a bien été transmise aux mariés.'}
+      </p>
     </div>
   )
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Présence */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <p className="text-sm text-stone-500 mb-3" style={{ fontWeight: 300 }}>
           Serez-vous présent(e) ?
-        </label>
-        <div className="flex gap-3">
-          {['confirmed', 'declined'].map((s) => (
-            <button
-              key={s}
-              type="button"
-              onClick={() => setStatus(s)}
-              className={`flex-1 py-2 rounded-lg border text-sm font-medium transition ${
-                status === s
-                  ? 'bg-rose-500 text-white border-rose-500'
-                  : 'border-gray-300 text-gray-600 hover:border-rose-300'
-              }`}
-            >
-              {s === 'confirmed' ? '✅ Oui' : '❌ Non'}
-            </button>
-          ))}
+        </p>
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={() => setStatus('confirme')}
+            className={`py-3 rounded-2xl border text-sm transition ${
+              status === 'confirme'
+                ? 'bg-[#4a5240] text-white border-[#4a5240]'
+                : 'border-stone-200 text-stone-500 hover:border-[#4a5240] hover:text-[#4a5240]'
+            }`}
+            style={{ fontWeight: 400 }}
+          >
+            🥂 Avec plaisir !
+          </button>
+          <button
+            type="button"
+            onClick={() => setStatus('decline')}
+            className={`py-3 rounded-2xl border text-sm transition ${
+              status === 'decline'
+                ? 'bg-stone-700 text-white border-stone-700'
+                : 'border-stone-200 text-stone-400 hover:border-stone-400'
+            }`}
+            style={{ fontWeight: 400 }}
+          >
+            😔 Je ne pourrai pas
+          </button>
         </div>
       </div>
 
-      {status === 'confirmed' && guest.plus_one && (
+      {/* Restrictions alimentaires */}
+      {status === 'confirme' && (
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Nombre d'accompagnants
-          </label>
-          <input
-            type="number"
-            min={0}
-            max={5}
-            value={plusOne}
-            onChange={(e) => setPlusOne(Number(e.target.value))}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-          />
-        </div>
-      )}
-
-      {status === 'confirmed' && (
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Restrictions alimentaires
+          <label className="block text-sm text-stone-500 mb-2" style={{ fontWeight: 300 }}>
+            Restrictions alimentaires <span className="text-stone-300">(optionnel)</span>
           </label>
           <textarea
             value={dietary}
             onChange={(e) => setDietary(e.target.value)}
-            rows={3}
-            placeholder="Végétarien, allergie aux noix..."
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+            rows={2}
+            placeholder="Végétarien, allergie aux fruits de mer…"
+            className="w-full border border-stone-200 rounded-2xl px-4 py-3 text-sm text-stone-700 placeholder:text-stone-300 focus:outline-none focus:border-[#4a5240] resize-none"
+            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}
           />
         </div>
       )}
@@ -95,9 +96,10 @@ export default function RSVPForm({ guest }: { guest: any }) {
       <button
         type="submit"
         disabled={!status || loading}
-        className="w-full bg-rose-500 text-white py-2 rounded-lg font-medium hover:bg-rose-600 disabled:opacity-40 transition"
+        className="w-full bg-[#4a5240] text-white py-3.5 rounded-2xl text-sm hover:bg-[#2d3228] disabled:opacity-40 transition"
+        style={{ fontWeight: 400, letterSpacing: '0.02em' }}
       >
-        {loading ? 'Envoi...' : 'Confirmer ma réponse'}
+        {loading ? 'Envoi…' : 'Confirmer ma réponse'}
       </button>
     </form>
   )

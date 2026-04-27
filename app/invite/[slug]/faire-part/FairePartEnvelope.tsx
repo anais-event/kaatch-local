@@ -14,6 +14,18 @@ type Props = {
 
 type Phase = 'curtain-closed' | 'opening' | 'revealed'
 
+// Deterministic petals — avoids hydration mismatch
+const PETALS = Array.from({ length: 30 }, (_, i) => ({
+  id: i,
+  left: (i * 37 + 3) % 100,
+  delay: ((i * 0.22) % 3).toFixed(2),
+  duration: (3.2 + (i % 6) * 0.35).toFixed(2),
+  size: 7 + (i % 5) * 3,
+  color: ['#f9c6d0', '#fde8b0', '#d4e8c2', '#e8d5f0', '#fbc2c2', '#c9d8f0'][i % 6],
+  side: i % 2 === 0 ? 'petal-l' : 'petal-r',
+  rotate: (i * 53) % 360,
+}))
+
 export default function FairePartEnvelope({
   weddingName,
   dateStr,
@@ -24,11 +36,12 @@ export default function FairePartEnvelope({
   personalUrl,
 }: Props) {
   const [phase, setPhase] = useState<Phase>('curtain-closed')
+  const [showPetals, setShowPetals] = useState(false)
   const qrRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase('opening'), 600)
-    const t2 = setTimeout(() => setPhase('revealed'), 1800)
+    const t1 = setTimeout(() => { setPhase('opening'); setShowPetals(true) }, 600)
+    const t2 = setTimeout(() => setPhase('revealed'), 1900)
     return () => { clearTimeout(t1); clearTimeout(t2) }
   }, [])
 
@@ -36,8 +49,7 @@ export default function FairePartEnvelope({
     if (phase !== 'revealed' || !qrRef.current) return
     import('qrcode').then((QRCode) => {
       QRCode.toCanvas(qrRef.current!, personalUrl, {
-        width: 110,
-        margin: 1,
+        width: 110, margin: 1,
         color: { dark: '#2d3228', light: '#ffffff' },
       }).catch(() => {})
     })
@@ -53,7 +65,6 @@ export default function FairePartEnvelope({
     ctx.fillStyle = '#fdfcf8'
     ctx.fillRect(0, 0, 600, 900)
 
-    // Top stripe
     const topGrad = ctx.createLinearGradient(0, 0, 600, 0)
     topGrad.addColorStop(0, '#4a5240')
     topGrad.addColorStop(1, '#2d3228')
@@ -62,7 +73,6 @@ export default function FairePartEnvelope({
 
     let y = 50
 
-    // Cover image
     if (coverImageUrl) {
       try {
         const img = new Image()
@@ -75,7 +85,6 @@ export default function FairePartEnvelope({
         ctx.clip()
         ctx.drawImage(img, 300 - r, y, r * 2, r * 2)
         ctx.restore()
-        // Ring
         ctx.strokeStyle = 'rgba(74,82,64,0.2)'
         ctx.lineWidth = 2
         ctx.beginPath()
@@ -85,21 +94,17 @@ export default function FairePartEnvelope({
       } catch { y += 20 }
     }
 
-    // Ornament
     ctx.fillStyle = '#c9a96e'
     ctx.font = '14px Georgia, serif'
     ctx.textAlign = 'center'
     ctx.fillText('✦', 300, y)
     y += 36
 
-    // Vous êtes invité(e)
     ctx.fillStyle = '#a8a29e'
     ctx.font = '300 11px Arial, sans-serif'
-    ctx.letterSpacing = '0.15em'
     ctx.fillText('VOUS ÊTES INVITÉ(E)', 300, y)
     y += 56
 
-    // Wedding name — big
     ctx.fillStyle = '#2d3228'
     ctx.font = 'italic 52px Georgia, serif'
     const words = weddingName.split(' ')
@@ -113,13 +118,11 @@ export default function FairePartEnvelope({
     for (const l of lines) { ctx.fillText(l, 300, y); y += 58 }
     y += 10
 
-    // Divider
     ctx.strokeStyle = '#e7e5e4'
     ctx.lineWidth = 1
     ctx.beginPath(); ctx.moveTo(240, y); ctx.lineTo(360, y); ctx.stroke()
     y += 30
 
-    // Date
     if (dateStr) {
       ctx.fillStyle = '#57534e'
       ctx.font = '500 18px Georgia, serif'
@@ -127,7 +130,6 @@ export default function FairePartEnvelope({
       y += 28
     }
 
-    // Location
     if (location) {
       ctx.fillStyle = '#a8a29e'
       ctx.font = '300 13px Arial, sans-serif'
@@ -141,11 +143,10 @@ export default function FairePartEnvelope({
       y += 30
     }
 
-    // Couple message
     if (coupleMessage) {
       ctx.fillStyle = '#78716c'
       ctx.font = 'italic 15px Georgia, serif'
-      const msgWords = coupleMessage.replace(/\r?\n.*/, '').split(' ')
+      const msgWords = coupleMessage.split('\n')[0].split(' ')
       let ml = ''
       const mls: string[] = []
       for (const w of msgWords) {
@@ -157,7 +158,6 @@ export default function FairePartEnvelope({
       y += 20
     }
 
-    // QR code
     if (qrRef.current) {
       ctx.drawImage(qrRef.current, 245, y, 110, 110)
       y += 120
@@ -166,7 +166,6 @@ export default function FairePartEnvelope({
       ctx.fillText('Flashez pour accéder à votre espace', 300, y)
     }
 
-    // Bottom stripe
     const botGrad = ctx.createLinearGradient(0, 0, 600, 0)
     botGrad.addColorStop(0, '#2d3228')
     botGrad.addColorStop(1, '#4a5240')
@@ -191,28 +190,75 @@ export default function FairePartEnvelope({
       <style>{`
         @keyframes open-left  { from { transform: translateX(0) } to { transform: translateX(-100%) } }
         @keyframes open-right { from { transform: translateX(0) } to { transform: translateX(100%) } }
-        @keyframes card-rise  { from { opacity:0; transform:translateY(32px) } to { opacity:1; transform:translateY(0) } }
+        @keyframes card-rise  { from { opacity:0; transform:translateY(36px) } to { opacity:1; transform:translateY(0) } }
         @keyframes fade-up    { from { opacity:0; transform:translateY(10px) } to { opacity:1; transform:translateY(0) } }
-        .curtain-l { animation: open-left  1.2s ease-in-out forwards; }
-        .curtain-r { animation: open-right 1.2s ease-in-out forwards; }
-        .card-rise { animation: card-rise  0.6s ease forwards; }
-        .fade-up   { animation: fade-up    0.5s ease forwards 0.5s; opacity:0; }
+        @keyframes star-pulse { 0%,100% { opacity:.5; transform:scale(1) } 50% { opacity:1; transform:scale(1.2) } }
+
+        .curtain-l { animation: open-left  1.3s cubic-bezier(0.4,0,0.2,1) forwards; }
+        .curtain-r { animation: open-right 1.3s cubic-bezier(0.4,0,0.2,1) forwards; }
+        .card-rise { animation: card-rise  0.7s ease forwards; }
+        .fade-up   { animation: fade-up    0.5s ease forwards 0.6s; opacity:0; }
+        .star-pulse { animation: star-pulse 1.6s ease-in-out infinite; }
+
+        @keyframes petal-fall-l {
+          0%   { transform: translateY(-60px) rotate(0deg) translateX(0px); opacity: 1; }
+          40%  { opacity: 0.9; }
+          80%  { transform: translateY(80vh) rotate(260deg) translateX(-35px); opacity: 0.6; }
+          100% { transform: translateY(110vh) rotate(380deg) translateX(-15px); opacity: 0; }
+        }
+        @keyframes petal-fall-r {
+          0%   { transform: translateY(-60px) rotate(0deg) translateX(0px); opacity: 1; }
+          40%  { opacity: 0.9; }
+          80%  { transform: translateY(80vh) rotate(-260deg) translateX(35px); opacity: 0.6; }
+          100% { transform: translateY(110vh) rotate(-380deg) translateX(15px); opacity: 0; }
+        }
+        .petal-l { animation-name: petal-fall-l; animation-timing-function: ease-in; animation-fill-mode: forwards; }
+        .petal-r { animation-name: petal-fall-r; animation-timing-function: ease-in; animation-fill-mode: forwards; }
       `}</style>
 
       {/* Curtains */}
       <div className={phase === 'opening' || phase === 'revealed' ? 'curtain-l' : ''}
         style={{ position:'absolute', top:0, left:0, width:'50%', height:'100%', zIndex:30,
           background:'linear-gradient(180deg,#2d3228 0%,#1a2419 100%)',
-          boxShadow:'inset -4px 0 12px rgba(0,0,0,0.3)' }} />
+          boxShadow:'inset -6px 0 18px rgba(0,0,0,0.35)' }} />
       <div className={phase === 'opening' || phase === 'revealed' ? 'curtain-r' : ''}
         style={{ position:'absolute', top:0, right:0, width:'50%', height:'100%', zIndex:30,
           background:'linear-gradient(180deg,#2d3228 0%,#1a2419 100%)',
-          boxShadow:'inset 4px 0 12px rgba(0,0,0,0.3)' }} />
+          boxShadow:'inset 6px 0 18px rgba(0,0,0,0.35)' }} />
 
-      {/* Star (before open) */}
+      {/* Gold center line (before open) */}
       {phase === 'curtain-closed' && (
-        <div style={{ position:'absolute', zIndex:40, color:'#c9a96e', fontSize:'2rem' }}>✦</div>
+        <div style={{ position:'absolute', left:'50%', top:0, width:1, height:'100%',
+          background:'rgba(201,169,110,0.35)', zIndex:35 }} />
       )}
+
+      {/* Pulsing star */}
+      {phase === 'curtain-closed' && (
+        <div className="star-pulse" style={{ position:'absolute', zIndex:40, color:'#c9a96e', fontSize:'2rem' }}>✦</div>
+      )}
+
+      {/* Falling petals */}
+      {showPetals && PETALS.map(p => (
+        <div
+          key={p.id}
+          className={p.side}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: `${p.left}%`,
+            width: p.size,
+            height: p.size,
+            borderRadius: '50% 0 50% 0',
+            background: p.color,
+            opacity: 0.85,
+            zIndex: 28,
+            pointerEvents: 'none',
+            animationDuration: `${p.duration}s`,
+            animationDelay: `${p.delay}s`,
+            transform: `rotate(${p.rotate}deg)`,
+          }}
+        />
+      ))}
 
       {/* Card */}
       {phase === 'revealed' && (
@@ -224,7 +270,7 @@ export default function FairePartEnvelope({
         }}>
           <div className="card-rise" style={{
             width:'100%', background:'#fff', borderRadius:20,
-            boxShadow:'0 25px 60px -12px rgba(0,0,0,0.2)',
+            boxShadow:'0 30px 70px -12px rgba(0,0,0,0.22)',
             overflow:'hidden',
           }}>
             {/* Top stripe */}
@@ -243,7 +289,7 @@ export default function FairePartEnvelope({
               {/* Ornament */}
               <p style={{ color:'#c9a96e', letterSpacing:'0.3em', fontSize:'0.7rem', marginBottom:20 }}>✦</p>
 
-              {/* Vous êtes invité(e) */}
+              {/* Invitation text */}
               <p style={{
                 fontFamily:'var(--font-lato)', fontWeight:300,
                 fontSize:'0.65rem', letterSpacing:'0.2em', textTransform:'uppercase',
@@ -252,7 +298,7 @@ export default function FairePartEnvelope({
                 Vous êtes invité(e)
               </p>
 
-              {/* Wedding name */}
+              {/* Wedding name — Cormorant italic */}
               <h1 style={{
                 fontFamily:'var(--font-cormorant)', fontWeight:400, fontStyle:'italic',
                 fontSize:'clamp(2rem, 9vw, 2.8rem)', color:'#2d3228',
@@ -290,7 +336,7 @@ export default function FairePartEnvelope({
                   <div style={{ height:1, background:'linear-gradient(90deg,transparent,#e7e5e4,transparent)', margin:'0 auto 20px', width:'70%' }} />
                   <p style={{
                     fontFamily:'var(--font-cormorant)', fontStyle:'italic', fontWeight:400,
-                    fontSize:'1rem', color:'#78716c', lineHeight:1.75, marginBottom:20,
+                    fontSize:'1.05rem', color:'#78716c', lineHeight:1.75, marginBottom:20,
                   }}>
                     &ldquo;{coupleMessage.split('\n')[0]}&rdquo;
                   </p>
@@ -316,15 +362,15 @@ export default function FairePartEnvelope({
           </div>
 
           {/* Buttons */}
-          <div className="fade-up" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:8, marginTop:20 }}>
+          <div className="fade-up" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:10, marginTop:22 }}>
             <button onClick={handleDownload}
               style={{
                 background:'#4a5240', color:'#fff', borderRadius:12,
-                padding:'10px 28px', fontSize:'0.82rem',
+                padding:'11px 32px', fontSize:'0.82rem',
                 fontFamily:'var(--font-lato)', fontWeight:300,
                 border:'none', cursor:'pointer', letterSpacing:'0.05em',
               }}>
-              Télécharger le faire-part
+              ↓ Télécharger le faire-part
             </button>
             <a href={`/invite/${slug}`}
               style={{

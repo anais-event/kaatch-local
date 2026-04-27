@@ -1,4 +1,11 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'Guide — Kaatch | Rétro-planning mariage, RSVP, plan de table',
+  description: 'Tout ce qu\'il faut savoir pour organiser son mariage avec Kaatch : rétro-planning, gestion des invités, faire-parts, plan de table et album photo partagé.',
+  keywords: 'rétro-planning mariage, checklist mariage, organiser mariage, guide mariage',
+}
 
 const sections = [
   {

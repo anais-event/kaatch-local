@@ -6,6 +6,8 @@ Disallow: /dashboard
 Disallow: /wedding/
 Disallow: /invite/
 Disallow: /p/
+Disallow: /i/
+Disallow: /rsvp/
 Disallow: /register
 
 Sitemap: https://kaatch.fr/sitemap.xml

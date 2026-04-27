@@ -1,3 +1,10 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Tarifs — Kaatch | À partir de 45€, paiement unique',
+  description: 'Plan gratuit jusqu\'à 30 invités, plan Mariage à 45€ (paiement unique, invités illimités, photos illimitées). Aucun abonnement caché.',
+}
+
 const DISPLAY = 'var(--font-cormorant)'
 const LATO = 'var(--font-lato)'
 const GREEN = '#4a5240'

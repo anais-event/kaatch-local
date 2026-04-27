@@ -1,4 +1,11 @@
+import type { Metadata } from 'next'
 import JoindreForm from './JoindreForm'
+
+export const metadata: Metadata = {
+  title: 'Rejoindre un mariage — Kaatch',
+  description: 'Vous êtes invité(e) à un mariage ? Entrez votre code d\'invitation pour accéder à votre espace personnel : programme, RSVP, album photo.',
+  robots: { index: false, follow: false },
+}
 
 export default function RejoindrePage() {
   return (

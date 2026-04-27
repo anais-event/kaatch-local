@@ -93,8 +93,26 @@ export default function Home() {
     },
   ]
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'Kaatch',
+    applicationCategory: 'LifestyleApplication',
+    operatingSystem: 'Web',
+    url: 'https://kaatch.fr',
+    description: 'Application d\'organisation de mariage : invitations personnalisées, RSVP, plan de table, album photo partagé.',
+    offers: {
+      '@type': 'Offer',
+      price: '45',
+      priceCurrency: 'EUR',
+      description: 'Plan Mariage — paiement unique',
+    },
+    inLanguage: 'fr',
+  }
+
   return (
     <main className="bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, color: '#2d3228' }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       {/* ── NAV ── */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-[#f5f0e8]/95 backdrop-blur-md border-b border-stone-200">

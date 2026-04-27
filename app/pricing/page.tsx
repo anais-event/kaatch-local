@@ -61,7 +61,7 @@ export default function PricingPage() {
               Connexion
             </a>
             <a
-              href="/auth"
+              href="/dashboard"
               className="text-sm bg-[#4a5240] text-white px-5 py-2.5 rounded-2xl hover:bg-[#2d3228] transition"
               style={{ fontWeight: 500 }}
             >

@@ -138,7 +138,7 @@ export default function Home() {
             <a href="/auth" className="text-sm text-stone-500 hover:text-[#2C3B2E] transition hidden sm:block" style={{ fontWeight: 400 }}>
               Connexion
             </a>
-            <a href="/auth"
+            <a href="/dashboard"
                className="text-sm bg-[#2C3B2E] text-white px-5 py-2.5 rounded-2xl hover:bg-[#1a2419] transition"
                style={{ fontWeight: 500 }}>
               Mon espace

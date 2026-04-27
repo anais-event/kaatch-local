@@ -3,24 +3,24 @@ import ContactForm from './_components/ContactForm'
 function FAQ() {
   const items = [
     {
-      q: 'Mes invités doivent-ils créer un compte ?',
-      a: 'Non, jamais. Chaque invité reçoit un lien unique à son prénom. Il accède directement à son espace — RSVP, programme, album photo — sans inscription, sans mot de passe.',
+      q: "Mes invités doivent-ils créer un compte ?",
+      a: "Non, jamais. Chaque invité reçoit un lien unique à son prénom. Il accède directement à son espace — RSVP, programme, album photo — sans inscription, sans mot de passe.",
     },
     {
-      q: 'Que se passe-t-il après le mariage ? Mes données sont conservées ?',
-      a: 'Vos données (photos, messages, liste d'invités) restent accessibles aussi longtemps que votre espace est actif. Vous pouvez tout télécharger à tout moment.',
+      q: "Que se passe-t-il après le mariage ? Mes données sont conservées ?",
+      a: "Vos données (photos, messages, liste d'invités) restent accessibles aussi longtemps que votre espace est actif. Vous pouvez tout télécharger à tout moment.",
     },
     {
-      q: 'Puis-je passer du plan gratuit au plan Mariage plus tard ?',
-      a: 'Oui, à tout moment. Vos données et votre espace sont entièrement conservés. Vous n'avez pas à recommencer de zéro.',
+      q: "Puis-je passer du plan gratuit au plan Mariage plus tard ?",
+      a: "Oui, à tout moment. Vos données et votre espace sont entièrement conservés. Vous n'avez pas à recommencer de zéro.",
     },
     {
-      q: 'Mes données sont-elles sécurisées ?',
-      a: 'Kaatch est hébergé en Europe, les données sont chiffrées et ne sont jamais revendues ni partagées. Vous restez propriétaire de tout ce que vous publiez.',
+      q: "Mes données sont-elles sécurisées ?",
+      a: "Kaatch est hébergé en Europe, les données sont chiffrées et ne sont jamais revendues ni partagées. Vous restez propriétaire de tout ce que vous publiez.",
     },
     {
-      q: 'Kaatch fonctionne-t-il sur téléphone ?',
-      a: 'Oui, entièrement. L'espace mariés comme l'espace invités sont conçus mobile-first. Aucune application à télécharger — tout fonctionne depuis le navigateur.',
+      q: "Kaatch fonctionne-t-il sur téléphone ?",
+      a: "Oui, entièrement. L'espace mariés comme l'espace invités sont conçus mobile-first. Aucune application à télécharger — tout fonctionne depuis le navigateur.",
     },
   ]
 

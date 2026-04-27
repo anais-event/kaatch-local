@@ -1,5 +1,56 @@
 import KaatchChatLanding from './_components/KaatchChatLanding'
 import ContactForm from './_components/ContactForm'
+function FAQ() {
+  const items = [
+    {
+      q: 'Mes invités doivent-ils créer un compte ?',
+      a: 'Non, jamais. Chaque invité reçoit un lien unique à son prénom. Il accède directement à son espace — RSVP, programme, album photo — sans inscription, sans mot de passe.',
+    },
+    {
+      q: 'Que se passe-t-il après le mariage ? Mes données sont conservées ?',
+      a: 'Vos données (photos, messages, liste d'invités) restent accessibles aussi longtemps que votre espace est actif. Vous pouvez tout télécharger à tout moment.',
+    },
+    {
+      q: 'Puis-je passer du plan gratuit au plan Mariage plus tard ?',
+      a: 'Oui, à tout moment. Vos données et votre espace sont entièrement conservés. Vous n'avez pas à recommencer de zéro.',
+    },
+    {
+      q: 'Mes données sont-elles sécurisées ?',
+      a: 'Kaatch est hébergé en Europe, les données sont chiffrées et ne sont jamais revendues ni partagées. Vous restez propriétaire de tout ce que vous publiez.',
+    },
+    {
+      q: 'Kaatch fonctionne-t-il sur téléphone ?',
+      a: 'Oui, entièrement. L'espace mariés comme l'espace invités sont conçus mobile-first. Aucune application à télécharger — tout fonctionne depuis le navigateur.',
+    },
+  ]
+
+  return (
+    <section className="py-28 px-10 bg-white border-t border-stone-100">
+      <div className="max-w-2xl mx-auto">
+        <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-4" style={{ fontFamily: 'var(--font-geist-sans)', fontWeight: 500 }}>FAQ</p>
+        <h2 style={{ fontFamily: 'var(--font-geist-sans)', fontWeight: 800, fontSize: 'clamp(1.7rem, 3vw, 2.4rem)', lineHeight: 1.15, letterSpacing: '-0.02em' }}
+            className="text-[#2C3B2E] mb-12">
+          Les questions qu'on nous pose souvent.
+        </h2>
+        <div className="divide-y divide-stone-100">
+          {items.map((item, i) => (
+            <details key={i} className="group py-5 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+              <summary className="flex items-center justify-between gap-4 list-none" style={{ fontFamily: 'var(--font-geist-sans)', fontWeight: 600, fontSize: '0.95rem', color: '#2C3B2E' }}>
+                {item.q}
+                <span className="shrink-0 w-5 h-5 rounded-full border border-stone-300 flex items-center justify-center text-stone-400 group-open:rotate-45 transition-transform text-xs">
+                  +
+                </span>
+              </summary>
+              <p className="mt-3 text-stone-500 text-sm leading-relaxed" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
+                {item.a}
+              </p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
 
 // Police display moderne : Geist Sans (= Inter/Satoshi déjà chargé dans layout.tsx)
 const DISPLAY = 'var(--font-geist-sans)'
@@ -321,7 +372,7 @@ export default function Home() {
               <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
                 <span className="bg-[#f5f0e8] text-[#2C3B2E] text-xs px-4 py-1.5 rounded-full whitespace-nowrap border border-[#2C3B2E]/20"
                       style={{ fontWeight: 600 }}>
-                  ✦ Prix de lancement
+                  ✦ Prix de lancement — jusqu'au 31 mai
                 </span>
               </div>
               <div className="mb-6">
@@ -391,6 +442,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* ── FAQ ── */}
+      <FAQ />
 
       {/* ── CTA FINAL ── */}
       <section className="py-32 px-10">

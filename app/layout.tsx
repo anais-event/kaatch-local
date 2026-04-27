@@ -33,8 +33,22 @@ const greatVibes = Great_Vibes({
 });
 
 export const metadata: Metadata = {
-  title: "Kaatch",
-  description: "Votre application de mariage",
+  title: "Kaatch — Organiser son mariage en ligne | RSVP, Plan de table, Album photo",
+  description: "Invitations personnalisées, gestion des RSVP, plan de table drag & drop, album photo partagé entre tous les invités. Votre mariage, tout au même endroit. Essai gratuit.",
+  keywords: "organisation mariage, application mariage, RSVP mariage en ligne, plan de table mariage, album photo mariage partagé, faire-part numérique, gestion invités mariage",
+  openGraph: {
+    title: "Kaatch — Organiser son mariage en ligne",
+    description: "Invitations personnalisées, RSVP, plan de table, album photo partagé. Tout pour votre mariage, au même endroit.",
+    url: "https://kaatch.fr",
+    siteName: "Kaatch",
+    locale: "fr_FR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Kaatch — Organiser son mariage en ligne",
+    description: "Invitations personnalisées, RSVP, plan de table, album photo partagé. Essai gratuit.",
+  },
 };
 
 export default function RootLayout({

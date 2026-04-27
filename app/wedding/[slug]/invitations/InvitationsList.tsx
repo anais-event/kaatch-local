@@ -55,95 +55,108 @@ async function drawFairePartCanvas(
 ): Promise<string> {
   const canvas = document.createElement('canvas')
   canvas.width = 600
-  canvas.height = 900
+  canvas.height = 860
   const ctx = canvas.getContext('2d')!
+  ctx.textAlign = 'center'
 
+  // Fond crème
   ctx.fillStyle = '#fdfcf8'
-  ctx.fillRect(0, 0, 600, 900)
+  ctx.fillRect(0, 0, 600, 860)
 
+  // Bande haute
   const topGrad = ctx.createLinearGradient(0, 0, 600, 0)
   topGrad.addColorStop(0, '#4a5240')
   topGrad.addColorStop(1, '#2d3228')
   ctx.fillStyle = topGrad
-  ctx.fillRect(0, 0, 600, 8)
+  ctx.fillRect(0, 0, 600, 6)
 
+  let y = 70
+
+  // ✦ ornement
   ctx.fillStyle = '#c9a96e'
-  ctx.font = '18px Georgia, serif'
-  ctx.textAlign = 'center'
-  ctx.fillText('✦', 300, 55)
+  ctx.font = '16px Georgia, serif'
+  ctx.fillText('✦', 300, y)
+  y += 42
 
-  const firstName = guest.first_name
-  ctx.fillStyle = '#6b6459'
-  ctx.font = 'italic 22px Georgia, serif'
-  ctx.textAlign = 'center'
-  ctx.fillText(`Chère/Cher ${firstName},`, 300, 120)
+  // VOUS ÊTES INVITÉ(E)
+  ctx.fillStyle = '#b8b0a6'
+  ctx.font = '300 11px Arial, sans-serif'
+  ctx.letterSpacing = '0.18em'
+  ctx.fillText('VOUS ÊTES INVITÉ(E)', 300, y)
+  ctx.letterSpacing = '0'
+  y += 52
 
-  ctx.fillStyle = '#9a9187'
-  ctx.font = '300 13px Lato, sans-serif'
-  ctx.textAlign = 'center'
-  ctx.fillText('Nous avons la joie de vous annoncer', 300, 160)
-
+  // Nom du mariage — italic serif large
   ctx.fillStyle = '#2d3228'
-  ctx.font = 'bold 42px Georgia, serif'
-  ctx.textAlign = 'center'
-  ctx.fillText(wedding.name, 300, 218)
+  ctx.font = 'italic 58px Georgia, serif'
+  const words = wedding.name.split(' ')
+  let line = ''
+  const nameLines: string[] = []
+  for (const w of words) {
+    const test = line + (line ? ' ' : '') + w
+    if (ctx.measureText(test).width > 520) { nameLines.push(line); line = w }
+    else line = test
+  }
+  nameLines.push(line)
+  for (const l of nameLines) { ctx.fillText(l, 300, y); y += 64 }
+  y += 8
 
-  ctx.fillStyle = '#9a9187'
-  ctx.font = '300 13px Lato, sans-serif'
-  ctx.textAlign = 'center'
-  ctx.fillText('et vous invitent à célébrer leur mariage', 300, 258)
+  // Divider
+  const div = (yy: number) => {
+    const g = ctx.createLinearGradient(150, 0, 450, 0)
+    g.addColorStop(0, 'transparent')
+    g.addColorStop(0.5, '#e7e5e4')
+    g.addColorStop(1, 'transparent')
+    ctx.strokeStyle = g as unknown as string
+    ctx.lineWidth = 1
+    ctx.beginPath(); ctx.moveTo(150, yy); ctx.lineTo(450, yy); ctx.stroke()
+  }
+  div(y); y += 32
 
-  ctx.strokeStyle = '#e0d9ce'
-  ctx.lineWidth = 1
-  ctx.beginPath()
-  ctx.moveTo(80, 290)
-  ctx.lineTo(520, 290)
-  ctx.stroke()
-
+  // Date
   if (wedding.date) {
     const dateStr = new Date(wedding.date).toLocaleDateString('fr-FR', {
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
     })
-    ctx.fillStyle = '#4a5240'
-    ctx.font = '18px Georgia, serif'
-    ctx.textAlign = 'center'
-    ctx.fillText(dateStr.charAt(0).toUpperCase() + dateStr.slice(1), 300, 330)
+    ctx.fillStyle = '#57534e'
+    ctx.font = '500 20px Georgia, serif'
+    ctx.fillText(dateStr.charAt(0).toUpperCase() + dateStr.slice(1), 300, y)
+    y += 30
   }
 
+  // Lieu
   if (wedding.location) {
-    ctx.fillStyle = '#9a9187'
-    ctx.font = '300 14px Lato, sans-serif'
-    ctx.textAlign = 'center'
-    ctx.fillText(wedding.location, 300, 360)
+    ctx.fillStyle = '#a8a29e'
+    ctx.font = '300 14px Arial, sans-serif'
+    ctx.fillText(wedding.location, 300, y)
+    y += 14
   }
 
-  ctx.strokeStyle = '#e0d9ce'
-  ctx.lineWidth = 1
-  ctx.beginPath()
-  ctx.moveTo(80, 395)
-  ctx.lineTo(520, 395)
-  ctx.stroke()
+  if (wedding.date || wedding.location) { y += 20; div(y); y += 32 }
 
+  // QR code (petit, centré)
   if (guest.invite_token) {
     const url = `${baseUrl}/i/${guest.invite_token}`
     const QR = await import('qrcode')
-    const qrDataUrl = await QR.default.toDataURL(url, { width: 200, margin: 1 })
+    const qrDataUrl = await QR.default.toDataURL(url, { width: 130, margin: 1, color: { dark: '#2d3228', light: '#fdfcf8' } })
     const qrImg = new Image()
     await new Promise<void>((resolve) => { qrImg.onload = () => resolve(); qrImg.src = qrDataUrl })
-    ctx.drawImage(qrImg, 200, 425, 200, 200)
+    ctx.drawImage(qrImg, 235, y, 130, 130)
+    y += 142
+    ctx.fillStyle = '#c8c4c0'
+    ctx.font = '300 10px Arial, sans-serif'
+    ctx.letterSpacing = '0.1em'
+    ctx.fillText('VOTRE ESPACE PERSONNEL', 300, y)
+    ctx.letterSpacing = '0'
+    y += 20
   }
 
-  ctx.fillStyle = '#b5ada3'
-  ctx.font = '300 12px Lato, sans-serif'
-  ctx.textAlign = 'center'
-  ctx.fillText('Scannez pour confirmer votre présence', 300, 642)
-  ctx.fillText(`${baseUrl}/i/${guest.invite_token}`, 300, 660)
-
+  // Bande basse
   const botGrad = ctx.createLinearGradient(0, 0, 600, 0)
   botGrad.addColorStop(0, '#2d3228')
   botGrad.addColorStop(1, '#4a5240')
   ctx.fillStyle = botGrad
-  ctx.fillRect(0, 892, 600, 8)
+  ctx.fillRect(0, 854, 600, 6)
 
   return canvas.toDataURL('image/png')
 }

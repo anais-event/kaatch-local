@@ -309,13 +309,14 @@ export default function InvitationsList({ guests, baseUrl, slug, wedding }: Prop
                         </svg>
                       </a>
 
-                      {/* Aperçu */}
+                      {/* Aperçu faire-part */}
                       <a
                         href={link}
                         target="_blank" rel="noopener noreferrer"
-                        title="Aperçu faire-part"
-                        className="w-8 h-8 flex items-center justify-center rounded-lg border border-stone-200 text-stone-400 hover:border-[#4a5240] hover:text-[#4a5240] transition text-xs">
-                        ↗
+                        title="Voir le faire-part de cet invité"
+                        className="flex items-center gap-1 px-2.5 h-8 rounded-lg border border-[#4a5240]/40 text-[#4a5240] hover:bg-[#4a5240] hover:text-white transition text-xs whitespace-nowrap"
+                        style={{ fontWeight: 400 }}>
+                        💌 Faire-part
                       </a>
                     </div>
                   ) : (

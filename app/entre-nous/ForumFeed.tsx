@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { categoryLabel, type ForumCategory } from './types'
+import PublicNav from '@/app/_components/PublicNav'
 
 const DISPLAY = 'var(--font-geist-sans)'
 const GREEN = '#2C3B2E'
@@ -100,21 +101,7 @@ export default function ForumFeed({ posts, likedPostIds, userId, createPost, del
   return (
     <main style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, color: '#2d3228', background: CREAM, minHeight: '100vh' }}>
 
-      {/* Nav */}
-      <nav style={{ background: `${CREAM}f2`, backdropFilter: 'blur(12px)' }}
-           className="fixed top-0 left-0 right-0 z-50 border-b border-stone-200/60">
-        <div className="max-w-3xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-5">
-            <Link href="/" style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '1.2rem', letterSpacing: '-0.02em', color: GREEN }}>
-              Kaatch
-            </Link>
-            <span className="text-sm text-stone-400" style={{ fontWeight: 400 }}>Entre nous</span>
-          </div>
-          <Link href="/dashboard" className="text-sm text-stone-500 hover:text-stone-800 transition" style={{ fontWeight: 400 }}>
-            Mon espace →
-          </Link>
-        </div>
-      </nav>
+      <PublicNav active="entre-nous" />
 
       <div className="pt-24 pb-24 px-6 max-w-3xl mx-auto">
 

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { getAllInspirations, categoryLabel, categoryColor, categoryBg, type InspirationCategory } from '@/lib/inspirations'
 import type { Metadata } from 'next'
+import PublicNav from '@/app/_components/PublicNav'
 
 export const metadata: Metadata = {
   title: 'Inspirations — Kaatch',
@@ -23,23 +24,7 @@ export default function InspirationsPage() {
   return (
     <main style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, color: '#2d3228', background: CREAM, minHeight: '100vh' }}>
 
-      <nav style={{ background: `${CREAM}f2`, backdropFilter: 'blur(12px)' }}
-           className="fixed top-0 left-0 right-0 z-50 border-b border-stone-200/60">
-        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/"
-                style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '1.2rem', letterSpacing: '-0.02em', color: GREEN }}>
-            Kaatch
-          </Link>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-stone-400" style={{ fontWeight: 400 }}>Inspirations</span>
-            <Link href="/auth"
-                  className="text-sm px-5 py-2.5 rounded-xl hover:opacity-90 transition text-white"
-                  style={{ background: GREEN, fontWeight: 500 }}>
-              Mon espace
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <PublicNav active="inspirations" />
 
       <div className="pt-28 pb-24 px-6 max-w-5xl mx-auto">
 

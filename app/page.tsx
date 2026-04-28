@@ -1,6 +1,8 @@
 import Image from 'next/image'
 import KaatchChatLanding from './_components/KaatchChatLanding'
 import ContactForm from './_components/ContactForm'
+import PublicNav from './_components/PublicNav'
+import ForumEmbed from './_components/ForumEmbed'
 
 const DISPLAY = 'var(--font-geist-sans)'
 const SHADOW = '0 4px 24px rgba(44,59,46,0.08), 0 1px 4px rgba(44,59,46,0.04)'
@@ -93,34 +95,7 @@ export default function Home() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       {/* ── NAV ── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#f5f0e8]/95 backdrop-blur-md border-b border-stone-200">
-        <div className="max-w-5xl mx-auto px-8 md:px-10 h-16 flex items-center justify-between">
-          <a href="/" className="flex items-center gap-2.5">
-            <Image src="/logo.png" alt="Kaatch" width={32} height={32} className="rounded-lg" />
-            <span style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '1.25rem', letterSpacing: '-0.02em' }} className="text-[#2C3B2E]">
-              Kaatch
-            </span>
-          </a>
-          <div className="hidden md:flex items-center gap-6">
-            <a href="#comment-ca-marche" className="text-sm text-stone-500 hover:text-[#2C3B2E] transition" style={{ fontWeight: 300 }}>Comment ça marche</a>
-            <a href="#offres" className="text-sm text-stone-500 hover:text-[#2C3B2E] transition" style={{ fontWeight: 300 }}>Offres</a>
-            <a href="/inspirations" className="text-sm text-stone-500 hover:text-[#2C3B2E] transition" style={{ fontWeight: 300 }}>Inspirations</a>
-            <a href="/entre-nous" className="text-sm text-stone-500 hover:text-[#2C3B2E] transition" style={{ fontWeight: 300 }}>Entre nous</a>
-          </div>
-          <div className="flex items-center gap-3">
-            <a href="/rejoindre"
-               className="text-sm border border-stone-300 text-stone-600 px-5 py-2.5 rounded-full hover:border-[#2C3B2E] hover:text-[#2C3B2E] transition hidden sm:block"
-               style={{ fontWeight: 400 }}>
-              Invité ?
-            </a>
-            <a href="/auth"
-               className="text-sm bg-[#2C3B2E] text-white px-5 py-2.5 rounded-full hover:bg-[#1a2419] transition"
-               style={{ fontWeight: 500 }}>
-              Connexion →
-            </a>
-          </div>
-        </div>
-      </nav>
+      <PublicNav />
 
       {/* ── HERO ── */}
       <section className="pt-16 min-h-screen grid md:grid-cols-2">
@@ -222,6 +197,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* ── FORUM EMBED ── */}
+      <ForumEmbed />
 
       {/* ── 1 MARIAGE, 2 ACCÈS ── */}
       <section id="comment-ca-marche" className="py-28 px-10 bg-[#f5f0e8] border-t border-stone-100">

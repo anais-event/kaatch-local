@@ -6,7 +6,6 @@ import ForumEmbed from './_components/ForumEmbed'
 
 const DISPLAY = 'var(--font-display)'
 const SHADOW = '0 4px 24px rgba(44,59,46,0.08), 0 1px 4px rgba(44,59,46,0.04)'
-const DEMO_URL = 'https://app.supademo.com/video/cmo6zgf590l9037n2na9km76d'
 
 function FAQ() {
   const items = [
@@ -319,34 +318,6 @@ export default function Home() {
               ))}
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* ── VIDÉO DÉMO ── */}
-      <section id="video" className="py-28 px-10 bg-[#f5f0e8] border-t border-stone-100">
-        <div className="max-w-3xl mx-auto text-center">
-          <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-4" style={{ fontWeight: 500 }}>En action</p>
-          <h2 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(1.7rem, 3vw, 2.4rem)', lineHeight: 1.15, letterSpacing: '-0.02em' }}
-              className="text-[#2C3B2E] mb-10">
-            Kaatch en 2 minutes chrono.
-          </h2>
-          <a href={DEMO_URL} target="_blank" rel="noopener noreferrer"
-             className="relative block w-full rounded-2xl overflow-hidden group"
-             style={{ paddingBottom: '56.25%', background: 'linear-gradient(135deg, #2C3B2E 0%, #1a2419 100%)', boxShadow: SHADOW }}>
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 px-8">
-              <div className="w-20 h-20 rounded-full bg-white/10 border border-white/20 flex items-center justify-center backdrop-blur-sm group-hover:bg-white/20 transition">
-                <span className="text-white text-3xl ml-1">▶</span>
-              </div>
-              <div className="text-center">
-                <p style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1.1rem', color: 'white', marginBottom: 8 }}>
-                  Voir la démo interactive
-                </p>
-                <p style={{ fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.6 }}>
-                  Le tour du propriétaire en 2 minutes. Pas de jargon, juste l&apos;app.
-                </p>
-              </div>
-            </div>
-          </a>
         </div>
       </section>
 

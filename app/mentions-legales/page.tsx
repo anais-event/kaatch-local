@@ -2,7 +2,7 @@ export const metadata = {
   title: 'Mentions légales — Kaatch',
 }
 
-const DISPLAY = 'var(--font-geist-sans)'
+const DISPLAY = 'var(--font-display)'
 const GREEN = '#2C3B2E'
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {

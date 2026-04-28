@@ -25,8 +25,8 @@ export default function GuestNav({ slug, isPreview }: { slug: string; isPreview?
 
         {/* Logo */}
         <a href={`/invite/${slug}`}
-           style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1rem', fontStyle: 'italic' }}
-           className="text-[#2d3228] shrink-0">
+           style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1rem' }}
+           className="text-[#2C3B2E] shrink-0">
           ✦
         </a>
 
@@ -36,17 +36,17 @@ export default function GuestNav({ slug, isPreview }: { slug: string; isPreview?
             <a key={tab.href} href={tab.href}
               className={`text-xs whitespace-nowrap px-2.5 py-1.5 rounded-md transition-colors shrink-0 ${
                 isActive(tab.href)
-                  ? 'bg-[#4a5240] text-white'
-                  : 'text-stone-400 hover:text-[#4a5240]'
+                  ? 'bg-[#2C3B2E] text-white'
+                  : 'text-stone-500 hover:text-[#2C3B2E]'
               }`}
-              style={{ fontWeight: 400, letterSpacing: '0.02em' }}>
+              style={{ fontFamily: 'var(--font-body)', fontWeight: 400, letterSpacing: '0.02em' }}>
               {tab.label}
             </a>
           ))}
           {isPreview && (
             <a href={`/wedding/${slug}`}
-              className="text-xs text-[#4a5240] border border-[#4a5240] px-2.5 py-1.5 rounded-md hover:bg-[#4a5240] hover:text-white transition whitespace-nowrap shrink-0 ml-1"
-              style={{ fontWeight: 300 }}>
+              className="text-xs text-[#2C3B2E] border border-[#2C3B2E] px-2.5 py-1.5 rounded-md hover:bg-[#2C3B2E] hover:text-white transition whitespace-nowrap shrink-0 ml-1"
+              style={{ fontFamily: 'var(--font-body)', fontWeight: 400 }}>
               ← Mariés
             </a>
           )}

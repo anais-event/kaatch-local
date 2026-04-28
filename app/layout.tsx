@@ -1,18 +1,22 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Cormorant_Garamond, Lato, Great_Vibes } from "next/font/google";
+import { Fraunces, Outfit, Cormorant_Garamond, Lato, Great_Vibes } from "next/font/google";
 import "./globals.css";
 import CookieBanner from './_components/CookieBanner'
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// DA : Fraunces (display éditorial) + Outfit (corps propre)
+const fraunces = Fraunces({
+  variable: "--font-display",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const outfit = Outfit({
+  variable: "--font-body",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
 });
 
+// Conservés pour les espaces mariés/invités (faire-part, noms de mariage)
 const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
   subsets: ["latin"],
@@ -59,7 +63,7 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} ${lato.variable} ${greatVibes.variable} h-full antialiased`}
+      className={`${fraunces.variable} ${outfit.variable} ${cormorant.variable} ${lato.variable} ${greatVibes.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         {children}

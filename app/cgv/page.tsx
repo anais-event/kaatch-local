@@ -2,7 +2,7 @@ export const metadata = {
   title: 'Conditions générales de vente — Kaatch',
 }
 
-const DISPLAY = 'var(--font-geist-sans)'
+const DISPLAY = 'var(--font-display)'
 const GREEN = '#2C3B2E'
 
 function Section({ n, title, children }: { n: string; title: string; children: React.ReactNode }) {

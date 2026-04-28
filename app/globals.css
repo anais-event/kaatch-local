@@ -1,14 +1,23 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #111111;
-  --radius: 0.625rem;
-}
+  /* ── Palette Kaatch ── */
+  --color-forest:  #2C3B2E;   /* vert forêt — titres, CTA primaires */
+  --color-sage:    #4a5240;   /* vert sauge — hover, actifs */
+  --color-dark:    #1a2419;   /* hover profond */
+  --color-cream:   #f5f0e8;   /* fond crème */
+  --color-text:    #2d3228;   /* texte principal */
+  --color-muted:   #78716c;   /* texte secondaire */
 
-.dark {
-  --background: #111111;
-  --foreground: #ffffff;
+  /* ── Shadows ── */
+  --shadow-sm: 0 2px 8px rgba(44,59,46,0.06), 0 1px 2px rgba(44,59,46,0.04);
+  --shadow-md: 0 4px 24px rgba(44,59,46,0.08), 0 1px 4px rgba(44,59,46,0.04);
+  --shadow-lg: 0 8px 32px rgba(44,59,46,0.12), 0 2px 8px rgba(44,59,46,0.06);
+
+  /* ── Legacy ── */
+  --background: #ffffff;
+  --foreground: #2d3228;
+  --radius: 0.625rem;
 }
 
 @layer base {
@@ -18,8 +27,20 @@
     padding: 0;
   }
   body {
-    background-color: var(--background);
-    color: var(--foreground);
+    font-family: var(--font-body, var(--font-lato, sans-serif));
+    font-weight: 300;
+    color: var(--color-text);
+    background-color: var(--color-cream);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Titres par défaut — Fraunces */
+  h1, h2, h3, h4 {
+    font-family: var(--font-display, var(--font-body, sans-serif));
+    font-weight: 700;
+    color: var(--color-forest);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
   }
 }
 

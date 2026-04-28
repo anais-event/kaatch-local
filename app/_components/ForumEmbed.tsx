@@ -1,7 +1,7 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import Link from 'next/link'
 
-const DISPLAY = 'var(--font-geist-sans)'
+const DISPLAY = 'var(--font-display)'
 const GREEN = '#2C3B2E'
 const SHADOW = '0 4px 24px rgba(44,59,46,0.08), 0 1px 4px rgba(44,59,46,0.04)'
 

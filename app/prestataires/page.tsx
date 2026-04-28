@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: 'Vous êtes professionnel du mariage ? Kaatch connecte les couples avec les meilleurs prestataires de leur région.',
 }
 
-const DISPLAY = 'var(--font-geist-sans)'
+const DISPLAY = 'var(--font-display)'
 const GREEN = '#2C3B2E'
 const CREAM = '#f5f0e8'
 

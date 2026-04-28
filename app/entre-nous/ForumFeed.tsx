@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { categoryLabel, type ForumCategory } from './types'
 import PublicNav from '@/app/_components/PublicNav'
 
-const DISPLAY = 'var(--font-geist-sans)'
+const DISPLAY = 'var(--font-display)'
 const GREEN = '#2C3B2E'
 const CREAM = '#f5f0e8'
 

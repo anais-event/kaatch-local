@@ -4,7 +4,7 @@ import { MDXRemote } from 'next-mdx-remote/rsc'
 import { getAllSlugs, getInspiration, categoryLabel, categoryColor } from '@/lib/inspirations'
 import type { Metadata } from 'next'
 
-const DISPLAY = 'var(--font-geist-sans)'
+const DISPLAY = 'var(--font-display)'
 const GREEN = '#2C3B2E'
 const CREAM = '#f5f0e8'
 

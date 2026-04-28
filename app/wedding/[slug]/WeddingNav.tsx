@@ -140,7 +140,7 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail }: 
                    className={`px-3 py-1 rounded-md text-xs whitespace-nowrap transition ${
                      active ? 'bg-[#4a5240] text-white' : 'text-stone-500 hover:text-[#4a5240]'
                    }`}
-                   style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, letterSpacing: '0.04em' }}>
+                   style={{ fontFamily: 'var(--font-body)', fontWeight: 300, letterSpacing: '0.04em' }}>
                   {section.label}
                 </a>
               )
@@ -154,7 +154,7 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail }: 
                   className={`px-3 py-1 rounded-md text-xs whitespace-nowrap transition flex items-center gap-1 cursor-pointer ${
                     active ? 'bg-[#4a5240] text-white' : 'text-stone-500 hover:text-[#4a5240]'
                   }`}
-                  style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, letterSpacing: '0.04em' }}>
+                  style={{ fontFamily: 'var(--font-body)', fontWeight: 300, letterSpacing: '0.04em' }}>
                   {section.label}
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
                        className={`w-2.5 h-2.5 transition-transform ${isOpen ? 'rotate-180' : ''}`}>
@@ -170,7 +170,7 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail }: 
                         <a key={item.href} href={item.href} target={item.target}
                            onClick={() => setOpen(null)}
                            className={`flex flex-col px-4 py-2.5 hover:bg-[#f5f0e8] transition ${itemActive ? 'bg-[#f5f0e8]' : ''}`}>
-                          <span style={{ fontFamily: 'var(--font-lato)', fontWeight: itemActive ? 400 : 300, fontSize: '0.82rem' }}
+                          <span style={{ fontFamily: 'var(--font-body)', fontWeight: itemActive ? 400 : 300, fontSize: '0.82rem' }}
                                 className={itemActive ? 'text-[#4a5240]' : 'text-stone-700'}>
                             {item.label}
                           </span>
@@ -229,7 +229,7 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail }: 
               className={`flex items-center gap-1 px-3 py-1 rounded-md text-xs whitespace-nowrap transition cursor-pointer ${
                 open === 'monespace' ? 'bg-[#4a5240] text-white' : 'text-stone-500 hover:text-[#4a5240]'
               }`}
-              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, letterSpacing: '0.04em' }}>
+              style={{ fontFamily: 'var(--font-body)', fontWeight: 300, letterSpacing: '0.04em' }}>
               {unread > 0 && <span className="w-1.5 h-1.5 rounded-full bg-red-400 shrink-0" />}
               Mon espace
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
@@ -386,7 +386,7 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail }: 
       {toasts.map(toast => (
         <div key={toast.id}
           className="flex items-center gap-2 bg-[#2d3228] text-white text-sm px-4 py-2.5 rounded-full shadow-lg pointer-events-auto"
-          style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
+          style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}>
           <span>{toast.icon}</span>
           <span>{toast.message}</span>
         </div>

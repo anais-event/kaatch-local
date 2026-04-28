@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: 'Astuces, bons plans et conseils pour organiser votre mariage sereinement.',
 }
 
-const DISPLAY = 'var(--font-geist-sans)'
+const DISPLAY = 'var(--font-display)'
 const GREEN = '#2C3B2E'
 const CREAM = '#f5f0e8'
 

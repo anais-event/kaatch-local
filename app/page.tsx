@@ -4,7 +4,7 @@ import ContactForm from './_components/ContactForm'
 import PublicNav from './_components/PublicNav'
 import ForumEmbed from './_components/ForumEmbed'
 
-const DISPLAY = 'var(--font-geist-sans)'
+const DISPLAY = 'var(--font-display)'
 const SHADOW = '0 4px 24px rgba(44,59,46,0.08), 0 1px 4px rgba(44,59,46,0.04)'
 const DEMO_URL = 'https://app.supademo.com/video/cmo6zgf590l9037n2na9km76d'
 

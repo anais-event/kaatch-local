@@ -43,7 +43,7 @@ export default function PricingPage() {
         <div className="max-w-5xl mx-auto px-8 md:px-10 h-16 flex items-center justify-between">
           <a
             href="/"
-            style={{ fontFamily: 'var(--font-geist-sans)', fontWeight: 800, fontSize: '1.25rem', letterSpacing: '-0.02em' }}
+            style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.25rem', letterSpacing: '-0.02em' }}
             className="text-[#2d3228]"
           >
             Kaatch
@@ -233,7 +233,7 @@ export default function PricingPage() {
       <footer className="border-t border-stone-200 py-10 px-8 bg-[#f5f0e8]">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <span
-            style={{ fontFamily: 'var(--font-geist-sans)', fontWeight: 800, fontSize: '1rem', letterSpacing: '-0.02em' }}
+            style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1rem', letterSpacing: '-0.02em' }}
             className="text-stone-400"
           >
             Kaatch

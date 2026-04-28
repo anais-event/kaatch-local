@@ -125,15 +125,12 @@ export default function Home() {
                style={{ fontWeight: 500, letterSpacing: '0.01em' }}>
               Je me connecte à mon espace →
             </a>
-            <a href={DEMO_URL} target="_blank" rel="noopener noreferrer"
+            <a href="/rejoindre"
                className="inline-block border border-stone-300 text-stone-500 px-8 py-4 rounded-2xl hover:border-[#2C3B2E] hover:text-[#2C3B2E] transition text-sm text-center"
                style={{ fontWeight: 400 }}>
-              ▶ Voir la démo en 2 min
+              Invité(e) à un mariage ? →
             </a>
           </div>
-          <p className="mt-5 text-xs text-stone-400" style={{ fontWeight: 300 }}>
-            <a href="/rejoindre" className="hover:text-[#2C3B2E] transition">Invité(e) à un mariage ? →</a>
-          </p>
         </div>
 
         <div className="hidden md:block relative">

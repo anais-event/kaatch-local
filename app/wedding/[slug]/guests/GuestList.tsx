@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import CopyLinkButton from '../invitations/CopyLinkButton'
+import CopyLinkButton from './CopyLinkButton'
 import PublipostagePanel from './PublipostagePanel'
 
 const PARTS_LABELS: Record<string, string> = {

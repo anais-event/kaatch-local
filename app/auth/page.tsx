@@ -95,6 +95,12 @@ function AuthInner() {
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-[#f5f0e8]">
+      {/* Bouton retour — mobile uniquement */}
+      <a href="/"
+        className="fixed top-4 left-4 sm:hidden flex items-center gap-1.5 text-stone-400 hover:text-[#2C3B2E] transition text-sm px-3 py-2 rounded-xl hover:bg-white/60"
+        style={fontLato}>
+        ← Retour
+      </a>
       <div className="w-full max-w-sm px-6">
 
         {/* Logo */}

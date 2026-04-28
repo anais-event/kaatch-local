@@ -1,0 +1,143 @@
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
+import { MDXRemote } from 'next-mdx-remote/rsc'
+import { getAllSlugs, getInspiration, categoryLabel, categoryColor } from '@/lib/inspirations'
+import type { Metadata } from 'next'
+
+const DISPLAY = 'var(--font-geist-sans)'
+const GREEN = '#2C3B2E'
+const CREAM = '#f5f0e8'
+
+export async function generateStaticParams() {
+  return getAllSlugs().map(slug => ({ slug }))
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
+  const item = getInspiration(slug)
+  if (!item) return {}
+  return {
+    title: `${item.title} — Kaatch Inspirations`,
+    description: item.excerpt,
+  }
+}
+
+function formatDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+}
+
+// Composants MDX custom — appliquent le design system Kaatch
+const mdxComponents = {
+  h2: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+    <h2 style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1.15rem', color: GREEN, marginTop: '2.5rem', marginBottom: '0.75rem', letterSpacing: '-0.01em' }}
+        {...props} />
+  ),
+  p: (props: React.HTMLAttributes<HTMLParagraphElement>) => (
+    <p style={{ fontSize: '0.95rem', lineHeight: 1.9, fontWeight: 300, marginBottom: '1rem' }}
+       className="text-stone-500" {...props} />
+  ),
+  ul: (props: React.HTMLAttributes<HTMLUListElement>) => (
+    <ul style={{ marginBottom: '1rem' }} className="space-y-2" {...props} />
+  ),
+  li: (props: React.HTMLAttributes<HTMLLIElement>) => (
+    <li style={{ fontSize: '0.95rem', lineHeight: 1.7, fontWeight: 300 }}
+        className="flex items-start gap-3 text-stone-500">
+      <span style={{ color: GREEN, fontWeight: 600, marginTop: 2, flexShrink: 0 }}>–</span>
+      <span {...props} />
+    </li>
+  ),
+  blockquote: ({ children }: React.HTMLAttributes<HTMLQuoteElement>) => (
+    <div style={{ background: '#eef1ec', borderLeft: `4px solid ${GREEN}`, borderRadius: '0 1rem 1rem 0', padding: '1.25rem 1.5rem', margin: '2rem 0' }}>
+      <div style={{ fontSize: '0.9rem', lineHeight: 1.8, fontWeight: 400, color: GREEN }}>
+        {children}
+      </div>
+    </div>
+  ),
+  strong: (props: React.HTMLAttributes<HTMLElement>) => (
+    <strong style={{ fontWeight: 600, color: '#44403c' }} {...props} />
+  ),
+}
+
+export default async function InspirationPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const item = getInspiration(slug)
+  if (!item) notFound()
+
+  return (
+    <main style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, color: '#2d3228', background: CREAM, minHeight: '100vh' }}>
+
+      <nav style={{ background: `${CREAM}f2`, backdropFilter: 'blur(12px)' }}
+           className="fixed top-0 left-0 right-0 z-50 border-b border-stone-200/60">
+        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-5">
+            <Link href="/"
+                  style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '1.2rem', letterSpacing: '-0.02em', color: GREEN }}>
+              Kaatch
+            </Link>
+            <Link href="/inspirations" className="text-sm text-stone-400 hover:text-stone-600 transition flex items-center gap-1" style={{ fontWeight: 400 }}>
+              <span>←</span> Inspirations
+            </Link>
+          </div>
+          <Link href="/auth"
+                className="text-sm px-5 py-2.5 rounded-xl hover:opacity-90 transition text-white"
+                style={{ background: GREEN, fontWeight: 500 }}>
+            Mon espace
+          </Link>
+        </div>
+      </nav>
+
+      <article className="pt-28 pb-24 px-6">
+        <div className="max-w-2xl mx-auto">
+
+          <div className="mb-10">
+            <div className="flex items-center gap-3 mb-6">
+              <span className="text-xs px-3 py-1 rounded-full font-medium"
+                    style={{ background: '#eef1ec', color: categoryColor[item.category] }}>
+                {categoryLabel[item.category]}
+              </span>
+              <span className="text-xs text-stone-400">{item.readTime}</span>
+              <span className="text-xs text-stone-400">·</span>
+              <span className="text-xs text-stone-400">{formatDate(item.date)}</span>
+            </div>
+            <h1 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(1.6rem, 3.5vw, 2.4rem)', lineHeight: 1.15, letterSpacing: '-0.02em', color: GREEN }}
+                className="mb-5">
+              {item.title}
+            </h1>
+            <p style={{ fontSize: '1.05rem', lineHeight: 1.8, color: '#78716c', fontWeight: 300 }}>
+              {item.excerpt}
+            </p>
+          </div>
+
+          <hr className="border-stone-200 mb-10" />
+
+          <div>
+            <MDXRemote source={item.content} components={mdxComponents} />
+          </div>
+
+          <div className="mt-16 rounded-2xl bg-white p-8 border border-stone-100 text-center"
+               style={{ boxShadow: '0 2px 16px rgba(44,59,46,0.06)' }}>
+            <p style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1.1rem', color: GREEN, marginBottom: 8 }}>
+              Envie de tout gérer au même endroit ?
+            </p>
+            <p className="text-stone-500 text-sm mb-6" style={{ fontWeight: 300 }}>
+              Kaatch vous aide à organiser votre mariage de A à Z — invités, plan de table, budget, photos.
+            </p>
+            <Link href="/auth"
+                  className="inline-block text-white px-8 py-3.5 rounded-xl hover:opacity-90 transition text-sm"
+                  style={{ background: GREEN, fontWeight: 500 }}>
+              Créer mon espace gratuitement →
+            </Link>
+          </div>
+
+          <div className="mt-10 text-center">
+            <Link href="/inspirations" className="text-sm text-stone-400 hover:text-stone-600 transition" style={{ fontWeight: 300 }}>
+              ← Voir toutes les inspirations
+            </Link>
+          </div>
+
+        </div>
+      </article>
+
+    </main>
+  )
+}

@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import KaatchChatLanding from './_components/KaatchChatLanding'
 import ContactForm from './_components/ContactForm'
 function FAQ() {
@@ -16,7 +17,7 @@ function FAQ() {
     },
     {
       q: "Mes données sont-elles sécurisées ?",
-      a: "Kaatch est hébergé en Europe, les données sont chiffrées et ne sont jamais revendues ni partagées. Vous restez propriétaire de tout ce que vous publiez.",
+      a: "Kaatch est sécurisé, les données sont chiffrées et ne sont jamais revendues ni partagées. Vous restez propriétaire de tout ce que vous publiez.",
     },
     {
       q: "Kaatch fonctionne-t-il sur téléphone ?",
@@ -117,16 +118,19 @@ export default function Home() {
       {/* ── NAV ── */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-[#f5f0e8]/95 backdrop-blur-md border-b border-stone-200">
         <div className="max-w-5xl mx-auto px-8 md:px-10 h-16 flex items-center justify-between">
-          <a href="/" style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '1.25rem', letterSpacing: '-0.02em' }}
-             className="text-[#2C3B2E]">
-            Kaatch
+          <a href="/" className="flex items-center gap-2.5">
+            <Image src="/logo.png" alt="Kaatch" width={32} height={32} />
+            <span style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '1.25rem', letterSpacing: '-0.02em' }}
+                  className="text-[#2C3B2E]">
+              Kaatch
+            </span>
           </a>
           <div className="hidden md:flex items-center gap-8">
             {[
               { label: 'Comment ça marche', href: '#comment' },
               { label: 'Offres', href: '#offres' },
-              { label: 'Guide', href: '/guide' },
-              { label: 'Tarifs', href: '/pricing' },
+              { label: 'Inspirations', href: '/inspirations' },
+              { label: 'Entre nous', href: '/entre-nous' },
             ].map(l => (
               <a key={l.href} href={l.href}
                  className="text-sm text-stone-500 hover:text-[#2C3B2E] transition" style={{ fontWeight: 400 }}>
@@ -519,7 +523,7 @@ export default function Home() {
               {[
                 { label: 'Comment ça marche', href: '#comment' },
                 { label: 'Offres', href: '#offres' },
-                { label: 'Guide', href: '/guide' },
+                { label: 'Inspirations', href: '/inspirations' },
                 { label: 'Espace invités', href: '/rejoindre' },
               ].map(l => (
                 <a key={l.href} href={l.href}

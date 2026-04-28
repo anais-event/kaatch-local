@@ -2,10 +2,14 @@
 
 import { useState } from 'react'
 
-export default function ContactForm() {
+const PRESETS: Record<string, string> = {
+  prestataire: 'Bonjour, je suis prestataire du mariage (photographe / traiteur / …) et je souhaite en savoir plus sur Kaatch.',
+}
+
+export default function ContactForm({ preset }: { preset?: string }) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
-  const [message, setMessage] = useState('')
+  const [message, setMessage] = useState(preset ? PRESETS[preset] ?? '' : '')
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
 
   async function handleSubmit(e: React.FormEvent) {

@@ -1,11 +1,13 @@
 'use client'
 
 import { createClient } from '@/lib/supabase'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, Suspense } from 'react'
 
-export default function Auth() {
+function AuthInner() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const next = searchParams.get('next') || '/dashboard'
   const [mode, setMode] = useState<'login' | 'signup' | 'reset'>('login')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -27,7 +29,7 @@ export default function Auth() {
       setLoading(false)
       return
     }
-    router.push('/dashboard')
+    router.push(next)
     router.refresh()
   }
 
@@ -59,7 +61,7 @@ export default function Auth() {
       password,
     })
     if (!loginErr) {
-      router.push('/dashboard')
+      router.push(next)
       router.refresh()
     } else {
       setError('Compte créé ! Vérifiez votre email pour confirmer votre inscription.')
@@ -243,5 +245,13 @@ export default function Auth() {
 
       </div>
     </main>
+  )
+}
+
+export default function Auth() {
+  return (
+    <Suspense>
+      <AuthInner />
+    </Suspense>
   )
 }

@@ -252,6 +252,12 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail }: 
                   <span style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-700">Paramètres</span>
                   <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400">Infos du mariage</span>
                 </a>
+                {/* Entre nous */}
+                <a href="/entre-nous" onClick={() => setOpen(null)}
+                   className="flex flex-col px-4 py-2.5 hover:bg-[#f5f0e8] transition">
+                  <span style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-700">Entre nous 💬</span>
+                  <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400">Forum des futurs mariés</span>
+                </a>
                 <div className="border-t border-stone-100 my-1" />
                 {/* Identifiants */}
                 <div className="px-4 py-2.5">

@@ -1,6 +1,11 @@
 import Image from 'next/image'
 import KaatchChatLanding from './_components/KaatchChatLanding'
 import ContactForm from './_components/ContactForm'
+
+const DISPLAY = 'var(--font-geist-sans)'
+const SHADOW = '0 4px 24px rgba(44,59,46,0.08), 0 1px 4px rgba(44,59,46,0.04)'
+const DEMO_URL = 'https://app.supademo.com/video/cmo6zgf590l9037n2na9km76d'
+
 function FAQ() {
   const items = [
     {
@@ -28,19 +33,17 @@ function FAQ() {
   return (
     <section className="py-28 px-10 bg-white border-t border-stone-100">
       <div className="max-w-2xl mx-auto">
-        <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-4" style={{ fontFamily: 'var(--font-geist-sans)', fontWeight: 500 }}>FAQ</p>
-        <h2 style={{ fontFamily: 'var(--font-geist-sans)', fontWeight: 800, fontSize: 'clamp(1.7rem, 3vw, 2.4rem)', lineHeight: 1.15, letterSpacing: '-0.02em' }}
+        <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-4" style={{ fontFamily: DISPLAY, fontWeight: 500 }}>FAQ</p>
+        <h2 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(1.7rem, 3vw, 2.4rem)', lineHeight: 1.15, letterSpacing: '-0.02em' }}
             className="text-[#2C3B2E] mb-12">
-          Les questions qu'on nous pose souvent.
+          Les questions qu&apos;on nous pose souvent.
         </h2>
         <div className="divide-y divide-stone-100">
           {items.map((item, i) => (
             <details key={i} className="group py-5 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
-              <summary className="flex items-center justify-between gap-4 list-none" style={{ fontFamily: 'var(--font-geist-sans)', fontWeight: 600, fontSize: '0.95rem', color: '#2C3B2E' }}>
+              <summary className="flex items-center justify-between gap-4 list-none" style={{ fontFamily: DISPLAY, fontWeight: 600, fontSize: '0.95rem', color: '#2C3B2E' }}>
                 {item.q}
-                <span className="shrink-0 w-5 h-5 rounded-full border border-stone-300 flex items-center justify-center text-stone-400 group-open:rotate-45 transition-transform text-xs">
-                  +
-                </span>
+                <span className="shrink-0 w-5 h-5 rounded-full border border-stone-300 flex items-center justify-center text-stone-400 group-open:rotate-45 transition-transform text-xs">+</span>
               </summary>
               <p className="mt-3 text-stone-500 text-sm leading-relaxed" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
                 {item.a}
@@ -53,45 +56,24 @@ function FAQ() {
   )
 }
 
-// Police display moderne : Geist Sans (= Inter/Satoshi déjà chargé dans layout.tsx)
-const DISPLAY = 'var(--font-geist-sans)'
-// Couleur titres accroche
-const GREEN = '#2C3B2E'
-// Shadow douce réutilisable
-const SHADOW = '0 4px 24px rgba(44,59,46,0.08), 0 1px 4px rgba(44,59,46,0.04)'
-
 export default function Home() {
-  const steps = [
-    {
-      n: '01',
-      title: 'Un espace créé en deux minutes',
-      desc: 'Les prénoms, la date, le lieu, une photo de couverture — et c\'est parti. Aucun paramétrage complexe, aucun manuel à lire.',
-    },
-    {
-      n: '02',
-      title: 'Un mariage organisé sur mesure',
-      sub: [
-        { icon: '💌', label: 'Invités & faire-parts', detail: 'Liste, RSVP, faire-parts personnalisés à chaque prénom' },
-        { icon: '🪑', label: 'Plan de table', detail: 'Glisse-dépose, récap imprimable, mise à jour instantanée' },
-        { icon: '💰', label: 'Budget', detail: 'Devis, dépenses, prestataires — tout au même endroit' },
-        { icon: '📅', label: 'Programme & Jour J', detail: 'Déroulé de la journée visible par les invités en temps réel' },
-      ],
-    },
-    {
-      n: '03',
-      title: 'Chaque invité reçoit son lien personnel',
-      desc: 'Chaque invité accède à un espace à son prénom — RSVP, programme, messagerie, album. Sans créer de compte. Sans appeler les mariés pour savoir où se garer.',
-    },
-    {
-      n: '04',
-      title: 'Le jour J, on lève les yeux',
-      desc: 'Un QR code posé sur les tables, les invités déposent leurs photos, le programme est accessible depuis leur téléphone. Tout le monde profite.',
-    },
-    {
-      n: '05',
-      title: 'Après le mariage, tout reste',
-      desc: 'Photos, messages, souvenirs — tout est centralisé, consultable, téléchargeable. Pour toujours.',
-    },
+  const backstage = [
+    { icon: '📋', label: "Rétro-planning", detail: "Toutes les étapes de J-12 mois au jour J, dans l'ordre." },
+    { icon: '💌', label: "Faire-parts & RSVP", detail: "Lien personnel par invité, réponses qui tombent en direct." },
+    { icon: '🪑', label: "Plan de table", detail: "Glisser-déposer, ajusté jusqu'à la veille." },
+    { icon: '💰', label: "Budget global", detail: "Devis, dépenses, prestataires — tout sous les yeux." },
+    { icon: '🤝', label: "Prestataires", detail: "Coordonnées, contrats, paiements — finis les mails fouillés." },
+    { icon: '📅', label: "Programme jour J", detail: "Le déroulé de la journée. Vos témoins respirent." },
+    { icon: '🎵', label: "Playlist & animations", detail: "Construire la bande-son, des idées pour animer la soirée." },
+  ]
+
+  const scene = [
+    { icon: '🔗', label: "Lien magique", detail: "Pas de compte à créer. Le lien dans le faire-part, et ils sont chez vous." },
+    { icon: '📅', label: "Programme du jour", detail: "Sans avoir à déranger qui que ce soit." },
+    { icon: '📝', label: "Livre d'or", detail: "Mots doux, vidéos, souvenirs — le tout depuis leur téléphone." },
+    { icon: '🏠', label: "Hébergements", detail: "Vos suggestions de logements, à portée de tap." },
+    { icon: '💬', label: "Messagerie", detail: "Discussion directe entre invités." },
+    { icon: '📸', label: "Album partagé", detail: "Toutes les photos, au même endroit, pour tout le monde." },
   ]
 
   const jsonLd = {
@@ -101,13 +83,8 @@ export default function Home() {
     applicationCategory: 'LifestyleApplication',
     operatingSystem: 'Web',
     url: 'https://kaatch.fr',
-    description: 'Application d\'organisation de mariage : invitations personnalisées, RSVP, plan de table, album photo partagé.',
-    offers: {
-      '@type': 'Offer',
-      price: '45',
-      priceCurrency: 'EUR',
-      description: 'Plan Mariage — paiement unique',
-    },
+    description: "Application d'organisation de mariage : invitations personnalisées, RSVP, plan de table, album photo partagé.",
+    offers: { '@type': 'Offer', price: '45', priceCurrency: 'EUR', description: 'Plan Mariage — paiement unique' },
     inLanguage: 'fr',
   }
 
@@ -120,32 +97,32 @@ export default function Home() {
         <div className="max-w-5xl mx-auto px-8 md:px-10 h-16 flex items-center justify-between">
           <a href="/" className="flex items-center gap-2.5">
             <Image src="/logo.png" alt="Kaatch" width={32} height={32} />
-            <span style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '1.25rem', letterSpacing: '-0.02em' }}
-                  className="text-[#2C3B2E]">
+            <span style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '1.25rem', letterSpacing: '-0.02em' }} className="text-[#2C3B2E]">
               Kaatch
             </span>
           </a>
           <div className="hidden md:flex items-center gap-8">
             {[
-              { label: 'Comment ça marche', href: '#comment' },
+              { label: "Comment ça marche", href: '#comment' },
               { label: 'Offres', href: '#offres' },
               { label: 'Inspirations', href: '/inspirations' },
               { label: 'Entre nous', href: '/entre-nous' },
             ].map(l => (
-              <a key={l.href} href={l.href}
-                 className="text-sm text-stone-500 hover:text-[#2C3B2E] transition" style={{ fontWeight: 400 }}>
+              <a key={l.href} href={l.href} className="text-sm text-stone-500 hover:text-[#2C3B2E] transition" style={{ fontWeight: 400 }}>
                 {l.label}
               </a>
             ))}
           </div>
           <div className="flex items-center gap-3">
-            <a href="/auth" className="text-sm text-stone-500 hover:text-[#2C3B2E] transition hidden sm:block" style={{ fontWeight: 400 }}>
-              Connexion
+            <a href="/rejoindre"
+               className="text-sm border border-stone-300 text-stone-600 px-5 py-2.5 rounded-full hover:border-[#2C3B2E] hover:text-[#2C3B2E] transition hidden sm:block"
+               style={{ fontWeight: 400 }}>
+              Invité ?
             </a>
-            <a href="/dashboard"
-               className="text-sm bg-[#2C3B2E] text-white px-5 py-2.5 rounded-2xl hover:bg-[#1a2419] transition"
+            <a href="/auth"
+               className="text-sm bg-[#2C3B2E] text-white px-5 py-2.5 rounded-full hover:bg-[#1a2419] transition"
                style={{ fontWeight: 500 }}>
-              Mon espace
+              Connexion →
             </a>
           </div>
         </div>
@@ -155,34 +132,39 @@ export default function Home() {
       <section className="pt-16 min-h-screen grid md:grid-cols-2">
         <div className="flex flex-col justify-center px-10 md:px-20 py-24 max-w-xl mx-auto md:mx-0 md:ml-auto">
           <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-7" style={{ fontWeight: 500 }}>
-            Organisation de mariage
+            La solution qui vous simplifie la vie
           </p>
-          <h1 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(2.2rem, 4vw, 3.4rem)', lineHeight: 1.1, letterSpacing: '-0.02em' }}
+          <h1 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(2.2rem, 4vw, 3.4rem)', lineHeight: 1.08, letterSpacing: '-0.02em' }}
               className="text-[#2C3B2E] mb-7">
-            Combien de groupes WhatsApp pour ce mariage ?
+            Tout pour l&apos;organisation de votre mariage.{' '}
+            <span style={{ color: '#4a5240' }}>Au même endroit.</span>
           </h1>
-          <p className="text-stone-600 mb-10" style={{ fontSize: '1.05rem', lineHeight: 1.9 }}>
-            Les infos éparpillées, les tableurs jamais à jour, les invités qui n'ont pas vu le message…
-            <br />
-            Kaatch regroupe tout — pour les mariés, et pour les invités.
-          </p>
+          <div className="text-stone-600 mb-10" style={{ fontSize: '1.05rem', lineHeight: 1.85 }}>
+            <p>
+              Préparer un mariage, c&apos;est pas de l&apos;impro. C&apos;est 1000 décisions, 20 prestataires,
+              des dizaines d&apos;invités, un peu de stress et beaucoup d&apos;argent. On a peur d&apos;oublier
+              quelque chose, il faut penser à chaque détail, et l&apos;on peut vite se sentir dépassé.
+            </p>
+            <p className="mt-4">
+              Kaatch centralise tout — c&apos;est un peu comme ranger sa chambre. Une fois qu&apos;on y voit
+              plus clair, l&apos;esprit s&apos;apaise, la fête approche, et vous pouvez vous reconcentrer
+              sur l&apos;essentiel&nbsp;: Vous.
+            </p>
+          </div>
           <div className="flex flex-col sm:flex-row gap-3">
             <a href="/auth"
                className="inline-block bg-[#2C3B2E] text-white px-8 py-4 rounded-2xl hover:bg-[#1a2419] transition text-sm text-center"
                style={{ fontWeight: 500, letterSpacing: '0.01em' }}>
-              Mon espace →
+              Je me connecte à mon espace →
             </a>
-            <a href="#video"
+            <a href={DEMO_URL} target="_blank" rel="noopener noreferrer"
                className="inline-block border border-stone-300 text-stone-500 px-8 py-4 rounded-2xl hover:border-[#2C3B2E] hover:text-[#2C3B2E] transition text-sm text-center"
                style={{ fontWeight: 400 }}>
-              ▶ Voir la démo
+              ▶ Voir la démo en 2 min
             </a>
           </div>
-          <p className="mt-4 text-xs text-stone-400" style={{ fontWeight: 300 }}>
+          <p className="mt-5 text-xs text-stone-400" style={{ fontWeight: 300 }}>
             <a href="/rejoindre" className="hover:text-[#2C3B2E] transition">Invité(e) à un mariage ? →</a>
-          </p>
-          <p className="mt-10 text-xs text-stone-400" style={{ fontWeight: 300 }}>
-            Aucune carte bleue demandée. L'espace est prêt en 2 minutes.
           </p>
         </div>
 
@@ -193,161 +175,211 @@ export default function Home() {
             className="absolute inset-0 w-full h-full object-cover"
           />
           <div className="absolute inset-0" style={{ background: 'rgba(30,28,24,0.12)' }} />
-          {/* Carte Emma & Luc */}
           <div className="absolute bottom-14 left-10 bg-white/95 backdrop-blur-sm px-6 py-5 max-w-[240px]"
                style={{ borderRadius: 16, boxShadow: '0 8px 32px rgba(44,59,46,0.18), 0 2px 8px rgba(44,59,46,0.08)' }}>
             <p style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '0.95rem', color: '#2C3B2E', marginBottom: 4 }}>
-              Emma & Luc 💍
+              Emma &amp; Luc
             </p>
             <p style={{ fontWeight: 300, fontSize: '0.72rem', color: '#78716c' }}>
-              127 invités · 12 tables · 3 groupes WhatsApp de moins
+              127 invités · 12 tables · 1 seule app. 0 stress.
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── POURQUOI KAATCH ── */}
+      <section className="py-28 px-10 bg-white border-t border-stone-100">
+        <div className="max-w-5xl mx-auto">
+          <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-5" style={{ fontWeight: 500 }}>
+            Pourquoi &quot;Kaatch&quot; ?
+          </p>
+          <div className="grid md:grid-cols-2 gap-16 items-center">
+            <div>
+              <h2 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(2rem, 4vw, 3rem)', lineHeight: 1.05, letterSpacing: '-0.03em' }}
+                  className="text-[#2C3B2E] mb-6">
+                Good catch. Catch up.
+              </h2>
+              <p className="text-stone-600 mb-5" style={{ fontSize: '1.05rem', lineHeight: 1.85 }}>
+                En anglais, &quot;catch&quot; veut dire deux choses.
+              </p>
+              <p className="text-stone-600" style={{ fontSize: '1.05rem', lineHeight: 1.85 }}>
+                Un mariage, c&apos;est exactement ça. Le moment où tout le monde se retrouve pour célébrer votre{' '}
+                <em style={{ color: '#2C3B2E', fontStyle: 'italic' }}>good catch</em>.
+                Maintenant, on vous aide à <em style={{ color: '#2C3B2E', fontStyle: 'italic' }}>catch up</em>{' '}
+                avec tous vos invités, chaque détail, chaque souvenir — sans rien oublier.
+              </p>
+            </div>
+            <div className="flex flex-col gap-5">
+              <div className="bg-[#f5f0e8] rounded-2xl p-7" style={{ boxShadow: SHADOW }}>
+                <p style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1.4rem', letterSpacing: '-0.01em' }}
+                   className="text-[#2C3B2E] mb-2">Good catch.</p>
+                <p className="text-stone-500 text-sm" style={{ lineHeight: 1.7 }}>
+                  La bonne personne. Celle qu&apos;on ne laisse pas partir.
+                </p>
+              </div>
+              <div className="bg-[#f5f0e8] rounded-2xl p-7" style={{ boxShadow: SHADOW }}>
+                <p style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1.4rem', letterSpacing: '-0.01em' }}
+                   className="text-[#2C3B2E] mb-2">Catch up.</p>
+                <p className="text-stone-500 text-sm" style={{ lineHeight: 1.7 }}>
+                  Se retrouver. Enfin tous au même endroit.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 1 MARIAGE, 2 ACCÈS ── */}
+      <section id="comment" className="py-28 px-10 bg-[#f5f0e8] border-t border-stone-100">
+        <div className="max-w-5xl mx-auto">
+          <div className="mb-16">
+            <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-4" style={{ fontWeight: 500 }}>1 mariage · 2 accès</p>
+            <h2 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)', lineHeight: 1.1, letterSpacing: '-0.02em' }}
+                className="text-[#2C3B2E] max-w-2xl">
+              Le backstage et la scène. Chacun son espace, le même mariage.
+            </h2>
+            <p className="mt-4 text-stone-600 max-w-xl" style={{ fontSize: '0.95rem', lineHeight: 1.85 }}>
+              Un seul mariage. Deux portes d&apos;entrée : une pour vous (les régisseurs), une pour vos invités (les spectateurs ravis).
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Backstage — mariés */}
+            <div className="bg-white rounded-[28px] overflow-hidden" style={{ boxShadow: SHADOW }}>
+              <div className="h-56 overflow-hidden">
+                <img
+                  src="https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=1200&q=80&auto=format&fit=crop"
+                  alt=""
+                  className="w-full h-full object-cover hover:scale-105 transition duration-700"
+                />
+              </div>
+              <div className="p-8">
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="text-xs uppercase tracking-[0.2em] text-[#2C3B2E]" style={{ fontWeight: 600 }}>Backstage</span>
+                  <span className="text-xs text-stone-400">— pour les mariés</span>
+                </div>
+                <h3 style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1.25rem', letterSpacing: '-0.01em', lineHeight: 1.2 }}
+                    className="text-[#2C3B2E] mb-5">
+                  Tout ce qu&apos;il faut pour une organisation simple et efficace.
+                </h3>
+                <div className="grid grid-cols-2 gap-2.5">
+                  {backstage.map(b => (
+                    <div key={b.label} className="flex items-start gap-2.5 bg-[#f5f0e8] rounded-xl px-3.5 py-3">
+                      <span className="text-base mt-0.5 shrink-0">{b.icon}</span>
+                      <div>
+                        <p style={{ fontWeight: 600, fontSize: '0.78rem', fontFamily: DISPLAY }} className="text-[#2C3B2E]">{b.label}</p>
+                        <p style={{ fontWeight: 300, fontSize: '0.7rem', lineHeight: 1.5 }} className="text-stone-500 mt-0.5">{b.detail}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Scène — invités */}
+            <div className="rounded-[28px] overflow-hidden" style={{ background: '#2C3B2E', boxShadow: '0 8px 40px rgba(44,59,46,0.25), 0 2px 8px rgba(44,59,46,0.12)' }}>
+              <div className="h-56 overflow-hidden relative">
+                <img
+                  src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=1200&q=80&auto=format&fit=crop"
+                  alt=""
+                  className="w-full h-full object-cover hover:scale-105 transition duration-700"
+                />
+                <div className="absolute inset-0" style={{ background: 'rgba(44,59,46,0.25)' }} />
+              </div>
+              <div className="p-8 text-white">
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="text-xs uppercase tracking-[0.2em] text-white/80" style={{ fontWeight: 600 }}>La scène</span>
+                  <span className="text-xs text-white/50">— pour les invités</span>
+                </div>
+                <h3 style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1.25rem', letterSpacing: '-0.01em', lineHeight: 1.2 }}
+                    className="mb-4">
+                  Un lien dans le faire-part. Et ils sont chez vous.
+                </h3>
+                <p className="text-white/65 text-sm mb-5" style={{ lineHeight: 1.7 }}>
+                  Pas de compte à créer. Vos invités cliquent sur leur lien personnel — papier ou numérique, vous choisissez — et accèdent à tout.
+                </p>
+                <div className="grid grid-cols-2 gap-2.5">
+                  {scene.map(s => (
+                    <div key={s.label} className="flex items-start gap-2.5 rounded-xl px-3.5 py-3"
+                         style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                      <span className="text-base mt-0.5 shrink-0">{s.icon}</span>
+                      <div>
+                        <p style={{ fontWeight: 600, fontSize: '0.78rem', fontFamily: DISPLAY }}>{s.label}</p>
+                        <p style={{ fontWeight: 300, fontSize: '0.7rem', lineHeight: 1.5 }} className="text-white/55 mt-0.5">{s.detail}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-5 text-white/40 text-xs italic" style={{ lineHeight: 1.6 }}>
+                  Vous préférez un faire-part papier ? Aucun problème — le lien Kaatch peut y figurer aussi.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── L'ALBUM ── */}
+      <section className="py-28 px-10 bg-white border-t border-stone-100">
+        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+          <div className="rounded-2xl overflow-hidden" style={{ boxShadow: SHADOW, height: 400 }}>
+            <img
+              src="https://images.unsplash.com/photo-1529636798458-92182e662485?w=1200&q=80&auto=format&fit=crop"
+              alt=""
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div>
+            <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-4" style={{ fontWeight: 500 }}>Le plus croustillant</p>
+            <h2 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(1.8rem, 3.5vw, 2.6rem)', lineHeight: 1.1, letterSpacing: '-0.02em' }}
+                className="text-[#2C3B2E] mb-5">
+              L&apos;album photo partagé entre tout le monde.
+            </h2>
+            <p className="text-stone-600 mb-4" style={{ fontSize: '1rem', lineHeight: 1.85 }}>
+              Plus de Google Drive perdus, plus de groupes Facebook saturés, plus de centaines de messages WhatsApp avec le fameux &quot;tu m&apos;enverras les photos hein ?&quot;.
+            </p>
+            <p className="text-stone-600" style={{ fontSize: '1rem', lineHeight: 1.85 }}>
+              Un QR code sur les tables, les invités déposent leurs photos en deux taps. Tout atterrit au même endroit, vous décidez ce que vous gardez. Et dans dix ans, c&apos;est toujours là.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-2.5">
+              {['Sans groupe Facebook', 'Sans Google Drive', 'Sans WhatsApp galère', 'Sans relancer personne'].map(t => (
+                <span key={t} className="px-4 py-2 rounded-full border border-stone-200 bg-[#f5f0e8] text-sm text-stone-600" style={{ fontWeight: 300 }}>{t}</span>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
       {/* ── VIDÉO DÉMO ── */}
-      <section id="video" className="py-28 px-10 bg-white border-t border-stone-100">
+      <section id="video" className="py-28 px-10 bg-[#f5f0e8] border-t border-stone-100">
         <div className="max-w-3xl mx-auto text-center">
           <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-4" style={{ fontWeight: 500 }}>En action</p>
           <h2 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(1.7rem, 3vw, 2.4rem)', lineHeight: 1.15, letterSpacing: '-0.02em' }}
               className="text-[#2C3B2E] mb-10">
-            Kaatch en 2 minutes
+            Kaatch en 2 minutes chrono.
           </h2>
-          {/* Placeholder démo — à remplacer par votre vidéo Loom/YouTube */}
-          <div className="relative w-full rounded-2xl overflow-hidden"
-               style={{ paddingBottom: '56.25%', background: 'linear-gradient(135deg, #2C3B2E 0%, #1a2419 100%)', boxShadow: SHADOW }}>
+          <a href={DEMO_URL} target="_blank" rel="noopener noreferrer"
+             className="relative block w-full rounded-2xl overflow-hidden group"
+             style={{ paddingBottom: '56.25%', background: 'linear-gradient(135deg, #2C3B2E 0%, #1a2419 100%)', boxShadow: SHADOW }}>
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 px-8">
-              {/* Icône play */}
-              <div className="w-20 h-20 rounded-full bg-white/10 border border-white/20 flex items-center justify-center backdrop-blur-sm">
+              <div className="w-20 h-20 rounded-full bg-white/10 border border-white/20 flex items-center justify-center backdrop-blur-sm group-hover:bg-white/20 transition">
                 <span className="text-white text-3xl ml-1">▶</span>
               </div>
               <div className="text-center">
                 <p style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1.1rem', color: 'white', marginBottom: 8 }}>
-                  Démo disponible sur demande
+                  Voir la démo interactive
                 </p>
                 <p style={{ fontWeight: 300, fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.6 }}>
-                  Créez un espace gratuit et découvrez toutes les fonctionnalités en 2 minutes.
+                  Le tour du propriétaire en 2 minutes. Pas de jargon, juste l&apos;app.
                 </p>
               </div>
-              <a href="/auth"
-                 className="inline-block bg-white text-[#2C3B2E] px-7 py-3 rounded-2xl hover:bg-[#f5f0e8] transition text-sm"
-                 style={{ fontWeight: 600 }}>
-                Essayer gratuitement →
-              </a>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── 3 BÉNÉFICES ── */}
-      <section className="py-28 px-10 bg-white">
-        <div className="max-w-5xl mx-auto">
-          <div className="mb-20">
-            <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-4" style={{ fontWeight: 500 }}>Ce que ça change</p>
-            <h2 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(1.7rem, 3vw, 2.5rem)', lineHeight: 1.15, letterSpacing: '-0.02em' }}
-                className="text-[#2C3B2E] max-w-xl">
-              Un mariage mérite mieux qu'un tableur partagé.
-            </h2>
-          </div>
-          <div className="grid md:grid-cols-3 gap-12">
-            {[
-              {
-                photo: 'https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=600&q=80&auto=format&fit=crop',
-                title: 'Des invitations qui font leur effet',
-                desc: 'Chaque invité reçoit un faire-part avec son prénom et un lien unique. Il confirme sa présence en un clic, les réponses apparaissent en temps réel.',
-              },
-              {
-                photo: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=600&q=80&auto=format&fit=crop',
-                title: 'Un plan de table sans prise de tête',
-                desc: "Glisser les invités sur leurs tables, ajuster jusqu'au dernier moment. Le récap est prêt à imprimer. Fini le tableur partagé que personne n'arrive à modifier.",
-              },
-              {
-                photo: 'https://images.unsplash.com/photo-1529636798458-92182e662485?w=600&q=80&auto=format&fit=crop',
-                title: 'Un album qui se remplit tout seul',
-                desc: "Les invités déposent leurs photos depuis leur téléphone. Tout se retrouve au même endroit, sans courir après les AirDrops et les Google Drive partagés.",
-              },
-            ].map((item, i) => (
-              <div key={i}>
-                <div className="rounded-2xl overflow-hidden h-56 mb-6"
-                     style={{ boxShadow: SHADOW }}>
-                  <img src={item.photo} alt="" className="w-full h-full object-cover hover:scale-105 transition duration-700" />
-                </div>
-                <h3 style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1.1rem', letterSpacing: '-0.01em' }}
-                    className="text-[#2C3B2E] mb-3">{item.title}</h3>
-                <p style={{ fontSize: '0.9rem', lineHeight: 1.85 }} className="text-stone-500">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── COMMENT ÇA MARCHE ── */}
-      <section id="comment" className="py-28 px-10">
-        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-20 items-start">
-          <div className="md:sticky md:top-24">
-            <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-4" style={{ fontWeight: 500 }}>Comment ça marche</p>
-            <h2 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(1.7rem, 3vw, 2.5rem)', lineHeight: 1.15, letterSpacing: '-0.02em' }}
-                className="text-[#2C3B2E] mb-6">
-              Simple comme bonjour.
-            </h2>
-            <p style={{ fontSize: '0.95rem', lineHeight: 1.85 }} className="text-stone-500">
-              Aucune formation, aucun manuel. On commence et on comprend. Les invités aussi — sans même créer un compte.
-            </p>
-            <div className="mt-10">
-              <a href="/auth"
-                 className="inline-block bg-[#2C3B2E] text-white px-9 py-4 rounded-2xl hover:bg-[#1a2419] transition text-sm"
-                 style={{ fontWeight: 500 }}>
-                Commencer →
-              </a>
-            </div>
-          </div>
-
-          <div className="space-y-12">
-            {steps.map((step, i) => (
-              <div key={i} className="flex gap-7">
-                <div className="flex flex-col items-center shrink-0">
-                  {/* Numéro grand, vert foncé */}
-                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0"
-                       style={{ background: '#2C3B2E', boxShadow: SHADOW }}>
-                    <span style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '1rem', color: 'white', letterSpacing: '-0.01em' }}>
-                      {step.n}
-                    </span>
-                  </div>
-                  {i < steps.length - 1 && (
-                    <div className="w-px flex-1 mt-3 min-h-[2.5rem]"
-                         style={{ background: 'linear-gradient(to bottom, #2C3B2E30, transparent)' }} />
-                  )}
-                </div>
-                <div className="flex-1 pb-2 pt-2">
-                  <h3 style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1.05rem', letterSpacing: '-0.01em' }}
-                      className="text-[#2C3B2E] mb-3">{step.title}</h3>
-                  {'desc' in step && step.desc && (
-                    <p style={{ fontSize: '0.9rem', lineHeight: 1.85 }} className="text-stone-500">{step.desc}</p>
-                  )}
-                  {'sub' in step && step.sub && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
-                      {step.sub.map((s) => (
-                        <div key={s.label} className="flex items-start gap-3 bg-white rounded-2xl px-4 py-4"
-                             style={{ boxShadow: SHADOW }}>
-                          <span className="text-lg mt-0.5">{s.icon}</span>
-                          <div>
-                            <p style={{ fontWeight: 600, fontSize: '0.85rem', fontFamily: DISPLAY }} className="text-[#2C3B2E] mb-0.5">{s.label}</p>
-                            <p style={{ fontWeight: 300, fontSize: '0.78rem', lineHeight: 1.6 }} className="text-stone-500">{s.detail}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+          </a>
         </div>
       </section>
 
       {/* ── OFFRES ── */}
-      <section id="offres" className="py-28 px-10 bg-white">
+      <section id="offres" className="py-28 px-10 bg-white border-t border-stone-100">
         <div className="max-w-5xl mx-auto">
           <div className="mb-14">
             <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-4" style={{ fontWeight: 500 }}>Offres</p>
@@ -356,15 +388,14 @@ export default function Home() {
               Aucune mauvaise surprise.
             </h2>
             <p style={{ fontSize: '0.95rem', lineHeight: 1.85 }} className="text-stone-500">
-              Un tarif unique, un seul paiement. Aucun abonnement caché. Prix en euros.
+              Un tarif unique, un seul paiement. Pas d&apos;abonnement caché. Prix en euros.
             </p>
           </div>
 
           <div className="md:grid md:grid-cols-3 md:gap-6 md:items-start flex overflow-x-auto gap-5 snap-x snap-mandatory pb-4 -mx-2 px-2">
 
             {/* Gratuit */}
-            <div className="bg-[#f5f0e8] rounded-2xl p-8 flex flex-col min-w-[280px] snap-start md:min-w-0"
-                 style={{ boxShadow: SHADOW }}>
+            <div className="bg-[#f5f0e8] rounded-2xl p-8 flex flex-col min-w-[280px] snap-start md:min-w-0" style={{ boxShadow: SHADOW }}>
               <div className="mb-6">
                 <p className="text-xs tracking-widest uppercase text-stone-400 mb-3" style={{ fontWeight: 500 }}>Gratuit</p>
                 <p style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '2.6rem', lineHeight: 1, letterSpacing: '-0.03em' }}
@@ -372,14 +403,11 @@ export default function Home() {
                 <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-400 mt-2">Pour découvrir</p>
               </div>
               <ul className="space-y-3 flex-1 mb-7">
-                {['1 événement', '30 invités maximum', '20 photos', 'RSVP basique', 'Gestion budget'].map(f => (
+                {["1 événement", "jusqu'à 30 invités", "20 photos", 'RSVP basique', 'Gestion budget'].map(f => (
                   <li key={f} className="flex items-start gap-3 text-sm text-stone-600" style={{ fontWeight: 300 }}>
                     <span className="text-[#2C3B2E] mt-0.5 shrink-0 font-bold">✓</span>{f}
                   </li>
                 ))}
-                <li className="flex items-start gap-3 text-xs text-stone-400 italic" style={{ fontWeight: 300 }}>
-                  <span className="mt-0.5 shrink-0 text-stone-300">·</span>Logo Kaatch visible <span className="not-italic">(mais discret !&nbsp;😉)</span>
-                </li>
               </ul>
               <a href="/auth"
                  className="w-full text-center border-2 border-stone-300 text-stone-500 px-6 py-3 rounded-2xl hover:border-[#2C3B2E] hover:text-[#2C3B2E] transition text-sm"
@@ -388,13 +416,13 @@ export default function Home() {
               </a>
             </div>
 
-            {/* Mariage — mis en avant */}
+            {/* Mariage */}
             <div className="rounded-2xl p-8 flex flex-col relative min-w-[280px] snap-start md:min-w-0"
                  style={{ background: '#2C3B2E', boxShadow: '0 8px 40px rgba(44,59,46,0.25), 0 2px 8px rgba(44,59,46,0.12)' }}>
               <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
                 <span className="bg-[#f5f0e8] text-[#2C3B2E] text-xs px-4 py-1.5 rounded-full whitespace-nowrap border border-[#2C3B2E]/20"
                       style={{ fontWeight: 600 }}>
-                  ✦ Prix de lancement — jusqu'au 31 mai
+                  ✦ Prix de lancement
                 </span>
               </div>
               <div className="mb-6">
@@ -408,7 +436,15 @@ export default function Home() {
                 <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-white/65 mt-2">Paiement unique · 1 mariage</p>
               </div>
               <ul className="space-y-3 flex-1 mb-7">
-                {['Invités illimités', 'Photos illimitées', 'RSVP complet', 'Invitation à plusieurs moments de la fête', 'Plan de table', 'Gestion budget', 'Site personnalisé', 'Sans branding Kaatch'].map(f => (
+                {[
+                  'Invités illimités',
+                  'RSVP complet',
+                  "Invitation à plusieurs moments de la fête",
+                  'Plan de table',
+                  'Gestion budget & prestataires',
+                  'Programme jour J',
+                  "Playlist & suggestions d'animations",
+                ].map(f => (
                   <li key={f} className="flex items-start gap-3 text-sm text-white/85" style={{ fontWeight: 300 }}>
                     <span className="text-white/80 mt-0.5 shrink-0 font-bold">✓</span>{f}
                   </li>
@@ -422,27 +458,26 @@ export default function Home() {
             </div>
 
             {/* Pro */}
-            <div className="bg-[#f5f0e8] rounded-2xl p-8 flex flex-col min-w-[280px] snap-start md:min-w-0"
-                 style={{ boxShadow: SHADOW }}>
-              <div className="mb-6">
+            <div className="bg-[#f5f0e8] rounded-2xl p-8 flex flex-col min-w-[280px] snap-start md:min-w-0" style={{ boxShadow: SHADOW }}>
+              <div className="mb-4">
                 <p className="text-xs tracking-widest uppercase text-stone-400 mb-3" style={{ fontWeight: 500 }}>👔 Planificateur Pro</p>
-                <p style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '2.6rem', lineHeight: 1, letterSpacing: '-0.03em' }}
-                   className="text-[#2C3B2E]">
-                  49<span style={{ fontSize: '1.1rem', fontWeight: 400 }} className="text-stone-400">/mois</span>
-                </p>
-                <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-400 mt-2">ou 399/an — 2 mois offerts</p>
               </div>
-              <ul className="space-y-3 flex-1 mb-7">
-                {['Mariages illimités', 'Tout ce qui est dans Mariage', 'Dashboard multi-événements', 'Support prioritaire', 'Accès anticipé aux nouvelles features'].map(f => (
-                  <li key={f} className="flex items-start gap-3 text-sm text-stone-600" style={{ fontWeight: 300 }}>
-                    <span className="text-[#2C3B2E] mt-0.5 shrink-0 font-bold">✓</span>{f}
-                  </li>
-                ))}
-              </ul>
-              <a href="/auth"
+              <div className="flex-1 flex flex-col items-center justify-center text-center py-6 gap-3">
+                <p style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1.2rem', letterSpacing: '-0.01em' }}
+                   className="text-[#2C3B2E]">
+                  Professionnels ?
+                </p>
+                <p className="text-stone-500 text-sm" style={{ lineHeight: 1.7 }}>
+                  Parlons-en 😊
+                </p>
+                <p className="text-stone-400 text-xs max-w-[180px] mx-auto" style={{ lineHeight: 1.6 }}>
+                  Wedding planners, organisateurs d&apos;événements — on a pensé à vous.
+                </p>
+              </div>
+              <a href="mailto:bonjour@kaatch.fr?subject=Kaatch%20Pro%20%E2%80%94%20Parlons-en"
                  className="w-full text-center bg-[#2C3B2E] text-white px-6 py-3 rounded-2xl hover:bg-[#1a2419] transition text-sm"
                  style={{ fontWeight: 500 }}>
-                Essayer Pro →
+                bonjour@kaatch.fr →
               </a>
             </div>
 
@@ -451,17 +486,6 @@ export default function Home() {
           <p className="text-center mt-10 text-xs text-stone-400" style={{ fontWeight: 300 }}>
             Aucune carte bleue requise pour le plan gratuit · Paiement sécurisé · Accès immédiat · Prix en euros
           </p>
-          <div className="mt-10 text-center border-t border-stone-200 pt-10">
-            <p style={{ fontFamily: DISPLAY, fontWeight: 600, fontSize: '1rem' }}
-               className="text-stone-500 mb-2">
-              Vous êtes wedding planner ou professionnel de l'événementiel ?
-            </p>
-            <a href="mailto:bonjour@kaatch.fr?subject=Kaatch%20Pro%20%E2%80%94%20Parlons-en"
-               className="text-sm text-[#2C3B2E] hover:underline"
-               style={{ fontWeight: 400 }}>
-              Parlons-en → bonjour@kaatch.fr
-            </a>
-          </div>
         </div>
       </section>
 
@@ -471,19 +495,19 @@ export default function Home() {
       {/* ── CTA FINAL ── */}
       <section className="py-32 px-10">
         <div className="max-w-2xl mx-auto text-center">
-          <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-5" style={{ fontWeight: 500 }}>Alors ?</p>
+          <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-5" style={{ fontWeight: 500 }}>Pensé avec amour</p>
           <h2 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(2rem, 4vw, 3rem)', lineHeight: 1.1, letterSpacing: '-0.02em' }}
               className="text-[#2C3B2E] mb-6">
-            Votre mariage mérite mieux que trois groupes WhatsApp.
+            Pour simplifier le plus beau jour d&apos;une vie.
           </h2>
           <p style={{ fontSize: '0.95rem', lineHeight: 1.9 }} className="text-stone-500 mb-10">
-            L'espace est prêt en deux minutes. Les invités n'ont pas besoin de créer un compte.
-            Et quelques groupes WhatsApp de moins, ça ne fait pas de mal.
+            Vous célébrez votre <em>good catch</em>. On s&apos;occupe du reste — pour que vous, vos témoins et vos
+            invités restiez ensemble, présents, et profitiez vraiment.
           </p>
           <a href="/auth"
-             className="inline-block bg-[#2C3B2E] text-white px-14 py-4.5 rounded-2xl hover:bg-[#1a2419] transition text-sm"
+             className="inline-block bg-[#2C3B2E] text-white rounded-2xl hover:bg-[#1a2419] transition text-sm"
              style={{ fontWeight: 500, letterSpacing: '0.01em', padding: '1rem 3.5rem' }}>
-            Mon espace →
+            Je me connecte à mon espace →
           </a>
           <p className="mt-6 text-sm text-stone-400" style={{ fontWeight: 300 }}>
             <a href="/rejoindre" className="hover:text-[#2C3B2E] transition">Invité(e) à un mariage ? Rejoindre →</a>
@@ -498,11 +522,9 @@ export default function Home() {
       <section className="py-24 px-10 bg-[#f5f0e8] border-t border-stone-200">
         <div className="max-w-xl mx-auto text-center">
           <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-4" style={{ fontWeight: 500 }}>Contact</p>
-          <h2
-            style={{ fontFamily: 'var(--font-geist-sans)', fontWeight: 800, fontSize: 'clamp(1.5rem, 3vw, 2rem)', lineHeight: 1.15, letterSpacing: '-0.02em' }}
-            className="text-[#2C3B2E] mb-2"
-          >
-            Une question ?
+          <h2 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(1.5rem, 3vw, 2rem)', lineHeight: 1.15, letterSpacing: '-0.02em' }}
+              className="text-[#2C3B2E] mb-2">
+            Une question ? Une idée ? Un commentaire ? Une suggestion ?
           </h2>
           <p className="text-stone-500 mb-10" style={{ fontSize: '0.95rem', lineHeight: 1.8, fontWeight: 300 }}>
             On vous répond dans la journée.
@@ -516,12 +538,18 @@ export default function Home() {
       {/* ── FOOTER ── */}
       <footer className="border-t border-stone-200 py-12 px-10 bg-[#f5f0e8]">
         <div className="max-w-5xl mx-auto">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-5 mb-8">
-            <span style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '1.1rem', letterSpacing: '-0.02em' }}
-                  className="text-stone-500">Kaatch</span>
-            <div className="flex items-center gap-5 flex-wrap justify-center">
+          <div className="flex flex-col sm:flex-row items-start justify-between gap-8 mb-8">
+            <div className="max-w-xs">
+              <span style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '1.1rem', letterSpacing: '-0.02em' }}
+                    className="text-[#2C3B2E] block mb-2">Kaatch</span>
+              <p className="text-xs text-stone-400" style={{ fontWeight: 300, lineHeight: 1.7 }}>
+                L&apos;app qui remplace les listes, les WhatsApp galère, et les tableurs Excel.
+                Pour les mariés qui veulent se concentrer sur leur mariage, pas sur son organisation.
+              </p>
+            </div>
+            <div className="flex items-center gap-5 flex-wrap">
               {[
-                { label: 'Comment ça marche', href: '#comment' },
+                { label: "Comment ça marche", href: '#comment' },
                 { label: 'Offres', href: '#offres' },
                 { label: 'Inspirations', href: '/inspirations' },
                 { label: 'Espace invités', href: '/rejoindre' },
@@ -532,12 +560,13 @@ export default function Home() {
                 </a>
               ))}
             </div>
-            <a href="/auth" className="text-sm text-[#2C3B2E] hover:underline" style={{ fontWeight: 400 }}>Connexion →</a>
+            <a href="/auth" className="text-sm text-[#2C3B2E] hover:underline shrink-0" style={{ fontWeight: 400 }}>Connexion →</a>
           </div>
-          {/* Barre légale */}
           <div className="border-t border-stone-200 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
             <p className="text-xs text-stone-400" style={{ fontWeight: 300 }}>
-              © 2025 Kaatch — <a href="mailto:bonjour@kaatch.fr" className="hover:text-[#2C3B2E] transition">bonjour@kaatch.fr</a>
+              © 2025 Kaatch —{' '}
+              <a href="mailto:bonjour@kaatch.fr" className="hover:text-[#2C3B2E] transition">bonjour@kaatch.fr</a>
+              <span className="hidden sm:inline"> · Aucun groupe WhatsApp n&apos;a été maltraité dans la fabrication de ce site.</span>
             </p>
             <div className="flex items-center gap-4">
               {[

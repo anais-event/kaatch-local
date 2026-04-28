@@ -101,18 +101,6 @@ export default function Home() {
               Kaatch
             </span>
           </a>
-          <div className="hidden md:flex items-center gap-8">
-            {[
-              { label: "Comment ça marche", href: '#comment' },
-              { label: 'Offres', href: '#offres' },
-              { label: 'Inspirations', href: '/inspirations' },
-              { label: 'Entre nous', href: '/entre-nous' },
-            ].map(l => (
-              <a key={l.href} href={l.href} className="text-sm text-stone-500 hover:text-[#2C3B2E] transition" style={{ fontWeight: 400 }}>
-                {l.label}
-              </a>
-            ))}
-          </div>
           <div className="flex items-center gap-3">
             <a href="/rejoindre"
                className="text-sm border border-stone-300 text-stone-600 px-5 py-2.5 rounded-full hover:border-[#2C3B2E] hover:text-[#2C3B2E] transition hidden sm:block"

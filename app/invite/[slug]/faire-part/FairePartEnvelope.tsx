@@ -183,8 +183,9 @@ export default function FairePartEnvelope({
       position: 'fixed', inset: 0,
       background: phase === 'curtain-closed' ? '#1a2419' : '#f5f0e8',
       transition: 'background 0.8s ease',
-      overflow: 'hidden',
-      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      overflow: phase === 'revealed' ? 'auto' : 'hidden',
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      justifyContent: phase === 'revealed' ? 'flex-start' : 'center',
       zIndex: 50,
     }}>
       <style>{`
@@ -265,7 +266,6 @@ export default function FairePartEnvelope({
         <div style={{
           position:'relative', zIndex:20, width:'100%', maxWidth:420,
           margin:'0 auto', padding:'24px 16px 40px',
-          maxHeight:'100vh', overflowY:'auto',
           display:'flex', flexDirection:'column', alignItems:'center',
         }}>
           <div className="card-rise" style={{

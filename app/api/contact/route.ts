@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
 
     await resend.emails.send({
       from: 'Kaatch <notifications@kaatch.fr>',
-      to: 'anais@kaatch.fr',
+      to: 'contact-formulaire@kaatch.fr',
       subject: `💌 Nouveau message de ${name}`,
       html: `<p><strong>De :</strong> ${name} (${email})</p><p><strong>Message :</strong></p><p style="white-space:pre-wrap">${message}</p>`,
       replyTo: email,

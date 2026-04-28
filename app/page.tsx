@@ -96,11 +96,17 @@ export default function Home() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-[#f5f0e8]/95 backdrop-blur-md border-b border-stone-200">
         <div className="max-w-5xl mx-auto px-8 md:px-10 h-16 flex items-center justify-between">
           <a href="/" className="flex items-center gap-2.5">
-            <Image src="/logo.png" alt="Kaatch" width={32} height={32} />
+            <Image src="/logo.png" alt="Kaatch" width={32} height={32} className="rounded-lg" />
             <span style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '1.25rem', letterSpacing: '-0.02em' }} className="text-[#2C3B2E]">
               Kaatch
             </span>
           </a>
+          <div className="hidden md:flex items-center gap-6">
+            <a href="#comment-ca-marche" className="text-sm text-stone-500 hover:text-[#2C3B2E] transition" style={{ fontWeight: 300 }}>Comment ça marche</a>
+            <a href="#offres" className="text-sm text-stone-500 hover:text-[#2C3B2E] transition" style={{ fontWeight: 300 }}>Offres</a>
+            <a href="/inspirations" className="text-sm text-stone-500 hover:text-[#2C3B2E] transition" style={{ fontWeight: 300 }}>Inspirations</a>
+            <a href="/entre-nous" className="text-sm text-stone-500 hover:text-[#2C3B2E] transition" style={{ fontWeight: 300 }}>Entre nous</a>
+          </div>
           <div className="flex items-center gap-3">
             <a href="/rejoindre"
                className="text-sm border border-stone-300 text-stone-600 px-5 py-2.5 rounded-full hover:border-[#2C3B2E] hover:text-[#2C3B2E] transition hidden sm:block"
@@ -218,7 +224,7 @@ export default function Home() {
       </section>
 
       {/* ── 1 MARIAGE, 2 ACCÈS ── */}
-      <section id="comment" className="py-28 px-10 bg-[#f5f0e8] border-t border-stone-100">
+      <section id="comment-ca-marche" className="py-28 px-10 bg-[#f5f0e8] border-t border-stone-100">
         <div className="max-w-5xl mx-auto">
           <div className="mb-16">
             <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-4" style={{ fontWeight: 500 }}>1 mariage · 2 accès</p>

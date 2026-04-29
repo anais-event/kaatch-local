@@ -25,13 +25,13 @@ export default async function WeddingLayout({
   return (
     <>
       <WeddingNav slug={slug} weddingName={wedding?.name ?? ''} weddingId={wedding?.id ?? ''} userEmail={user?.email ?? ''} plan={wedding?.plan ?? null} />
-      <div className="pt-12 pb-20 sm:pb-0">
+      <div className="pt-12 md:pt-0 pb-20 md:pb-0 md:ml-56">
         {children}
       </div>
       <BottomNav slug={slug} />
       <OnboardingModal slug={slug} />
       {/* Déconnexion en bas de page */}
-      <footer className="py-8 text-center">
+      <footer className="py-8 text-center md:ml-56">
         <form action={logoutMaried}>
           <button type="submit"
             className="text-xs text-stone-300 hover:text-red-400 transition cursor-pointer"

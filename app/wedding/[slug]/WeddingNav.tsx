@@ -16,9 +16,10 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-export default function WeddingNav({ slug, weddingName, weddingId, userEmail, plan }: { slug: string; weddingName: string; weddingId: string; userEmail: string; plan?: string | null }) {
+export default function WeddingNav({ slug, weddingName, weddingId, userEmail, plan }: {
+  slug: string; weddingName: string; weddingId: string; userEmail: string; plan?: string | null
+}) {
   const pathname = usePathname()
-  const [open, setOpen] = useState<string | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null)
   const [navHidden, setNavHidden] = useState(false)
@@ -28,57 +29,6 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
   const [toasts, setToasts] = useState<Toast[]>([])
   const toastId = useRef(0)
   const mounted = useRef(false)
-  const navRef = useRef<HTMLDivElement>(null)
-
-  // Realtime notifications
-  useEffect(() => {
-    if (!weddingId) return
-    mounted.current = true
-
-    function addToast(icon: string, message: string) {
-      if (!mounted.current) return
-      const id = ++toastId.current
-      setToasts(t => [...t, { id, message, icon }])
-      setLog(l => [{ message, icon, time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) }, ...l.slice(0, 19)])
-      setUnread(n => n + 1)
-      setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 4000)
-    }
-
-    const channel = supabase
-      .channel(`wedding-${weddingId}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'photos', filter: `wedding_id=eq.${weddingId}` },
-        (payload) => addToast('📸', `${(payload.new as any).uploaded_by_name || 'Quelqu\'un'} a ajouté une photo`))
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `wedding_id=eq.${weddingId}` },
-        (payload) => addToast('💬', `${(payload.new as any).author_name || 'Quelqu\'un'} a envoyé un message`))
-      .subscribe()
-
-    return () => { mounted.current = false; supabase.removeChannel(channel) }
-  }, [weddingId])
-
-  useEffect(() => {
-    function handler(e: MouseEvent) {
-      if (navRef.current && !navRef.current.contains(e.target as Node)) {
-        setOpen(null)
-        setMobileOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [])
-
-  useEffect(() => { setMobileOpen(false); setOpen(null) }, [pathname])
-
-  useEffect(() => {
-    function handleScroll() {
-      const current = window.scrollY
-      if (current < 10) { setNavHidden(false) }
-      else if (current > lastScrollY.current + 5) { setNavHidden(true) }
-      else if (current < lastScrollY.current - 5) { setNavHidden(false) }
-      lastScrollY.current = current
-    }
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
 
   const sections: NavSection[] = [
     { label: '🏠 Accueil', href: `/wedding/${slug}` },
@@ -108,319 +58,286 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
     { label: '💬 Messagerie', href: `/wedding/${slug}/messagerie` },
   ]
 
-  const isActive = (section: NavSection): boolean => {
-    if (section.href) {
-      if (section.href === `/wedding/${slug}`) return pathname === section.href
-      return pathname.startsWith(section.href)
-    }
-    return section.items?.some(item => pathname.startsWith(item.href)) ?? false
+  // Auto-expand the active section in sidebar
+  const activeSection = sections.find(s =>
+    s.items?.some(item => pathname.startsWith(item.href))
+  )?.label ?? null
+  const [sidebarExpanded, setSidebarExpanded] = useState<string | null>(activeSection)
+
+  const isItemActive = (href: string) =>
+    href === `/wedding/${slug}` ? pathname === href : pathname.startsWith(href)
+  const isSectionActive = (section: NavSection) => {
+    if (section.href) return isItemActive(section.href)
+    return section.items?.some(item => isItemActive(item.href)) ?? false
   }
+
+  // Realtime
+  useEffect(() => {
+    if (!weddingId) return
+    mounted.current = true
+    function addToast(icon: string, message: string) {
+      if (!mounted.current) return
+      const id = ++toastId.current
+      setToasts(t => [...t, { id, message, icon }])
+      setLog(l => [{ message, icon, time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) }, ...l.slice(0, 19)])
+      setUnread(n => n + 1)
+      setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 4000)
+    }
+    const channel = supabase.channel(`wedding-${weddingId}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'photos', filter: `wedding_id=eq.${weddingId}` },
+        (p) => addToast('📸', `${(p.new as any).uploaded_by_name || 'Quelqu\'un'} a ajouté une photo`))
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `wedding_id=eq.${weddingId}` },
+        (p) => addToast('💬', `${(p.new as any).author_name || 'Quelqu\'un'} a envoyé un message`))
+      .subscribe()
+    return () => { mounted.current = false; supabase.removeChannel(channel) }
+  }, [weddingId])
+
+  useEffect(() => { setMobileOpen(false) }, [pathname])
+
+  // Hide mobile top bar on scroll
+  useEffect(() => {
+    function handleScroll() {
+      const current = window.scrollY
+      if (current < 10) setNavHidden(false)
+      else if (current > lastScrollY.current + 5) setNavHidden(true)
+      else if (current < lastScrollY.current - 5) setNavHidden(false)
+      lastScrollY.current = current
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   return (
     <>
-    <nav ref={navRef} className={`fixed top-0 left-0 right-0 z-50 bg-[#f5f0e8]/95 backdrop-blur border-b border-stone-200 shadow-sm transition-transform duration-300 ${navHidden ? '-translate-y-full' : ''}`}>
-      <div className="max-w-4xl mx-auto px-4 flex items-center justify-between h-12">
+      {/* ─── DESKTOP SIDEBAR ─── */}
+      <aside className="hidden md:flex flex-col fixed left-0 top-0 h-full w-56 bg-white border-r border-stone-100 z-50">
 
         {/* Logo */}
-        <a href={`/wedding/${slug}`}
-           style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.1rem', fontStyle: 'italic' }}
-           className="text-[#2d3228] shrink-0 mr-4">
-          {weddingName}
-        </a>
+        <div className="px-5 py-5 border-b border-stone-100">
+          <a href={`/wedding/${slug}`}
+            style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.1rem', fontStyle: 'italic' }}
+            className="text-[#2d3228] block leading-tight">
+            {weddingName}
+          </a>
+          <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.62rem', letterSpacing: '0.12em' }}
+            className="text-stone-400 uppercase mt-0.5 tracking-widest">
+            Espace mariés
+          </p>
+        </div>
 
-        {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-0.5 flex-1 justify-center">
+        {/* Nav items */}
+        <nav className="flex-1 overflow-y-auto py-3 px-2">
           {sections.map(section => {
-            const active = isActive(section)
+            const active = isSectionActive(section)
 
             if (!section.items) {
               return (
                 <a key={section.label} href={section.href}
-                   className={`px-3 py-1 rounded-md text-xs whitespace-nowrap transition ${
-                     active ? 'bg-[#4a5240] text-white' : 'text-stone-500 hover:text-[#4a5240]'
-                   }`}
-                   style={{ fontFamily: 'var(--font-body)', fontWeight: 300, letterSpacing: '0.04em' }}>
+                  className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition mb-0.5 ${
+                    active
+                      ? 'bg-[#4a5240] text-white'
+                      : 'text-stone-600 hover:bg-stone-50 hover:text-[#4a5240]'
+                  }`}
+                  style={{ fontFamily: 'var(--font-lato)', fontWeight: active ? 400 : 300 }}>
                   {section.label}
                 </a>
               )
             }
 
-            const isOpen = open === section.label
+            const isExpanded = sidebarExpanded === section.label
+
             return (
-              <div key={section.label} className="relative">
+              <div key={section.label} className="mb-0.5">
                 <button
-                  onClick={() => setOpen(isOpen ? null : section.label)}
-                  className={`px-3 py-1 rounded-md text-xs whitespace-nowrap transition flex items-center gap-1 cursor-pointer ${
-                    active ? 'bg-[#4a5240] text-white' : 'text-stone-500 hover:text-[#4a5240]'
+                  onClick={() => setSidebarExpanded(isExpanded ? null : section.label)}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition cursor-pointer ${
+                    active && !isExpanded
+                      ? 'bg-[#f5f0e8] text-[#4a5240]'
+                      : 'text-stone-500 hover:bg-stone-50 hover:text-[#4a5240]'
                   }`}
-                  style={{ fontFamily: 'var(--font-body)', fontWeight: 300, letterSpacing: '0.04em' }}>
-                  {section.label}
+                  style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
+                  <span>{section.label}</span>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
-                       className={`w-2.5 h-2.5 transition-transform ${isOpen ? 'rotate-180' : ''}`}>
+                    className={`w-3 h-3 text-stone-300 transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
 
-                {isOpen && (
-                  <div className="absolute top-full left-0 mt-1.5 bg-white rounded-xl shadow-lg border border-stone-100 py-1.5 min-w-[200px] z-50">
+                {isExpanded && (
+                  <div className="ml-3 pl-3 border-l border-stone-100 mt-0.5 mb-1 space-y-0.5">
                     {section.items.map(item => {
-                      const itemActive = pathname.startsWith(item.href)
+                      const itemActive = isItemActive(item.href)
                       return (
-                        <a key={item.href} href={item.href} target={item.target}
-                           onClick={() => setOpen(null)}
-                           className={`flex flex-col px-4 py-2.5 hover:bg-[#f5f0e8] transition ${itemActive ? 'bg-[#f5f0e8]' : ''}`}>
-                          <span style={{ fontFamily: 'var(--font-body)', fontWeight: itemActive ? 400 : 300, fontSize: '0.82rem' }}
-                                className={itemActive ? 'text-[#4a5240]' : 'text-stone-700'}>
-                            {item.label}
-                          </span>
-                          {item.sub && (
-                            <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400">{item.sub}</span>
-                          )}
+                        <a key={item.href} href={item.href}
+                          className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs transition ${
+                            itemActive
+                              ? 'bg-[#4a5240] text-white'
+                              : 'text-stone-500 hover:bg-stone-50 hover:text-[#4a5240]'
+                          }`}
+                          style={{ fontFamily: 'var(--font-lato)', fontWeight: itemActive ? 400 : 300 }}>
+                          {item.label}
                         </a>
                       )
                     })}
-                    {section.label === 'Compte' && (
-                      <>
-                        <div className="border-t border-stone-100 my-1" />
-                        {/* Activité récente */}
-                        <div className="px-4 py-2">
-                          <p className="text-[10px] uppercase tracking-widest text-stone-300 mb-2" style={{ fontWeight: 300 }}>Activité récente</p>
-                          {log.length === 0 ? (
-                            <p className="text-xs text-stone-300 italic" style={{ fontWeight: 300 }}>Aucune activité</p>
-                          ) : (
-                            <ul className="space-y-1.5 max-h-32 overflow-y-auto">
-                              {log.slice(0, 5).map((entry, i) => (
-                                <li key={i} className="flex items-start gap-2">
-                                  <span className="text-sm shrink-0">{entry.icon}</span>
-                                  <div className="min-w-0">
-                                    <p className="text-xs text-stone-600 leading-snug" style={{ fontWeight: 300 }}>{entry.message}</p>
-                                    <p className="text-[10px] text-stone-400">{entry.time}</p>
-                                  </div>
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                        </div>
-                        <div className="border-t border-stone-100 my-1" />
-                        <form action={logoutMaried} className="px-4 py-2">
-                          <button type="submit"
-                            className="text-xs text-stone-400 hover:text-red-400 transition cursor-pointer w-full text-left"
-                            style={{ fontWeight: 300 }}>
-                            Déconnexion
-                          </button>
-                        </form>
-                      </>
-                    )}
                   </div>
                 )}
               </div>
             )
           })}
-        </div>
+        </nav>
 
-        {/* Mon espace + hamburger */}
-        <div className="flex items-center gap-1 ml-auto md:ml-2">
+        {/* Bottom — Mon espace */}
+        <div className="border-t border-stone-100 px-2 py-3 space-y-0.5">
+          <a href={`/invite/${slug}`} target="_blank"
+            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs text-stone-500 hover:bg-stone-50 hover:text-[#4a5240] transition"
+            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3.5 h-3.5 shrink-0">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Vue invités
+          </a>
+          <a href={`/wedding/${slug}/edit`}
+            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs text-stone-500 hover:bg-stone-50 hover:text-[#4a5240] transition"
+            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3.5 h-3.5 shrink-0">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Paramètres
+          </a>
 
-          {/* Mon espace dropdown */}
-          <div className="hidden md:block relative">
-            <button
-              onClick={() => setOpen(open === 'monespace' ? null : 'monespace')}
-              className={`flex items-center gap-1 px-3 py-1 rounded-md text-xs whitespace-nowrap transition cursor-pointer ${
-                open === 'monespace' ? 'bg-[#4a5240] text-white' : 'text-stone-500 hover:text-[#4a5240]'
-              }`}
-              style={{ fontFamily: 'var(--font-body)', fontWeight: 300, letterSpacing: '0.04em' }}>
-              {unread > 0 && <span className="w-1.5 h-1.5 rounded-full bg-red-400 shrink-0" />}
-              Mon espace
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
-                   className={`w-2.5 h-2.5 transition-transform ${open === 'monespace' ? 'rotate-180' : ''}`}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          {/* Activité */}
+          {log.length > 0 && (
+            <div className="px-3 py-2">
+              <p style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.12em' }}
+                className="text-stone-300 uppercase mb-1.5">Activité récente</p>
+              <ul className="space-y-1.5 max-h-24 overflow-y-auto">
+                {log.slice(0, 3).map((entry, i) => (
+                  <li key={i} className="flex items-start gap-1.5">
+                    <span className="text-xs shrink-0">{entry.icon}</span>
+                    <p style={{ fontWeight: 300, fontSize: '0.68rem', lineHeight: 1.4 }}
+                      className="text-stone-400 truncate">{entry.message}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <form action={logoutMaried} className="px-1">
+            <button type="submit"
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs text-stone-400 hover:text-red-400 hover:bg-red-50 transition cursor-pointer"
+              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3.5 h-3.5 shrink-0">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
               </svg>
+              Déconnexion
             </button>
-
-            {open === 'monespace' && (
-              <div className="absolute right-0 top-full mt-1.5 bg-white rounded-xl shadow-lg border border-stone-100 py-1.5 min-w-[220px] z-50">
-                {/* Vue invités */}
-                <a href={`/invite/${slug}`} target="_blank" onClick={() => setOpen(null)}
-                   className="flex flex-col px-4 py-2.5 hover:bg-[#f5f0e8] transition">
-                  <span style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-700">Vue invités</span>
-                  <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400">Aperçu de votre espace</span>
-                </a>
-                {/* Paramètres */}
-                <a href={`/wedding/${slug}/edit`} onClick={() => setOpen(null)}
-                   className="flex flex-col px-4 py-2.5 hover:bg-[#f5f0e8] transition">
-                  <span style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-700">Paramètres</span>
-                  <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400">Infos du mariage</span>
-                </a>
-                {/* Entre nous */}
-                <a href="/entre-nous" onClick={() => setOpen(null)}
-                   className="flex flex-col px-4 py-2.5 hover:bg-[#f5f0e8] transition">
-                  <span style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-700">Entre nous 💬</span>
-                  <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400">Forum des futurs mariés</span>
-                </a>
-                <div className="border-t border-stone-100 my-1" />
-                {/* Formule */}
-                {plan === 'mariage' || plan === 'pro' ? (
-                  <div className="px-4 py-2.5">
-                    <p style={{ fontWeight: 300, fontSize: '0.62rem', letterSpacing: '0.15em' }} className="text-stone-400 uppercase mb-1.5">Formule</p>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] bg-[#4a5240]/10 text-[#4a5240] px-2 py-0.5 rounded-full" style={{ fontWeight: 500 }}>
-                        Mariage
-                      </span>
-                      <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">Tout inclus ✓</span>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="px-4 py-2.5">
-                    <p style={{ fontWeight: 300, fontSize: '0.62rem', letterSpacing: '0.15em' }} className="text-stone-400 uppercase mb-1.5">Formule</p>
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-[10px] bg-stone-100 text-stone-400 px-2 py-0.5 rounded-full" style={{ fontWeight: 500 }}>
-                        Gratuite
-                      </span>
-                      <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">20 invités max</span>
-                    </div>
-                    <a href={`https://kaatch-mariage.lemonsqueezy.com/checkout/buy/a9a7912e-a499-41a4-83ee-a885e4d3855c?checkout[custom][wedding_id]=${weddingId}&checkout[custom][plan]=mariage`}
-                       className="block text-center bg-[#4a5240] text-white text-xs px-3 py-1.5 rounded-lg hover:bg-[#2d3228] transition"
-                       style={{ fontWeight: 400 }}>
-                      Passer à la formule Mariage →
-                    </a>
-                  </div>
-                )}
-                <div className="border-t border-stone-100 my-1" />
-                {/* Identifiants */}
-                <div className="px-4 py-2.5">
-                  <p style={{ fontWeight: 300, fontSize: '0.62rem', letterSpacing: '0.15em' }} className="text-stone-400 uppercase mb-2">Connexion</p>
-                  {userEmail && (
-                    <p style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-500 truncate mb-2">{userEmail}</p>
-                  )}
-                  <a href="/auth/update-password"
-                     style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-[#4a5240] hover:underline block">
-                    Changer le mot de passe →
-                  </a>
-                </div>
-                <div className="border-t border-stone-100 my-1" />
-                {/* Activité */}
-                {log.length > 0 && (
-                  <div className="px-4 py-2">
-                    <p style={{ fontWeight: 300, fontSize: '0.62rem', letterSpacing: '0.15em' }} className="text-stone-400 uppercase mb-2">Activité récente</p>
-                    <ul className="space-y-1.5 max-h-28 overflow-y-auto">
-                      {log.slice(0, 4).map((entry, i) => (
-                        <li key={i} className="flex items-start gap-2">
-                          <span className="text-sm shrink-0">{entry.icon}</span>
-                          <div className="min-w-0">
-                            <p className="text-xs text-stone-600 leading-snug" style={{ fontWeight: 300 }}>{entry.message}</p>
-                            <p className="text-[10px] text-stone-400">{entry.time}</p>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {log.length > 0 && <div className="border-t border-stone-100 my-1" />}
-                {/* Déconnexion */}
-                <form action={logoutMaried} className="px-4 py-2">
-                  <button type="submit" className="text-xs text-stone-400 hover:text-red-400 transition cursor-pointer w-full text-left" style={{ fontWeight: 300 }}>
-                    Déconnexion
-                  </button>
-                </form>
-              </div>
-            )}
-          </div>
-
-          {/* Hamburger mobile */}
-          <button
-            onClick={() => setMobileOpen(o => !o)}
-            className="md:hidden p-1.5 rounded-md text-stone-500 hover:text-[#4a5240] transition cursor-pointer"
-            aria-label="Menu">
-            {mobileOpen ? (
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            ) : (
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-              </svg>
-            )}
-          </button>
+          </form>
         </div>
+      </aside>
+
+      {/* ─── MOBILE TOP BAR ─── */}
+      <nav className={`md:hidden fixed top-0 left-0 right-0 z-50 bg-[#f5f0e8]/95 backdrop-blur border-b border-stone-200 shadow-sm transition-transform duration-300 ${navHidden ? '-translate-y-full' : ''}`}>
+        <div className="flex items-center justify-between px-4 h-12">
+          <a href={`/wedding/${slug}`}
+            style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.1rem', fontStyle: 'italic' }}
+            className="text-[#2d3228]">
+            {weddingName}
+          </a>
+          <div className="flex items-center gap-2">
+            {unread > 0 && <span className="w-2 h-2 rounded-full bg-red-400" />}
+            <button onClick={() => setMobileOpen(o => !o)}
+              className="p-1.5 rounded-md text-stone-500 hover:text-[#4a5240] transition cursor-pointer"
+              aria-label="Menu">
+              {mobileOpen ? (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                </svg>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile drawer */}
+        {mobileOpen && (
+          <div className="bg-white border-t border-stone-100 shadow-lg max-h-[80vh] overflow-y-auto">
+            {sections.map(section => (
+              <div key={section.label}>
+                {!section.items ? (
+                  <a href={section.href}
+                    className={`flex items-center px-5 py-3 text-sm border-b border-stone-50 ${
+                      isSectionActive(section) ? 'text-[#4a5240] bg-[#f5f0e8]' : 'text-stone-600'
+                    }`}
+                    style={{ fontWeight: isSectionActive(section) ? 400 : 300 }}>
+                    {section.label}
+                  </a>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => setMobileExpanded(mobileExpanded === section.label ? null : section.label)}
+                      className={`w-full flex items-center justify-between px-5 py-3 text-sm border-b border-stone-50 cursor-pointer transition ${
+                        isSectionActive(section) ? 'text-[#4a5240] bg-[#f5f0e8]' : 'text-stone-600'
+                      }`}
+                      style={{ fontWeight: isSectionActive(section) ? 400 : 300 }}>
+                      <span>{section.label}</span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
+                        className={`w-3.5 h-3.5 text-stone-300 transition-transform ${mobileExpanded === section.label ? 'rotate-180' : ''}`}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    {mobileExpanded === section.label && section.items.map(item => (
+                      <a key={item.href} href={item.href}
+                        className={`flex flex-col px-6 py-2.5 border-b border-stone-50 ${
+                          isItemActive(item.href) ? 'bg-[#f5f0e8] text-[#4a5240]' : 'text-stone-600'
+                        }`}>
+                        <span style={{ fontWeight: 300, fontSize: '0.85rem' }}>{item.label}</span>
+                        {item.sub && <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400">{item.sub}</span>}
+                      </a>
+                    ))}
+                  </>
+                )}
+              </div>
+            ))}
+            <div className="border-t border-stone-100">
+              <a href={`/invite/${slug}`} target="_blank" className="flex flex-col px-6 py-2.5 border-b border-stone-50 text-stone-600">
+                <span style={{ fontWeight: 300, fontSize: '0.85rem' }}>Vue invités</span>
+              </a>
+              <a href={`/wedding/${slug}/edit`} className="flex flex-col px-6 py-2.5 border-b border-stone-50 text-stone-600">
+                <span style={{ fontWeight: 300, fontSize: '0.85rem' }}>Paramètres</span>
+              </a>
+              {userEmail && (
+                <div className="px-6 py-2.5 border-b border-stone-50">
+                  <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400">{userEmail}</p>
+                </div>
+              )}
+              <form action={logoutMaried} className="px-6 py-3">
+                <button type="submit" className="text-sm text-red-400 cursor-pointer" style={{ fontWeight: 300 }}>
+                  Déconnexion
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+      </nav>
+
+      {/* Toasts */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-[100] pointer-events-none">
+        {toasts.map(toast => (
+          <div key={toast.id}
+            className="flex items-center gap-2 bg-[#2d3228] text-white text-sm px-4 py-2.5 rounded-full shadow-lg pointer-events-auto"
+            style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}>
+            <span>{toast.icon}</span>
+            <span>{toast.message}</span>
+          </div>
+        ))}
       </div>
 
-      {/* Mobile menu */}
-      {mobileOpen && (
-        <div className="md:hidden bg-white border-t border-stone-100 shadow-lg max-h-[80vh] overflow-y-auto">
-          {sections.map(section => (
-            <div key={section.label}>
-              {!section.items ? (
-                <a href={section.href}
-                   className={`flex items-center px-5 py-3 text-sm border-b border-stone-50 ${
-                     isActive(section) ? 'text-[#4a5240] bg-[#f5f0e8]' : 'text-stone-600'
-                   }`}
-                   style={{ fontWeight: isActive(section) ? 400 : 300 }}>
-                  {section.label}
-                </a>
-              ) : (
-                <>
-                  <button
-                    onClick={() => setMobileExpanded(mobileExpanded === section.label ? null : section.label)}
-                    className={`w-full flex items-center justify-between px-5 py-3 text-sm border-b border-stone-50 cursor-pointer transition ${
-                      isActive(section) ? 'text-[#4a5240] bg-[#f5f0e8]' : 'text-stone-600'
-                    }`}
-                    style={{ fontWeight: isActive(section) ? 400 : 300 }}>
-                    <span>{section.label}</span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
-                         className={`w-3.5 h-3.5 text-stone-300 transition-transform ${mobileExpanded === section.label ? 'rotate-180' : ''}`}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                  {mobileExpanded === section.label && section.items.map(item => (
-                    <a key={item.href} href={item.href} target={item.target}
-                       className={`flex flex-col px-6 py-2.5 border-b border-stone-50 ${
-                         pathname.startsWith(item.href) ? 'bg-[#f5f0e8] text-[#4a5240]' : 'text-stone-600'
-                       }`}>
-                      <span style={{ fontWeight: 300, fontSize: '0.85rem' }}>{item.label}</span>
-                      {item.sub && <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400">{item.sub}</span>}
-                    </a>
-                  ))}
-                </>
-              )}
-            </div>
-          ))}
-          {/* Mon espace mobile */}
-          <div>
-            <p className="px-5 pt-3 pb-1 text-[10px] uppercase tracking-widest text-stone-300" style={{ fontWeight: 300 }}>Mon espace</p>
-            <a href={`/invite/${slug}`} target="_blank" className="flex flex-col px-6 py-2.5 border-b border-stone-50 text-stone-600">
-              <span style={{ fontWeight: 300, fontSize: '0.85rem' }}>Vue invités</span>
-              <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400">Aperçu de votre espace</span>
-            </a>
-            <a href={`/wedding/${slug}/edit`} className="flex flex-col px-6 py-2.5 border-b border-stone-50 text-stone-600">
-              <span style={{ fontWeight: 300, fontSize: '0.85rem' }}>Paramètres</span>
-              <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400">Infos du mariage</span>
-            </a>
-            {userEmail && (
-              <div className="px-6 py-2.5 border-b border-stone-50">
-                <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400">Connecté : {userEmail}</p>
-              </div>
-            )}
-            <form action={logoutMaried} className="px-6 py-3 border-b border-stone-50">
-              <button type="submit" className="text-sm text-red-400 cursor-pointer" style={{ fontWeight: 300 }}>Déconnexion</button>
-            </form>
-          </div>
-        </div>
-      )}
-    </nav>
-
-    {/* Toasts realtime (centre bas) */}
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-[100] pointer-events-none">
-      {toasts.map(toast => (
-        <div key={toast.id}
-          className="flex items-center gap-2 bg-[#2d3228] text-white text-sm px-4 py-2.5 rounded-full shadow-lg pointer-events-auto"
-          style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}>
-          <span>{toast.icon}</span>
-          <span>{toast.message}</span>
-        </div>
-      ))}
-    </div>
-
-    <KaatchChat />
+      <KaatchChat />
     </>
   )
 }

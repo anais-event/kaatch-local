@@ -98,6 +98,21 @@ export default function PhotoGallery({ slug, weddingName, photos, moments, guest
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [downloading, setDownloading] = useState(false)
   const [uploadError, setUploadError] = useState('')
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [headerVisible, setHeaderVisible] = useState(true)
+  const lastScrollRef = useRef(0)
+
+  useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY
+      if (y < 48) { setHeaderVisible(true); lastScrollRef.current = y; return }
+      if (Math.abs(y - lastScrollRef.current) < 6) return
+      setHeaderVisible(y < lastScrollRef.current)
+      lastScrollRef.current = y
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   function toggleSelect(id: string) {
     setSelectedIds(prev => {
@@ -306,74 +321,113 @@ export default function PhotoGallery({ slug, weddingName, photos, moments, guest
 
   return (
     <div className="min-h-screen bg-[#f5f0e8]">
-      {/* Header */}
-      <div className="sticky top-0 z-30 bg-[#f5f0e8]/90 backdrop-blur-sm border-b border-stone-200/60 px-4 py-3">
-        <div className="flex items-center justify-between mb-2.5">
+      {/* Header — auto-hide on scroll down */}
+      <div
+        className="sticky top-0 z-30 bg-[#f5f0e8]/95 backdrop-blur-sm border-b border-stone-200/60 transition-transform duration-250"
+        style={{ transform: headerVisible ? 'translateY(0)' : 'translateY(-100%)' }}
+      >
+        {/* Row principale : nav + titre + actions icônes */}
+        <div className="flex items-center gap-2 px-3 h-12">
           <a href={`/wedding/${slug}`}
-            className="text-stone-400 hover:text-stone-600 transition text-sm flex items-center gap-1.5"
-            style={{ fontWeight: 300 }}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4">
+            className="shrink-0 text-stone-400 hover:text-stone-600 transition flex items-center justify-center w-8 h-8 rounded-full hover:bg-stone-100"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
               <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
             </svg>
-            <span className="hidden sm:inline">Retour</span>
           </a>
-          <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400, fontSize: '1.1rem', fontStyle: 'italic' }}
-            className="text-[#2d3228]">
-            {weddingName} — Photos
+
+          <h1
+            className="flex-1 text-center text-[#2d3228] truncate"
+            style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400, fontSize: '1rem', fontStyle: 'italic' }}
+          >
+            {weddingName}
+            <span className="text-stone-400 text-xs ml-2" style={{ fontWeight: 300, fontStyle: 'normal' }}>
+              {photos.length}
+            </span>
           </h1>
-          <span className="text-stone-400 text-sm" style={{ fontWeight: 300 }}>
-            {photos.length} photo{photos.length !== 1 ? 's' : ''}
-          </span>
+
+          {/* Icônes actions */}
+          <div className="flex items-center gap-1 shrink-0">
+            {/* Recherche */}
+            <button
+              onClick={() => setSearchOpen(s => !s)}
+              className={`w-8 h-8 rounded-full flex items-center justify-center transition cursor-pointer ${
+                searchOpen || search ? 'bg-[#4a5240] text-white' : 'text-stone-400 hover:bg-stone-100 hover:text-stone-600'
+              }`}
+              title="Rechercher"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+              </svg>
+            </button>
+            {/* Sélectionner */}
+            <button
+              onClick={() => { setSelectMode(s => !s); setSelectedIds(new Set()) }}
+              className={`w-8 h-8 rounded-full flex items-center justify-center transition cursor-pointer ${
+                selectMode ? 'bg-[#4a5240] text-white' : 'text-stone-400 hover:bg-stone-100 hover:text-stone-600'
+              }`}
+              title={selectMode ? 'Annuler la sélection' : 'Sélectionner'}
+            >
+              {selectMode
+                ? <span className="text-xs font-bold">{selectedIds.size > 0 ? selectedIds.size : '✓'}</span>
+                : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+              }
+            </button>
+            {/* ZIP */}
+            <button
+              onClick={async () => { setZipping(true); await downloadZip(filteredPhotos); setZipping(false) }}
+              disabled={zipping || filteredPhotos.length === 0}
+              className="w-8 h-8 rounded-full flex items-center justify-center text-stone-400 hover:bg-stone-100 hover:text-stone-600 transition disabled:opacity-30 cursor-pointer"
+              title="Tout télécharger (ZIP)"
+            >
+              {zipping
+                ? <span className="text-xs">…</span>
+                : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                  </svg>
+              }
+            </button>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Rechercher par nom ou moment…"
-            className="flex-1 bg-white border border-stone-200 rounded-full px-4 py-1.5 text-stone-700 text-sm outline-none focus:border-stone-400 placeholder:text-stone-300 transition"
-            style={{ fontWeight: 300 }}
-          />
-          <button
-            onClick={() => { setSelectMode(s => !s); setSelectedIds(new Set()) }}
-            className={`px-3 py-1.5 rounded-full border text-sm transition cursor-pointer whitespace-nowrap ${
-              selectMode
-                ? 'bg-[#4a5240] border-[#4a5240] text-white'
-                : 'bg-white border-stone-200 text-stone-500 hover:border-[#4a5240] hover:text-[#4a5240]'
-            }`}
-            style={{ fontWeight: 300 }}
-          >
-            {selectMode ? `✓ Sélection (${selectedIds.size})` : 'Sélectionner'}
-          </button>
-          <button
-            onClick={async () => { setZipping(true); await downloadZip(filteredPhotos); setZipping(false) }}
-            disabled={zipping || filteredPhotos.length === 0}
-            className="px-3 py-1.5 rounded-full bg-white border border-stone-200 text-stone-500 text-sm hover:border-[#4a5240] hover:text-[#4a5240] transition disabled:opacity-40 cursor-pointer whitespace-nowrap"
-            style={{ fontWeight: 300 }}
-          >
-            {zipping ? '…' : '↓ ZIP'}
-          </button>
-        </div>
-        {/* Moment filter pills */}
+
+        {/* Barre de recherche — collapsible */}
+        {searchOpen && (
+          <div className="px-3 pb-2">
+            <input
+              autoFocus
+              type="text"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Rechercher par nom ou moment…"
+              className="w-full bg-white border border-stone-200 rounded-full px-4 py-1.5 text-stone-700 text-sm outline-none focus:border-[#4a5240] placeholder:text-stone-300 transition"
+              style={{ fontWeight: 300 }}
+            />
+          </div>
+        )}
+
+        {/* Filtres moments */}
         {moments.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mt-2">
+          <div className="flex gap-1.5 overflow-x-auto px-3 pb-2 scrollbar-none">
             <button onClick={() => setMomentFilter('')}
-              className={`px-3 py-0.5 rounded-full text-xs transition cursor-pointer ${!momentFilter ? 'bg-[#4a5240] text-white' : 'text-stone-400 hover:text-stone-600'}`}
+              className={`shrink-0 px-3 py-0.5 rounded-full text-xs transition cursor-pointer ${!momentFilter ? 'bg-[#4a5240] text-white' : 'text-stone-400 hover:text-stone-600'}`}
               style={{ fontWeight: 300 }}>Tous</button>
             {moments.map(m => (
               <button key={m} onClick={() => setMomentFilter(momentFilter === m ? '' : m)}
-                className={`px-3 py-0.5 rounded-full text-xs transition cursor-pointer ${momentFilter === m ? 'bg-[#4a5240] text-white' : 'text-stone-400 hover:text-stone-600'}`}
+                className={`shrink-0 px-3 py-0.5 rounded-full text-xs transition cursor-pointer ${momentFilter === m ? 'bg-[#4a5240] text-white' : 'text-stone-400 hover:text-stone-600'}`}
                 style={{ fontWeight: 300 }}>{m}</button>
             ))}
           </div>
         )}
-        {/* Download selected bar */}
+
+        {/* Barre téléchargement sélection */}
         {selectMode && selectedIds.size > 0 && (
-          <div className="mt-2 flex justify-end">
+          <div className="px-3 pb-2 flex justify-end">
             <button
               onClick={downloadSelected}
               disabled={downloading}
-              className="px-4 py-1.5 rounded-full bg-[#4a5240] text-white text-sm transition disabled:opacity-50 cursor-pointer"
+              className="px-4 py-1.5 rounded-full bg-[#4a5240] text-white text-xs transition disabled:opacity-50 cursor-pointer"
               style={{ fontWeight: 300 }}
             >
               {downloading ? 'Téléchargement…' : `↓ Télécharger (${selectedIds.size})`}

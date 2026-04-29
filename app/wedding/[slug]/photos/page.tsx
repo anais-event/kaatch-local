@@ -57,10 +57,16 @@ export default async function PhotosPage({ params }: { params: Promise<{ slug: s
     .eq('wedding_id', wedding.id)
     .order('created_at', { ascending: false })
 
-  const { data: guestNames } = await supabase
+  const { data: guestRows } = await supabase
     .from('guests')
     .select('first_name, last_name')
     .eq('wedding_id', wedding.id)
+
+  // Extraire les prénoms des mariés depuis le nom du mariage (ex: "Sophie & Julien")
+  const coupleNames: string[] = []
+  const m = wedding.name.match(/^(.+?)\s+(?:&|et)\s+(.+)$/i)
+  if (m) { coupleNames.push(m[1].trim(), m[2].trim()) }
+  else { coupleNames.push(wedding.name) }
 
   const { data: steps } = await supabase
     .from('program_steps').select('title').eq('wedding_id', wedding.id).order('position')
@@ -83,7 +89,10 @@ export default async function PhotosPage({ params }: { params: Promise<{ slug: s
       weddingName={wedding.name}
       photos={photos}
       moments={moments}
-      guestNames={(guestNames ?? []).map(g => [g.first_name, g.last_name].filter(v => v && v !== 'null').join(' '))}
+      guestNames={[
+        ...coupleNames,
+        ...(guestRows ?? []).map(g => [g.first_name, g.last_name].filter(v => v && v !== 'null').join(' ')),
+      ]}
       uploadPhoto={uploadPhoto}
       deletePhoto={deletePhoto}
     />

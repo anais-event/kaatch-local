@@ -76,7 +76,9 @@
       "Bash(git checkout *)",
       "Bash(git commit *)",
       "Bash(git push *)",
-      "Bash(grep -v \"^$\")"
+      "Bash(grep -v \"^$\")",
+      "Bash(git pull *)",
+      "Bash(git stash *)"
     ]
   }
 }

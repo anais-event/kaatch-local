@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { FREE_GUEST_LIMIT } from '@/lib/plan'
 
 const RELATIONS = ['Ami(e)', 'Frère', 'Sœur', 'Père', 'Mère', 'Oncle', 'Tante', 'Cousin(e)', 'Collègue', 'Autre']
 
@@ -8,10 +9,36 @@ type Props = {
   weddingId: string
   slug: string
   addGuest: (formData: FormData) => Promise<void>
+  guestCount: number
+  paid: boolean
 }
 
-export default function AddGuestForm({ weddingId, slug, addGuest }: Props) {
+export default function AddGuestForm({ weddingId, slug, addGuest, guestCount, paid }: Props) {
   const [open, setOpen] = useState(false)
+  const atLimit = !paid && guestCount >= FREE_GUEST_LIMIT
+
+  if (atLimit) {
+    return (
+      <div className="bg-amber-50 border border-amber-200 rounded-xl px-5 py-4 mb-4 flex items-start gap-3">
+        <span className="text-amber-500 text-lg leading-none mt-0.5">🔒</span>
+        <div className="flex-1">
+          <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 500, fontSize: '0.88rem' }} className="text-amber-800 mb-1">
+            Limite de {FREE_GUEST_LIMIT} invités atteinte
+          </p>
+          <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.8rem' }} className="text-amber-700 mb-3">
+            Passez au plan Mariage pour ajouter des invités en illimité.
+          </p>
+          <a
+            href={`${process.env.NEXT_PUBLIC_LEMON_CHECKOUT_URL ?? '/pricing'}?checkout[custom][wedding_id]=${weddingId}`}
+            className="inline-block bg-[#4a5240] text-white text-xs px-4 py-2 rounded-xl hover:bg-[#2d3228] transition"
+            style={{ fontWeight: 400 }}
+          >
+            Passer au plan Mariage — 45€ →
+          </a>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="bg-white rounded-xl border border-stone-100 mb-4 overflow-hidden">

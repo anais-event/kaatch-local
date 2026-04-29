@@ -343,7 +343,7 @@ export default function Home() {
                 <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-400 mt-2">Pour découvrir</p>
               </div>
               <ul className="space-y-3 flex-1 mb-7">
-                {["1 événement", "jusqu'à 30 invités", "20 photos", 'RSVP basique', 'Gestion budget'].map(f => (
+                {["1 mariage", "jusqu'à 20 invités", 'RSVP basique', 'Suivi budget', "Livre d'or"].map(f => (
                   <li key={f} className="flex items-start gap-3 text-sm text-stone-600" style={{ fontWeight: 300 }}>
                     <span className="text-[#2C3B2E] mt-0.5 shrink-0 font-bold">✓</span>{f}
                   </li>
@@ -379,12 +379,12 @@ export default function Home() {
               <ul className="space-y-3 flex-1 mb-7">
                 {[
                   'Invités illimités',
-                  'RSVP complet',
-                  "Invitation à plusieurs moments de la fête",
+                  'Faire-part animé personnalisé',
+                  'Espace invités complet',
                   'Plan de table',
-                  'Gestion budget & prestataires',
+                  'Photos illimitées + téléchargement',
                   'Programme jour J',
-                  "Playlist & suggestions d'animations",
+                  'RSVP complet',
                 ].map(f => (
                   <li key={f} className="flex items-start gap-3 text-sm text-white/85" style={{ fontWeight: 300 }}>
                     <span className="text-white/80 mt-0.5 shrink-0 font-bold">✓</span>{f}

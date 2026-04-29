@@ -14,21 +14,20 @@ const SHADOW = '0 4px 24px rgba(44,59,46,0.08), 0 1px 4px rgba(44,59,46,0.04)'
 export default function PricingPage() {
   const gratuitFeatures = [
     '1 mariage',
-    "Jusqu'à 50 invités",
-    'Programme & faire-part',
-    '50 photos maximum',
-    'Messagerie de groupe',
-    'Accès 3 mois',
+    "Jusqu'à 20 invités",
+    'Gestion RSVP basique',
+    'Suivi budget',
+    'Livre d\'or',
   ]
 
   const mariageFeatures = [
-    '1 mariage',
     'Invités illimités',
-    'Toutes les fonctionnalités',
-    'Budget & prestataires',
+    'Faire-part animé personnalisé',
+    'Espace invités complet',
+    'Programme jour J',
     'Plan de table',
-    'Rétro-planning',
-    'Photos illimitées',
+    'Photos illimitées + téléchargement',
+    'RSVP complet',
     'Export Excel invités',
     'Accès à vie',
   ]
@@ -115,7 +114,7 @@ export default function PricingPage() {
                 </span>
               </div>
               <p className="text-stone-400 text-sm" style={{ fontWeight: 300 }}>
-                Pour découvrir Kaatch
+                Pour tester Kaatch
               </p>
             </div>
 

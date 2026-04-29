@@ -6,14 +6,23 @@ import GuestListSection from './GuestListSection'
 import ImportGuests from './ImportGuests'
 import AddGuestForm from './AddGuestForm'
 import ExportGuestsButton from './ExportGuestsButton'
+import { isPaid, FREE_GUEST_LIMIT } from '@/lib/plan'
 
 async function addGuest(formData: FormData) {
   'use server'
   const supabase = await createSupabaseServerClient()
   const slug = formData.get('slug') as string
+  const weddingId = formData.get('wedding_id') as string
   const parts = formData.getAll('invited_parts') as string[]
+
+  const { data: w } = await supabase.from('weddings').select('plan').eq('id', weddingId).single()
+  if (!isPaid(w?.plan)) {
+    const { count } = await supabase.from('guests').select('id', { count: 'exact', head: true }).eq('wedding_id', weddingId)
+    if ((count ?? 0) >= FREE_GUEST_LIMIT) return
+  }
+
   await supabase.from('guests').insert({
-    wedding_id: formData.get('wedding_id') as string,
+    wedding_id: weddingId,
     first_name: formData.get('first_name') as string,
     last_name: (formData.get('last_name') as string) || null,
     nickname: (formData.get('nickname') as string) || null,
@@ -86,7 +95,7 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
 
   const { data: wedding } = await supabase
     .from('weddings')
-    .select('id, name, date, location, cover_image_url, couple_message')
+    .select('id, name, date, location, cover_image_url, couple_message, plan')
     .eq('slug', slug)
     .single()
 
@@ -173,7 +182,13 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
         <ImportGuests weddingId={wedding.id} slug={slug} />
 
         {/* ── Formulaire d'ajout (collapsible) ── */}
-        <AddGuestForm weddingId={wedding.id} slug={slug} addGuest={addGuest} />
+        <AddGuestForm
+          weddingId={wedding.id}
+          slug={slug}
+          addGuest={addGuest}
+          guestCount={total}
+          paid={isPaid(wedding.plan)}
+        />
 
         {/* ── Tableau unifié invités ── */}
         <GuestListSection total={total}>

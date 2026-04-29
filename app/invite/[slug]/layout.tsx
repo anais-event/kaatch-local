@@ -55,7 +55,7 @@ export default async function InviteLayout({
   return (
     <NotificationBadgesProvider slug={slug} weddingId={weddingId}>
       <GuestNav slug={slug} isPreview={isPreview} />
-      <div className="pt-12 pb-20 sm:pb-0">
+      <div className="pt-12 md:pt-0 pb-20 md:pb-0 md:ml-56">
         {children}
       </div>
       <BottomNavGuest slug={slug} />

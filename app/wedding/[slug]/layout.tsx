@@ -16,7 +16,7 @@ export default async function WeddingLayout({
 
   const { data: wedding } = await supabase
     .from('weddings')
-    .select('id, name')
+    .select('id, name, plan')
     .eq('slug', slug)
     .single()
 
@@ -24,7 +24,7 @@ export default async function WeddingLayout({
 
   return (
     <>
-      <WeddingNav slug={slug} weddingName={wedding?.name ?? ''} weddingId={wedding?.id ?? ''} userEmail={user?.email ?? ''} />
+      <WeddingNav slug={slug} weddingName={wedding?.name ?? ''} weddingId={wedding?.id ?? ''} userEmail={user?.email ?? ''} plan={wedding?.plan ?? null} />
       <div className="pt-12 pb-20 sm:pb-0">
         {children}
       </div>

@@ -54,6 +54,7 @@ export default function ImportGuests({ weddingId, slug }: { weddingId: string; s
   const [mapping, setMapping] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
+  const [importResult, setImportResult] = useState<{ imported: number; skipped: number; limit_reached: boolean } | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
@@ -105,6 +106,8 @@ export default function ImportGuests({ weddingId, slug }: { weddingId: string; s
     })
     setLoading(false)
     if (res.ok) {
+      const result = await res.json()
+      setImportResult({ imported: result.imported, skipped: result.skipped ?? 0, limit_reached: result.limit_reached ?? false })
       setDone(true)
       setStep('upload')
       setOpen(false)
@@ -127,10 +130,18 @@ export default function ImportGuests({ weddingId, slug }: { weddingId: string; s
         Importer depuis Excel / Google Sheets
       </button>
 
-      {done && (
-        <p className="mt-2 text-sm text-[#4a5240]" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
-          Invités importés avec succès !
-        </p>
+      {done && importResult && (
+        <div className="mt-2">
+          <p className="text-sm text-[#4a5240]" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
+            {importResult.imported} invité{importResult.imported > 1 ? 's' : ''} importé{importResult.imported > 1 ? 's' : ''} avec succès.
+          </p>
+          {importResult.limit_reached && (
+            <p className="text-xs text-amber-600 mt-1" style={{ fontWeight: 300 }}>
+              {importResult.skipped} invité{importResult.skipped > 1 ? 's' : ''} ignoré{importResult.skipped > 1 ? 's' : ''} — limite de 20 atteinte.{' '}
+              <a href="#" className="underline">Passer à la formule Mariage</a> pour importer sans limite.
+            </p>
+          )}
+        </div>
       )}
 
       {open && (

@@ -266,17 +266,6 @@ export default function CopyLinkButton({
 
           <div className="border-t border-stone-50 my-1" />
 
-          {/* Bannière upgrade si plan gratuit */}
-          {!paid && (
-            <a href={upgradeUrl} onClick={() => setDropdownOpen(false)}
-               className="mx-2 mb-1 flex items-center gap-2 bg-[#2d3228] rounded-lg px-3 py-2 cursor-pointer hover:bg-[#4a5240] transition">
-              <span className="text-xs shrink-0">💍</span>
-              <p style={{ fontWeight: 400, fontSize: '0.72rem' }} className="text-white">
-                Plan Mariage — 45€ pour tout débloquer →
-              </p>
-            </a>
-          )}
-
           {/* WhatsApp */}
           {paid ? (
             <a href={`https://wa.me/?text=${whatsappMsg}`} target="_blank" rel="noopener noreferrer"

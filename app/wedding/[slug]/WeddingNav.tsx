@@ -16,7 +16,7 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-export default function WeddingNav({ slug, weddingName, weddingId, userEmail }: { slug: string; weddingName: string; weddingId: string; userEmail: string }) {
+export default function WeddingNav({ slug, weddingName, weddingId, userEmail, plan }: { slug: string; weddingName: string; weddingId: string; userEmail: string; plan?: string | null }) {
   const pathname = usePathname()
   const [open, setOpen] = useState<string | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -257,6 +257,34 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail }: 
                   <span style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-700">Entre nous 💬</span>
                   <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400">Forum des futurs mariés</span>
                 </a>
+                <div className="border-t border-stone-100 my-1" />
+                {/* Formule */}
+                {plan === 'mariage' || plan === 'pro' ? (
+                  <div className="px-4 py-2.5">
+                    <p style={{ fontWeight: 300, fontSize: '0.62rem', letterSpacing: '0.15em' }} className="text-stone-400 uppercase mb-1.5">Formule</p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] bg-[#4a5240]/10 text-[#4a5240] px-2 py-0.5 rounded-full" style={{ fontWeight: 500 }}>
+                        Mariage
+                      </span>
+                      <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">Tout inclus ✓</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="px-4 py-2.5">
+                    <p style={{ fontWeight: 300, fontSize: '0.62rem', letterSpacing: '0.15em' }} className="text-stone-400 uppercase mb-1.5">Formule</p>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-[10px] bg-stone-100 text-stone-400 px-2 py-0.5 rounded-full" style={{ fontWeight: 500 }}>
+                        Gratuite
+                      </span>
+                      <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">20 invités max</span>
+                    </div>
+                    <a href={`https://kaatch-mariage.lemonsqueezy.com/checkout/buy/a9a7912e-a499-41a4-83ee-a885e4d3855c?checkout[custom][wedding_id]=${weddingId}&checkout[custom][plan]=mariage`}
+                       className="block text-center bg-[#4a5240] text-white text-xs px-3 py-1.5 rounded-lg hover:bg-[#2d3228] transition"
+                       style={{ fontWeight: 400 }}>
+                      Passer à la formule Mariage →
+                    </a>
+                  </div>
+                )}
                 <div className="border-t border-stone-100 my-1" />
                 {/* Identifiants */}
                 <div className="px-4 py-2.5">

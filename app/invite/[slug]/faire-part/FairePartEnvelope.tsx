@@ -10,6 +10,7 @@ type Props = {
   coverImageUrl: string | null
   slug: string
   personalUrl: string
+  paid?: boolean
 }
 
 type Phase = 'curtain-closed' | 'opening' | 'revealed'
@@ -496,7 +497,7 @@ async function drawFairePartCanvasNew(
 }
 
 export default function FairePartEnvelope({
-  weddingName, dateStr, location, coupleMessage, coverImageUrl, slug, personalUrl,
+  weddingName, dateStr, location, coupleMessage, coverImageUrl, slug, personalUrl, paid = true,
 }: Props) {
   const [phase, setPhase] = useState<Phase>('curtain-closed')
   const [showPetals, setShowPetals] = useState(false)
@@ -723,14 +724,25 @@ export default function FairePartEnvelope({
           {/* Buttons */}
           <div className="fade-up" style={{ display:'flex', flexDirection:'column',
             alignItems:'center', gap:10 }}>
-            <button onClick={handleDownload} disabled={downloading}
-              style={{ background:GOLD, color:'#2d3a22', borderRadius:10,
-                padding:'11px 32px', fontSize:'0.82rem',
-                fontFamily:'var(--font-lato)', fontWeight:600,
-                border:'none', cursor:'pointer', letterSpacing:'0.05em',
-                opacity: downloading ? 0.6 : 1 }}>
-              {downloading ? '…Génération' : '↓ Télécharger le faire-part'}
-            </button>
+            {paid ? (
+              <button onClick={handleDownload} disabled={downloading}
+                style={{ background:GOLD, color:'#2d3a22', borderRadius:10,
+                  padding:'11px 32px', fontSize:'0.82rem',
+                  fontFamily:'var(--font-lato)', fontWeight:600,
+                  border:'none', cursor:'pointer', letterSpacing:'0.05em',
+                  opacity: downloading ? 0.6 : 1 }}>
+                {downloading ? '…Génération' : '↓ Télécharger le faire-part'}
+              </button>
+            ) : (
+              <div style={{ textAlign:'center' }}>
+                <div style={{ background:'rgba(255,255,255,0.08)', borderRadius:10,
+                  padding:'11px 32px', fontSize:'0.82rem',
+                  fontFamily:'var(--font-lato)', fontWeight:400, color:'rgba(255,255,255,0.35)',
+                  letterSpacing:'0.05em', cursor:'default' }}>
+                  🔒 Téléchargement — Formule Mariage
+                </div>
+              </div>
+            )}
             <a href={`/invite/${slug}`}
               style={{ fontSize:'0.72rem', color:'rgba(255,255,255,0.4)',
                 fontFamily:'var(--font-lato)', fontWeight:300, textDecoration:'none' }}>

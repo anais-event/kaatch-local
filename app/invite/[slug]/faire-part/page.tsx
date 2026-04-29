@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { cookies, headers } from 'next/headers'
 import FairePartEnvelope from './FairePartEnvelope'
+import { isPaid } from '@/lib/plan'
 
 export default async function FairePartPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -8,7 +9,7 @@ export default async function FairePartPage({ params }: { params: Promise<{ slug
 
   const { data: wedding } = await supabase
     .from('weddings')
-    .select('id, name, date, location, couple_message, cover_image_url')
+    .select('id, name, date, location, couple_message, cover_image_url, plan')
     .eq('slug', slug)
     .single()
 
@@ -46,6 +47,7 @@ export default async function FairePartPage({ params }: { params: Promise<{ slug
       coverImageUrl={wedding.cover_image_url}
       slug={slug}
       personalUrl={personalUrl}
+      paid={isPaid(wedding.plan)}
     />
   )
 }

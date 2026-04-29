@@ -75,22 +75,29 @@ async function downloadPhotoBlob(url: string, filename = 'photo.jpg') {
   }
 }
 
+type PendingPhoto = {
+  file: File
+  preview: string
+  tags: string[]
+  tagInput: string
+  tagSuggestions: string[]
+}
+
 export default function PhotoGallery({ slug, weddingName, photos, moments, guestNames, uploadPhoto, deletePhoto }: Props) {
   const [lightbox, setLightbox] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState<{ done: number; total: number } | null>(null)
   const [showUpload, setShowUpload] = useState(false)
   const [uploaderName, setUploaderName] = useState('')
   const [dragOver, setDragOver] = useState(false)
-  const [pendingFiles, setPendingFiles] = useState<File[]>([])
-  const [tagged, setTagged] = useState<string[]>([])
-  const [tagInput, setTagInput] = useState('')
-  const [tagSuggestions, setTagSuggestions] = useState<string[]>([])
+  const [pendingPhotos, setPendingPhotos] = useState<PendingPhoto[]>([])
   const [search, setSearch] = useState('')
   const [momentFilter, setMomentFilter] = useState('')
   const [zipping, setZipping] = useState(false)
   const [selectMode, setSelectMode] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [downloading, setDownloading] = useState(false)
+  const [uploadError, setUploadError] = useState('')
 
   function toggleSelect(id: string) {
     setSelectedIds(prev => {
@@ -132,7 +139,6 @@ export default function PhotoGallery({ slug, weddingName, photos, moments, guest
   const [lbCommentText, setLbCommentText] = useState('')
   const [likingId, setLikingId] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
-  const tagRef = useRef<HTMLInputElement>(null)
 
   const filteredPhotos = photos.filter(p => {
     if (momentFilter && p.moment_tag !== momentFilter) return false
@@ -215,51 +221,87 @@ export default function PhotoGallery({ slug, weddingName, photos, moments, guest
     setLbCommenting(false)
   }
 
-  const handleTagInput = (val: string) => {
-    setTagInput(val)
-    if (val.trim().length > 0) {
-      setTagSuggestions(
-        guestNames.filter(n => n.toLowerCase().includes(val.toLowerCase()) && !tagged.includes(n)).slice(0, 6)
-      )
-    } else {
-      setTagSuggestions([])
-    }
+  function addFiles(files: File[]) {
+    const imgs = files.filter(f => f.type.startsWith('image/'))
+    if (!imgs.length) return
+    const newPhotos: PendingPhoto[] = imgs.map(file => ({
+      file,
+      preview: URL.createObjectURL(file),
+      tags: [],
+      tagInput: '',
+      tagSuggestions: [],
+    }))
+    setPendingPhotos(prev => [...prev, ...newPhotos])
+    setShowUpload(true)
   }
 
-  const addTag = (name: string) => {
-    if (!tagged.includes(name) && name.trim()) {
-      setTagged(prev => [...prev, name.trim()])
-    }
-    setTagInput('')
-    setTagSuggestions([])
-    tagRef.current?.focus()
+  function updatePhotoTagInput(idx: number, val: string) {
+    setPendingPhotos(prev => prev.map((p, i) => {
+      if (i !== idx) return p
+      const suggestions = val.trim()
+        ? guestNames.filter(n => n.toLowerCase().includes(val.toLowerCase()) && !p.tags.includes(n)).slice(0, 6)
+        : []
+      return { ...p, tagInput: val, tagSuggestions: suggestions }
+    }))
   }
 
-  const removeTag = (name: string) => setTagged(prev => prev.filter(t => t !== name))
+  function addTagToPhoto(idx: number, name: string) {
+    setPendingPhotos(prev => prev.map((p, i) => {
+      if (i !== idx) return p
+      if (p.tags.includes(name) || !name.trim()) return { ...p, tagInput: '', tagSuggestions: [] }
+      return { ...p, tags: [...p.tags, name.trim()], tagInput: '', tagSuggestions: [] }
+    }))
+  }
+
+  function removeTagFromPhoto(idx: number, name: string) {
+    setPendingPhotos(prev => prev.map((p, i) => {
+      if (i !== idx) return p
+      return { ...p, tags: p.tags.filter(t => t !== name) }
+    }))
+  }
+
+  function removePhotoFromPending(idx: number) {
+    setPendingPhotos(prev => {
+      URL.revokeObjectURL(prev[idx].preview)
+      return prev.filter((_, i) => i !== idx)
+    })
+  }
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
     setDragOver(false)
-    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'))
-    if (files.length > 0) { setPendingFiles(files); setShowUpload(true) }
+    addFiles(Array.from(e.dataTransfer.files))
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    if (!pendingPhotos.length) return
     setUploading(true)
-    const fd = new FormData()
-    fd.set('slug', slug)
-    fd.set('uploader_name', uploaderName || 'Anonyme')
-    const files = pendingFiles.length > 0 ? pendingFiles : Array.from(fileRef.current?.files ?? [])
-    files.forEach(f => fd.append('photo', f))
-    tagged.forEach(t => fd.append('tagged', t))
-    await uploadPhoto(fd)
+    setUploadError('')
+    setUploadProgress({ done: 0, total: pendingPhotos.length })
+    let errorCount = 0
+    for (let i = 0; i < pendingPhotos.length; i++) {
+      const pp = pendingPhotos[i]
+      try {
+        const fd = new FormData()
+        fd.set('slug', slug)
+        fd.set('uploader_name', uploaderName || 'Anonyme')
+        fd.append('photo', pp.file)
+        pp.tags.forEach(t => fd.append('tagged', t))
+        await uploadPhoto(fd)
+      } catch {
+        errorCount++
+      }
+      setUploadProgress({ done: i + 1, total: pendingPhotos.length })
+    }
+    pendingPhotos.forEach(p => URL.revokeObjectURL(p.preview))
     setUploading(false)
+    setUploadProgress(null)
     setShowUpload(false)
-    setPendingFiles([])
-    setTagged([])
+    setPendingPhotos([])
     setUploaderName('')
     if (fileRef.current) fileRef.current.value = ''
+    if (errorCount > 0) setUploadError(`${errorCount} photo(s) n'ont pas pu être envoyées.`)
   }
 
   return (
@@ -353,7 +395,7 @@ export default function PhotoGallery({ slug, weddingName, photos, moments, guest
           className="p-3 max-w-2xl mx-auto"
           onDragOver={e => { e.preventDefault(); setDragOver(true) }}
           onDragLeave={() => setDragOver(false)}
-          onDrop={handleDrop}
+          onDrop={e => { handleDrop(e) }}
         >
           {dragOver && (
             <div className="fixed inset-0 z-50 bg-[#4a5240]/80 backdrop-blur flex items-center justify-center pointer-events-none">
@@ -455,98 +497,143 @@ export default function PhotoGallery({ slug, weddingName, photos, moments, guest
       {/* Upload modal */}
       {showUpload && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-4"
-          onClick={e => { if (e.target === e.currentTarget) setShowUpload(false) }}>
-          <div className="bg-white border border-stone-200 rounded-2xl w-full max-w-md p-6 space-y-4 max-h-[90vh] overflow-y-auto shadow-xl">
-            <div className="flex items-center justify-between">
+          onClick={e => { if (e.target === e.currentTarget && !uploading) { setShowUpload(false); setPendingPhotos([]) } }}>
+          <div className="bg-white border border-stone-200 rounded-2xl w-full max-w-lg shadow-xl flex flex-col max-h-[92vh]">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-stone-100 shrink-0">
               <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400, fontSize: '1.4rem', fontStyle: 'italic' }}
                 className="text-[#2d3228]">Ajouter des photos</h2>
-              <button onClick={() => setShowUpload(false)} className="text-stone-400 hover:text-stone-600 transition cursor-pointer text-xl leading-none">×</button>
+              <button onClick={() => { if (!uploading) { setShowUpload(false); setPendingPhotos([]) } }}
+                className="text-stone-400 hover:text-stone-600 transition cursor-pointer text-xl leading-none">×</button>
             </div>
-            <form onSubmit={handleSubmit} className="space-y-3">
-              {/* Drop zone */}
-              <div
-                onClick={() => fileRef.current?.click()}
-                onDragOver={e => e.preventDefault()}
-                onDrop={e => { e.preventDefault(); const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')); setPendingFiles(files) }}
-                className="border-2 border-dashed border-stone-200 hover:border-[#4a5240] rounded-xl p-8 text-center cursor-pointer transition"
-              >
-                {pendingFiles.length > 0 ? (
-                  <div>
-                    <p style={{ fontWeight: 300, fontSize: '0.95rem' }} className="text-stone-600 mb-1">
-                      {pendingFiles.length} photo{pendingFiles.length > 1 ? 's' : ''} sélectionnée{pendingFiles.length > 1 ? 's' : ''}
+
+            <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+              <div className="overflow-y-auto flex-1 px-6 py-4 space-y-4">
+
+                {/* Drop zone — toujours visible pour ajouter d'autres photos */}
+                <div
+                  onClick={() => fileRef.current?.click()}
+                  onDragOver={e => e.preventDefault()}
+                  onDrop={e => { e.preventDefault(); addFiles(Array.from(e.dataTransfer.files)) }}
+                  className="border-2 border-dashed border-stone-200 hover:border-[#4a5240] rounded-xl p-5 text-center cursor-pointer transition"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-7 h-7 text-stone-300 mx-auto mb-2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                  </svg>
+                  <p style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-500">
+                    {pendingPhotos.length > 0 ? 'Ajouter d\'autres photos' : 'Cliquer ou glisser des photos'}
+                  </p>
+                  <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 mt-0.5">JPG, PNG, HEIC</p>
+                  <input ref={fileRef} type="file" accept="image/*" multiple className="hidden"
+                    onChange={e => { addFiles(Array.from(e.target.files ?? [])); if (fileRef.current) fileRef.current.value = '' }} />
+                </div>
+
+                {/* Qui publie */}
+                <input
+                  type="text"
+                  value={uploaderName}
+                  onChange={e => setUploaderName(e.target.value)}
+                  placeholder="Qui publie ? (votre prénom)"
+                  className="w-full bg-white border border-stone-200 rounded-xl px-4 py-2.5 text-stone-700 outline-none focus:border-stone-400 transition placeholder:text-stone-300 text-sm"
+                  style={{ fontWeight: 300 }}
+                />
+
+                {/* Une fiche par photo */}
+                {pendingPhotos.length > 0 && (
+                  <div className="space-y-3">
+                    <p style={{ fontWeight: 400, fontSize: '0.75rem' }} className="text-stone-400 uppercase tracking-wider">
+                      {pendingPhotos.length} photo{pendingPhotos.length > 1 ? 's' : ''} — taguez les personnes visibles
                     </p>
-                    <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">Cliquer pour changer</p>
-                  </div>
-                ) : (
-                  <div>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1} className="w-10 h-10 text-stone-300 mx-auto mb-3">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                    </svg>
-                    <p style={{ fontWeight: 300, fontSize: '0.88rem' }} className="text-stone-500 mb-1">Cliquer ou glisser des photos</p>
-                    <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-300">JPG, PNG, HEIC</p>
-                  </div>
-                )}
-                <input ref={fileRef} type="file" name="photo" accept="image/*" multiple className="hidden"
-                  onChange={e => setPendingFiles(Array.from(e.target.files ?? []))} />
-              </div>
-
-              {/* Uploader name */}
-              <input
-                type="text"
-                value={uploaderName}
-                onChange={e => setUploaderName(e.target.value)}
-                placeholder="Qui publie ? (votre prénom)"
-                className="w-full bg-white border border-stone-200 rounded-xl px-4 py-2.5 text-stone-700 outline-none focus:border-stone-400 transition placeholder:text-stone-300 text-sm"
-                style={{ fontWeight: 300 }}
-              />
-
-              {/* Tag guests */}
-              <div className="bg-stone-50 border border-stone-200 rounded-xl px-4 py-2.5 space-y-2">
-                <p style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-stone-400">Qui voit-on sur la photo ?</p>
-                {tagged.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5">
-                    {tagged.map(t => (
-                      <span key={t} className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-stone-200 text-stone-600"
-                        style={{ fontSize: '0.75rem', fontWeight: 300 }}>
-                        {t}
-                        <button type="button" onClick={() => removeTag(t)} className="text-stone-400 hover:text-stone-700 transition leading-none cursor-pointer">×</button>
-                      </span>
+                    {pendingPhotos.map((pp, idx) => (
+                      <div key={idx} className="flex gap-3 bg-stone-50 border border-stone-100 rounded-xl p-3">
+                        {/* Miniature */}
+                        <div className="relative shrink-0">
+                          <img src={pp.preview} alt="" className="w-16 h-16 object-cover rounded-lg" />
+                          <button type="button"
+                            onClick={() => removePhotoFromPending(idx)}
+                            className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-stone-400 text-white flex items-center justify-center text-xs leading-none hover:bg-red-400 transition cursor-pointer">
+                            ×
+                          </button>
+                        </div>
+                        {/* Tags pour cette photo */}
+                        <div className="flex-1 min-w-0">
+                          <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-1.5">
+                            Qui voit-on ?
+                          </p>
+                          {pp.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mb-1.5">
+                              {pp.tags.map(t => (
+                                <span key={t} className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-stone-200 text-stone-600"
+                                  style={{ fontSize: '0.7rem', fontWeight: 300 }}>
+                                  {t}
+                                  <button type="button" onClick={() => removeTagFromPhoto(idx, t)}
+                                    className="text-stone-400 hover:text-stone-700 leading-none cursor-pointer">×</button>
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          <div className="relative">
+                            <input
+                              type="text"
+                              value={pp.tagInput}
+                              onChange={e => updatePhotoTagInput(idx, e.target.value)}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter') { e.preventDefault(); if (pp.tagInput.trim()) addTagToPhoto(idx, pp.tagInput.trim()) }
+                                if (e.key === 'Escape') updatePhotoTagInput(idx, '')
+                              }}
+                              placeholder="Taper un nom…"
+                              className="w-full bg-white border border-stone-200 rounded-lg px-3 py-1.5 text-stone-600 outline-none focus:border-[#4a5240] text-xs"
+                              style={{ fontWeight: 300 }}
+                            />
+                            {pp.tagSuggestions.length > 0 && (
+                              <div className="absolute left-0 top-full mt-1 bg-white border border-stone-200 rounded-xl overflow-hidden z-10 w-full shadow-lg">
+                                {pp.tagSuggestions.map(s => (
+                                  <button key={s} type="button"
+                                    onMouseDown={e => { e.preventDefault(); addTagToPhoto(idx, s) }}
+                                    className="w-full text-left px-3 py-1.5 text-stone-600 hover:bg-stone-50 transition text-xs cursor-pointer"
+                                    style={{ fontWeight: 300 }}>
+                                    {s}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 )}
-                <div className="relative">
-                  <input
-                    ref={tagRef}
-                    type="text"
-                    value={tagInput}
-                    onChange={e => handleTagInput(e.target.value)}
-                    onKeyDown={e => {
-                      if (e.key === 'Enter') { e.preventDefault(); if (tagInput.trim()) addTag(tagInput.trim()) }
-                      if (e.key === 'Escape') { setTagSuggestions([]); setTagInput('') }
-                    }}
-                    placeholder="Taper un nom…"
-                    className="w-full bg-transparent text-stone-600 outline-none placeholder:text-stone-300 text-sm"
-                    style={{ fontWeight: 300 }}
-                  />
-                  {tagSuggestions.length > 0 && (
-                    <div className="absolute left-0 top-full mt-1 bg-white border border-stone-200 rounded-xl overflow-hidden z-10 w-full shadow-lg">
-                      {tagSuggestions.map(s => (
-                        <button key={s} type="button"
-                          onMouseDown={e => { e.preventDefault(); addTag(s) }}
-                          className="w-full text-left px-3 py-2 text-stone-600 hover:bg-stone-50 transition text-sm cursor-pointer"
-                          style={{ fontWeight: 300 }}>
-                          {s}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
               </div>
 
-              <button type="submit" disabled={uploading || (pendingFiles.length === 0 && !fileRef.current?.files?.length)}
-                className="w-full bg-[#4a5240] text-white py-3 rounded-xl text-sm hover:bg-[#2d3228] transition disabled:opacity-40 cursor-pointer font-medium">
-                {uploading ? 'Envoi en cours…' : `Ajouter ${pendingFiles.length > 0 ? `${pendingFiles.length} photo${pendingFiles.length > 1 ? 's' : ''}` : 'les photos'}`}
-              </button>
+              {/* Footer fixe */}
+              <div className="px-6 pb-5 pt-3 border-t border-stone-100 shrink-0 space-y-2">
+                {/* Barre de progression */}
+                {uploadProgress && (
+                  <div className="space-y-1">
+                    <div className="w-full bg-stone-100 rounded-full h-1.5 overflow-hidden">
+                      <div
+                        className="bg-[#4a5240] h-full rounded-full transition-all duration-300"
+                        style={{ width: `${(uploadProgress.done / uploadProgress.total) * 100}%` }}
+                      />
+                    </div>
+                    <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400 text-center">
+                      {uploadProgress.done} / {uploadProgress.total} photo{uploadProgress.total > 1 ? 's' : ''} envoyée{uploadProgress.total > 1 ? 's' : ''}…
+                    </p>
+                  </div>
+                )}
+                {uploadError && (
+                  <p style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-red-400 text-center">{uploadError}</p>
+                )}
+                <button type="submit" disabled={uploading || pendingPhotos.length === 0}
+                  className="w-full bg-[#4a5240] text-white py-3 rounded-xl text-sm hover:bg-[#2d3228] transition disabled:opacity-40 cursor-pointer"
+                  style={{ fontWeight: 500 }}>
+                  {uploading
+                    ? `Envoi en cours…`
+                    : pendingPhotos.length > 0
+                      ? `Envoyer ${pendingPhotos.length} photo${pendingPhotos.length > 1 ? 's' : ''}`
+                      : 'Sélectionner des photos'}
+                </button>
+              </div>
             </form>
           </div>
         </div>

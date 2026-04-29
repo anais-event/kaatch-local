@@ -52,7 +52,6 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
   claimPhoto: (fd: FormData) => Promise<void>
 }) {
   const [search, setSearch] = useState('')
-  const [momentFilter, setMomentFilter] = useState('')
   const [selectMode, setSelectMode] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [zipping, setZipping] = useState(false)
@@ -93,14 +92,11 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
   }, [dropdownOpen])
 
   const filtered = photos.filter(p => {
-    if (momentFilter && p.moment_tag !== momentFilter) return false
-    if (search.trim()) {
-      const q = search.toLowerCase()
-      return cleanName(p.uploaded_by_name).toLowerCase().includes(q) ||
-        p.tagged_guests.some(g => cleanName(g).toLowerCase().includes(q)) ||
-        p.moment_tag?.toLowerCase().includes(q)
-    }
-    return true
+    if (!search.trim()) return true
+    const q = search.toLowerCase()
+    return cleanName(p.uploaded_by_name).toLowerCase().includes(q) ||
+      p.tagged_guests.some(g => cleanName(g).toLowerCase().includes(q)) ||
+      (p.moment_tag?.toLowerCase().includes(q) ?? false)
   })
 
   const currentPhoto = lightbox ? photos.find(p => p.id === lightbox) ?? null : null
@@ -198,7 +194,7 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
         {filtered.length === 0 ? (
           <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.5rem', fontWeight: 300 }}
             className="text-center text-stone-300 py-20">
-            {search || momentFilter ? 'Aucun résultat…' : 'Aucune photo pour l\'instant…'}
+            {search ? 'Aucun résultat…' : "Aucune photo pour l'instant…"}
           </p>
         ) : (
           <div className="columns-2 gap-3 space-y-3">
@@ -286,19 +282,6 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
                 className="w-full bg-[#f5f0e8] border-0 rounded-xl px-3 py-2 text-stone-700 text-sm outline-none focus:ring-1 focus:ring-[#4a5240] transition"
                 style={{ fontWeight: 300 }} />
             </div>
-            {/* Filtres moments */}
-            {moments.length > 0 && (
-              <div className="px-4 pb-3 flex flex-wrap gap-1.5">
-                <button onClick={() => setMomentFilter('')}
-                  className={`px-3 py-0.5 rounded-full text-xs transition cursor-pointer ${!momentFilter ? 'bg-[#4a5240] text-white' : 'text-stone-400 hover:text-stone-600'}`}
-                  style={{ fontWeight: 300 }}>Tous</button>
-                {moments.map(m => (
-                  <button key={m} onClick={() => setMomentFilter(momentFilter === m ? '' : m)}
-                    className={`px-3 py-0.5 rounded-full text-xs transition cursor-pointer ${momentFilter === m ? 'bg-[#4a5240] text-white' : 'text-stone-400 hover:text-stone-600'}`}
-                    style={{ fontWeight: 300 }}>{m}</button>
-                ))}
-              </div>
-            )}
             <div className="border-t border-stone-100">
               {/* Sélectionner */}
               <button onClick={() => { setSelectMode(s => !s); setSelectedIds(new Set()); setDropdownOpen(false) }}

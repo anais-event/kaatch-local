@@ -207,30 +207,6 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
             Paramètres
           </a>
 
-          {/* Formule */}
-          <div className="px-3 py-2.5 mt-1">
-            <p style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.12em' }}
-               className="text-stone-300 uppercase mb-1.5">Formule</p>
-            {plan === 'mariage' || plan === 'pro' ? (
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] bg-[#4a5240]/10 text-[#4a5240] px-2 py-0.5 rounded-full" style={{ fontWeight: 500 }}>Mariage</span>
-                <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400">Tout inclus ✓</span>
-              </div>
-            ) : (
-              <div>
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className="text-[10px] bg-stone-100 text-stone-400 px-2 py-0.5 rounded-full" style={{ fontWeight: 500 }}>Gratuite</span>
-                  <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400">20 invités max</span>
-                </div>
-                <a href={`https://kaatch-mariage.lemonsqueezy.com/checkout/buy/a9a7912e-a499-41a4-83ee-a885e4d3855c?checkout[custom][wedding_id]=${weddingId}&checkout[custom][plan]=mariage`}
-                   className="block text-center bg-[#4a5240] text-white text-[10px] px-2 py-1.5 rounded-lg hover:bg-[#2d3228] transition"
-                   style={{ fontWeight: 400, letterSpacing: '0.03em' }}>
-                  Passer à Mariage →
-                </a>
-              </div>
-            )}
-          </div>
-
           {/* Activité */}
           {log.length > 0 && (
             <div className="px-3 py-2">

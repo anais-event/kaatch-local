@@ -12,6 +12,30 @@ function adminClient() {
   )
 }
 
+async function createCode(formData: FormData) {
+  'use server'
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user?.email !== ADMIN_EMAIL) return
+
+  const code = (formData.get('code') as string).trim().toUpperCase()
+  const maxUses = parseInt(formData.get('max_uses') as string) || 1
+  await adminClient().from('promo_codes').insert({ code, max_uses: maxUses, plan: 'mariage' })
+  revalidatePath('/admin')
+}
+
+async function toggleCode(formData: FormData) {
+  'use server'
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user?.email !== ADMIN_EMAIL) return
+
+  const id = formData.get('id') as string
+  const active = formData.get('active') === 'true'
+  await adminClient().from('promo_codes').update({ active: !active }).eq('id', id)
+  revalidatePath('/admin')
+}
+
 async function setPlan(formData: FormData) {
   'use server'
   const supabase = await createSupabaseServerClient()
@@ -45,6 +69,11 @@ export default async function AdminPage() {
   for (const g of guestCounts ?? []) {
     countByWedding[g.wedding_id] = (countByWedding[g.wedding_id] ?? 0) + 1
   }
+
+  const { data: promoCodes } = await adminClient()
+    .from('promo_codes')
+    .select('id, code, plan, max_uses, uses_count, active, created_at')
+    .order('created_at', { ascending: false })
 
   const total = weddings?.length ?? 0
   const paid = weddings?.filter(w => w.plan === 'mariage' || w.plan === 'pro').length ?? 0
@@ -174,6 +203,71 @@ export default async function AdminPage() {
               })}
             </div>
           )}
+        </div>
+
+        {/* Codes avantage */}
+        <div className="mt-10">
+          <h2 style={{ fontFamily: DISPLAY, fontWeight: 500, fontSize: '1.4rem', fontStyle: 'italic' }}
+              className="text-[#2d3228] mb-5">Codes avantage</h2>
+
+          {/* Créer un code */}
+          <form action={createCode} className="bg-white rounded-2xl border border-stone-100 p-5 shadow-sm mb-5 flex gap-3 flex-wrap items-end">
+            <div className="flex-1 min-w-[160px]">
+              <label className="block text-xs text-stone-400 uppercase tracking-wide mb-1" style={{ fontWeight: 400 }}>
+                Code
+              </label>
+              <input type="text" name="code" placeholder="KAATCH-BETA" required
+                className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#4a5240] transition uppercase"
+                style={{ fontWeight: 300, letterSpacing: '0.05em' }} />
+            </div>
+            <div className="w-28">
+              <label className="block text-xs text-stone-400 uppercase tracking-wide mb-1" style={{ fontWeight: 400 }}>
+                Nb d'utilisations
+              </label>
+              <input type="number" name="max_uses" defaultValue={1} min={1} max={9999}
+                className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#4a5240] transition"
+                style={{ fontWeight: 300 }} />
+            </div>
+            <button type="submit"
+              className="bg-[#4a5240] text-white px-5 py-2.5 rounded-xl text-sm hover:bg-[#2d3228] transition cursor-pointer"
+              style={{ fontWeight: 400 }}>
+              + Créer
+            </button>
+          </form>
+
+          {/* Liste des codes */}
+          <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
+            {(promoCodes ?? []).length === 0 ? (
+              <p className="px-6 py-8 text-center text-stone-400 text-sm">Aucun code créé pour l'instant.</p>
+            ) : (
+              <div className="divide-y divide-stone-50">
+                {(promoCodes ?? []).map(c => (
+                  <div key={c.id} className="px-5 py-3 flex items-center gap-4 flex-wrap">
+                    <p style={{ fontFamily: 'monospace', fontWeight: 600, fontSize: '0.9rem', letterSpacing: '0.08em' }}
+                       className={`flex-1 ${c.active ? 'text-[#2d3228]' : 'text-stone-300 line-through'}`}>
+                      {c.code}
+                    </p>
+                    <span className="text-xs text-stone-400" style={{ fontWeight: 300 }}>
+                      {c.uses_count} / {c.max_uses} utilisations
+                    </span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full ${c.active ? 'bg-emerald-50 text-emerald-600' : 'bg-stone-100 text-stone-400'}`}
+                          style={{ fontWeight: 500 }}>
+                      {c.active ? 'Actif' : 'Désactivé'}
+                    </span>
+                    <form action={toggleCode}>
+                      <input type="hidden" name="id" value={c.id} />
+                      <input type="hidden" name="active" value={String(c.active)} />
+                      <button type="submit"
+                        className="text-xs border border-stone-200 text-stone-400 px-3 py-1 rounded-lg hover:border-stone-300 hover:text-stone-600 transition cursor-pointer"
+                        style={{ fontWeight: 300 }}>
+                        {c.active ? 'Désactiver' : 'Réactiver'}
+                      </button>
+                    </form>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
       </div>

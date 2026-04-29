@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
+import { isPaid, checkoutUrl } from '@/lib/plan'
 
 export default async function Dashboard() {
   const supabase = await createSupabaseServerClient()
@@ -9,7 +10,7 @@ export default async function Dashboard() {
 
   const { data: weddings } = await supabase
     .from('weddings')
-    .select('slug, name, date, cover_image_url, theme, photos(id)')
+    .select('id, slug, name, date, cover_image_url, theme, plan, photos(id)')
     .eq('couple_id', user.id)
     .order('created_at', { ascending: false })
 
@@ -41,10 +42,12 @@ export default async function Dashboard() {
               : 'Date à confirmer'
 
             return (
-              <a key={wedding.slug} href={`/wedding/${wedding.slug}`}
-                 className="group block rounded-2xl overflow-hidden transition-shadow hover:shadow-lg border border-stone-100"
-                 style={{ boxShadow: '0 2px 12px rgba(44,59,46,0.07)' }}>
-                <div className="relative h-48 bg-[#2C3B2E]">
+              <div key={wedding.slug} className="rounded-2xl overflow-hidden border border-stone-100"
+                   style={{ boxShadow: '0 2px 12px rgba(44,59,46,0.07)' }}>
+
+                {/* Cover + infos */}
+                <a href={`/wedding/${wedding.slug}`}
+                   className="group block relative h-48 bg-[#2C3B2E]">
                   {wedding.cover_image_url && (
                     <img src={wedding.cover_image_url} alt={wedding.name}
                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -66,8 +69,39 @@ export default async function Dashboard() {
                       )}
                     </div>
                   </div>
-                </div>
-              </a>
+                </a>
+
+                {/* Bandeau formule */}
+                {isPaid(wedding.plan) ? (
+                  <div className="bg-[#2d3228] px-5 py-2.5 flex items-center gap-2">
+                    <span className="text-[10px] bg-[#4a5240] text-white px-2 py-0.5 rounded-full tracking-wide"
+                          style={{ fontWeight: 500 }}>
+                      FORMULE MARIAGE
+                    </span>
+                    <p className="text-xs text-white/50" style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}>
+                      Toutes les fonctionnalités activées
+                    </p>
+                  </div>
+                ) : (
+                  <div className="bg-white border-t border-stone-100 px-5 py-3 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] bg-stone-100 text-stone-400 px-2 py-0.5 rounded-full tracking-wide"
+                            style={{ fontWeight: 500 }}>
+                        FORMULE GRATUITE
+                      </span>
+                      <p className="text-xs text-stone-400 hidden sm:block" style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}>
+                        20 invités · faire-part limité
+                      </p>
+                    </div>
+                    <a href={checkoutUrl(wedding.id)}
+                       className="shrink-0 bg-[#4a5240] text-white text-xs px-4 py-1.5 rounded-xl hover:bg-[#2d3228] transition"
+                       style={{ fontFamily: 'var(--font-body)', fontWeight: 400 }}>
+                      Passer à la formule Mariage →
+                    </a>
+                  </div>
+                )}
+
+              </div>
             )
           })}
         </div>

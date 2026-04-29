@@ -218,280 +218,145 @@ async function drawFairePartCanvasNew(
   coupleMessage: string | null,
   qrCanvas: HTMLCanvasElement | null
 ): Promise<string> {
-  const W = 600, H = 1700
+  // Get actual font family names from CSS variables (next/font assigns obfuscated names)
+  const cssVars = getComputedStyle(document.documentElement)
+  const FONT_D = cssVars.getPropertyValue('--font-cormorant').trim() || '"Cormorant Garamond", Georgia, serif'
+  const FONT_B = cssVars.getPropertyValue('--font-lato').trim() || 'Lato, sans-serif'
+
+  // Wait for fonts to be loaded in the page before drawing
+  await document.fonts.ready
+
+  const W = 600, H = 980
+  const DPR = 2
   const canvas = document.createElement('canvas')
-  canvas.width = W; canvas.height = H
+  canvas.width = W * DPR; canvas.height = H * DPR
   const ctx = canvas.getContext('2d')!
+  ctx.scale(DPR, DPR)
   ctx.textAlign = 'center'
 
-  // ─── PAGE 1 BACKGROUND ───
+  // ─── BACKGROUND ───
+  ctx.fillStyle = '#f5f0e8'
+  ctx.fillRect(0, 0, W, H)
+
+  // ─── DARK GREEN HEADER ───
   ctx.fillStyle = '#4a5639'
-  ctx.fillRect(0, 0, W, 850)
+  ctx.fillRect(0, 0, W, 220)
 
-  // ─── PAGE 2 BACKGROUND ───
-  ctx.fillStyle = '#4c5a3b'
-  ctx.fillRect(0, 860, W, H - 860)
-
-  // ─── THIN PAGE SEPARATOR ───
-  ctx.strokeStyle = 'rgba(201,169,110,0.3)'
-  ctx.lineWidth = 1
-  ctx.beginPath(); ctx.moveTo(40, 855); ctx.lineTo(560, 855); ctx.stroke()
-
-  // ─── HELPER FUNCTIONS ───
-  function goldGrad(x0: number, y0: number, x1: number, y1: number) {
-    const g = ctx.createLinearGradient(x0, y0, x1, y1)
-    g.addColorStop(0, '#e2c97e')
-    g.addColorStop(0.4, '#c9a96e')
-    g.addColorStop(0.75, '#a07840')
-    g.addColorStop(1, '#d4b96e')
-    return g
-  }
-
-  function drawLeaf(lx: number, ly: number, size: number, angle: number, color: string, alpha = 0.75) {
-    ctx.save()
-    ctx.translate(lx, ly)
-    ctx.rotate(angle)
-    ctx.globalAlpha = alpha
-    ctx.beginPath()
-    ctx.moveTo(0, 0)
-    ctx.bezierCurveTo(-size * 0.32, -size * 0.45, -size * 0.22, -size * 1.05, 0, -size * 1.15)
-    ctx.bezierCurveTo(size * 0.22, -size * 1.05, size * 0.32, -size * 0.45, 0, 0)
-    ctx.fillStyle = color
-    ctx.fill()
-    ctx.globalAlpha = 0.2
-    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -size * 1.15)
-    ctx.strokeStyle = '#2d3a22'; ctx.lineWidth = 0.6; ctx.stroke()
-    ctx.restore()
-    ctx.globalAlpha = 1
-  }
-
-  function drawGoldLeaf(lx: number, ly: number) {
-    ctx.save()
-    ctx.translate(lx, ly)
-    const g = ctx.createLinearGradient(0, 0, 35, 60)
-    g.addColorStop(0, '#e2c97e'); g.addColorStop(0.5, '#c9a96e'); g.addColorStop(1, '#a07840')
-    ctx.beginPath()
-    ctx.moveTo(35, 0)
-    ctx.bezierCurveTo(8, 10, 4, 38, 8, 50)
-    ctx.bezierCurveTo(14, 62, 32, 56, 35, 0)
-    ctx.fillStyle = g; ctx.fill()
-    ctx.beginPath(); ctx.moveTo(35, 0); ctx.bezierCurveTo(20, 20, 14, 44, 10, 54)
-    ctx.strokeStyle = 'rgba(120,80,30,0.5)'; ctx.lineWidth = 0.8; ctx.stroke()
-    // sub-leaf
-    ctx.beginPath()
-    ctx.moveTo(12, 50)
-    ctx.bezierCurveTo(-2, 45, -5, 58, 2, 64)
-    ctx.bezierCurveTo(10, 68, 18, 62, 12, 50)
-    ctx.fillStyle = g; ctx.fill()
-    ctx.restore()
-  }
-
-  // ─── PAGE 1: TOP TEXT ───
-  ctx.fillStyle = 'rgba(255,255,255,0.82)'
-  ctx.font = 'italic 22px Georgia, serif'
-  ctx.fillText('Vous êtes invités au mariage de', W / 2, 58)
-
-  // ─── RING ───
-  const ringCX = W / 2, ringCY = 330, ringR = 175, ringR2 = 160
-
-  // outer ring
-  ctx.beginPath(); ctx.arc(ringCX, ringCY, ringR, 0, Math.PI * 2)
-  ctx.strokeStyle = goldGrad(ringCX - ringR, ringCY, ringCX + ringR, ringCY)
-  ctx.lineWidth = 2.2; ctx.stroke()
-  // inner ring
-  ctx.beginPath(); ctx.arc(ringCX, ringCY, ringR2, 0, Math.PI * 2)
-  ctx.strokeStyle = goldGrad(ringCX + ringR2, ringCY, ringCX - ringR2, ringCY)
-  ctx.globalAlpha = 0.65; ctx.lineWidth = 1.4; ctx.stroke()
-  ctx.globalAlpha = 1
-
-  // decorative dots on ring
-  ;[0, 90, 180, 270].forEach(deg => {
-    const rad = (deg * Math.PI) / 180
-    const dx = ringCX + ringR * Math.cos(rad)
-    const dy = ringCY + ringR * Math.sin(rad)
-    ctx.beginPath(); ctx.arc(dx, dy, 3.5, 0, Math.PI * 2)
-    ctx.strokeStyle = goldGrad(dx - 4, dy, dx + 4, dy); ctx.lineWidth = 1.5; ctx.stroke()
-  })
-
-  // ─── BOTANICAL TOP LEAVES ───
-  const leafColors = ['#9bb982', '#8aad72', '#a3c48a', '#7aa068', '#b0cc96']
-  // center cluster top
-  ;[
-    [ringCX, ringCY - ringR - 2, 22, -Math.PI / 2, 0],
-    [ringCX - 30, ringCY - ringR + 8, 18, -Math.PI * 0.6, 1],
-    [ringCX + 30, ringCY - ringR + 8, 18, -Math.PI * 0.4, 2],
-    [ringCX - 55, ringCY - ringR + 20, 16, -Math.PI * 0.7, 3],
-    [ringCX + 55, ringCY - ringR + 20, 16, -Math.PI * 0.3, 4],
-    [ringCX - 75, ringCY - ringR + 36, 14, -Math.PI * 0.75, 2],
-    [ringCX + 75, ringCY - ringR + 36, 14, -Math.PI * 0.25, 3],
-    [ringCX - 22, ringCY - ringR - 10, 16, -Math.PI * 0.55, 1],
-    [ringCX + 22, ringCY - ringR - 10, 16, -Math.PI * 0.45, 4],
-  ].forEach(([lx, ly, size, angle, ci]) => {
-    drawLeaf(lx as number, ly as number, size as number, angle as number, leafColors[ci as number])
-  })
-
-  // ─── BOTANICAL BOTTOM LEAVES ───
-  ;[
-    [ringCX, ringCY + ringR + 2, 22, Math.PI / 2, 0],
-    [ringCX - 32, ringCY + ringR - 8, 18, Math.PI * 0.62, 1],
-    [ringCX + 32, ringCY + ringR - 8, 18, Math.PI * 0.38, 2],
-    [ringCX - 60, ringCY + ringR - 18, 16, Math.PI * 0.7, 3],
-    [ringCX + 60, ringCY + ringR - 18, 16, Math.PI * 0.3, 4],
-    [ringCX - 85, ringCY + ringR - 32, 14, Math.PI * 0.78, 2],
-    [ringCX + 85, ringCY + ringR - 32, 14, Math.PI * 0.22, 3],
-    [ringCX - 22, ringCY + ringR + 12, 16, Math.PI * 0.55, 1],
-    [ringCX + 22, ringCY + ringR + 12, 16, Math.PI * 0.45, 4],
-    [ringCX - 100, ringCY + ringR - 42, 12, Math.PI * 0.8, 0],
-    [ringCX + 100, ringCY + ringR - 42, 12, Math.PI * 0.2, 1],
-  ].forEach(([lx, ly, size, angle, ci]) => {
-    drawLeaf(lx as number, ly as number, size as number, angle as number, leafColors[ci as number])
-  })
-
-  // ─── GOLD LEAF (LEFT) ───
-  drawGoldLeaf(ringCX - ringR - 28, ringCY - 30)
-
-  // ─── NAMES INSIDE RING ───
-  const [name1, name2] = parseNames(weddingName)
-
-  ctx.fillStyle = '#ffffff'
-  ctx.font = '600 36px Georgia, serif'
-  ctx.letterSpacing = '0.12em'
-
-  if (name2) {
-    ctx.fillText(name1.toUpperCase(), ringCX, ringCY - 34)
-    ctx.fillStyle = GOLD
-    ctx.font = 'normal 20px Georgia, serif'
-    ctx.letterSpacing = '0'
-    ctx.fillText('&', ringCX, ringCY - 8)
-    ctx.fillStyle = '#ffffff'
-    ctx.font = '600 36px Georgia, serif'
-    ctx.letterSpacing = '0.12em'
-    ctx.fillText(name2.toUpperCase(), ringCX, ringCY + 30)
-  } else {
-    ctx.fillText(name1.toUpperCase(), ringCX, ringCY + 8)
-  }
+  // ─── HEADER: small caps label ───
+  ctx.fillStyle = 'rgba(255,255,255,0.45)'
+  ctx.font = `300 10px ${FONT_B}`
+  ctx.letterSpacing = '0.22em'
+  ctx.fillText('VOUS ÊTES INVITÉS AU MARIAGE DE', W / 2, 44)
   ctx.letterSpacing = '0'
 
-  // date
+  // ─── NAMES ───
+  const [name1, name2] = parseNames(weddingName)
+  ctx.fillStyle = '#ffffff'
+  if (name2) {
+    ctx.font = `italic 600 50px ${FONT_D}`
+    ctx.fillText(name1, W / 2, 106)
+    ctx.fillStyle = '#c9a96e'
+    ctx.font = `italic 300 18px ${FONT_D}`
+    ctx.fillText('&', W / 2, 132)
+    ctx.fillStyle = '#ffffff'
+    ctx.font = `italic 600 50px ${FONT_D}`
+    ctx.fillText(name2, W / 2, 192)
+  } else {
+    ctx.font = `italic 600 50px ${FONT_D}`
+    ctx.fillText(name1, W / 2, 154)
+  }
+
+  // ─── GOLD SEPARATOR LINE ───
+  const lineY = 238
+  const grad = ctx.createLinearGradient(80, lineY, W - 80, lineY)
+  grad.addColorStop(0, 'rgba(201,169,110,0)'); grad.addColorStop(0.5, 'rgba(201,169,110,0.6)'); grad.addColorStop(1, 'rgba(201,169,110,0)')
+  ctx.strokeStyle = grad; ctx.lineWidth = 0.8
+  ctx.beginPath(); ctx.moveTo(80, lineY); ctx.lineTo(W - 80, lineY); ctx.stroke()
+
+  // ─── DATE ───
+  let contentY = 278
   if (dateStr) {
-    ctx.fillStyle = 'rgba(255,255,255,0.8)'
-    ctx.font = 'italic 17px Georgia, serif'
     const d = dateStr.charAt(0).toUpperCase() + dateStr.slice(1)
-    // wrap if long
-    const words = d.split(' ')
+    ctx.fillStyle = '#2d3228'
+    ctx.font = `italic 300 19px ${FONT_D}`
+    ctx.fillText(d, W / 2, contentY)
+    contentY += 32
+  }
+
+  // ─── LOCATION ───
+  if (location) {
+    ctx.fillStyle = '#7a8070'
+    ctx.font = `300 11px ${FONT_B}`
+    ctx.letterSpacing = '0.1em'
+    ctx.fillText(location.replace(/\n/g, ' · ').toUpperCase(), W / 2, contentY)
+    ctx.letterSpacing = '0'
+    contentY += 30
+  }
+
+  // ─── COUPLE MESSAGE ───
+  if (coupleMessage) {
+    contentY += 16
+    // Ornament
+    ctx.fillStyle = '#c9a96e'
+    ctx.globalAlpha = 0.5
+    ctx.font = '11px serif'
+    ctx.fillText('◆', W / 2, contentY)
+    ctx.globalAlpha = 1
+    contentY += 24
+
+    ctx.fillStyle = '#5a5a52'
+    ctx.font = `italic 300 16px ${FONT_D}`
+    const maxW = W - 120
+    const words = coupleMessage.split(/\s+/)
     let line = '', lines: string[] = []
     for (const w of words) {
       const t = line + (line ? ' ' : '') + w
-      if (ctx.measureText(t).width > 280) { lines.push(line); line = w } else line = t
+      if (ctx.measureText(t).width > maxW) { lines.push(line); line = w } else line = t
     }
-    lines.push(line)
-    let dateY = name2 ? ringCY + 60 : ringCY + 42
-    for (const l of lines) { ctx.fillText(l, ringCX, dateY); dateY += 22 }
-  }
-
-  // ─── BOTTOM LOCATION ───
-  if (location) {
-    ctx.fillStyle = 'rgba(255,255,255,0.72)'
-    ctx.font = 'italic 16px Georgia, serif'
-    const locLines = location.split('\n')
-    let ly = 760
-    for (const l of locLines) { ctx.fillText(l, W / 2, ly); ly += 24 }
-  }
-
-  // small bottom text page 1
-  ctx.fillStyle = 'rgba(255,255,255,0.5)'
-  ctx.font = 'italic 13px Georgia, serif'
-  ctx.fillText('pour célébrer ce moment d\'amour', W / 2, 820)
-
-  // ─── PAGE 2: GEOMETRIC FRAME ───
-  const fX = 55, fY = 920, fW = W - 110, fH = 620
-
-  function geoPoints(x: number, y: number, fw: number, fh: number) {
-    const cx2 = x + fw / 2
-    return [
-      [cx2, y],
-      [x + fw * 0.78, y + fh * 0.12],
-      [x + fw, y + fh * 0.35],
-      [x + fw, y + fh * 0.65],
-      [x + fw * 0.78, y + fh * 0.88],
-      [cx2, y + fh],
-      [x + fw * 0.22, y + fh * 0.88],
-      [x, y + fh * 0.65],
-      [x, y + fh * 0.35],
-      [x + fw * 0.22, y + fh * 0.12],
-    ]
-  }
-
-  const outerPts = geoPoints(fX, fY, fW, fH)
-  const inset2 = 10
-  const innerPts = geoPoints(fX + inset2, fY + inset2 * 0.5, fW - inset2 * 2, fH - inset2)
-
-  function strokePolygon(pts: number[][], grad: CanvasGradient, lw: number, alpha = 1) {
-    ctx.globalAlpha = alpha
-    ctx.beginPath()
-    pts.forEach(([px, py], i) => i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py))
-    ctx.closePath()
-    ctx.strokeStyle = grad; ctx.lineWidth = lw; ctx.stroke()
-    ctx.globalAlpha = 1
-  }
-
-  const frameGrad1 = goldGrad(fX, fY, fX + fW, fY + fH)
-  const frameGrad2 = goldGrad(fX + fW, fY + fH, fX, fY)
-  strokePolygon(outerPts, frameGrad1, 2)
-  strokePolygon(innerPts, frameGrad2, 1, 0.55)
-
-  // ─── PAGE 2: MESSAGE ───
-  if (coupleMessage) {
-    ctx.fillStyle = 'rgba(255,255,255,0.88)'
-    ctx.font = 'italic 17px Georgia, serif'
-    const maxW = fW - 80
-    const allWords = coupleMessage.split(/\n/)
-    let msgY = fY + 80
-    for (const para of allWords) {
-      if (!para.trim()) { msgY += 14; continue }
-      const ws = para.trim().split(' ')
-      let cl = ''
-      const cls: string[] = []
-      for (const w of ws) {
-        const t = cl + (cl ? ' ' : '') + w
-        if (ctx.measureText(t).width > maxW) { cls.push(cl); cl = w } else cl = t
-      }
-      cls.push(cl)
-      for (const l of cls) { ctx.fillText(l, W / 2, msgY); msgY += 26 }
-      msgY += 10
+    if (line) lines.push(line)
+    for (const l of lines.slice(0, 6)) {
+      ctx.fillText(l, W / 2, contentY)
+      contentY += 26
     }
   }
 
-  // ─── MERCI CONFIRMER ───
-  ctx.fillStyle = 'rgba(255,255,255,0.75)'
-  ctx.font = '300 13px Arial, sans-serif'
-  ctx.letterSpacing = '0.14em'
-  ctx.fillText('MERCI DE NOUS CONFIRMER VOTRE PRÉSENCE', W / 2, fY + fH - 120)
+  // ─── QR CODE ZONE ───
+  const qrTop = Math.max(contentY + 40, 660)
+  ctx.fillStyle = '#7a8070'
+  ctx.font = `300 9px ${FONT_B}`
+  ctx.letterSpacing = '0.18em'
+  ctx.fillText('VOTRE ESPACE PERSONNEL', W / 2, qrTop)
   ctx.letterSpacing = '0'
-  ctx.fillStyle = GOLD
-  ctx.font = '20px Georgia, serif'
-  ctx.fillText('↓', W / 2, fY + fH - 96)
 
-  // ─── QR CODE ───
+  const qrSize = 116
+  const qrX = W / 2 - qrSize / 2
+  const qrY2 = qrTop + 14
+
+  // Light cream bg behind QR
+  ctx.fillStyle = '#ede8df'
+  ctx.beginPath()
+  ctx.roundRect(qrX - 8, qrY2 - 8, qrSize + 16, qrSize + 16, 8)
+  ctx.fill()
+
   if (qrCanvas) {
-    ctx.drawImage(qrCanvas, W / 2 - 50, fY + fH - 85, 100, 100)
+    ctx.drawImage(qrCanvas, qrX, qrY2, qrSize, qrSize)
   } else {
     const QR = await import('qrcode')
     const qrDataUrl = await QR.default.toDataURL(personalUrl, {
-      width: 120, margin: 1,
-      color: { dark: '#2d3a22', light: '#f0ede4' },
+      width: qrSize * 2, margin: 1,
+      color: { dark: '#2d3a22', light: '#ede8df' },
     })
     const qrImg = new Image()
     await new Promise<void>(r => { qrImg.onload = () => r(); qrImg.src = qrDataUrl })
-    ctx.drawImage(qrImg, W / 2 - 60, fY + fH - 90, 120, 120)
+    ctx.drawImage(qrImg, qrX, qrY2, qrSize, qrSize)
   }
 
-  // ─── HEARTS AROUND QR ───
-  const hearts = [[-70, -20], [70, -20], [-55, 30], [55, 30]]
-  const heartCX = W / 2, heartCY = fY + fH - 30
-  ctx.fillStyle = 'rgba(201,169,110,0.5)'
-  ctx.font = '14px sans-serif'
-  hearts.forEach(([hx, hy]) => ctx.fillText('♡', heartCX + hx, heartCY + hy))
+  // ─── FOOTER ───
+  ctx.fillStyle = 'rgba(74,86,57,0.3)'
+  ctx.font = `300 9px ${FONT_B}`
+  ctx.letterSpacing = '0.12em'
+  ctx.fillText('KAATCH.FR', W / 2, H - 18)
+  ctx.letterSpacing = '0'
 
   return canvas.toDataURL('image/png')
 }

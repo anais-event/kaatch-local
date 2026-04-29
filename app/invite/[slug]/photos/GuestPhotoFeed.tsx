@@ -43,12 +43,13 @@ async function downloadZip(photos: Photo[]) {
   a.download = 'photos-mariage.zip'; a.click()
 }
 
-export default function GuestPhotoFeed({ photos, moments, guestName, guestNames, addLike, addComment, uploadPhoto, deletePhoto, slug }: {
+export default function GuestPhotoFeed({ photos, moments, guestName, guestNames, addLike, addComment, uploadPhoto, deletePhoto, claimPhoto, slug }: {
   photos: Photo[]; moments: string[]; guestNames: string[]; guestName: string; slug: string
   addLike: (fd: FormData) => Promise<void>
   addComment: (fd: FormData) => Promise<void>
   uploadPhoto: (fd: FormData) => Promise<void>
   deletePhoto: (fd: FormData) => Promise<void>
+  claimPhoto: (fd: FormData) => Promise<void>
 }) {
   const [search, setSearch] = useState('')
   const [momentFilter, setMomentFilter] = useState('')
@@ -71,6 +72,9 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
   const [selectedMoment, setSelectedMoment] = useState('')
   const [uploading, setUploading] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [editingName, setEditingName] = useState(false)
+  const [editNameValue, setEditNameValue] = useState('')
+  const [savingName, setSavingName] = useState(false)
   const [, startTransition] = useTransition()
 
   const fileRef = useRef<HTMLInputElement>(null)
@@ -108,7 +112,7 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
     setLightbox(id); setLbLikes(p.likes); setLbLikedBy(p.liked_by); setLbComments(p.comments)
   }, [photos])
 
-  const closeLightbox = () => { setLightbox(null); setLbComments([]) }
+  const closeLightbox = () => { setLightbox(null); setLbComments([]); setEditingName(false) }
   const prevPhoto = () => openLightbox(photos[(currentIdx - 1 + photos.length) % photos.length].id)
   const nextPhoto = () => openLightbox(photos[(currentIdx + 1) % photos.length].id)
 
@@ -464,7 +468,51 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               <div>
                 <p className="text-stone-400 text-xs mb-0.5" style={{ fontWeight: 300 }}>Publié par</p>
-                <p className="text-stone-700 text-sm" style={{ fontWeight: 400 }}>{cleanName(currentPhoto.uploaded_by_name) || 'Anonyme'}</p>
+                {editingName ? (
+                  <form onSubmit={async e => {
+                    e.preventDefault()
+                    if (!editNameValue.trim()) return
+                    setSavingName(true)
+                    const fd = new FormData()
+                    fd.append('photo_id', currentPhoto.id)
+                    fd.append('slug', slug)
+                    fd.append('new_name', editNameValue.trim())
+                    await claimPhoto(fd)
+                    setSavingName(false)
+                    setEditingName(false)
+                  }} className="flex gap-2 items-center mt-1">
+                    <input
+                      type="text"
+                      value={editNameValue}
+                      onChange={e => setEditNameValue(e.target.value)}
+                      autoFocus
+                      placeholder="Votre prénom"
+                      className="flex-1 border border-stone-200 rounded-lg px-2.5 py-1.5 text-stone-700 text-sm outline-none focus:border-[#4a5240] transition"
+                      style={{ fontWeight: 300 }}
+                    />
+                    <button type="submit" disabled={savingName || !editNameValue.trim()}
+                      className="bg-[#4a5240] text-white px-2.5 py-1.5 rounded-lg text-xs hover:bg-[#2d3228] transition disabled:opacity-40 cursor-pointer"
+                      style={{ fontWeight: 300 }}>
+                      {savingName ? '…' : '✓'}
+                    </button>
+                    <button type="button" onClick={() => setEditingName(false)}
+                      className="text-stone-400 hover:text-stone-700 text-sm cursor-pointer px-1">×</button>
+                  </form>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <p className="text-stone-700 text-sm" style={{ fontWeight: 400 }}>
+                      {cleanName(currentPhoto.uploaded_by_name) || 'Anonyme'}
+                    </p>
+                    {(!currentPhoto.uploaded_by_name || currentPhoto.uploaded_by_name === 'Anonyme' || currentPhoto.uploaded_by_name === myName) && (
+                      <button
+                        onClick={() => { setEditingName(true); setEditNameValue(myName !== 'Anonyme' ? myName : '') }}
+                        className="text-[10px] text-stone-400 hover:text-[#4a5240] transition cursor-pointer underline underline-offset-2"
+                        style={{ fontWeight: 300 }}>
+                        {!currentPhoto.uploaded_by_name || currentPhoto.uploaded_by_name === 'Anonyme' ? "C'est moi" : 'Modifier'}
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
               {currentPhoto.moment_tag && (
                 <div>

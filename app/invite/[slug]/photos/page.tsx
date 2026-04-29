@@ -25,6 +25,24 @@ async function addComment(formData: FormData) {
   revalidatePath(`/invite/${formData.get('slug')}/photos`)
 }
 
+async function claimPhoto(formData: FormData) {
+  'use server'
+  const supabase = await createSupabaseServerClient()
+  const slug = formData.get('slug') as string
+  const photo_id = formData.get('photo_id') as string
+  const new_name = (formData.get('new_name') as string)?.trim()
+  if (!new_name) return
+  const { data: photo } = await supabase.from('photos').select('uploaded_by_name').eq('id', photo_id).single()
+  const current = photo?.uploaded_by_name
+  // Autoriser si la photo est anonyme ou si c'est déjà ce nom
+  const isAnonymous = !current || current === 'Anonyme'
+  const isOwn = current === new_name
+  if (isAnonymous || isOwn) {
+    await supabase.from('photos').update({ uploaded_by_name: new_name }).eq('id', photo_id)
+    revalidatePath(`/invite/${slug}/photos`)
+  }
+}
+
 async function deletePhoto(formData: FormData) {
   'use server'
   const supabase = await createSupabaseServerClient()
@@ -125,6 +143,7 @@ export default async function GuestPhotosPage({ params }: { params: Promise<{ sl
       addComment={addComment}
       uploadPhoto={uploadPhoto}
       deletePhoto={deletePhoto}
+      claimPhoto={claimPhoto}
       slug={slug}
     />
     </>

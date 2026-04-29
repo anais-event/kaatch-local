@@ -1,8 +1,16 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createClient } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 
 const ADMIN_EMAIL = 'anais@kaatch.fr'
+
+function adminClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+}
 
 async function setPlan(formData: FormData) {
   'use server'
@@ -12,7 +20,7 @@ async function setPlan(formData: FormData) {
 
   const weddingId = formData.get('wedding_id') as string
   const plan = formData.get('plan') as string | null
-  await supabase.from('weddings').update({ plan: plan || null }).eq('id', weddingId)
+  await adminClient().from('weddings').update({ plan: plan || null }).eq('id', weddingId)
   revalidatePath('/admin')
 }
 
@@ -22,9 +30,9 @@ export default async function AdminPage() {
 
   if (user?.email !== ADMIN_EMAIL) redirect('/auth')
 
-  const { data: weddings } = await supabase
+  const { data: weddings } = await adminClient()
     .from('weddings')
-    .select('id, slug, name, date, plan, user_id, created_at')
+    .select('id, slug, name, date, plan, couple_id, created_at')
     .order('created_at', { ascending: false })
 
   const weddingIds = (weddings ?? []).map(w => w.id)

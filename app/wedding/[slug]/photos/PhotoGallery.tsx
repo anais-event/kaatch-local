@@ -99,21 +99,7 @@ export default function PhotoGallery({ slug, weddingName, photos, moments, guest
   const [downloading, setDownloading] = useState(false)
   const [uploadError, setUploadError] = useState('')
   const [dropdownOpen, setDropdownOpen] = useState(false)
-  const [headerVisible, setHeaderVisible] = useState(true)
   const dropdownRef = useRef<HTMLDivElement>(null)
-  const lastScrollRef = useRef(0)
-
-  useEffect(() => {
-    const onScroll = () => {
-      const y = window.scrollY
-      if (y < 48) { setHeaderVisible(true); lastScrollRef.current = y; return }
-      if (Math.abs(y - lastScrollRef.current) < 6) return
-      setHeaderVisible(y < lastScrollRef.current)
-      lastScrollRef.current = y
-    }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
 
   useEffect(() => {
     if (!dropdownOpen) return
@@ -333,137 +319,6 @@ export default function PhotoGallery({ slug, weddingName, photos, moments, guest
 
   return (
     <div className="min-h-screen bg-[#f5f0e8]">
-      {/* Header — auto-hide on scroll down */}
-      <div
-        className="sticky top-0 z-30 bg-[#f5f0e8]/95 backdrop-blur-sm border-b border-stone-200/60 transition-transform duration-200"
-        style={{ transform: headerVisible ? 'translateY(0)' : 'translateY(-100%)' }}
-      >
-        {/* Ligne unique : retour + titre + ⋯ */}
-        <div className="flex items-center px-3 h-12 gap-2">
-          <a href={`/wedding/${slug}`}
-            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-stone-400 hover:bg-stone-100 hover:text-stone-600 transition"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-            </svg>
-          </a>
-
-          <h1 className="flex-1 text-center text-[#2d3228] truncate"
-            style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400, fontSize: '1rem', fontStyle: 'italic' }}>
-            {weddingName}
-            <span className="text-stone-400 text-xs ml-1.5" style={{ fontWeight: 300, fontStyle: 'normal' }}>
-              · {filteredPhotos.length}{filteredPhotos.length !== photos.length ? `/${photos.length}` : ''}
-            </span>
-          </h1>
-
-          {/* Bouton ⋯ + dropdown */}
-          <div className="relative shrink-0" ref={dropdownRef}>
-            <button
-              onClick={() => setDropdownOpen(s => !s)}
-              className={`w-8 h-8 flex items-center justify-center rounded-full transition cursor-pointer text-lg leading-none pb-1 ${
-                dropdownOpen ? 'bg-[#2d3228] text-white' : 'text-stone-400 hover:bg-stone-100 hover:text-stone-600'
-              }`}
-            >
-              ···
-            </button>
-
-            {dropdownOpen && (
-              <div className="absolute right-0 top-10 w-64 bg-white rounded-2xl shadow-xl border border-stone-100 overflow-hidden z-50">
-                {/* Recherche */}
-                <div className="px-3 pt-3 pb-2">
-                  <input
-                    autoFocus
-                    type="text"
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                    placeholder="Rechercher…"
-                    className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-stone-700 text-sm outline-none focus:border-[#4a5240] placeholder:text-stone-300 transition"
-                    style={{ fontWeight: 300 }}
-                  />
-                </div>
-
-                <div className="border-t border-stone-100" />
-
-                {/* Filtres moments */}
-                {moments.length > 0 && (
-                  <>
-                    <div className="px-3 py-2">
-                      <p className="text-xs text-stone-400 mb-1.5" style={{ fontWeight: 300 }}>Filtrer par moment</p>
-                      <div className="flex flex-wrap gap-1">
-                        <button onClick={() => setMomentFilter('')}
-                          className={`px-2.5 py-0.5 rounded-full text-xs transition cursor-pointer ${!momentFilter ? 'bg-[#4a5240] text-white' : 'bg-stone-100 text-stone-500 hover:bg-stone-200'}`}
-                          style={{ fontWeight: 300 }}>Tous</button>
-                        {moments.map(m => (
-                          <button key={m} onClick={() => setMomentFilter(momentFilter === m ? '' : m)}
-                            className={`px-2.5 py-0.5 rounded-full text-xs transition cursor-pointer ${momentFilter === m ? 'bg-[#4a5240] text-white' : 'bg-stone-100 text-stone-500 hover:bg-stone-200'}`}
-                            style={{ fontWeight: 300 }}>{m}</button>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="border-t border-stone-100" />
-                  </>
-                )}
-
-                {/* Actions */}
-                <div className="py-1">
-                  <button
-                    onClick={() => { setSelectMode(s => !s); setSelectedIds(new Set()); setDropdownOpen(false) }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-stone-600 hover:bg-stone-50 transition cursor-pointer text-left"
-                    style={{ fontWeight: 300 }}
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4 text-stone-400 shrink-0">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    {selectMode ? 'Annuler la sélection' : 'Sélectionner des photos'}
-                  </button>
-                  <button
-                    onClick={async () => { setDropdownOpen(false); setZipping(true); await downloadZip(filteredPhotos); setZipping(false) }}
-                    disabled={zipping || filteredPhotos.length === 0}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-stone-600 hover:bg-stone-50 transition cursor-pointer text-left disabled:opacity-40"
-                    style={{ fontWeight: 300 }}
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4 text-stone-400 shrink-0">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                    </svg>
-                    {zipping ? 'Téléchargement…' : `Télécharger tout (${filteredPhotos.length} photos)`}
-                  </button>
-                  <button
-                    onClick={() => { window.print(); setDropdownOpen(false) }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-stone-600 hover:bg-stone-50 transition cursor-pointer text-left"
-                    style={{ fontWeight: 300 }}
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4 text-stone-400 shrink-0">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.056 48.056 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z" />
-                    </svg>
-                    Imprimer
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Sélection active : barre de téléchargement */}
-        {selectMode && (
-          <div className="px-3 pb-2 flex items-center gap-2">
-            <span className="text-xs text-stone-400 flex-1" style={{ fontWeight: 300 }}>
-              {selectedIds.size > 0 ? `${selectedIds.size} photo${selectedIds.size > 1 ? 's' : ''} sélectionnée${selectedIds.size > 1 ? 's' : ''}` : 'Tapez sur les photos pour les sélectionner'}
-            </span>
-            {selectedIds.size > 0 && (
-              <button onClick={downloadSelected} disabled={downloading}
-                className="px-3 py-1 rounded-full bg-[#4a5240] text-white text-xs transition disabled:opacity-50 cursor-pointer shrink-0"
-                style={{ fontWeight: 300 }}>
-                {downloading ? '…' : `↓ Télécharger`}
-              </button>
-            )}
-            <button onClick={() => { setSelectMode(false); setSelectedIds(new Set()) }}
-              className="text-xs text-stone-400 hover:text-stone-600 transition cursor-pointer shrink-0"
-              style={{ fontWeight: 300 }}>
-              Annuler
-            </button>
-          </div>
-        )}
-      </div>
 
       {/* Gallery */}
       {filteredPhotos.length === 0 ? (
@@ -566,16 +421,128 @@ export default function PhotoGallery({ slug, weddingName, photos, moments, guest
         </div>
       )}
 
-      {/* FAB */}
-      <button
-        onClick={() => setShowUpload(true)}
-        className="fixed bottom-24 right-6 w-14 h-14 rounded-full bg-[#4a5240] text-white shadow-2xl flex items-center justify-center hover:scale-110 transition-transform cursor-pointer z-20"
-        title="Ajouter des photos"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-6 h-6">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-        </svg>
-      </button>
+      {/* ── FABs en bas à droite ── */}
+      <div className="fixed bottom-24 right-5 z-30 flex flex-col items-end gap-3">
+
+        {/* Menu ··· — s'ouvre vers le haut */}
+        <div className="relative" ref={dropdownRef}>
+          {dropdownOpen && (
+            <div className="absolute bottom-16 right-0 w-64 bg-white rounded-2xl shadow-2xl border border-stone-100 overflow-hidden">
+              {/* Recherche */}
+              <div className="px-3 pt-3 pb-2">
+                <input
+                  autoFocus
+                  type="text"
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="Rechercher…"
+                  className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-stone-700 text-sm outline-none focus:border-[#4a5240] placeholder:text-stone-300 transition"
+                  style={{ fontWeight: 300 }}
+                />
+              </div>
+              <div className="border-t border-stone-100" />
+              {/* Filtres moments */}
+              {moments.length > 0 && (
+                <>
+                  <div className="px-3 py-2.5">
+                    <p className="text-xs text-stone-400 mb-1.5" style={{ fontWeight: 300 }}>Filtrer par moment</p>
+                    <div className="flex flex-wrap gap-1">
+                      <button onClick={() => setMomentFilter('')}
+                        className={`px-2.5 py-0.5 rounded-full text-xs transition cursor-pointer ${!momentFilter ? 'bg-[#4a5240] text-white' : 'bg-stone-100 text-stone-500 hover:bg-stone-200'}`}
+                        style={{ fontWeight: 300 }}>Tous</button>
+                      {moments.map(m => (
+                        <button key={m} onClick={() => setMomentFilter(momentFilter === m ? '' : m)}
+                          className={`px-2.5 py-0.5 rounded-full text-xs transition cursor-pointer ${momentFilter === m ? 'bg-[#4a5240] text-white' : 'bg-stone-100 text-stone-500 hover:bg-stone-200'}`}
+                          style={{ fontWeight: 300 }}>{m}</button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="border-t border-stone-100" />
+                </>
+              )}
+              {/* Actions */}
+              <div className="py-1">
+                <button
+                  onClick={() => { setSelectMode(s => !s); setSelectedIds(new Set()); setDropdownOpen(false) }}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-stone-600 hover:bg-stone-50 transition cursor-pointer text-left"
+                  style={{ fontWeight: 300 }}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4 text-stone-400 shrink-0">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {selectMode ? 'Annuler la sélection' : 'Sélectionner des photos'}
+                </button>
+                <button
+                  onClick={async () => { setDropdownOpen(false); setZipping(true); await downloadZip(filteredPhotos); setZipping(false) }}
+                  disabled={zipping || filteredPhotos.length === 0}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-stone-600 hover:bg-stone-50 transition cursor-pointer text-left disabled:opacity-40"
+                  style={{ fontWeight: 300 }}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4 text-stone-400 shrink-0">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                  </svg>
+                  {zipping ? 'Téléchargement…' : `Tout télécharger (${filteredPhotos.length})`}
+                </button>
+                <button
+                  onClick={() => { window.print(); setDropdownOpen(false) }}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-stone-600 hover:bg-stone-50 transition cursor-pointer text-left"
+                  style={{ fontWeight: 300 }}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4 text-stone-400 shrink-0">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.056 48.056 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z" />
+                  </svg>
+                  Imprimer
+                </button>
+              </div>
+            </div>
+          )}
+          <button
+            onClick={() => setDropdownOpen(s => !s)}
+            className={`w-12 h-12 rounded-full shadow-xl flex items-center justify-center transition cursor-pointer ${
+              dropdownOpen || search || momentFilter || selectMode
+                ? 'bg-[#2d3228] text-white'
+                : 'bg-white text-stone-500 hover:bg-stone-50'
+            }`}
+            style={{ boxShadow: '0 4px 20px rgba(44,59,46,0.2)' }}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+          </button>
+        </div>
+
+        {/* FAB + upload */}
+        <button
+          onClick={() => setShowUpload(true)}
+          className="w-14 h-14 rounded-full bg-[#4a5240] text-white shadow-2xl flex items-center justify-center hover:scale-105 transition-transform cursor-pointer"
+          style={{ boxShadow: '0 6px 24px rgba(44,59,46,0.35)' }}
+          title="Ajouter des photos"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-6 h-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Barre sélection flottante en bas */}
+      {selectMode && (
+        <div className="fixed bottom-24 left-4 right-24 z-30 flex items-center gap-2 bg-[#2d3228] text-white rounded-2xl px-4 py-2.5 shadow-xl">
+          <span className="flex-1 text-xs" style={{ fontWeight: 300 }}>
+            {selectedIds.size > 0
+              ? `${selectedIds.size} photo${selectedIds.size > 1 ? 's' : ''} sélectionnée${selectedIds.size > 1 ? 's' : ''}`
+              : 'Tapez sur les photos'}
+          </span>
+          {selectedIds.size > 0 && (
+            <button onClick={downloadSelected} disabled={downloading}
+              className="text-xs bg-white/15 hover:bg-white/25 px-3 py-1 rounded-full transition cursor-pointer shrink-0"
+              style={{ fontWeight: 300 }}>
+              {downloading ? '…' : '↓ Télécharger'}
+            </button>
+          )}
+          <button onClick={() => { setSelectMode(false); setSelectedIds(new Set()) }}
+            className="text-xs text-white/50 hover:text-white transition cursor-pointer shrink-0"
+            style={{ fontWeight: 300 }}>
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* Upload modal */}
       {showUpload && (

@@ -84,7 +84,7 @@ export default function GuestList({ guests, tables, slug, baseUrl, wedding, setR
   const [editingId, setEditingId] = useState<string | null>(null)
   const [showAll, setShowAll] = useState(false)
   const [isPending, startTransition] = useTransition()
-  const weddingId = guests[0]?.wedding_id ?? ''
+  const resolvedWeddingId = weddingId ?? guests[0]?.wedding_id ?? ''
 
   const filtered = guests
     .filter(g => {
@@ -111,7 +111,7 @@ export default function GuestList({ guests, tables, slug, baseUrl, wedding, setR
 
   return (
     <div>
-      <PublipostagePanel guests={guests} weddingId={weddingId} slug={slug} />
+      <PublipostagePanel guests={guests} weddingId={resolvedWeddingId} slug={slug} />
 
       {/* Barre recherche + tri */}
       <div className="flex gap-2 mb-4">
@@ -188,7 +188,7 @@ export default function GuestList({ guests, tables, slug, baseUrl, wedding, setR
                 <div onClick={e => e.stopPropagation()} className="shrink-0">
                   {link ? (
                     <CopyLinkButton url={link} guestName={fullName} gender={guest.gender}
-                      slug={slug} wedding={wedding} guestId={guest.id} paid={paid} weddingId={weddingId} />
+                      slug={slug} wedding={wedding} guestId={guest.id} paid={paid} weddingId={resolvedWeddingId} />
                   ) : (
                     <span className="text-xs text-stone-300 italic" style={{ fontWeight: 300 }}>Pas de lien</span>
                   )}

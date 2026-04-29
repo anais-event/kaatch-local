@@ -201,6 +201,8 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
             setRsvp={setRsvp}
             deleteGuest={deleteGuest}
             updateGuest={updateGuest}
+            paid={isPaid(wedding.plan)}
+            weddingId={wedding.id}
           />
         </GuestListSection>
 

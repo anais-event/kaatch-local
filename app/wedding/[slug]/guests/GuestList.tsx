@@ -50,6 +50,8 @@ type Props = {
   setRsvp: (fd: FormData) => Promise<void>
   deleteGuest: (fd: FormData) => Promise<void>
   updateGuest: (fd: FormData) => Promise<void>
+  paid?: boolean
+  weddingId?: string
 }
 
 const RSVP = {
@@ -75,7 +77,7 @@ function formatSentDate(iso: string) {
 
 const PREVIEW_COUNT = 6
 
-export default function GuestList({ guests, tables, slug, baseUrl, wedding, setRsvp, deleteGuest, updateGuest }: Props) {
+export default function GuestList({ guests, tables, slug, baseUrl, wedding, setRsvp, deleteGuest, updateGuest, paid = true, weddingId }: Props) {
   const [search, setSearch] = useState('')
   const [sortBy, setSortBy] = useState<'nom' | 'rsvp' | 'relation'>('nom')
   const [expandedId, setExpandedId] = useState<string | null>(null)
@@ -186,7 +188,7 @@ export default function GuestList({ guests, tables, slug, baseUrl, wedding, setR
                 <div onClick={e => e.stopPropagation()} className="shrink-0">
                   {link ? (
                     <CopyLinkButton url={link} guestName={fullName} gender={guest.gender}
-                      slug={slug} wedding={wedding} guestId={guest.id} />
+                      slug={slug} wedding={wedding} guestId={guest.id} paid={paid} weddingId={weddingId} />
                   ) : (
                     <span className="text-xs text-stone-300 italic" style={{ fontWeight: 300 }}>Pas de lien</span>
                   )}

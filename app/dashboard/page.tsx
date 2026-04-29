@@ -80,6 +80,16 @@ export default async function Dashboard() {
           </a>
         </div>
 
+        {user.email === 'anais@kaatch.fr' && (
+          <div className="text-center mt-6">
+            <a href="/admin"
+               className="text-xs text-stone-300 hover:text-[#4a5240] transition"
+               style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}>
+              ⚙ Admin
+            </a>
+          </div>
+        )}
+
       </div>
     </div>
   )

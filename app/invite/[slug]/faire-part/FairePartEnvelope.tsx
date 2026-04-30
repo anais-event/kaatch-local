@@ -140,73 +140,25 @@ function GoldLeafSVG() {
   )
 }
 
-function GeometricFrame({ width, height }: { width: number; height: number }) {
-  const w = width, h = height
-  const cx = w / 2
-  const inset = 10
-  const pts = (scale: number, offset: number) => {
-    const s = scale
-    const o = offset
-    return [
-      [cx, o],
-      [cx + w * 0.3 * s, h * 0.12 * s + o],
-      [w * s + (w - w * s) / 2, h * 0.36 * s + o],
-      [w * s + (w - w * s) / 2, h * 0.64 * s + o],
-      [cx + w * 0.3 * s, h * 0.88 * s + o],
-      [cx, h * s + o],
-      [cx - w * 0.3 * s, h * 0.88 * s + o],
-      [w * (1 - s) / 2, h * 0.64 * s + o],
-      [w * (1 - s) / 2, h * 0.36 * s + o],
-      [cx - w * 0.3 * s, h * 0.12 * s + o],
-    ].map(([x, y]) => `${x},${y}`).join(' ')
-  }
-
-  const outerPts = [
-    cx, 0,
-    cx + w * 0.3, h * 0.12,
-    w, h * 0.36,
-    w, h * 0.64,
-    cx + w * 0.3, h * 0.88,
-    cx, h,
-    cx - w * 0.3, h * 0.88,
-    0, h * 0.64,
-    0, h * 0.36,
-    cx - w * 0.3, h * 0.12,
-  ].reduce((acc: string, v, i) => acc + (i % 2 === 0 ? (i > 0 ? ' ' : '') + v : ',' + v), '')
-
-  const innerOff = inset
-  const innerPts = [
-    cx, innerOff,
-    cx + (w - innerOff * 2) * 0.3, h * 0.12 + innerOff * 0.6,
-    w - innerOff, h * 0.36 + innerOff * 0.4,
-    w - innerOff, h * 0.64 - innerOff * 0.4,
-    cx + (w - innerOff * 2) * 0.3, h * 0.88 - innerOff * 0.6,
-    cx, h - innerOff,
-    cx - (w - innerOff * 2) * 0.3, h * 0.88 - innerOff * 0.6,
-    innerOff, h * 0.64 - innerOff * 0.4,
-    innerOff, h * 0.36 + innerOff * 0.4,
-    cx - (w - innerOff * 2) * 0.3, h * 0.12 + innerOff * 0.6,
-  ].reduce((acc: string, v, i) => acc + (i % 2 === 0 ? (i > 0 ? ' ' : '') + v : ',' + v), '')
-
+function CornerAccents() {
+  const L = 28, T = 1.5
+  const C = '#c9a96e'
+  const style: React.CSSProperties = { position: 'absolute', pointerEvents: 'none' }
   return (
-    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`}
-         style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
-      <defs>
-        <linearGradient id="frameGradA" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#e2c97e" />
-          <stop offset="35%" stopColor="#c9a96e" />
-          <stop offset="65%" stopColor="#8b6430" />
-          <stop offset="100%" stopColor="#c9a96e" />
-        </linearGradient>
-        <linearGradient id="frameGradB" x1="1" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#d4b96e" />
-          <stop offset="50%" stopColor="#a07840" />
-          <stop offset="100%" stopColor="#e2c97e" />
-        </linearGradient>
-      </defs>
-      <polygon points={outerPts} fill="none" stroke="url(#frameGradA)" strokeWidth="1.8" />
-      <polygon points={innerPts} fill="none" stroke="url(#frameGradB)" strokeWidth="1" opacity="0.6" />
-    </svg>
+    <>
+      <svg width={L} height={L} viewBox={`0 0 ${L} ${L}`} style={{ ...style, top: 16, left: 16 }}>
+        <path d={`M${L} ${T} L${T} ${T} L${T} ${L}`} fill="none" stroke={C} strokeWidth={T} opacity="0.7" />
+      </svg>
+      <svg width={L} height={L} viewBox={`0 0 ${L} ${L}`} style={{ ...style, top: 16, right: 16 }}>
+        <path d={`M0 ${T} L${L - T} ${T} L${L - T} ${L}`} fill="none" stroke={C} strokeWidth={T} opacity="0.7" />
+      </svg>
+      <svg width={L} height={L} viewBox={`0 0 ${L} ${L}`} style={{ ...style, bottom: 16, left: 16 }}>
+        <path d={`M${T} 0 L${T} ${L - T} L${L} ${L - T}`} fill="none" stroke={C} strokeWidth={T} opacity="0.7" />
+      </svg>
+      <svg width={L} height={L} viewBox={`0 0 ${L} ${L}`} style={{ ...style, bottom: 16, right: 16 }}>
+        <path d={`M${L - T} 0 L${L - T} ${L - T} L0 ${L - T}`} fill="none" stroke={C} strokeWidth={T} opacity="0.7" />
+      </svg>
+    </>
   )
 }
 
@@ -545,7 +497,7 @@ export default function FairePartEnvelope({
             padding:'50px 32px 52px', textAlign:'center', marginBottom:20,
             boxShadow:'0 24px 64px rgba(0,0,0,0.5)',
             border:'1px solid rgba(201,169,110,0.15)' }}>
-            <GeometricFrame width={370} height={480} />
+            <CornerAccents />
 
             {/* Message */}
             {coupleMessage ? (

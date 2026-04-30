@@ -55,3 +55,19 @@
 .animate-fade-in-up {
   animation: fade-in-up 0.25s ease-out;
 }
+
+/* ── Sidebar collapsible ── */
+.sidebar-panel {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+html.sidebar-collapsed .sidebar-panel {
+  transform: translateX(-100%);
+}
+.sidebar-main {
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@media (min-width: 768px) {
+  html.sidebar-collapsed .sidebar-main {
+    margin-left: 0 !important;
+  }
+}

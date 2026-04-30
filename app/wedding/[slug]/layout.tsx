@@ -31,7 +31,7 @@ export default async function WeddingLayout({
   return (
     <>
       <WeddingNav slug={slug} weddingName={wedding?.name ?? ''} weddingId={wedding?.id ?? ''} userEmail={user?.email ?? ''} plan={wedding?.plan ?? null} />
-      <div className="pt-12 md:pt-0 pb-20 md:pb-0 md:ml-56">
+      <div className="sidebar-main pt-12 md:pt-0 pb-20 md:pb-0 md:ml-56">
         {children}
       </div>
       <BottomNav slug={slug} />

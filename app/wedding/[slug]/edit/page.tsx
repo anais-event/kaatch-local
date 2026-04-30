@@ -1,7 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import SlugField from './SlugField'
-import { isPaid, checkoutUrl } from '@/lib/plan'
 
 function toSlug(str: string) {
   return str
@@ -229,47 +228,6 @@ export default async function EditWedding({ params, searchParams }: { params: Pr
               </a>
             </div>
           </form>
-        </div>
-
-        {/* Formule */}
-        <div className="bg-white/80 rounded-3xl shadow-sm p-6 mt-4">
-          <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.7rem', letterSpacing: '0.15em' }}
-             className="text-stone-400 uppercase mb-4">
-            Formule
-          </p>
-          {isPaid(wedding.plan) ? (
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="text-sm bg-[#4a5240]/10 text-[#4a5240] px-3 py-1 rounded-full"
-                      style={{ fontFamily: 'var(--font-lato)', fontWeight: 500 }}>
-                  Mariage
-                </span>
-                <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.8rem' }}
-                   className="text-stone-400 mt-2">
-                  Invités illimités · toutes les fonctionnalités
-                </p>
-              </div>
-              <span className="text-lg">✓</span>
-            </div>
-          ) : (
-            <div>
-              <div className="flex items-center gap-3 mb-3">
-                <span className="text-sm bg-stone-100 text-stone-400 px-3 py-1 rounded-full"
-                      style={{ fontFamily: 'var(--font-lato)', fontWeight: 500 }}>
-                  Gratuite
-                </span>
-                <span style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.8rem' }}
-                      className="text-stone-400">
-                  20 invités max
-                </span>
-              </div>
-              <a href={checkoutUrl(wedding.id)}
-                 className="block text-center bg-[#4a5240] text-white py-2.5 rounded-full hover:bg-[#2d3228] transition"
-                 style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem', letterSpacing: '0.05em' }}>
-                Passer à la formule Mariage →
-              </a>
-            </div>
-          )}
         </div>
 
       </div>

@@ -53,7 +53,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
               {dateFormatted}
             </p>
           )}
-          <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: 'clamp(2rem, 6vw, 3.5rem)', lineHeight: 1 }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 'clamp(2rem, 6vw, 3.5rem)', lineHeight: 1 }}>
             {wedding.name}
           </h1>
           <p style={{ fontWeight: 300, fontSize: '0.85rem' }} className="text-stone-300 mt-2">
@@ -88,7 +88,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
             <div>
               <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
                  className="text-stone-400 uppercase mb-1">Date</p>
-              <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.15rem' }}
+              <p style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.15rem' }}
                  className="text-stone-700 capitalize">{dateFormatted}</p>
             </div>
           </div>
@@ -99,7 +99,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
             <div className="flex-1">
               <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
                  className="text-stone-400 uppercase mb-1">Lieu</p>
-              <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.15rem' }}
+              <p style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.15rem' }}
                  className="text-stone-700">{wedding.location}</p>
             </div>
             <a href={`https://maps.google.com/?q=${encodeURIComponent(wedding.location)}`}
@@ -121,7 +121,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
           ].map(item => (
             <a key={item.label} href={item.href}
                className="p-4 rounded-2xl bg-white/80 text-center hover:shadow-md transition-shadow"
-               style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.1rem' }}>
+               style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.1rem' }}>
               {item.label}
             </a>
           ))}

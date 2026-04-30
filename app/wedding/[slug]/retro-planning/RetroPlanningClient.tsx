@@ -163,7 +163,7 @@ function CalendarMonth({
   return (
     <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-5">
       <h3
-        style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.15rem', fontStyle: 'italic' }}
+        style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.15rem' }}
         className="text-[#2d3228] mb-4 capitalize"
       >
         {formatMonthLabel(month)}
@@ -260,7 +260,7 @@ function DayDetail({
     <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-5">
       <div className="flex items-center justify-between mb-3">
         <h3
-          style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.1rem', fontStyle: 'italic' }}
+          style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.1rem' }}
           className="text-[#2d3228]"
         >
           {tasksForMonth[0].period.emoji} {tasksForMonth[0].period.label}
@@ -372,7 +372,7 @@ export default function RetroPlanningClient({
   return (
     <div className="max-w-3xl mx-auto px-6 pt-8 pb-24">
       <h1
-        style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.2rem', fontStyle: 'italic' }}
+        style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '2.2rem' }}
         className="text-[#2d3228] mb-1"
       >
         Rétro-planning
@@ -404,7 +404,7 @@ export default function RetroPlanningClient({
             {doneTasks} tâche{doneTasks > 1 ? 's' : ''} sur {totalTasks} complétée{doneTasks > 1 ? 's' : ''}
           </p>
           <p
-            style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.3rem', fontStyle: 'italic' }}
+            style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.3rem' }}
             className="text-[#4a5240]"
           >
             {pct}%
@@ -416,7 +416,7 @@ export default function RetroPlanningClient({
         {pct === 100 && (
           <p
             className="text-center mt-3 text-sm text-[#4a5240]"
-            style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic' }}
+            style={{ fontFamily: 'var(--font-display)' }}
           >
             🎉 Tout est prêt — profitez de chaque moment !
           </p>
@@ -436,10 +436,10 @@ export default function RetroPlanningClient({
                   <div>
                     <h2
                       style={{
-                        fontFamily: 'var(--font-cormorant)',
+                        fontFamily: 'var(--font-display)',
                         fontWeight: 600,
                         fontSize: '1.2rem',
-                        fontStyle: 'italic',
+                        
                       }}
                       className="text-[#2d3228] leading-tight"
                     >
@@ -588,7 +588,7 @@ export default function RetroPlanningClient({
 
                   {selectedCarteData.total > 0 && selectedCarteData.remaining === 0 && (
                     <div className="px-5 py-3 border-t border-stone-50 text-center">
-                      <span style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '0.9rem' }}
+                      <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem' }}
                             className="text-[#4a5240]">✓ Toutes les tâches de ce mois sont faites !</span>
                     </div>
                   )}

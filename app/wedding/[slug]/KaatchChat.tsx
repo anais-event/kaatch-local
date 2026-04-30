@@ -72,7 +72,7 @@ export default function KaatchChat() {
               </svg>
             </div>
             <div>
-              <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1rem', fontStyle: 'italic', color: 'white' }}>
+              <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1rem', color: 'white' }}>
                 Assistant Kaatch
               </p>
               <p style={{ fontWeight: 300, fontSize: '0.65rem', color: 'rgba(255,255,255,0.6)', letterSpacing: '0.05em' }}>
@@ -91,7 +91,7 @@ export default function KaatchChat() {
           <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3" style={{ background: '#fdfdf8' }}>
             {messages.length === 0 && (
               <div className="text-center pt-4">
-                <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1rem', color: '#a8a29e' }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: '#a8a29e' }}>
                   Bonjour ! 👋
                 </p>
                 <p style={{ fontWeight: 300, fontSize: '0.78rem', color: '#a8a29e', lineHeight: 1.6, marginTop: 6 }}>

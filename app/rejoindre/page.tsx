@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import JoindreForm from './JoindreForm'
 
 export const metadata: Metadata = {
@@ -15,7 +15,7 @@ export default function RejoindrePage() {
            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
           Bienvenue
         </p>
-        <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '3rem', fontStyle: 'italic' }}
+        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '3rem' }}
             className="text-[#2d3228] mb-2">
           Rejoindre un mariage
         </h1>

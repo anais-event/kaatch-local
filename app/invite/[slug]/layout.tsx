@@ -46,7 +46,7 @@ export default async function InviteLayout({
       <div className="min-h-screen bg-[#f5f0e8] flex items-center justify-center p-6">
         <div className="bg-white rounded-2xl border border-stone-100 p-10 max-w-sm w-full text-center shadow-sm">
           <div className="text-4xl mb-4">💍</div>
-          <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.6rem', fontStyle: 'italic' }}
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.6rem' }}
               className="text-[#2d3228] mb-3">Bientôt disponible</h2>
           <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem', lineHeight: 1.7 }}
              className="text-stone-500">

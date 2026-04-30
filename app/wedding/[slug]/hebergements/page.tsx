@@ -75,7 +75,7 @@ export default async function HebergementsPage({ params }: { params: Promise<{ s
           </a>
         </div>
 
-        <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.5rem', fontStyle: 'italic' }}
+        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '2.5rem' }}
             className="text-[#2d3228] mb-4">
           Hébergements
         </h1>
@@ -87,7 +87,7 @@ export default async function HebergementsPage({ params }: { params: Promise<{ s
 
         {/* Formulaire d'ajout */}
         <div className="bg-white/80 rounded-3xl p-6 shadow-sm mb-8">
-          <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.4rem', fontStyle: 'italic' }}
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.4rem' }}
               className="text-[#4a5240] mb-4">
             Ajouter un coup de cœur
           </h2>
@@ -131,7 +131,7 @@ export default async function HebergementsPage({ params }: { params: Promise<{ s
         {/* Liste des hébergements */}
         {accommodations && accommodations.length > 0 ? (
           <div>
-            <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.4rem', fontStyle: 'italic' }}
+            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.4rem' }}
                 className="text-[#4a5240] mb-4">
               ⭐ Vos coups de cœur ({accommodations.length})
             </h2>
@@ -144,7 +144,7 @@ export default async function HebergementsPage({ params }: { params: Promise<{ s
                         {acc.type && (
                           <span className="text-base">{TYPE_ICONS[acc.type] ?? '📍'}</span>
                         )}
-                        <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.2rem' }}
+                        <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }}
                            className="text-stone-800">{acc.name}</p>
                         {acc.type && (
                           <span className="text-[10px] bg-[#f5f0e8] text-[#4a5240] px-2 py-0.5 rounded-full"
@@ -162,7 +162,7 @@ export default async function HebergementsPage({ params }: { params: Promise<{ s
                            className="text-stone-400">💶 {acc.price_range}</p>
                       )}
                       {acc.note && (
-                        <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem', fontStyle: 'italic' }}
+                        <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem' }}
                            className="text-stone-500 mt-2">"{acc.note}"</p>
                       )}
                       {acc.url && (
@@ -185,7 +185,7 @@ export default async function HebergementsPage({ params }: { params: Promise<{ s
           </div>
         ) : (
           <div className="text-center py-12">
-            <p style={{ fontFamily: 'var(--font-cormorant)', fontSize: '1.3rem', fontStyle: 'italic' }}
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem' }}
                className="text-stone-400">
               Aucun hébergement ajouté pour l'instant
             </p>

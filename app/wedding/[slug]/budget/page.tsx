@@ -240,7 +240,7 @@ export default async function BudgetPage({ params }: { params: Promise<{ slug: s
           </a>
           <p style={{ fontWeight: 300, fontSize: '0.68rem', letterSpacing: '0.2em' }}
              className="text-stone-400 uppercase mb-1">Budget</p>
-          <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.2rem', fontStyle: 'italic' }}
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '2.2rem' }}
               className="text-[#2d3228] leading-none">{wedding.name}</h1>
         </div>
 

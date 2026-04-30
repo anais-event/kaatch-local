@@ -67,7 +67,7 @@ export default async function LivreDorPage({ params }: { params: Promise<{ slug:
           <p className="text-4xl mb-2">📖</p>
           <h1
             className="text-3xl text-[#2d3228] mb-2"
-            style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontWeight: 600 }}
+            style={{ fontFamily: 'var(--font-display)', fontWeight: 600 }}
           >
             Livre d&apos;Or
           </h1>

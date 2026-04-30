@@ -72,7 +72,7 @@ export default async function SurprisesPage({ params }: { params: Promise<{ slug
                style={{ fontWeight: 300 }}>
             🔒 Zone privée — les mariés n'ont pas accès à cette page
           </div>
-          <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.2rem', fontStyle: 'italic' }}
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '2.2rem' }}
               className="text-[#2d3228] mb-1">Surprises pour le jour J</h1>
           <p style={{ fontWeight: 300, fontSize: '0.85rem' }} className="text-stone-400">
             Des idées pour rendre ce mariage encore plus inoubliable.
@@ -84,7 +84,7 @@ export default async function SurprisesPage({ params }: { params: Promise<{ slug
         <div className="bg-white rounded-2xl border border-stone-100 p-5 mb-8">
           <div className="flex items-center gap-2 mb-3">
             <span className="text-lg">💬</span>
-            <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.15rem', fontStyle: 'italic' }}
+            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.15rem' }}
                 className="text-[#4a5240]">Se coordonner avec les autres invités</h2>
           </div>
           <p style={{ fontWeight: 300, fontSize: '0.82rem', lineHeight: 1.7 }} className="text-stone-400 mb-4">
@@ -98,7 +98,7 @@ export default async function SurprisesPage({ params }: { params: Promise<{ slug
         </div>
 
         {/* Idées */}
-        <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.3rem', fontStyle: 'italic' }}
+        <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.3rem' }}
             className="text-[#2d3228] mb-4">Idées pour vous inspirer</h2>
         <div className="space-y-3">
           {IDEES_SURPRISES.map(idee => (
@@ -107,7 +107,7 @@ export default async function SurprisesPage({ params }: { params: Promise<{ slug
                 <span className="text-2xl mt-0.5 shrink-0">{idee.emoji}</span>
                 <div className="flex-1">
                   <div className="flex items-start justify-between gap-2 mb-1">
-                    <h3 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.1rem', fontStyle: 'italic' }}
+                    <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.1rem' }}
                         className="text-[#2d3228]">{idee.titre}</h3>
                     <span className="text-xs bg-[#4a5240]/8 text-[#4a5240] px-2.5 py-1 rounded-full shrink-0"
                           style={{ fontWeight: 300 }}>
@@ -125,7 +125,7 @@ export default async function SurprisesPage({ params }: { params: Promise<{ slug
 
         {/* Jeux */}
         <div className="mt-10">
-          <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.3rem', fontStyle: 'italic' }}
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.3rem' }}
               className="text-[#2d3228] mb-1">Jeux & animations</h2>
           <p style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-400 mb-4">
             Des idées pour animer la soirée et créer des souvenirs.
@@ -144,7 +144,7 @@ export default async function SurprisesPage({ params }: { params: Promise<{ slug
                   <span className="text-2xl mt-0.5 shrink-0">{jeu.emoji}</span>
                   <div className="flex-1">
                     <div className="flex items-start justify-between gap-2 mb-1">
-                      <h3 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.1rem', fontStyle: 'italic' }}
+                      <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.1rem' }}
                           className="text-[#2d3228]">{jeu.titre}</h3>
                       <span className="text-xs bg-[#4a5240]/8 text-[#4a5240] px-2.5 py-1 rounded-full shrink-0"
                             style={{ fontWeight: 300 }}>

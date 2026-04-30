@@ -41,7 +41,7 @@ export default async function PartagerPage({ params }: { params: Promise<{ slug:
           </a>
         </div>
 
-        <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2rem', fontStyle: 'italic' }}
+        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '2rem' }}
             className="text-[#2d3228] mb-1">
           Partager avec tes invités
         </h1>
@@ -52,7 +52,7 @@ export default async function PartagerPage({ params }: { params: Promise<{ slug:
 
         {/* Code de partage */}
         <div className="bg-white rounded-2xl p-5 mb-4 border border-stone-100">
-          <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.1rem', fontStyle: 'italic' }}
+          <p style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.1rem' }}
              className="text-[#4a5240] mb-3">
             Code de partage
           </p>
@@ -81,7 +81,7 @@ export default async function PartagerPage({ params }: { params: Promise<{ slug:
           <>
             {/* Lien + partage */}
             <div className="bg-white rounded-2xl p-5 mb-4 border border-stone-100">
-              <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.1rem', fontStyle: 'italic' }}
+              <p style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.1rem' }}
                  className="text-[#4a5240] mb-3">
                 Lien à partager
               </p>
@@ -99,7 +99,7 @@ export default async function PartagerPage({ params }: { params: Promise<{ slug:
 
             {/* QR Code */}
             <div className="bg-white rounded-2xl p-5 border border-stone-100 text-center">
-              <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.1rem', fontStyle: 'italic' }}
+              <p style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.1rem' }}
                  className="text-[#4a5240] mb-1">
                 QR Code
               </p>

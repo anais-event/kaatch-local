@@ -323,7 +323,7 @@ export default function PhotoGallery({ slug, weddingName, photos, moments, guest
       {/* Gallery */}
       {filteredPhotos.length === 0 ? (
         <div className="flex flex-col items-center justify-center min-h-[50vh]">
-          <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.8rem', fontWeight: 300 }}
+          <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 300 }}
             className="text-stone-300 text-center">
             {search || momentFilter ? 'Aucun résultat…' : 'Aucune photo pour l\'instant…'}
           </p>
@@ -337,7 +337,7 @@ export default function PhotoGallery({ slug, weddingName, photos, moments, guest
         >
           {dragOver && (
             <div className="fixed inset-0 z-50 bg-[#4a5240]/80 backdrop-blur flex items-center justify-center pointer-events-none">
-              <p style={{ fontFamily: 'var(--font-cormorant)', fontSize: '2rem', fontWeight: 300 }} className="text-white">
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 300 }} className="text-white">
                 Déposez vos photos ici
               </p>
             </div>
@@ -551,7 +551,7 @@ export default function PhotoGallery({ slug, weddingName, photos, moments, guest
           <div className="bg-white border border-stone-200 rounded-2xl w-full max-w-lg shadow-xl flex flex-col max-h-[92vh]">
             {/* Header */}
             <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-stone-100 shrink-0">
-              <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400, fontSize: '1.4rem', fontStyle: 'italic' }}
+              <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: '1.4rem' }}
                 className="text-[#2d3228]">Ajouter des photos</h2>
               <button onClick={() => { if (!uploading) { setShowUpload(false); setPendingPhotos([]) } }}
                 className="text-stone-400 hover:text-stone-600 transition cursor-pointer text-xl leading-none">×</button>

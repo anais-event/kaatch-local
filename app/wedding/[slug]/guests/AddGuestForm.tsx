@@ -49,7 +49,7 @@ export default function AddGuestForm({ weddingId, slug, addGuest, guestCount, pa
       >
         <div className="flex items-center gap-2">
           <span className="text-[#4a5240] text-lg leading-none">+</span>
-          <span style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1rem', fontStyle: 'italic' }}
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1rem' }}
                 className="text-[#4a5240]">Ajouter un invité</span>
         </div>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}

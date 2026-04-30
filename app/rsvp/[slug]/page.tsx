@@ -34,7 +34,7 @@ export default async function RSVPPage({ params }: { params: Promise<{ slug: str
         <div className="text-center mb-8">
           <p className="text-4xl mb-4">💌</p>
           <h1
-            style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.2rem', fontStyle: 'italic' }}
+            style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '2.2rem' }}
             className="text-[#2d3228] mb-1"
           >
             {wedding?.name ?? 'Notre mariage'}
@@ -53,7 +53,7 @@ export default async function RSVPPage({ params }: { params: Promise<{ slug: str
             Invitation personnelle
           </p>
           <h2
-            style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.5rem', fontStyle: 'italic' }}
+            style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.5rem' }}
             className="text-[#2d3228] mb-6"
           >
             {guest.first_name}{guest.last_name ? ` ${guest.last_name}` : ''},<br />

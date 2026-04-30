@@ -209,7 +209,7 @@ function AuthInner() {
         {/* MOT DE PASSE OUBLIÉ */}
         {mode === 'reset' && !resetSent && (
           <form onSubmit={handleReset} className="space-y-4">
-            <p style={{ ...fontCormorant, fontSize: '0.95rem', fontStyle: 'italic' }} className="text-stone-500 text-center mb-2">
+            <p style={{ ...fontCormorant, fontSize: '0.95rem' }} className="text-stone-500 text-center mb-2">
               Entrez votre email, on vous envoie un lien.
             </p>
             <input name="email" type="email" placeholder="Votre email" required

@@ -192,7 +192,7 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
       {/* Gallery */}
       <div className="p-3 max-w-2xl mx-auto">
         {filtered.length === 0 ? (
-          <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.5rem', fontWeight: 300 }}
+          <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 300 }}
             className="text-center text-stone-300 py-20">
             {search ? 'Aucun résultat…' : "Aucune photo pour l'instant…"}
           </p>
@@ -328,7 +328,7 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
           onClick={e => { if (e.target === e.currentTarget) setShowUpload(false) }}>
           <div className="bg-white rounded-2xl w-full max-w-md p-6 space-y-3 max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="flex items-center justify-between mb-1">
-              <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400, fontSize: '1.4rem', fontStyle: 'italic' }} className="text-[#2d3228]">Ajouter des photos</h2>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: '1.4rem' }} className="text-[#2d3228]">Ajouter des photos</h2>
               <button onClick={() => setShowUpload(false)} className="text-stone-400 hover:text-stone-700 transition cursor-pointer text-xl leading-none">×</button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-3">

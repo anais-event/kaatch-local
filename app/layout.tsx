@@ -1,39 +1,26 @@
 import type { Metadata } from "next";
-import { Fraunces, Outfit, Cormorant_Garamond, Lato, Great_Vibes } from "next/font/google";
+import { Outfit, Cormorant_Garamond, Lato } from "next/font/google";
 import "./globals.css";
 import CookieBanner from './_components/CookieBanner'
 
-// DA : Fraunces (display éditorial) + Outfit (corps propre)
-const fraunces = Fraunces({
+const outfit = Outfit({
   variable: "--font-display",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
 });
 
-const outfit = Outfit({
+const lato = Lato({
   variable: "--font-body",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
+  weight: ["300", "400", "700"],
 });
 
-// Conservés pour les espaces mariés/invités (faire-part, noms de mariage)
+// Conservé uniquement pour le faire-part (carte d'invitation visuelle)
 const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   style: ["normal", "italic"],
-});
-
-const lato = Lato({
-  variable: "--font-lato",
-  subsets: ["latin"],
-  weight: ["300", "400", "700"],
-});
-
-const greatVibes = Great_Vibes({
-  variable: "--font-great-vibes",
-  subsets: ["latin"],
-  weight: "400",
 });
 
 export const metadata: Metadata = {
@@ -63,7 +50,7 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${fraunces.variable} ${outfit.variable} ${cormorant.variable} ${lato.variable} ${greatVibes.variable} h-full antialiased`}
+      className={`${outfit.variable} ${lato.variable} ${cormorant.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         {children}

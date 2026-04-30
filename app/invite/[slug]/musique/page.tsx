@@ -62,7 +62,7 @@ export default async function MusiqueGuestPage({ params }: { params: Promise<{ s
         <div className="text-center mb-8">
           <p className="text-4xl mb-2">🎵</p>
           <h1 className="text-3xl text-[#2d3228] mb-2"
-              style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontWeight: 600 }}>
+              style={{ fontFamily: 'var(--font-display)', fontWeight: 600 }}>
             Suggestions musicales
           </h1>
           <p className="text-stone-400 text-sm" style={{ fontWeight: 300 }}>

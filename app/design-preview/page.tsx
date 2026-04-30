@@ -1,4 +1,4 @@
-export default function DesignPreview() {
+﻿export default function DesignPreview() {
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <h1 className="text-2xl font-bold text-center mb-2">Vert Olive — Choix de typographie</h1>
@@ -15,7 +15,7 @@ export default function DesignPreview() {
                  style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
                 31 août 2028
               </p>
-              <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2rem', lineHeight: 1.2, fontStyle: 'italic' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '2rem', lineHeight: 1.2 }}>
                 Mariage de<br/>
                 <span style={{ fontWeight: 600, fontStyle: 'normal', fontSize: '2.4rem' }}>Sophie & Julien</span>
               </h2>
@@ -40,13 +40,13 @@ export default function DesignPreview() {
                 <div>
                   <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
                      className="text-stone-400 uppercase">{label}</p>
-                  <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.1rem' }}
+                  <p style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.1rem' }}
                      className="text-stone-700">{val}</p>
                 </div>
               </div>
             ))}
             <p className="text-center pt-2"
-               style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', color: '#4a5240', fontSize: '0.9rem', letterSpacing: '0.05em' }}>
+               style={{ fontFamily: 'var(--font-display)', color: '#4a5240', fontSize: '0.9rem', letterSpacing: '0.05em' }}>
               ✦ Option A — Cormorant Garamond ✦
             </p>
           </div>
@@ -61,10 +61,10 @@ export default function DesignPreview() {
                  style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
                 31 août 2028
               </p>
-              <p style={{ fontFamily: 'var(--font-great-vibes)', fontSize: '1.4rem', color: '#d4c9a8', lineHeight: 1 }}>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', color: '#d4c9a8', lineHeight: 1 }}>
                 Mariage de
               </p>
-              <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '2.4rem', lineHeight: 1.1 }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '2.4rem', lineHeight: 1.1 }}>
                 Sophie & Julien
               </h2>
             </div>
@@ -88,13 +88,13 @@ export default function DesignPreview() {
                 <div>
                   <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
                      className="text-stone-400 uppercase">{label}</p>
-                  <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.1rem' }}
+                  <p style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.1rem' }}
                      className="text-stone-700">{val}</p>
                 </div>
               </div>
             ))}
             <p className="text-center pt-2"
-               style={{ fontFamily: 'var(--font-great-vibes)', color: '#4a5240', fontSize: '1.2rem' }}>
+               style={{ fontFamily: 'var(--font-display)', color: '#4a5240', fontSize: '1.2rem' }}>
               Option B — Calligraphie & Serif
             </p>
           </div>

@@ -41,7 +41,7 @@ export default function ProgrammeClient({ slug, steps, icons, addStep, deleteSte
         </div>
 
         <div className="flex items-center justify-between mb-8">
-          <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.5rem', fontStyle: 'italic' }}
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '2.5rem' }}
               className="text-[#2d3228]">
             Programme de la journée
           </h1>
@@ -88,7 +88,7 @@ export default function ProgrammeClient({ slug, steps, icons, addStep, deleteSte
                                 {step.time}
                               </p>
                             )}
-                            <h3 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.15rem' }}
+                            <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.15rem' }}
                                 className="text-stone-800">{step.title}</h3>
                             {step.description && (
                               <p className="text-sm text-stone-500 mt-1"
@@ -132,7 +132,7 @@ export default function ProgrammeClient({ slug, steps, icons, addStep, deleteSte
 
         {/* Formulaire ajout */}
         <div className="bg-white/70 rounded-3xl p-6 shadow-sm mb-6">
-          <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '1.6rem', fontStyle: 'italic' }}
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '1.6rem' }}
               className="text-[#2d3228] mb-4">
             Ajouter un moment
           </h2>

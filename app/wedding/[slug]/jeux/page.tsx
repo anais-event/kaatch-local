@@ -126,7 +126,7 @@ export default async function JeuxPage({ params }: { params: Promise<{ slug: str
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
       <div className="max-w-3xl mx-auto px-6 pt-8 pb-24">
 
-        <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.2rem', fontStyle: 'italic' }}
+        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '2.2rem' }}
             className="text-[#2d3228] mb-1">Idées de jeux & animations</h1>
         <p style={{ fontWeight: 300, fontSize: '0.85rem' }} className="text-stone-400 mb-10">
           Des idées testées et approuvées, par moment de la journée. Partagez vos coups de cœur avec vos témoins !
@@ -135,13 +135,13 @@ export default async function JeuxPage({ params }: { params: Promise<{ slug: str
         <div className="space-y-12">
           {JEUX.map(cat => (
             <div key={cat.categorie}>
-              <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.4rem', fontStyle: 'italic' }}
+              <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.4rem' }}
                   className="text-[#4a5240] mb-4">{cat.categorie}</h2>
               <div className="grid gap-4">
                 {cat.idees.map(jeu => (
                   <div key={jeu.titre} className="bg-white rounded-2xl border border-stone-100 p-5">
                     <div className="flex items-start justify-between gap-3 mb-2">
-                      <h3 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.15rem', fontStyle: 'italic' }}
+                      <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.15rem' }}
                           className="text-[#2d3228]">
                         {jeu.titre}
                       </h3>
@@ -166,7 +166,7 @@ export default async function JeuxPage({ params }: { params: Promise<{ slug: str
         </div>
 
         <div className="mt-12 bg-[#4a5240]/8 rounded-2xl p-6 border border-[#4a5240]/20">
-          <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.1rem', fontStyle: 'italic' }}
+          <p style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.1rem' }}
              className="text-[#4a5240] mb-2">💡 Bon à savoir</p>
           <p style={{ fontSize: '0.88rem', lineHeight: 1.75, fontWeight: 300 }} className="text-stone-600">
             Les invités peuvent aussi proposer des surprises depuis leur espace — une fonctionnalité discrète pour coordonner entre eux sans que vous le sachiez d'avance !

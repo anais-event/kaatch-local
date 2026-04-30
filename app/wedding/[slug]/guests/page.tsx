@@ -136,7 +136,7 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
         </div>
 
         <div className="flex items-center justify-between mb-5">
-          <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2rem', fontStyle: 'italic' }}
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '2rem' }}
               className="text-[#2d3228]">
             Invités {total > 0 && <span style={{ fontSize: '1.2rem' }} className="text-stone-400">({total})</span>}
           </h1>
@@ -151,7 +151,7 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
             { label: `Décliné${declined > 1 ? 's' : ''}`, value: declined, color: 'text-red-400' },
           ].map(s => (
             <div key={s.label} className="bg-white rounded-xl border border-stone-100 p-3 text-center">
-              <p className={`text-2xl font-bold ${s.color}`} style={{ fontFamily: 'var(--font-cormorant)' }}>{s.value}</p>
+              <p className={`text-2xl font-bold ${s.color}`} style={{ fontFamily: 'var(--font-display)' }}>{s.value}</p>
               <p className="text-[10px] text-stone-400 uppercase tracking-wide mt-0.5"
                  style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>{s.label}</p>
             </div>

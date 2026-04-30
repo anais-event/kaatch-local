@@ -14,6 +14,9 @@
   --shadow-md: 0 4px 24px rgba(44,59,46,0.08), 0 1px 4px rgba(44,59,46,0.04);
   --shadow-lg: 0 8px 32px rgba(44,59,46,0.12), 0 2px 8px rgba(44,59,46,0.06);
 
+  /* ── Font aliases (backwards-compat) ── */
+  --font-lato: var(--font-body);
+
   /* ── Legacy ── */
   --background: #ffffff;
   --foreground: #2d3228;
@@ -34,7 +37,7 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Titres par défaut — Fraunces */
+  /* Titres par défaut — Outfit */
   h1, h2, h3, h4 {
     font-family: var(--font-display, var(--font-body, sans-serif));
     font-weight: 700;

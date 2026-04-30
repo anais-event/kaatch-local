@@ -36,7 +36,7 @@ export default function PromoCodeForm({ redeemCode, weddingId, slug }: Props) {
 
   return (
     <div className="bg-white rounded-2xl border border-stone-100 p-5 shadow-sm">
-      <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.1rem', fontStyle: 'italic' }}
+      <p style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.1rem' }}
          className="text-[#2d3228] mb-3">Code avantage</p>
 
       {result?.success ? (

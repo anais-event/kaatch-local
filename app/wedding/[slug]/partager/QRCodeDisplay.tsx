@@ -171,7 +171,7 @@ export default function QRCodeDisplay({ url, weddingName, weddingDate }: {
           </p>
 
           <h2 style={{
-            fontFamily: 'var(--font-cormorant)', fontWeight: 600,
+            fontFamily: 'var(--font-display)', fontWeight: 600,
             fontSize: '1.6rem', lineHeight: 1.15, color: '#2d3228',
             marginBottom: 4
           }}>
@@ -198,7 +198,7 @@ export default function QRCodeDisplay({ url, weddingName, weddingDate }: {
           </div>
 
           <p style={{
-            fontFamily: 'var(--font-cormorant)', fontStyle: 'italic',
+            fontFamily: 'var(--font-display)',
             fontSize: '0.95rem', color: '#6b6459', lineHeight: 1.6,
             marginBottom: 12
           }}>

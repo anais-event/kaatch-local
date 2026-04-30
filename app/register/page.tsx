@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
@@ -35,7 +35,7 @@ export default function Register() {
     <main className="min-h-screen flex flex-col items-center justify-center bg-[#f5f0e8]">
       <div className="w-full max-w-sm px-6">
         <div className="text-center mb-10">
-          <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '3.5rem', fontStyle: 'italic' }}
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '3.5rem' }}
               className="text-[#2d3228]">
             Kaatch
           </h1>

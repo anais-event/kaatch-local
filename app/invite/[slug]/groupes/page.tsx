@@ -129,7 +129,7 @@ export default async function GuestGroupesPage({ params }: { params: Promise<{ s
       <MarkMessagesSeen slug={slug} />
       <div className="max-w-2xl mx-auto px-6 pt-8 pb-24">
 
-        <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.2rem', fontStyle: 'italic' }}
+        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '2.2rem' }}
             className="text-[#2d3228] mb-1">Messagerie</h1>
         <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-400 mb-6">
           Les groupes sont ouverts à tous les invités.
@@ -146,7 +146,7 @@ export default async function GuestGroupesPage({ params }: { params: Promise<{ s
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm shrink-0 ${
                   isGeneral ? 'bg-[#4a5240] text-white' : 'bg-[#4a5240]/10 text-[#4a5240]'
                 }`}
-                  style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1rem' }}>
+                  style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1rem' }}>
                   {isGeneral ? '✦' : group.name.replace('@', '').charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -179,7 +179,7 @@ export default async function GuestGroupesPage({ params }: { params: Promise<{ s
 
         {/* Créer un groupe */}
         <div className="bg-white rounded-xl border border-stone-100 p-5">
-          <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.2rem', fontStyle: 'italic' }}
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.2rem' }}
               className="text-[#4a5240] mb-1">Créer un groupe</h2>
           <p style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-400 mb-4">
             Donnez-lui un titre — tous les invités et les mariés seront notifiés dans <strong>@ToutLeMonde</strong>.

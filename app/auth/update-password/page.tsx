@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
@@ -41,7 +41,7 @@ export default function UpdatePassword() {
     <main className="min-h-screen flex flex-col items-center justify-center bg-[#f5f0e8]">
       <div className="w-full max-w-sm px-6">
         <div className="text-center mb-10">
-          <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '3.5rem', fontStyle: 'italic' }}
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '3.5rem' }}
               className="text-[#2d3228]">Kaatch</h1>
           <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.8rem', letterSpacing: '0.1em' }}
              className="text-stone-400 uppercase mt-1">Nouveau mot de passe</p>
@@ -50,7 +50,7 @@ export default function UpdatePassword() {
         {done ? (
           <div className="text-center bg-white/80 rounded-2xl p-6">
             <p className="text-2xl mb-2">✅</p>
-            <p style={{ fontFamily: 'var(--font-cormorant)', fontSize: '1.3rem', fontStyle: 'italic' }}
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem' }}
                className="text-stone-700">Mot de passe mis à jour !</p>
             <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem' }}
                className="text-stone-400 mt-2">Redirection en cours…</p>

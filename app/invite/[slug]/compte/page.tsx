@@ -18,7 +18,7 @@ export default async function ComptePage({ params }: { params: Promise<{ slug: s
       <div className="min-h-screen bg-[#f5f0e8] flex items-center justify-center p-8"
            style={{ fontFamily: 'var(--font-lato)' }}>
         <div className="text-center">
-          <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.3rem' }}
+          <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem' }}
              className="text-stone-400 mb-4">
             Vous n'êtes pas connecté(e) à cet espace.
           </p>
@@ -59,7 +59,7 @@ export default async function ComptePage({ params }: { params: Promise<{ slug: s
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
       <div className="max-w-lg mx-auto px-6 pt-8 pb-28">
 
-        <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2rem', fontStyle: 'italic' }}
+        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '2rem' }}
             className="text-[#2d3228] mb-1">Mon compte</h1>
         <p style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-400 mb-8">
           Vos informations pour le mariage {wedding?.name ?? ''}.
@@ -71,7 +71,7 @@ export default async function ComptePage({ params }: { params: Promise<{ slug: s
              className="text-stone-400 uppercase mb-3">Identité</p>
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-full bg-[#4a5240]/10 flex items-center justify-center shrink-0"
-                 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.5rem', color: '#4a5240' }}>
+                 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.5rem', color: '#4a5240' }}>
               {(guest.firstName || '?').charAt(0).toUpperCase()}
             </div>
             <div>
@@ -87,7 +87,7 @@ export default async function ComptePage({ params }: { params: Promise<{ slug: s
         <div className="bg-white rounded-2xl border border-stone-100 p-5 mb-4">
           <p style={{ fontWeight: 400, fontSize: '0.75rem', letterSpacing: '0.12em' }}
              className="text-stone-400 uppercase mb-3">Mariage</p>
-          <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.2rem', fontStyle: 'italic' }}
+          <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }}
              className="text-[#2d3228] mb-1">{wedding?.name}</p>
           {dateStr && (
             <p style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-500 capitalize mb-1">{dateStr}</p>
@@ -153,7 +153,7 @@ export default async function ComptePage({ params }: { params: Promise<{ slug: s
           <div className="bg-white rounded-2xl border border-stone-100 p-5 mb-6">
             <p style={{ fontWeight: 400, fontSize: '0.75rem', letterSpacing: '0.12em' }}
                className="text-stone-400 uppercase mb-2">Mon message aux mariés</p>
-            <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1rem', lineHeight: 1.65, fontWeight: 300 }}
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', lineHeight: 1.65, fontWeight: 300 }}
                className="text-stone-600">
               « {guestData.guest_message} »
             </p>

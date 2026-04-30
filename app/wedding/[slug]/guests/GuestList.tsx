@@ -65,7 +65,7 @@ function Avatar({ name, gender }: { name: string; gender: 'M' | 'F' | null }) {
   const color = gender === 'F' ? 'bg-rose-100 text-rose-400' : gender === 'M' ? 'bg-sky-100 text-sky-500' : 'bg-stone-100 text-stone-400'
   return (
     <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${color}`}
-         style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '0.9rem', fontStyle: 'italic' }}>
+         style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '0.9rem' }}>
       {initials}
     </div>
   )

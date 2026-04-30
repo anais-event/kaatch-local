@@ -146,7 +146,7 @@ export default function ImportGuests({ weddingId, slug }: { weddingId: string; s
 
       {open && (
         <div className="mt-4 bg-white rounded-xl p-6 shadow-sm border border-stone-100">
-          <h3 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.2rem', fontStyle: 'italic' }}
+          <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.2rem' }}
               className="text-[#4a5240] mb-1">Importer une liste d'invités</h3>
 
           {step === 'upload' && (

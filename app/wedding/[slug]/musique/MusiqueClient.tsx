@@ -150,7 +150,7 @@ export default function MusiqueClient({ slug, songs, playlistLinks, addSong, del
       <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden mb-3">
         <div className="px-5 py-3.5 border-b border-stone-50 flex items-center gap-3">
           <span className="text-xl">{icon}</span>
-          <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.1rem', fontStyle: 'italic' }}
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.1rem' }}
               className="text-[#4a5240] flex-1">{label}</h2>
           <span className="text-xs text-stone-300" style={{ fontWeight: 300 }}>{momentSongs.length} morceau{momentSongs.length !== 1 ? 'x' : ''}</span>
         </div>
@@ -267,7 +267,7 @@ export default function MusiqueClient({ slug, songs, playlistLinks, addSong, del
 
         <div className="flex items-start justify-between mb-6">
           <div>
-            <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.2rem', fontStyle: 'italic' }}
+            <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '2.2rem' }}
                 className="text-[#2d3228]">Musique</h1>
             <p className="text-stone-400 mt-0.5" style={{ fontWeight: 300, fontSize: '0.82rem' }}>
               {songs.length} morceau{songs.length !== 1 ? 'x' : ''} · {playlistLinks.length} playlist{playlistLinks.length !== 1 ? 's' : ''}
@@ -359,7 +359,7 @@ export default function MusiqueClient({ slug, songs, playlistLinks, addSong, del
 
             {/* Ajouter une playlist */}
             <div className="bg-white rounded-2xl border border-stone-100 p-5 space-y-3">
-              <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.1rem', fontStyle: 'italic' }}
+              <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.1rem' }}
                   className="text-[#4a5240]">+ Ajouter une playlist</h2>
               <input value={newPlName} onChange={e => setNewPlName(e.target.value)}
                 placeholder="Nom (ex: Playlist cocktail Spotify)"

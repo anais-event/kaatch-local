@@ -118,7 +118,7 @@ export default function PrestatairesClient({ slug, weddingId, vendors, addPresta
         {/* Header */}
         <div className="flex items-start justify-between mb-6 flex-wrap gap-3">
           <div>
-            <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.8rem', fontStyle: 'italic' }}
+            <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.8rem' }}
                 className="text-[#2d3228]">Prestataires</h1>
             <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-400">
               {vendors.length} prestataire{vendors.length !== 1 ? 's' : ''}
@@ -151,7 +151,7 @@ export default function PrestatairesClient({ slug, weddingId, vendors, addPresta
         {/* Liste */}
         {vendors.length === 0 ? (
           <div className="bg-white rounded-2xl border border-dashed border-stone-200 py-16 text-center">
-            <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.3rem', fontWeight: 300 }}
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', fontWeight: 300 }}
                className="text-stone-300 mb-2">Aucun prestataire pour l'instant</p>
             <p style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-300">
               Ajoutez votre photographe, traiteur, fleuriste…
@@ -270,7 +270,7 @@ export default function PrestatairesClient({ slug, weddingId, vendors, addPresta
              onClick={e => { if (e.target === e.currentTarget) setShowForm(false) }}>
           <div className="bg-white rounded-2xl w-full max-w-md p-6 space-y-4 max-h-[90vh] overflow-y-auto shadow-xl">
             <div className="flex items-center justify-between">
-              <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.4rem', fontStyle: 'italic' }}
+              <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.4rem' }}
                   className="text-[#2d3228]">
                 {editing ? 'Modifier' : 'Nouveau prestataire'}
               </h2>

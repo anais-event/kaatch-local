@@ -147,7 +147,7 @@ export default function TablesClient({
         {/* Header */}
         <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
           <div>
-            <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.8rem', fontStyle: 'italic' }}
+            <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.8rem' }}
                 className="text-[#2d3228]">Plan de table</h1>
             <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-400">
               {totalSeated} / {guests.length} invités placés · {unassigned.length} sans table
@@ -185,7 +185,7 @@ export default function TablesClient({
               <input type="hidden" name="wedding_id" value={weddingId} />
               <input name="name" placeholder="Nom de la table" autoFocus required
                 className="w-full text-sm border border-stone-200 rounded-xl px-4 py-2.5 outline-none focus:border-[#4a5240]"
-                style={{ fontFamily: 'var(--font-cormorant)', fontSize: '1rem' }} />
+                style={{ fontFamily: 'var(--font-display)', fontSize: '1rem' }} />
               <div className="flex items-center gap-3">
                 <label style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-stone-400">Capacité</label>
                 <input name="capacity" type="number" min={1} max={30} defaultValue={8}
@@ -205,7 +205,7 @@ export default function TablesClient({
 
           {tables.length === 0 && (
             <div className="bg-white rounded-2xl border border-dashed border-stone-200 py-16 text-center mb-4">
-              <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.2rem' }}
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem' }}
                  className="text-stone-300 mb-2">Aucune table pour l'instant</p>
               <p style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-300">
                 Tapez "+ Nouvelle table" pour commencer
@@ -231,7 +231,7 @@ export default function TablesClient({
                     className="w-full px-4 py-3 flex items-center justify-between text-left cursor-pointer"
                     onClick={() => setExpandedTableId(isExpanded ? null : table.id)}>
                     <div>
-                      <h3 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.05rem' }}
+                      <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.05rem' }}
                           className="text-[#2d3228]">{table.name}</h3>
                       <p style={{ fontWeight: 300, fontSize: '0.7rem' }}
                          className={isFull ? 'text-amber-500' : 'text-stone-400'}>
@@ -261,7 +261,7 @@ export default function TablesClient({
                     <div className="border-t border-stone-100 px-4 py-3 space-y-3">
                       {/* Assigned guests */}
                       {tableGuests.length === 0 ? (
-                        <p style={{ fontWeight: 300, fontSize: '0.8rem', fontStyle: 'italic' }} className="text-stone-300 text-center py-2">
+                        <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-300 text-center py-2">
                           Aucun invité assigné
                         </p>
                       ) : (
@@ -393,7 +393,7 @@ export default function TablesClient({
                   <p style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-300 text-center py-4">Aucun résultat</p>
                 )}
                 {filteredUnassigned.length === 0 && unassigned.length === 0 && (
-                  <p style={{ fontWeight: 300, fontSize: '0.78rem', fontStyle: 'italic' }} className="text-stone-300 text-center py-4">
+                  <p style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-300 text-center py-4">
                     🎉 Tous placés !
                   </p>
                 )}
@@ -454,7 +454,7 @@ export default function TablesClient({
                 <input type="hidden" name="wedding_id" value={weddingId} />
                 <input name="name" placeholder="Nom de la table (ex: Table des amis)" autoFocus required
                   className="flex-1 min-w-[160px] text-sm border border-stone-200 rounded-xl px-4 py-2.5 outline-none focus:border-[#4a5240]"
-                  style={{ fontFamily: 'var(--font-cormorant)', fontSize: '1rem' }} />
+                  style={{ fontFamily: 'var(--font-display)', fontSize: '1rem' }} />
                 <div className="flex items-center gap-2">
                   <label style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-stone-400 whitespace-nowrap">Capacité</label>
                   <input name="capacity" type="number" min={1} max={30} defaultValue={8}
@@ -474,7 +474,7 @@ export default function TablesClient({
 
             {tables.length === 0 && (
               <div className="bg-white rounded-2xl border border-dashed border-stone-200 py-16 text-center">
-                <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.2rem' }}
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem' }}
                    className="text-stone-300 mb-2">Aucune table pour l'instant</p>
                 <p style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-300">
                   Cliquez sur "+ Nouvelle table" pour commencer
@@ -523,7 +523,7 @@ export default function TablesClient({
                           <input type="hidden" name="id" value={table.id} />
                           <input name="name" defaultValue={table.name} autoFocus required
                             className="flex-1 text-sm border border-stone-200 rounded-lg px-2 py-1 outline-none focus:border-[#4a5240]"
-                            style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '0.95rem' }} />
+                            style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '0.95rem' }} />
                           <input name="capacity" type="number" min={1} max={30} defaultValue={table.capacity}
                             className="w-14 text-xs border border-stone-200 rounded-lg px-2 py-1 outline-none focus:border-[#4a5240]"
                             style={{ fontWeight: 300 }} />
@@ -540,7 +540,7 @@ export default function TablesClient({
                               <p style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.15em' }}
                                  className="text-stone-300 uppercase mb-0.5">N°{table.position_order}</p>
                             )}
-                            <h3 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.1rem' }}
+                            <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.1rem' }}
                                 className="text-[#2d3228]">{table.name}</h3>
                             <p style={{ fontWeight: 300, fontSize: '0.68rem' }}
                                className={isFull ? 'text-amber-500' : 'text-stone-400'}>

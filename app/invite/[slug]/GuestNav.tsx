@@ -47,7 +47,7 @@ export default function GuestNav({ slug, isPreview }: { slug: string; isPreview?
         {/* Logo */}
         <div className="px-5 py-5 border-b border-stone-100">
           <a href={`/invite/${slug}`}
-            style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.1rem', fontStyle: 'italic' }}
+            style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.1rem' }}
             className="text-[#2d3228] block leading-tight">
             ✦ Kaatch
           </a>
@@ -106,7 +106,7 @@ export default function GuestNav({ slug, isPreview }: { slug: string; isPreview?
       <nav className={`md:hidden fixed top-0 left-0 right-0 z-50 bg-[#f5f0e8]/95 backdrop-blur border-b border-stone-200 shadow-sm transition-transform duration-300 ${navHidden ? '-translate-y-full' : ''}`}>
         <div className="flex items-center justify-between px-4 h-12">
           <a href={`/invite/${slug}`}
-            style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.1rem', fontStyle: 'italic' }}
+            style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.1rem' }}
             className="text-[#2d3228]">
             ✦ Kaatch
           </a>

@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+﻿import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { createClient } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
@@ -80,7 +80,7 @@ export default async function AdminPage() {
   const free = total - paid
 
   const LATO = 'var(--font-lato)'
-  const DISPLAY = 'var(--font-cormorant)'
+  const DISPLAY = 'var(--font-display)'
 
   return (
     <main className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: LATO, fontWeight: 300 }}>
@@ -91,7 +91,7 @@ export default async function AdminPage() {
           <p className="text-white/50 text-xs tracking-widest uppercase mb-1" style={{ fontWeight: 500 }}>
             Kaatch Admin
           </p>
-          <h1 style={{ fontFamily: DISPLAY, fontWeight: 500, fontSize: '1.6rem', fontStyle: 'italic' }}
+          <h1 style={{ fontFamily: DISPLAY, fontWeight: 500, fontSize: '1.6rem' }}
               className="text-white">
             Dashboard administrateur
           </h1>
@@ -207,7 +207,7 @@ export default async function AdminPage() {
 
         {/* Codes avantage */}
         <div className="mt-10">
-          <h2 style={{ fontFamily: DISPLAY, fontWeight: 500, fontSize: '1.4rem', fontStyle: 'italic' }}
+          <h2 style={{ fontFamily: DISPLAY, fontWeight: 500, fontSize: '1.4rem' }}
               className="text-[#2d3228] mb-5">Codes avantage</h2>
 
           {/* Créer un code */}

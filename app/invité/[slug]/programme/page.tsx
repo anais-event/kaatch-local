@@ -34,14 +34,14 @@ export default async function GuestProgrammePage({ params }: { params: Promise<{
           <ProgrammePDF slug={slug} weddingName={wedding.name} steps={steps ?? []} />
         </div>
 
-        <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.5rem', fontStyle: 'italic' }}
+        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '2.5rem' }}
             className="text-[#2d3228] mb-8">
           Programme de la journée
         </h1>
 
         {(!steps || steps.length === 0) ? (
           <div className="p-8 rounded-2xl bg-white/80 text-center">
-            <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.1rem' }}
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem' }}
                className="text-stone-400">Programme à venir…</p>
           </div>
         ) : (
@@ -68,7 +68,7 @@ export default async function GuestProgrammePage({ params }: { params: Promise<{
                     {/* Contenu */}
                     <div className="flex-1 bg-white/80 rounded-2xl p-5 shadow-sm">
                       <div className="flex items-start justify-between gap-2 mb-1">
-                        <h3 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.2rem' }}
+                        <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }}
                             className="text-[#2d3228]">
                           {step.title}
                         </h3>

@@ -71,7 +71,7 @@ export default function OnboardingModal({ slug }: { slug: string }) {
         {/* Contenu */}
         <div className="px-8 pb-8 text-center">
           <div className="text-4xl mb-5">{current.icon}</div>
-          <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.8rem', fontStyle: 'italic' }}
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.8rem' }}
               className="text-[#2d3228] mb-3">{current.title}</h2>
           <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.95rem', lineHeight: 1.8 }}
              className="text-stone-500 mb-8">{current.desc}</p>

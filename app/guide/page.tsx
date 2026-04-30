@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
@@ -101,7 +101,7 @@ export default function GuidePage() {
       {/* Nav */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-[#f5f0e8]/95 backdrop-blur border-b border-stone-200">
         <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
-          <a href="/" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.4rem', fontStyle: 'italic' }}
+          <a href="/" style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.4rem' }}
              className="text-[#2d3228]">Kaatch</a>
           <a href="/auth"
              className="text-sm bg-[#4a5240] text-white px-5 py-2 rounded-xl hover:bg-[#2d3228] transition"
@@ -115,7 +115,7 @@ export default function GuidePage() {
       <section className="pt-28 pb-16 px-6">
         <div className="max-w-3xl mx-auto">
           <p className="text-xs tracking-[0.25em] uppercase text-[#4a5240] mb-4" style={{ fontWeight: 300 }}>Guide pratique</p>
-          <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: 'clamp(2.2rem, 5vw, 3.5rem)', fontStyle: 'italic', lineHeight: 1.15 }}
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 'clamp(2.2rem, 5vw, 3.5rem)', lineHeight: 1.15 }}
               className="text-[#2d3228] mb-5">
             Le guide des futurs mariés (un peu) débordés
           </h1>
@@ -148,7 +148,7 @@ export default function GuidePage() {
             <div key={section.slug} id={section.slug} className="scroll-mt-20">
               <div className="flex items-center gap-3 mb-5">
                 <span className="text-2xl">{section.emoji}</span>
-                <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.5rem', fontStyle: 'italic' }}
+                <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.5rem' }}
                     className="text-[#2d3228]">
                   {section.title}
                 </h2>
@@ -169,7 +169,7 @@ export default function GuidePage() {
       {/* CTA */}
       <section className="py-20 px-6 bg-white border-t border-stone-100">
         <div className="max-w-xl mx-auto text-center">
-          <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '2rem', fontStyle: 'italic' }}
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '2rem' }}
               className="text-[#2d3228] mb-4">
             Prêt à passer à l'action ?
           </h2>
@@ -186,7 +186,7 @@ export default function GuidePage() {
 
       {/* Footer */}
       <footer className="border-t border-stone-200 py-8 px-6 bg-[#f5f0e8] text-center">
-        <a href="/" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '1.3rem', fontStyle: 'italic' }}
+        <a href="/" style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '1.3rem' }}
            className="text-stone-400">Kaatch</a>
       </footer>
     </main>

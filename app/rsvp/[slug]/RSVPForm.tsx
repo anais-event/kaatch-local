@@ -29,7 +29,7 @@ export default function RSVPForm({ guest }: { guest: any }) {
   if (done) return (
     <div className="text-center py-8">
       <p className="text-5xl mb-4">{status === 'confirme' ? '🥂' : '💌'}</p>
-      <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '1.8rem', fontStyle: 'italic' }}
+      <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '1.8rem' }}
           className="text-[#2d3228] mb-2">
         {status === 'confirme' ? 'À très bientôt !' : 'Réponse enregistrée'}
       </h2>

@@ -63,7 +63,7 @@ export default async function ContactsPage({ params }: { params: Promise<{ slug:
           </a>
         </div>
 
-        <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.5rem', fontStyle: 'italic' }}
+        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '2.5rem' }}
             className="text-[#2d3228] mb-2">Prestataires</h1>
         <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem' }}
            className="text-stone-400 mb-8">
@@ -72,7 +72,7 @@ export default async function ContactsPage({ params }: { params: Promise<{ slug:
 
         {/* Formulaire ajout */}
         <div className="bg-white rounded-xl p-6 mb-8 shadow-sm border border-stone-100">
-          <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.4rem', fontStyle: 'italic' }}
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.4rem' }}
               className="text-[#4a5240] mb-4">Ajouter un prestataire</h2>
           <form action={addContact} className="space-y-3">
             <input type="hidden" name="slug" value={slug} />
@@ -125,7 +125,7 @@ export default async function ContactsPage({ params }: { params: Promise<{ slug:
                   <div className="flex-1">
                     <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.7rem', letterSpacing: '0.12em' }}
                        className="text-stone-400 uppercase mb-1">{contact.role}</p>
-                    <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.2rem' }}
+                    <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }}
                        className="text-[#2d3228]">{contact.name}</p>
                     {contact.note && (
                       <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.82rem' }}
@@ -184,7 +184,7 @@ export default async function ContactsPage({ params }: { params: Promise<{ slug:
 
         {contacts?.length === 0 && (
           <div className="text-center py-12">
-            <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.1rem' }}
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem' }}
                className="text-stone-400">Aucun prestataire pour l'instant…</p>
           </div>
         )}

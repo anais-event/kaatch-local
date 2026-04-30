@@ -124,7 +124,7 @@ function TableView({ categories, items, quotes, budgetCurrency, getItemEffective
 
                 {/* Montant */}
                 <td className="px-4 py-3 text-right">
-                  <span style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1rem' }} className="text-stone-700">
+                  <span style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1rem' }} className="text-stone-700">
                     {fmt(eff.amount, eff.currency)}
                   </span>
                 </td>
@@ -132,7 +132,7 @@ function TableView({ categories, items, quotes, budgetCurrency, getItemEffective
                 {/* Payé */}
                 <td className="px-4 py-3 text-right">
                   {eff.paid > 0
-                    ? <span style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1rem' }} className="text-emerald-600">{fmt(eff.paid, eff.currency)}</span>
+                    ? <span style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1rem' }} className="text-emerald-600">{fmt(eff.paid, eff.currency)}</span>
                     : <span className="text-stone-300" style={{ fontWeight: 300, fontSize: '0.8rem' }}>—</span>
                   }
                 </td>
@@ -140,7 +140,7 @@ function TableView({ categories, items, quotes, budgetCurrency, getItemEffective
                 {/* Reste */}
                 <td className="px-4 py-3 text-right">
                   {remaining > 0
-                    ? <span style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1rem' }} className="text-amber-500">{fmt(remaining, eff.currency)}</span>
+                    ? <span style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1rem' }} className="text-amber-500">{fmt(remaining, eff.currency)}</span>
                     : <span className="text-emerald-500" style={{ fontWeight: 400, fontSize: '0.8rem' }}>✓</span>
                   }
                 </td>
@@ -169,13 +169,13 @@ function TableView({ categories, items, quotes, budgetCurrency, getItemEffective
                 </span>
               </td>
               <td className="px-4 py-3 text-right">
-                <span style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.05rem' }} className="text-stone-700">{fmt(totalEngaged, budgetCurrency)}</span>
+                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.05rem' }} className="text-stone-700">{fmt(totalEngaged, budgetCurrency)}</span>
               </td>
               <td className="px-4 py-3 text-right">
-                <span style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.05rem' }} className="text-emerald-600">{fmt(totalPaid, budgetCurrency)}</span>
+                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.05rem' }} className="text-emerald-600">{fmt(totalPaid, budgetCurrency)}</span>
               </td>
               <td className="px-4 py-3 text-right">
-                <span style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.05rem' }} className="text-amber-500">{fmt(totalRemaining, budgetCurrency)}</span>
+                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.05rem' }} className="text-amber-500">{fmt(totalRemaining, budgetCurrency)}</span>
               </td>
               <td />
             </tr>
@@ -271,7 +271,7 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
               </form>
             ) : (
               <button onClick={() => setEditBudget(true)} className="flex items-baseline gap-2 group cursor-pointer">
-                <span style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '2.2rem', lineHeight: 1 }} className="text-[#2d3228]">
+                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '2.2rem', lineHeight: 1 }} className="text-[#2d3228]">
                   {budgetTotal > 0 ? fmt(budgetTotal, budgetCurrency) : '— Définir le budget'}
                 </span>
                 <span className="text-xs text-stone-300 group-hover:text-[#4a5240] transition" style={{ fontWeight: 300 }}>modifier</span>
@@ -389,7 +389,7 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
       {/* ── État vide ── */}
       {categories.length === 0 ? (
         <div className="text-center py-14 bg-white rounded-2xl border border-stone-100">
-          <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.4rem' }} className="text-stone-400 mb-2">Aucune catégorie</p>
+          <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem' }} className="text-stone-400 mb-2">Aucune catégorie</p>
           <p style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-300 mb-6">Commencez avec nos suggestions ou créez les vôtres</p>
           <button onClick={async () => { const fd = new FormData(); fd.set('slug', slug); await actions.initDefaultCategories(fd) }}
             className="bg-[#4a5240] text-white px-6 py-2.5 rounded-xl text-sm hover:bg-[#2d3228] transition cursor-pointer mr-3" style={{ fontWeight: 300 }}>
@@ -587,7 +587,7 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
                                            className={isRetenu ? 'text-white' : 'text-stone-700'}>
                                           {quote.vendor_name || <span className="italic opacity-40">Prestataire</span>}
                                         </p>
-                                        <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.3rem', lineHeight: 1 }}
+                                        <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.3rem', lineHeight: 1 }}
                                            className={isRetenu ? 'text-white' : 'text-[#2d3228]'}>
                                           {fmt(quote.amount, quote.currency)}
                                         </p>

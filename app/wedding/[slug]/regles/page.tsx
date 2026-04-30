@@ -68,7 +68,7 @@ export default async function ReglesPage({ params }: { params: Promise<{ slug: s
         <a href={`/wedding/${slug}`} className="text-sm text-[#4a5240] hover:underline mb-6 block" style={{ fontWeight: 300 }}>
           ← Retour aux préparatifs
         </a>
-        <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.5rem', fontStyle: 'italic' }}
+        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '2.5rem' }}
             className="text-[#2d3228] mb-2">Le mot des mariés</h1>
         <p className="text-stone-400 text-sm mb-8" style={{ fontWeight: 300 }}>
           Un message personnel + des infos pratiques visibles par tous vos invités.
@@ -76,7 +76,7 @@ export default async function ReglesPage({ params }: { params: Promise<{ slug: s
 
         {/* Section : Petit mot libre */}
         <div className="bg-white rounded-xl border border-stone-100 p-6 mb-6">
-          <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.3rem', fontStyle: 'italic' }}
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.3rem' }}
               className="text-[#4a5240] mb-1">Votre message</h2>
           <p className="text-xs text-stone-400 mb-4" style={{ fontWeight: 300 }}>
             Ce texte apparaîtra en haut de la page d'accueil de vos invités.
@@ -118,7 +118,7 @@ export default async function ReglesPage({ params }: { params: Promise<{ slug: s
 
         {/* Section : Infos pratiques / règles */}
         <div className="bg-white rounded-xl border border-stone-100 p-6 mb-6">
-          <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.3rem', fontStyle: 'italic' }}
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.3rem' }}
               className="text-[#4a5240] mb-1">Infos pratiques</h2>
           <p className="text-xs text-stone-400 mb-4" style={{ fontWeight: 300 }}>
             Courtes phrases pratiques affichées sous votre message.
@@ -174,7 +174,7 @@ export default async function ReglesPage({ params }: { params: Promise<{ slug: s
           <div className="bg-white rounded-xl border border-stone-100 p-6">
             <p className="text-xs text-stone-400 uppercase tracking-widest mb-4" style={{ fontWeight: 300 }}>Aperçu côté invité</p>
             {wedding.couple_message && (
-              <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.05rem', lineHeight: 1.7 }}
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.05rem', lineHeight: 1.7 }}
                  className="text-stone-600 mb-4 whitespace-pre-wrap">{wedding.couple_message}</p>
             )}
             {(rules ?? []).length > 0 && (

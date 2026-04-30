@@ -27,7 +27,7 @@ export default async function UpgradePage({ params }: { params: Promise<{ slug: 
           <p className="text-xs tracking-[0.25em] uppercase text-[#4a5240] mb-3" style={{ fontWeight: 300 }}>
             Passer à l'offre supérieure
           </p>
-          <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '2.4rem', fontStyle: 'italic', lineHeight: 1.2 }}
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '2.4rem', lineHeight: 1.2 }}
               className="text-[#2d3228] mb-3">
             Offre 💍 Mariage
           </h1>
@@ -45,7 +45,7 @@ export default async function UpgradePage({ params }: { params: Promise<{ slug: 
             </span>
           </div>
           <div className="flex items-end gap-3 mb-6">
-            <span style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '3.5rem', lineHeight: 1 }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '3.5rem', lineHeight: 1 }}>
               45
             </span>
             <div className="pb-2">

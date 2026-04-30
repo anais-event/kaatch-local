@@ -1,11 +1,11 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Tarifs — Kaatch | À partir de 45€, paiement unique',
   description: 'Plan gratuit jusqu\'à 30 invités, plan Mariage à 45€ (paiement unique, invités illimités, photos illimitées). Aucun abonnement caché.',
 }
 
-const DISPLAY = 'var(--font-cormorant)'
+const DISPLAY = 'var(--font-display)'
 const LATO = 'var(--font-lato)'
 const GREEN = '#4a5240'
 const GREEN_DARK = '#2d3228'
@@ -79,7 +79,7 @@ export default function PricingPage() {
           Tarifs
         </p>
         <h1
-          style={{ fontFamily: DISPLAY, fontWeight: 600, fontSize: 'clamp(2.2rem, 5vw, 3.5rem)', lineHeight: 1.1, letterSpacing: '-0.01em', fontStyle: 'italic' }}
+          style={{ fontFamily: DISPLAY, fontWeight: 600, fontSize: 'clamp(2.2rem, 5vw, 3.5rem)', lineHeight: 1.1, letterSpacing: '-0.01em' }}
           className="text-[#2d3228] mb-5"
         >
           Simple. Transparent. Sans surprise.
@@ -201,7 +201,7 @@ export default function PricingPage() {
             Questions
           </p>
           <h2
-            style={{ fontFamily: DISPLAY, fontWeight: 600, fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', lineHeight: 1.2, fontStyle: 'italic' }}
+            style={{ fontFamily: DISPLAY, fontWeight: 600, fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', lineHeight: 1.2 }}
             className="text-[#2d3228] mb-4"
           >
             Vous avez une question ?

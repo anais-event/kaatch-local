@@ -29,7 +29,7 @@ export default function Countdown({ weddingDate }: { weddingDate: string }) {
 
   if (diff.past) return (
     <div className="flex items-center gap-4 p-5 rounded-2xl bg-[#4a5240] text-white text-center justify-center">
-      <span style={{ fontFamily: 'var(--font-cormorant)', fontSize: '1.5rem', fontStyle: 'italic' }}>✨ C'est aujourd'hui !</span>
+      <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem' }}>✨ C'est aujourd'hui !</span>
     </div>
   )
 
@@ -46,7 +46,7 @@ export default function Countdown({ weddingDate }: { weddingDate: string }) {
       <div className={`grid gap-2 text-center`} style={{ gridTemplateColumns: `repeat(${units.length}, 1fr)` }}>
         {units.map(({ value, label }) => (
           <div key={label} className="bg-[#f5f0e8] rounded-xl py-3">
-            <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '2rem', lineHeight: 1 }} className="text-[#4a5240]">
+            <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '2rem', lineHeight: 1 }} className="text-[#4a5240]">
               {String(value).padStart(2, '0')}
             </p>
             <p style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.1em' }} className="text-stone-400 uppercase mt-1">{label}</p>

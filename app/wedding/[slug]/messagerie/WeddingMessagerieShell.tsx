@@ -50,7 +50,7 @@ export default function WeddingMessagerieShell({
         isRoot ? 'w-full sm:w-72 flex-shrink-0' : 'hidden sm:flex sm:w-72 flex-shrink-0'
       }`}>
         <div className="px-4 py-4 border-b border-stone-100">
-          <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.3rem', fontStyle: 'italic' }}
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.3rem' }}
               className="text-[#2d3228]">Messagerie</h2>
           <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400 mt-0.5">
             Vue des mariés
@@ -70,7 +70,7 @@ export default function WeddingMessagerieShell({
                 <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
                   isGeneral ? 'bg-[#4a5240] text-white' : 'bg-[#4a5240]/10 text-[#4a5240]'
                 }`}
-                  style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600 }}>
+                  style={{ fontFamily: 'var(--font-display)', fontWeight: 600 }}>
                   {isGeneral ? '✦' : group.name.replace('@', '').charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -127,7 +127,7 @@ export default function WeddingMessagerieShell({
         {isRoot ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
-              <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.2rem' }}
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem' }}
                  className="text-stone-400 mb-2">Choisissez un groupe</p>
               <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-300">
                 ou créez-en un nouveau à gauche

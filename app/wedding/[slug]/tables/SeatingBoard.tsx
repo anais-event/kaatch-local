@@ -134,7 +134,7 @@ export default function SeatingBoard({
 
         {tables.length === 0 ? (
           <div className="text-center py-20 text-stone-300">
-            <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.5rem' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem' }}>
               Aucune table encore
             </p>
             <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="mt-1">
@@ -227,7 +227,7 @@ export default function SeatingBoard({
                         onDragStart={() => handleDragStart(guest)}
                         className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-stone-50 group cursor-grab active:cursor-grabbing transition">
                         <div className="w-6 h-6 rounded-full bg-[#4a5240]/10 flex items-center justify-center shrink-0">
-                          <span style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '0.65rem' }}
+                          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '0.65rem' }}
                                 className="text-[#4a5240]">
                             {guestInitials(guest)}
                           </span>
@@ -299,7 +299,7 @@ export default function SeatingBoard({
                   onDragStart={() => handleDragStart(guest)}
                   className="group flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-stone-50 cursor-grab active:cursor-grabbing transition">
                   <div className="w-7 h-7 rounded-full bg-stone-100 flex items-center justify-center shrink-0">
-                    <span style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '0.7rem' }}
+                    <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '0.7rem' }}
                           className="text-stone-500">
                       {guestInitials(guest)}
                     </span>

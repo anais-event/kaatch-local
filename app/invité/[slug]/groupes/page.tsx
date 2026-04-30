@@ -80,7 +80,7 @@ export default async function GuestGroupesPage({ params }: { params: Promise<{ s
           </a>
         </div>
 
-        <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.5rem', fontStyle: 'italic' }}
+        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '2.5rem' }}
             className="text-[#2d3228] mb-8">Groupes</h1>
 
         {/* Groupes existants */}
@@ -91,7 +91,7 @@ export default async function GuestGroupesPage({ params }: { params: Promise<{ s
             return (
               <div key={group.id} className="bg-white/80 rounded-2xl p-5 shadow-sm">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.2rem' }}
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }}
                       className="text-[#2d3228]">{group.name}</h3>
                   <span className="text-xs text-stone-400" style={{ fontWeight: 300 }}>
                     {msgs.length} message{msgs.length > 1 ? 's' : ''}
@@ -119,7 +119,7 @@ export default async function GuestGroupesPage({ params }: { params: Promise<{ s
             )
           })}
           {(!groups || groups.length === 0) && (
-            <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.1rem' }}
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem' }}
                className="text-stone-400 text-center py-6">
               Aucun groupe pour le moment…
             </p>
@@ -128,7 +128,7 @@ export default async function GuestGroupesPage({ params }: { params: Promise<{ s
 
         {/* Suggestions */}
         <div className="mb-8">
-          <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.4rem', fontStyle: 'italic' }}
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.4rem' }}
               className="text-[#4a5240] mb-4">Créer un groupe</h2>
           <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-400 mb-4">
             Suggestions :

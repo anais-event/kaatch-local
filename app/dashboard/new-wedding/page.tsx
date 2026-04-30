@@ -1,4 +1,4 @@
-import { createWedding } from './actions'
+﻿import { createWedding } from './actions'
 
 export default function NewWedding() {
   return (
@@ -10,7 +10,7 @@ export default function NewWedding() {
              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
             Bienvenue sur Kaatch
           </p>
-          <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.8rem', fontStyle: 'italic' }}
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '2.8rem' }}
               className="text-[#2d3228]">
             Créez votre mariage
           </h1>
@@ -31,9 +31,9 @@ export default function NewWedding() {
                   placeholder="Votre prénom"
                   required
                   className="flex-1 border border-stone-200 rounded-xl px-4 py-3 outline-none focus:border-[#4a5240] transition text-stone-700 bg-white"
-                  style={{ fontFamily: 'var(--font-cormorant)', fontSize: '1.1rem' }}
+                  style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem' }}
                 />
-                <span style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.1rem' }}
+                <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem' }}
                       className="text-stone-300 text-center shrink-0">et</span>
                 <input
                   name="partner_name"
@@ -41,7 +41,7 @@ export default function NewWedding() {
                   placeholder="Son prénom"
                   required
                   className="flex-1 border border-stone-200 rounded-xl px-4 py-3 outline-none focus:border-[#4a5240] transition text-stone-700 bg-white"
-                  style={{ fontFamily: 'var(--font-cormorant)', fontSize: '1.1rem' }}
+                  style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem' }}
                 />
               </div>
               <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-300 mt-2">

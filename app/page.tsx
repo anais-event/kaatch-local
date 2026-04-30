@@ -169,8 +169,8 @@ export default function Home() {
               </p>
               <p className="text-stone-600" style={{ fontSize: '1.05rem', lineHeight: 1.85 }}>
                 Un mariage, c&apos;est exactement ça. Le moment où tout le monde se retrouve pour célébrer votre{' '}
-                <em style={{ color: '#2C3B2E', fontStyle: 'italic' }}>good catch</em>.
-                Maintenant, on vous aide à <em style={{ color: '#2C3B2E', fontStyle: 'italic' }}>catch up</em>{' '}
+                <em style={{ color: '#2C3B2E' }}>good catch</em>.
+                Maintenant, on vous aide à <em style={{ color: '#2C3B2E' }}>catch up</em>{' '}
                 avec tous vos invités, chaque détail, chaque souvenir — sans rien oublier.
               </p>
             </div>

@@ -71,10 +71,10 @@ export default async function WeddingGroupPage({
            className="sm:hidden text-[#4a5240] text-xl leading-none">←</a>
         <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
           group.name === '@ToutLeMonde' ? 'bg-[#4a5240] text-white' : 'bg-[#4a5240]/10 text-[#4a5240]'
-        }`} style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600 }}>
+        }`} style={{ fontFamily: 'var(--font-display)', fontWeight: 600 }}>
           {group.name === '@ToutLeMonde' ? '✦' : group.name.replace('@', '').charAt(0).toUpperCase()}
         </div>
-        <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.1rem', fontStyle: 'italic' }}
+        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.1rem' }}
             className="text-[#2d3228]">
           {group.name}
         </h1>
@@ -87,7 +87,7 @@ export default async function WeddingGroupPage({
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         {grouped.length === 0 && (
           <p className="text-center text-stone-400 pt-12"
-             style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.1rem' }}>
+             style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem' }}>
             Aucun message pour le moment…
           </p>
         )}

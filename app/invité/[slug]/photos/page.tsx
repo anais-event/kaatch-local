@@ -111,12 +111,12 @@ export default async function GuestPhotosPage({ params }: { params: Promise<{ sl
           </a>
         </div>
 
-        <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.5rem', fontStyle: 'italic' }}
+        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '2.5rem' }}
             className="text-[#2d3228] mb-6">Photos</h1>
 
         {/* Upload */}
         <div className="bg-white/80 rounded-3xl p-6 mb-8 shadow-sm">
-          <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.4rem', fontStyle: 'italic' }}
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.4rem' }}
               className="text-[#4a5240] mb-4">Partager une photo</h2>
           <form action={uploadPhoto} className="space-y-3">
             <input type="hidden" name="slug" value={slug} />

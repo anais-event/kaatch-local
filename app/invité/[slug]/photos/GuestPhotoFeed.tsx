@@ -52,7 +52,7 @@ export default function GuestPhotoFeed({ photos, moments, guestName, addLike, ad
 
       {filtered.length === 0 && (
         <p className="text-center py-12 text-stone-400 italic"
-           style={{ fontFamily: 'var(--font-cormorant)', fontSize: '1.2rem' }}>
+           style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem' }}>
           {filter === 'mine' ? 'Aucune photo avec votre tag pour l\'instant…' : 'Aucune photo pour le moment…'}
         </p>
       )}

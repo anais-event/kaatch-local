@@ -20,7 +20,7 @@ export default async function PublicPage({ params }: { params: Promise<{ code: s
       <div className="min-h-screen bg-[#f5f0e8] flex items-center justify-center p-8">
         <div className="text-center">
           <p className="text-4xl mb-4">🔍</p>
-          <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2rem', fontStyle: 'italic' }}
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '2rem' }}
               className="text-[#2d3228] mb-2">Code introuvable</h1>
           <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.9rem' }}
              className="text-stone-400">Vérifiez le code avec les mariés.</p>
@@ -93,7 +93,7 @@ export default async function PublicPage({ params }: { params: Promise<{ code: s
 
             {/* Noms */}
             <h1 className="text-center text-[#2d3228] mb-2 leading-none"
-                style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: 'clamp(2.2rem, 8vw, 3.2rem)' }}>
+                style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 'clamp(2.2rem, 8vw, 3.2rem)' }}>
               {wedding.name}
             </h1>
 
@@ -109,7 +109,7 @@ export default async function PublicPage({ params }: { params: Promise<{ code: s
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                   </svg>
                   <p className="text-stone-700 capitalize"
-                     style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.05rem' }}>
+                     style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.05rem' }}>
                     {dateFormatted}
                   </p>
                 </div>
@@ -122,7 +122,7 @@ export default async function PublicPage({ params }: { params: Promise<{ code: s
                   </svg>
                   <div className="flex-1 min-w-0">
                     <p className="text-stone-700 truncate"
-                       style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.05rem' }}>
+                       style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.05rem' }}>
                       {wedding.location}
                     </p>
                   </div>
@@ -145,7 +145,7 @@ export default async function PublicPage({ params }: { params: Promise<{ code: s
                   <div className="flex-1 h-px bg-stone-100" />
                 </div>
                 <p className="text-center text-stone-600 leading-relaxed whitespace-pre-wrap"
-                   style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.1rem', lineHeight: 1.8 }}>
+                   style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', lineHeight: 1.8 }}>
                   {wedding.couple_message}
                 </p>
               </div>
@@ -198,7 +198,7 @@ export default async function PublicPage({ params }: { params: Promise<{ code: s
             {/* Version papier : remplace le formulaire */}
             <div className="print-only text-center space-y-2 py-4">
               {dateShort && (
-                <p style={{ fontFamily: 'var(--font-cormorant)', fontSize: '1rem', fontWeight: 300 }}
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', fontWeight: 300 }}
                    className="text-stone-500">{dateShort}</p>
               )}
               <p style={{ fontWeight: 300, fontSize: '0.75rem', letterSpacing: '0.1em' }}

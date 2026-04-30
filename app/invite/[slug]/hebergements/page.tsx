@@ -83,7 +83,7 @@ export default async function GuestHebergementsPage({ params }: { params: Promis
                       </p>
                     )}
                     {acc.note && (
-                      <p style={{ fontWeight: 300, fontSize: '0.88rem', fontStyle: 'italic' }}
+                      <p style={{ fontWeight: 300, fontSize: '0.88rem' }}
                          className="text-[#4a5240] mt-2 bg-[#f5f0e8] rounded-xl px-3 py-2">
                         ✨ {acc.note}
                       </p>

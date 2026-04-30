@@ -51,7 +51,7 @@ export default function GuestbookForm({ submitEntry, defaultName }: GuestbookFor
     return (
       <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-8 text-center">
         <p className="text-3xl mb-3">💌</p>
-        <p className="text-[#4a5240] text-lg" style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic' }}>
+        <p className="text-[#4a5240] text-lg" style={{ fontFamily: 'var(--font-display)' }}>
           Merci, votre mot a été déposé
         </p>
         <p className="text-stone-400 text-sm mt-2" style={{ fontWeight: 300 }}>Votre message sera lu par les mariés 🌸</p>

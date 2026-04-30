@@ -78,7 +78,8 @@
       "Bash(git push *)",
       "Bash(grep -v \"^$\")",
       "Bash(git pull *)",
-      "Bash(git stash *)"
+      "Bash(git stash *)",
+      "Bash(del \"C:\\\\Users\\\\anais\\\\Desktop\\\\kaatch\\\\.git\\\\index.lock\")"
     ]
   }
 }

@@ -167,6 +167,16 @@ export default function Home() {
               <p className="text-stone-600 mb-5" style={{ fontSize: '1.05rem', lineHeight: 1.85 }}>
                 En anglais, &quot;catch&quot; veut dire deux choses.
               </p>
+              <div className="mb-5 flex flex-col gap-3">
+                <p style={{ fontSize: '1rem', lineHeight: 1.7 }}>
+                  <span style={{ fontFamily: DISPLAY, fontWeight: 700, color: '#2C3B2E' }}>Good catch&nbsp;:</span>{' '}
+                  <span className="text-stone-600">La bonne personne. Celle qu&apos;on ne laisse pas partir.</span>
+                </p>
+                <p style={{ fontSize: '1rem', lineHeight: 1.7 }}>
+                  <span style={{ fontFamily: DISPLAY, fontWeight: 700, color: '#2C3B2E' }}>Catch up&nbsp;:</span>{' '}
+                  <span className="text-stone-600">Se retrouver. Enfin tous au même endroit.</span>
+                </p>
+              </div>
               <p className="text-stone-600" style={{ fontSize: '1.05rem', lineHeight: 1.85 }}>
                 Un mariage, c&apos;est exactement ça. Le moment où tout le monde se retrouve pour célébrer votre{' '}
                 <em style={{ color: '#2C3B2E' }}>good catch</em>.

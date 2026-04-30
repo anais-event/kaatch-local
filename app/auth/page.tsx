@@ -8,7 +8,7 @@ function AuthInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const next = searchParams.get('next') || '/dashboard'
-  const [mode, setMode] = useState<'login' | 'signup' | 'reset'>('login')
+  const [mode, setMode] = useState<'login' | 'signup' | 'reset' | 'confirm'>('login')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [resetSent, setResetSent] = useState(false)
@@ -38,6 +38,7 @@ function AuthInner() {
     setLoading(true)
     setError('')
     const formData = new FormData(e.currentTarget)
+    const email = formData.get('email') as string
     const password = formData.get('password') as string
     const confirm = formData.get('confirm') as string
     if (password !== confirm) {
@@ -46,27 +47,27 @@ function AuthInner() {
       return
     }
     const supabase = createClient()
-    const { error: err } = await supabase.auth.signUp({
-      email: formData.get('email') as string,
+    const { data, error: err } = await supabase.auth.signUp({
+      email,
       password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
     })
     if (err) {
       setError(err.message)
       setLoading(false)
       return
     }
-    // Auto sign in après signup
-    const { error: loginErr } = await supabase.auth.signInWithPassword({
-      email: formData.get('email') as string,
-      password,
-    })
-    if (!loginErr) {
+    // Si la session est déjà active (email confirm désactivé côté Supabase), on redirige
+    if (data.session) {
       router.push(next)
       router.refresh()
-    } else {
-      setError('Compte créé ! Vérifiez votre email pour confirmer votre inscription.')
-      setLoading(false)
+      return
     }
+    // Sinon : email de confirmation envoyé
+    setMode('confirm' as typeof mode)
+    setLoading(false)
   }
 
   async function handleReset(e: React.FormEvent<HTMLFormElement>) {
@@ -91,7 +92,7 @@ function AuthInner() {
   const fontCormorant = { fontFamily: 'var(--font-display)' }
   const fontLato = { fontFamily: 'var(--font-body)', fontWeight: 300 as const }
 
-  const subtitle = mode === 'login' ? 'Connexion' : mode === 'signup' ? 'Créer un compte' : 'Mot de passe oublié'
+  const subtitle = mode === 'login' ? 'Connexion' : mode === 'signup' ? 'Créer un compte' : mode === 'confirm' ? 'Vérifiez votre email' : 'Mot de passe oublié'
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-[#f5f0e8]">
@@ -114,7 +115,7 @@ function AuthInner() {
         </div>
 
         {/* Toggle login / signup */}
-        {mode !== 'reset' && !resetSent && (
+        {mode !== 'reset' && mode !== 'confirm' && !resetSent && (
           <div className="flex rounded-xl border border-stone-200 bg-white/60 p-1 mb-6">
             <button
               type="button"
@@ -204,6 +205,36 @@ function AuthInner() {
               <a href="/" className="text-stone-400 hover:text-stone-600 text-sm" style={fontLato}>← Retour</a>
             </p>
           </form>
+        )}
+
+        {/* EMAIL DE CONFIRMATION ENVOYÉ */}
+        {mode === 'confirm' && (
+          <div className="text-center space-y-5">
+            <div className="w-16 h-16 rounded-full bg-[#2C3B2E]/8 flex items-center justify-center mx-auto">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#4a5240" strokeWidth={1.5} className="w-8 h-8">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+              </svg>
+            </div>
+            <div>
+              <p style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.1rem', color: '#2C3B2E' }}>
+                Un email vous attend !
+              </p>
+              <p style={{ ...fontLato, fontSize: '0.85rem', lineHeight: 1.7 }} className="text-stone-500 mt-2">
+                Cliquez sur le lien dans votre boîte mail pour activer votre compte.
+                Pensez à vérifier vos spams si vous ne le voyez pas.
+              </p>
+            </div>
+            <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
+              <p style={{ ...fontLato, fontSize: '0.78rem', lineHeight: 1.6 }} className="text-amber-700">
+                Toujours rien après 5 min ? Vérifiez vos spams ou contactez-nous à{' '}
+                <a href="mailto:bonjour@kaatch.fr" className="underline">bonjour@kaatch.fr</a>
+              </p>
+            </div>
+            <button onClick={() => { setMode('login'); setError('') }}
+              className="text-stone-400 hover:text-stone-600 text-sm cursor-pointer" style={fontLato}>
+              ← Retour à la connexion
+            </button>
+          </div>
         )}
 
         {/* MOT DE PASSE OUBLIÉ */}

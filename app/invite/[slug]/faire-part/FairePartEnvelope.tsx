@@ -16,7 +16,28 @@ type Props = {
 type Phase = 'curtain-closed' | 'opening' | 'revealed'
 
 const BG = '#4a5639'
+const NIGHT = '#0b1209'
 const GOLD = '#c9a96e'
+
+const STARS = Array.from({ length: 90 }, (_, i) => ({
+  id: i,
+  x: (i * 31 + 7) % 100,
+  y: (i * 47 + 13) % 100,
+  size: 1 + (i % 4) * 0.6,
+  delay: ((i * 0.41) % 5).toFixed(2),
+  duration: (2.2 + (i % 6) * 0.55).toFixed(2),
+  color: i % 5 === 0 ? '#e2c97e' : i % 5 === 1 ? '#c9a96e' : i % 5 === 2 ? '#f5e6c0' : 'rgba(255,255,255,0.85)',
+  cross: i % 14 === 0,
+}))
+
+const SPARKLES = Array.from({ length: 10 }, (_, i) => ({
+  id: i,
+  x: (i * 73 + 11) % 90 + 5,
+  y: (i * 53 + 17) % 85 + 5,
+  size: 10 + (i % 3) * 6,
+  delay: ((i * 0.9) % 3).toFixed(2),
+  duration: (3 + (i % 4) * 0.8).toFixed(2),
+}))
 
 const PETALS = Array.from({ length: 18 }, (_, i) => ({
   id: i,
@@ -358,8 +379,7 @@ export default function FairePartEnvelope({
   return (
     <div style={{
       position: 'fixed', inset: 0,
-      background: phase === 'curtain-closed' ? '#2d3a22' : BG,
-      transition: 'background 0.8s ease',
+      background: NIGHT,
       overflow: phase === 'revealed' ? 'auto' : 'hidden',
       display: 'flex', flexDirection: 'column', alignItems: 'center',
       justifyContent: phase === 'revealed' ? 'flex-start' : 'center',
@@ -371,11 +391,27 @@ export default function FairePartEnvelope({
         @keyframes card-rise  { from { opacity:0; transform:translateY(32px) } to { opacity:1; transform:translateY(0) } }
         @keyframes fade-up    { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:translateY(0) } }
         @keyframes star-pulse { 0%,100% { opacity:.4; transform:scale(1) } 50% { opacity:1; transform:scale(1.25) } }
+        @keyframes twinkle {
+          0%,100% { opacity:0.15; transform:scale(0.7); }
+          50%     { opacity:1;    transform:scale(1.3); }
+        }
+        @keyframes sparkle-spin {
+          0%   { opacity:0.3; transform:scale(0.8) rotate(0deg); }
+          40%  { opacity:1;   transform:scale(1.3) rotate(72deg); }
+          100% { opacity:0.3; transform:scale(0.8) rotate(144deg); }
+        }
+        @keyframes glow-pulse {
+          0%,100% { opacity:0.06; transform:scale(1); }
+          50%     { opacity:0.18; transform:scale(1.15); }
+        }
         .curtain-l { animation: open-left  1.3s cubic-bezier(0.4,0,0.2,1) forwards; }
         .curtain-r { animation: open-right 1.3s cubic-bezier(0.4,0,0.2,1) forwards; }
         .card-rise { animation: card-rise  0.8s ease forwards; }
         .fade-up   { animation: fade-up    0.5s ease forwards 0.7s; opacity:0; }
         .star-pulse { animation: star-pulse 1.6s ease-in-out infinite; }
+        .twinkle   { animation-name:twinkle; animation-timing-function:ease-in-out; animation-iteration-count:infinite; }
+        .sparkle   { animation-name:sparkle-spin; animation-timing-function:ease-in-out; animation-iteration-count:infinite; }
+        .glow      { animation-name:glow-pulse; animation-timing-function:ease-in-out; animation-iteration-count:infinite; }
         @keyframes petal-fall-l {
           0%   { transform:translateY(-60px) rotate(0deg) translateX(0px); opacity:1; }
           80%  { transform:translateY(80vh) rotate(240deg) translateX(-28px); opacity:0.5; }
@@ -390,15 +426,64 @@ export default function FairePartEnvelope({
         .petal-r { animation-name:petal-fall-r; animation-timing-function:ease-in; animation-fill-mode:forwards; }
       `}</style>
 
+      {/* ── STARFIELD (always visible) ── */}
+      <div style={{ position:'fixed', inset:0, zIndex:1, pointerEvents:'none', overflow:'hidden' }}>
+
+        {/* Radial gold glows */}
+        <div className="glow" style={{ position:'absolute', top:'15%', left:'50%', transform:'translateX(-50%)',
+          width:400, height:400, borderRadius:'50%',
+          background:'radial-gradient(circle, rgba(201,169,110,0.22) 0%, transparent 65%)',
+          animationDuration:'6s', animationDelay:'0s' }} />
+        <div className="glow" style={{ position:'absolute', bottom:'20%', left:'30%',
+          width:250, height:250, borderRadius:'50%',
+          background:'radial-gradient(circle, rgba(201,169,110,0.14) 0%, transparent 65%)',
+          animationDuration:'8s', animationDelay:'2s' }} />
+        <div className="glow" style={{ position:'absolute', top:'40%', right:'15%',
+          width:200, height:200, borderRadius:'50%',
+          background:'radial-gradient(circle, rgba(255,220,160,0.1) 0%, transparent 65%)',
+          animationDuration:'7s', animationDelay:'1s' }} />
+
+        {/* Tiny twinkling stars */}
+        {STARS.map(s => (
+          s.cross ? (
+            <div key={s.id} className="sparkle"
+              style={{ position:'absolute', left:`${s.x}%`, top:`${s.y}%`,
+                color: s.color, fontSize: s.size * 6,
+                animationDuration:`${s.duration}s`, animationDelay:`${s.delay}s`,
+                lineHeight:1, transform:'translate(-50%,-50%)' }}>
+              ✦
+            </div>
+          ) : (
+            <div key={s.id} className="twinkle"
+              style={{ position:'absolute', left:`${s.x}%`, top:`${s.y}%`,
+                width: s.size, height: s.size, borderRadius:'50%',
+                background: s.color,
+                animationDuration:`${s.duration}s`, animationDelay:`${s.delay}s`,
+                transform:'translate(-50%,-50%)' }} />
+          )
+        ))}
+
+        {/* Larger gold sparkles */}
+        {SPARKLES.map(s => (
+          <div key={s.id} className="sparkle"
+            style={{ position:'absolute', left:`${s.x}%`, top:`${s.y}%`,
+              color:'rgba(201,169,110,0.65)', fontSize: s.size,
+              animationDuration:`${s.duration}s`, animationDelay:`${s.delay}s`,
+              lineHeight:1, transform:'translate(-50%,-50%)' }}>
+            ✧
+          </div>
+        ))}
+      </div>
+
       {/* Curtains */}
       <div className={phase === 'opening' || phase === 'revealed' ? 'curtain-l' : ''}
         style={{ position:'absolute', top:0, left:0, width:'50%', height:'100%', zIndex:30,
-          background:'linear-gradient(180deg,#2d3a22 0%,#1a2419 100%)',
-          boxShadow:'inset -8px 0 20px rgba(0,0,0,0.4)' }} />
+          background:'linear-gradient(180deg,#0e1a0b 0%,#060e04 100%)',
+          boxShadow:'inset -8px 0 20px rgba(0,0,0,0.6)' }} />
       <div className={phase === 'opening' || phase === 'revealed' ? 'curtain-r' : ''}
         style={{ position:'absolute', top:0, right:0, width:'50%', height:'100%', zIndex:30,
-          background:'linear-gradient(180deg,#2d3a22 0%,#1a2419 100%)',
-          boxShadow:'inset 8px 0 20px rgba(0,0,0,0.4)' }} />
+          background:'linear-gradient(180deg,#0e1a0b 0%,#060e04 100%)',
+          boxShadow:'inset 8px 0 20px rgba(0,0,0,0.6)' }} />
 
       {/* Gold center line */}
       {phase === 'curtain-closed' && (
@@ -424,7 +509,7 @@ export default function FairePartEnvelope({
 
       {/* Main content */}
       {phase === 'revealed' && (
-        <div style={{ position:'relative', zIndex:20, width:'100%', maxWidth:440,
+        <div style={{ position:'relative', zIndex:10, width:'100%', maxWidth:440,
           margin:'0 auto', padding:'28px 16px 60px' }}>
 
           {/* ── RECTO ── */}

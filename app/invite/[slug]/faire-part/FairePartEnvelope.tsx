@@ -39,15 +39,16 @@ const SPARKLES = Array.from({ length: 10 }, (_, i) => ({
   duration: (3 + (i % 4) * 0.8).toFixed(2),
 }))
 
-const PETALS = Array.from({ length: 18 }, (_, i) => ({
+const GOLD_RAIN = Array.from({ length: 38 }, (_, i) => ({
   id: i,
-  left: (i * 37 + 3) % 100,
-  delay: ((i * 0.22) % 3).toFixed(2),
-  duration: (3.5 + (i % 5) * 0.4).toFixed(2),
-  size: 6 + (i % 4) * 2,
-  color: ['rgba(201,169,110,0.45)', 'rgba(255,255,255,0.12)', 'rgba(180,200,150,0.35)', 'rgba(226,201,126,0.4)'][i % 4],
-  side: i % 2 === 0 ? 'petal-l' : 'petal-r',
-  rotate: (i * 53) % 360,
+  left: (i * 41 + 5) % 100,
+  delay: ((i * 0.18) % 4).toFixed(2),
+  duration: (4.5 + (i % 7) * 0.6).toFixed(2),
+  size: [10, 12, 14, 9, 16, 11][i % 6],
+  symbol: ['✦', '✧', '✦', '★', '✧', '✦'][i % 6],
+  drift: ((i % 3) - 1) * 18,
+  color: ['#e2c97e', '#c9a96e', '#f5e6c0', '#ffd980', '#d4a85a', '#fff0b0'][i % 6],
+  opacity: 0.55 + (i % 5) * 0.09,
 }))
 
 function parseNames(name: string): [string, string | null] {
@@ -338,14 +339,14 @@ export default function FairePartEnvelope({
   weddingName, dateStr, location, coupleMessage, coverImageUrl, slug, personalUrl, paid = true,
 }: Props) {
   const [phase, setPhase] = useState<Phase>('curtain-closed')
-  const [showPetals, setShowPetals] = useState(false)
+  const [showRain, setShowRain] = useState(false)
   const [downloading, setDownloading] = useState(false)
   const qrRef = useRef<HTMLCanvasElement>(null)
   const [name1, name2] = parseNames(weddingName)
 
   useEffect(() => {
-    const t1 = setTimeout(() => { setPhase('opening'); setShowPetals(true) }, 600)
-    const t2 = setTimeout(() => setPhase('revealed'), 1900)
+    const t1 = setTimeout(() => { setPhase('opening'); setShowRain(true) }, 600)
+    const t2 = setTimeout(() => setPhase('revealed'), 4000)
     return () => { clearTimeout(t1); clearTimeout(t2) }
   }, [])
 
@@ -404,26 +405,21 @@ export default function FairePartEnvelope({
           0%,100% { opacity:0.06; transform:scale(1); }
           50%     { opacity:0.18; transform:scale(1.15); }
         }
-        .curtain-l { animation: open-left  1.3s cubic-bezier(0.4,0,0.2,1) forwards; }
-        .curtain-r { animation: open-right 1.3s cubic-bezier(0.4,0,0.2,1) forwards; }
+        .curtain-l { animation: open-left  2.8s cubic-bezier(0.7,0,0.3,1) forwards; }
+        .curtain-r { animation: open-right 2.8s cubic-bezier(0.7,0,0.3,1) forwards; }
         .card-rise { animation: card-rise  0.8s ease forwards; }
         .fade-up   { animation: fade-up    0.5s ease forwards 0.7s; opacity:0; }
         .star-pulse { animation: star-pulse 1.6s ease-in-out infinite; }
         .twinkle   { animation-name:twinkle; animation-timing-function:ease-in-out; animation-iteration-count:infinite; }
         .sparkle   { animation-name:sparkle-spin; animation-timing-function:ease-in-out; animation-iteration-count:infinite; }
         .glow      { animation-name:glow-pulse; animation-timing-function:ease-in-out; animation-iteration-count:infinite; }
-        @keyframes petal-fall-l {
-          0%   { transform:translateY(-60px) rotate(0deg) translateX(0px); opacity:1; }
-          80%  { transform:translateY(80vh) rotate(240deg) translateX(-28px); opacity:0.5; }
-          100% { transform:translateY(110vh) rotate(360deg) translateX(-14px); opacity:0; }
+        @keyframes gold-fall {
+          0%   { transform:translateY(-80px) translateX(0px) rotate(0deg) scale(1);   opacity:0; }
+          8%   { opacity:1; }
+          70%  { opacity:0.85; }
+          100% { transform:translateY(115vh) translateX(var(--drift)) rotate(180deg) scale(0.6); opacity:0; }
         }
-        @keyframes petal-fall-r {
-          0%   { transform:translateY(-60px) rotate(0deg) translateX(0px); opacity:1; }
-          80%  { transform:translateY(80vh) rotate(-240deg) translateX(28px); opacity:0.5; }
-          100% { transform:translateY(110vh) rotate(-360deg) translateX(14px); opacity:0; }
-        }
-        .petal-l { animation-name:petal-fall-l; animation-timing-function:ease-in; animation-fill-mode:forwards; }
-        .petal-r { animation-name:petal-fall-r; animation-timing-function:ease-in; animation-fill-mode:forwards; }
+        .gold-star { animation-name:gold-fall; animation-timing-function:cubic-bezier(0.25,0.46,0.45,0.94); animation-fill-mode:forwards; }
       `}</style>
 
       {/* ── STARFIELD (always visible) ── */}
@@ -497,14 +493,17 @@ export default function FairePartEnvelope({
           style={{ position:'absolute', zIndex:40, color:GOLD, fontSize:'2.2rem' }}>✦</div>
       )}
 
-      {/* Petals */}
-      {showPetals && PETALS.map(p => (
-        <div key={p.id} className={p.side}
-          style={{ position:'absolute', top:0, left:`${p.left}%`,
-            width:p.size, height:p.size, borderRadius:'50% 0 50% 0',
-            background:p.color, opacity:0.9, zIndex:28, pointerEvents:'none',
-            animationDuration:`${p.duration}s`, animationDelay:`${p.delay}s`,
-            transform:`rotate(${p.rotate}deg)` }} />
+      {/* Pluie d'étoiles dorées */}
+      {showRain && GOLD_RAIN.map(s => (
+        <div key={s.id} className="gold-star"
+          style={{ position:'absolute', top:0, left:`${s.left}%`,
+            color: s.color, fontSize: s.size, lineHeight:1,
+            opacity: s.opacity, zIndex:28, pointerEvents:'none',
+            animationDuration:`${s.duration}s`, animationDelay:`${s.delay}s`,
+            ['--drift' as string]: `${s.drift}px`,
+            transform:'translate(-50%, 0)' }}>
+          {s.symbol}
+        </div>
       ))}
 
       {/* Main content */}

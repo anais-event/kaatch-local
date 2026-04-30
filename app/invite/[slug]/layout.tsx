@@ -32,11 +32,16 @@ export default async function InviteLayout({
   }
 
   const { data: wedding } = await supabase
-    .from('weddings').select('id, plan').eq('slug', slug).single()
+    .from('weddings').select('id, plan, is_suspended').eq('slug', slug).single()
   const weddingId = wedding?.id ?? ''
 
-  // Espace invités verrouillé si plan gratuit — SAUF pour les mariés connectés (aperçu)
-  if (!isPaid(wedding?.plan) && !user) {
+  const blocked = !isPaid(wedding?.plan) || wedding?.is_suspended
+
+  // Espace invités verrouillé (plan gratuit ou suspendu) — SAUF pour les mariés connectés (aperçu)
+  if (blocked && !user) {
+    const message = wedding?.is_suspended
+      ? 'L\'espace invités est temporairement suspendu par les mariés.'
+      : 'Les mariés finalisent la configuration de votre espace. Vous recevrez bientôt votre invitation personnalisée.'
     return (
       <div className="min-h-screen bg-[#f5f0e8] flex items-center justify-center p-6">
         <div className="bg-white rounded-2xl border border-stone-100 p-10 max-w-sm w-full text-center shadow-sm">
@@ -45,7 +50,7 @@ export default async function InviteLayout({
               className="text-[#2d3228] mb-3">Bientôt disponible</h2>
           <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem', lineHeight: 1.7 }}
              className="text-stone-500">
-            Les mariés finalisent la configuration de votre espace. Vous recevrez bientôt votre invitation personnalisée.
+            {message}
           </p>
         </div>
       </div>

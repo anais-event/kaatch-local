@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { redirect } from 'next/navigation'
 import WeddingNav from './WeddingNav'
 import BottomNav from './BottomNav'
 import OnboardingModal from './OnboardingModal'
@@ -16,11 +17,16 @@ export default async function WeddingLayout({
 
   const { data: wedding } = await supabase
     .from('weddings')
-    .select('id, name, plan')
+    .select('id, name, plan, user_id, co_owner_email')
     .eq('slug', slug)
     .single()
 
   const { data: { user } } = await supabase.auth.getUser()
+
+  // Accès réservé au propriétaire ou au co-owner invité
+  if (user && wedding && user.id !== wedding.user_id && user.email !== wedding.co_owner_email) {
+    redirect('/dashboard')
+  }
 
   return (
     <>

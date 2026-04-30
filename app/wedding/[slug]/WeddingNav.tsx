@@ -256,7 +256,12 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
                     <p style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.1em' }}
                       className="text-stone-300 uppercase mb-1">Connexion</p>
                     <p style={{ fontWeight: 300, fontSize: '0.7rem' }}
-                      className="text-stone-400 truncate">{userEmail}</p>
+                      className="text-stone-400 truncate mb-1">{userEmail}</p>
+                    <a href={`/wedding/${slug}/compte`}
+                      className="text-[10px] text-[#4a5240] hover:underline"
+                      style={{ fontWeight: 300 }}>
+                      Gérer mon compte →
+                    </a>
                   </div>
                 )}
               </div>

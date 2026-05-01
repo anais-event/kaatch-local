@@ -14,9 +14,7 @@ export default async function UpgradePage({ params }: { params: Promise<{ slug: 
   if (!wedding) redirect(`/wedding/${slug}`)
   if (wedding.plan === 'mariage' || wedding.plan === 'pro') redirect(`/wedding/${slug}`)
 
-  // URL Lemon Squeezy avec les données du mariage pré-remplies
-  const baseUrl = process.env.LEMONSQUEEZY_CHECKOUT_URL ?? 'https://kaatch-mariage.lemonsqueezy.com/checkout/buy/a9a7912e-a499-41a4-83ee-a885e4d3855c'
-  const checkoutUrl = `${baseUrl}?checkout[custom][wedding_id]=${wedding.id}&checkout[custom][plan]=mariage`
+  const checkoutUrl = `/api/stripe/checkout?wedding_id=${wedding.id}&slug=${slug}`
 
   return (
     <div className="min-h-screen bg-[#f5f0e8] flex items-center justify-center px-6"
@@ -72,7 +70,7 @@ export default async function UpgradePage({ params }: { params: Promise<{ slug: 
         </div>
 
         {/* Bouton paiement */}
-        <a href={checkoutUrl} target="_blank" rel="noopener noreferrer"
+        <a href={checkoutUrl}
            className="block w-full text-center bg-[#4a5240] text-white px-8 py-4 rounded-xl hover:bg-[#2d3228] transition text-sm font-normal"
            style={{ fontWeight: 300, letterSpacing: '0.05em' }}>
           Passer à l'offre Mariage →

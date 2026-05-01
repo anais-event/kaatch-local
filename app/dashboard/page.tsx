@@ -93,7 +93,7 @@ export default async function Dashboard() {
                         20 invités · faire-part limité
                       </p>
                     </div>
-                    <a href={checkoutUrl(wedding.id)}
+                    <a href={checkoutUrl(wedding.id, wedding.slug)}
                        className="shrink-0 bg-[#4a5240] text-white text-xs px-4 py-1.5 rounded-xl hover:bg-[#2d3228] transition"
                        style={{ fontFamily: 'var(--font-body)', fontWeight: 400 }}>
                       Passer à la formule Mariage →

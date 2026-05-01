@@ -51,7 +51,7 @@ export default function CGV() {
 
         <Section n="3" title="Commande et paiement">
           <p>
-            Le paiement est sécurisé via <strong>Lemon Squeezy</strong> (Stripe en sous-traitant). L'accès payant est activé automatiquement dès réception de la confirmation de paiement. Le Client reçoit une confirmation par email.
+            Le paiement est sécurisé via <strong>Stripe</strong>. L'accès payant est activé automatiquement dès réception de la confirmation de paiement. Le Client reçoit une confirmation par email.
           </p>
           <p className="mt-3">
             Pour l'offre Mariage, le paiement unique confère un accès illimité dans le temps pour le mariage concerné. Il ne s'agit pas d'un abonnement.

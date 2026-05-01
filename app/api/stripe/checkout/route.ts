@@ -3,6 +3,10 @@ import Stripe from 'stripe'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
+// Coupon lancement -20€, expire le 31/05/2026
+const LAUNCH_COUPON_ID = 'RJmSDmSI'
+const LAUNCH_COUPON_EXPIRES = new Date('2026-06-01T00:00:00Z')
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const weddingId = searchParams.get('wedding_id')
@@ -13,6 +17,7 @@ export async function GET(req: Request) {
   }
 
   const origin = new URL(req.url).origin
+  const isLaunchPeriod = new Date() < LAUNCH_COUPON_EXPIRES
 
   const session = await stripe.checkout.sessions.create({
     mode: 'payment',
@@ -22,6 +27,7 @@ export async function GET(req: Request) {
         quantity: 1,
       },
     ],
+    ...(isLaunchPeriod ? { discounts: [{ coupon: LAUNCH_COUPON_ID }] } : {}),
     metadata: {
       wedding_id: weddingId,
       plan: 'mariage',

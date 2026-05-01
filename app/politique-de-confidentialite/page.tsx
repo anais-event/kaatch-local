@@ -45,7 +45,7 @@ export default function PolitiqueConfidentialite() {
           <ul className="mt-3 space-y-1.5 list-disc list-inside">
             <li><strong>Mariés :</strong> adresse email, nom du mariage, date, liste d'invités.</li>
             <li><strong>Invités :</strong> prénom, réponse RSVP, message de réponse, photos partagées.</li>
-            <li><strong>Paiement :</strong> aucune donnée bancaire n'est stockée par Kaatch — le paiement est traité par Lemon Squeezy (Stripe).</li>
+            <li><strong>Paiement :</strong> aucune donnée bancaire n'est stockée par Kaatch — le paiement est traité par Stripe.</li>
             <li><strong>Technique :</strong> logs de connexion, cookies de session.</li>
           </ul>
         </Section>
@@ -75,7 +75,7 @@ export default function PolitiqueConfidentialite() {
             {[
               { name: 'Vercel Inc.', role: "Hébergement de l'application", country: 'États-Unis (DPA disponible)', link: 'https://vercel.com/legal/privacy-policy' },
               { name: 'Supabase Inc.', role: 'Base de données et authentification', country: 'Singapour / UE', link: 'https://supabase.com/privacy' },
-              { name: 'Lemon Squeezy (Stripe)', role: 'Paiement en ligne', country: 'États-Unis (SCC)', link: 'https://www.lemonsqueezy.com/privacy' },
+              { name: 'Stripe', role: 'Paiement en ligne', country: 'États-Unis (SCC)', link: 'https://stripe.com/fr/privacy' },
               { name: 'Resend', role: "Envoi d'emails transactionnels", country: 'États-Unis (DPA disponible)', link: 'https://resend.com/privacy' },
             ].map(s => (
               <div key={s.name} className="bg-white/70 rounded-xl px-4 py-3" style={{ fontSize: '0.83rem' }}>

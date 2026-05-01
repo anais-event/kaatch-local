@@ -29,7 +29,7 @@ export default function AddGuestForm({ weddingId, slug, addGuest, guestCount, pa
             Passez au plan Mariage pour ajouter des invités en illimité.
           </p>
           <a
-            href={`${process.env.NEXT_PUBLIC_LEMON_CHECKOUT_URL ?? '/pricing'}?checkout[custom][wedding_id]=${weddingId}`}
+            href={`/api/stripe/checkout?wedding_id=${weddingId}&slug=${slug}`}
             className="inline-block bg-[#4a5240] text-white text-xs px-4 py-2 rounded-xl hover:bg-[#2d3228] transition"
             style={{ fontWeight: 400 }}
           >

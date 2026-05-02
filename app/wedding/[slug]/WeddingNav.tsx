@@ -263,7 +263,7 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
                   ) : (
                     <div className="space-y-1.5">
                       <span className="text-[10px] bg-stone-100 text-stone-400 px-2 py-0.5 rounded-full inline-block" style={{ fontWeight: 500 }}>Gratuite — 20 invités</span>
-                      <a href={`https://kaatch-mariage.lemonsqueezy.com/checkout/buy/a9a7912e-a499-41a4-83ee-a885e4d3855c?checkout[custom][wedding_id]=${weddingId}&checkout[custom][plan]=mariage`}
+                      <a href={`/api/stripe/checkout?wedding_id=${weddingId}&slug=${slug}`}
                         className="block text-center bg-[#4a5240] text-white text-[10px] px-2 py-1.5 rounded-lg hover:bg-[#2d3228] transition"
                         style={{ fontWeight: 400 }}>
                         Passer à Mariage →

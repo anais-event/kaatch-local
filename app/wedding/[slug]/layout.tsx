@@ -17,14 +17,14 @@ export default async function WeddingLayout({
 
   const { data: wedding } = await supabase
     .from('weddings')
-    .select('id, name, plan, user_id, co_owner_email')
+    .select('id, name, plan, couple_id, co_owner_email')
     .eq('slug', slug)
     .single()
 
   const { data: { user } } = await supabase.auth.getUser()
 
   // Accès réservé au propriétaire ou au co-owner invité
-  if (user && wedding && user.id !== wedding.user_id && user.email !== wedding.co_owner_email) {
+  if (user && wedding && user.id !== wedding.couple_id && user.email !== wedding.co_owner_email) {
     redirect('/dashboard')
   }
 

@@ -427,13 +427,9 @@ export default function TablesClient({
                 })}
               </div>
             </div>
-            {selectedGuestId ? (
+            {selectedGuestId && (
               <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-[#4a5240] text-center mt-3 italic">
                 Tapez une table pour placer →
-              </p>
-            ) : (
-              <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 text-center mt-3 italic">
-                Glissez ou tapez un invité →
               </p>
             )}
           </div>

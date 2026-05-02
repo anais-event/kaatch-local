@@ -22,7 +22,6 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null)
-  const [settingsOpen, setSettingsOpen] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
 
   useEffect(() => {
@@ -222,75 +221,15 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
             </svg>
             Vue invités
           </a>
-          {/* Dropdown Paramètres */}
-          <div>
-            <button
-              onClick={() => setSettingsOpen(o => !o)}
-              className={`w-full flex items-center justify-between gap-2.5 px-3 py-2 rounded-lg text-xs transition cursor-pointer ${settingsOpen ? 'bg-stone-100 text-[#4a5240]' : 'text-stone-600 hover:bg-stone-100 hover:text-[#4a5240]'}`}
-              style={{ fontFamily: 'var(--font-lato)', fontWeight: 400 }}>
-              <span className="flex items-center gap-2.5">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3.5 h-3.5 shrink-0">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                Paramètres
-              </span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}
-                className={`w-3.5 h-3.5 text-stone-500 transition-transform ${settingsOpen ? 'rotate-180' : ''}`}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-
-            {settingsOpen && (
-              <div className="ml-3 pl-3 border-l-2 border-stone-200 mt-1 mb-1 space-y-3 py-2">
-                {/* Infos du mariage */}
-                <a href={`/wedding/${slug}/edit`}
-                  className="flex items-center gap-2 text-xs text-stone-700 hover:text-[#4a5240] transition font-medium"
-                  style={{ fontFamily: 'var(--font-lato)', fontWeight: 500 }}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3 h-3 shrink-0">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                  </svg>
-                  Infos du mariage
-                </a>
-
-                {/* Formule */}
-                <div>
-                  <p style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.1em' }}
-                    className="text-stone-300 uppercase mb-1">Formule</p>
-                  {plan === 'mariage' || plan === 'pro' ? (
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] bg-[#4a5240]/10 text-[#4a5240] px-2 py-0.5 rounded-full" style={{ fontWeight: 500 }}>Mariage ✓</span>
-                    </div>
-                  ) : (
-                    <div className="space-y-1.5">
-                      <span className="text-[10px] bg-stone-100 text-stone-400 px-2 py-0.5 rounded-full inline-block" style={{ fontWeight: 500 }}>Gratuite — 20 invités</span>
-                      <a href={`/api/stripe/checkout?wedding_id=${weddingId}&slug=${slug}`}
-                        className="block text-center bg-[#4a5240] text-white text-[10px] px-2 py-1.5 rounded-lg hover:bg-[#2d3228] transition"
-                        style={{ fontWeight: 400 }}>
-                        Passer à Mariage →
-                      </a>
-                    </div>
-                  )}
-                </div>
-
-                {/* Identifiants */}
-                {userEmail && (
-                  <div>
-                    <p style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.1em' }}
-                      className="text-stone-300 uppercase mb-1">Connexion</p>
-                    <p style={{ fontWeight: 300, fontSize: '0.7rem' }}
-                      className="text-stone-400 truncate mb-1">{userEmail}</p>
-                    <a href={`/wedding/${slug}/compte`}
-                      className="text-[10px] text-[#4a5240] hover:underline"
-                      style={{ fontWeight: 300 }}>
-                      Gérer mon compte →
-                    </a>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+          <a href={`/wedding/${slug}/compte`}
+            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs text-stone-600 hover:bg-stone-100 hover:text-[#4a5240] transition"
+            style={{ fontFamily: 'var(--font-lato)', fontWeight: 400 }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3.5 h-3.5 shrink-0">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Paramètres
+          </a>
 
           {/* Activité */}
           {log.length > 0 && (

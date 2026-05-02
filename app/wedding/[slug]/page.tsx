@@ -144,6 +144,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
                 {/* Invités */}
                 <a href={`/wedding/${slug}/guests`}
                    className="group bg-white rounded-xl border border-stone-100 p-4 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                  <span className="text-2xl mb-1">👥</span>
                   <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.1rem' }} className="text-[#2d3228]">Invités</p>
                   <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400 mb-2">Faire-part & RSVP</p>
                   <div className="flex items-end gap-1 mt-auto">
@@ -159,6 +160,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
                 {/* Plan de table */}
                 <a href={`/wedding/${slug}/tables`}
                    className="group bg-white rounded-xl border border-stone-100 p-4 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                  <span className="text-2xl mb-1">🪑</span>
                   <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.1rem' }} className="text-[#2d3228]">Plan de table</p>
                   <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400 mb-2">Placement & récap</p>
                   <div className="flex items-end gap-1 mt-auto">
@@ -171,6 +173,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
                 {/* Budget */}
                 <a href={`/wedding/${slug}/budget`}
                    className="group bg-white rounded-xl border border-stone-100 p-4 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                  <span className="text-2xl mb-1">💰</span>
                   <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.1rem' }} className="text-[#2d3228]">Budget</p>
                   <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400 mb-2">Suivi des dépenses</p>
                   <div className="flex items-end gap-1 mt-auto">
@@ -183,6 +186,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
                 {/* Prestataires */}
                 <a href={`/wedding/${slug}/prestataires`}
                    className="group bg-white rounded-xl border border-stone-100 p-4 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                  <span className="text-2xl mb-1">🤝</span>
                   <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.1rem' }} className="text-[#2d3228]">Prestataires</p>
                   <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400 mb-2">Contacts & contrats</p>
                   <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto">Gérer →</p>
@@ -191,6 +195,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
                 {/* Mot des mariés */}
                 <a href={`/wedding/${slug}/regles`}
                    className="group bg-white rounded-xl border border-stone-100 p-4 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                  <span className="text-2xl mb-1">💌</span>
                   <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.1rem' }} className="text-[#2d3228]">Mot des mariés</p>
                   <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400 mb-2">Message & infos pratiques</p>
                   <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto">Gérer →</p>
@@ -208,6 +213,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
                 {/* Programme */}
                 <a href={`/wedding/${slug}/programme`}
                    className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                  <span className="text-2xl mb-1">📋</span>
                   <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Programme</p>
                   <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-3">Déroulé de la journée</p>
                   <div className="flex items-end gap-1 mt-auto">
@@ -244,6 +250,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
                 {/* Hébergements */}
                 <a href={`/wedding/${slug}/hebergements`}
                    className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all sm:col-start-1">
+                  <span className="text-2xl mb-1">🏡</span>
                   <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Hébergements</p>
                   <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-3">Options aux alentours</p>
                   <div className="flex items-end gap-1 mt-auto">
@@ -256,6 +263,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
                 {/* Musique */}
                 <a href={`/wedding/${slug}/musique`}
                    className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                  <span className="text-2xl mb-1">🎵</span>
                   <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Musique</p>
                   <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-3">Playlist &amp; ambiance</p>
                   <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto">Gérer →</p>
@@ -264,6 +272,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
                 {/* Jeux & anim. */}
                 <a href={`/wedding/${slug}/jeux`}
                    className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                  <span className="text-2xl mb-1">🎉</span>
                   <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Jeux &amp; anim.</p>
                   <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-3">Idées pour la fête</p>
                   <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto">Gérer →</p>
@@ -272,6 +281,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
                 {/* QR Code */}
                 <a href={`/wedding/${slug}/partager`}
                    className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                  <span className="text-2xl mb-1">📲</span>
                   <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">QR Code</p>
                   <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-3">Accès rapide jour J</p>
                   <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto">Gérer →</p>
@@ -280,6 +290,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
                 {/* Livre d'Or */}
                 <a href={`/wedding/${slug}/livre-dor`}
                    className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                  <span className="text-2xl mb-1">📖</span>
                   <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Livre d&apos;Or</p>
                   <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-3">Messages des invités</p>
                   <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto">Gérer →</p>

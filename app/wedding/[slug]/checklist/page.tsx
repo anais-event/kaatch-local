@@ -55,4 +55,17 @@ export default async function ChecklistPage({ params }: { params: Promise<{ slug
     const assigned_to = (formData.get('assigned_to') as string).trim() || null
     const moment = formData.get('moment') as string
     if (!title) return
-    await supabase.from('day_tasks').update({ title, assigned_to,
+    await supabase.from('day_tasks').update({ title, assigned_to, moment }).eq('id', id)
+    revalidatePath(`/mariage/${weddingSlug}/checklist`)
+  }
+
+  return (
+    <ChecklistClient
+      tasks={tasks ?? []}
+      addTask={addTask}
+      toggleTask={toggleTask}
+      deleteTask={deleteTask}
+      updateTask={updateTask}
+    />
+  )
+}

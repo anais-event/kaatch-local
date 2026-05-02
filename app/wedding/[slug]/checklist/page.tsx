@@ -9,10 +9,13 @@ export default async function ChecklistPage({ params }: { params: Promise<{ slug
   const { data: wedding } = await supabase.from('weddings').select('id').eq('slug', slug).single()
   if (!wedding) return <div className="p-8">Mariage introuvable</div>
 
+  const weddingId = wedding.id
+  const weddingSlug = slug
+
   const { data: tasks } = await supabase
     .from('day_tasks')
     .select('*')
-    .eq('wedding_id', wedding.id)
+    .eq('wedding_id', weddingId)
     .order('position')
     .order('created_at')
 
@@ -23,8 +26,8 @@ export default async function ChecklistPage({ params }: { params: Promise<{ slug
     const assigned_to = (formData.get('assigned_to') as string).trim() || null
     const moment = formData.get('moment') as string
     if (!title) return
-    await supabase.from('day_tasks').insert({ wedding_id: wedding!.id, title, assigned_to, moment })
-    revalidatePath(`/mariage/${slug}/checklist`)
+    await supabase.from('day_tasks').insert({ wedding_id: weddingId, title, assigned_to, moment })
+    revalidatePath(`/mariage/${weddingSlug}/checklist`)
   }
 
   async function toggleTask(formData: FormData) {
@@ -33,7 +36,7 @@ export default async function ChecklistPage({ params }: { params: Promise<{ slug
     const id = formData.get('id') as string
     const done = formData.get('done') === 'true'
     await supabase.from('day_tasks').update({ done: !done }).eq('id', id)
-    revalidatePath(`/mariage/${slug}/checklist`)
+    revalidatePath(`/mariage/${weddingSlug}/checklist`)
   }
 
   async function deleteTask(formData: FormData) {
@@ -41,7 +44,7 @@ export default async function ChecklistPage({ params }: { params: Promise<{ slug
     const supabase = await createSupabaseServerClient()
     const id = formData.get('id') as string
     await supabase.from('day_tasks').delete().eq('id', id)
-    revalidatePath(`/mariage/${slug}/checklist`)
+    revalidatePath(`/mariage/${weddingSlug}/checklist`)
   }
 
   async function updateTask(formData: FormData) {
@@ -52,19 +55,4 @@ export default async function ChecklistPage({ params }: { params: Promise<{ slug
     const assigned_to = (formData.get('assigned_to') as string).trim() || null
     const moment = formData.get('moment') as string
     if (!title) return
-    await supabase.from('day_tasks').update({ title, assigned_to, moment }).eq('id', id)
-    revalidatePath(`/mariage/${slug}/checklist`)
-  }
-
-  return (
-    <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
-      <ChecklistClient
-        tasks={tasks ?? []}
-        addTask={addTask}
-        toggleTask={toggleTask}
-        deleteTask={deleteTask}
-        updateTask={updateTask}
-      />
-    </div>
-  )
-}
+    await supabase.from('day_tasks').update({ title, assigned_to,

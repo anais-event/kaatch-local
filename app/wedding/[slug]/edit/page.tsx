@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 import SlugField from './SlugField'
 import CoverPositionPicker from './CoverPositionPicker'
 
@@ -60,6 +61,8 @@ async function updateWedding(formData: FormData) {
     })
     .eq('slug', currentSlug)
 
+  revalidatePath(`/mariage/${newSlug}`)
+  revalidatePath(`/mariage/${newSlug}/edit`)
   redirect(`/mariage/${newSlug}`)
 }
 

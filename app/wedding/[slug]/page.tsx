@@ -1,41 +1,9 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
-import { createClient } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
 import Countdown from './Countdown'
 import Memo from './Memo'
 import PlanningWidget from './PlanningWidget'
-import PromoCodeForm from './PromoCodeForm'
 import { isPaid } from '@/lib/plan'
-
-async function redeemCode(formData: FormData): Promise<{ success: boolean; error?: string }> {
-  'use server'
-  const weddingId = formData.get('wedding_id') as string
-  const slug = formData.get('slug') as string
-  const code = (formData.get('code') as string).trim().toUpperCase()
-
-  const admin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-
-  const { data: promo } = await admin
-    .from('promo_codes')
-    .select('id, plan, max_uses, uses_count, active')
-    .eq('code', code)
-    .single()
-
-  if (!promo || !promo.active) return { success: false, error: 'Code invalide ou expiré.' }
-  if (promo.uses_count >= promo.max_uses) return { success: false, error: 'Ce code a déjà été utilisé le nombre maximum de fois.' }
-
-  const { error: useError } = await admin.from('promo_code_uses').insert({ code_id: promo.id, wedding_id: weddingId })
-  if (useError) return { success: false, error: 'Ce code a déjà été utilisé sur ce mariage.' }
-
-  await admin.from('promo_codes').update({ uses_count: promo.uses_count + 1 }).eq('id', promo.id)
-  await admin.from('weddings').update({ plan: promo.plan }).eq('id', weddingId)
-
-  revalidatePath(`/mariage/${slug}`)
-  return { success: true }
-}
 
 export default async function WeddingPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -326,12 +294,6 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
               </a>
             </div>
 
-            {/* Code avantage — visible uniquement en plan gratuit */}
-            {!isPaid(wedding.plan) && (
-              <div className="mt-4">
-                <PromoCodeForm redeemCode={redeemCode} weddingId={wedding.id} slug={slug} />
-              </div>
-            )}
           </div>
 
         </div>

@@ -1,9 +1,12 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createClient } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import PasswordForm from './PasswordForm'
 import InvitePartnerForm from './InvitePartnerForm'
 import DangerZone from './DangerZone'
+import PlanSection from './PlanSection'
+import { checkoutUrl } from '@/lib/plan'
 
 export default async function ComptePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -14,11 +17,34 @@ export default async function ComptePage({ params }: { params: Promise<{ slug: s
 
   const { data: wedding } = await supabase
     .from('weddings')
-    .select('id, name, co_owner_email, is_suspended')
+    .select('id, name, co_owner_email, is_suspended, plan')
     .eq('slug', slug)
     .single()
 
   if (!wedding) redirect('/dashboard')
+
+  async function redeemCode(formData: FormData): Promise<{ success: boolean; error?: string }> {
+    'use server'
+    const weddingId = formData.get('wedding_id') as string
+    const code = (formData.get('code') as string).trim().toUpperCase()
+    const admin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+    const { data: promo } = await admin
+      .from('promo_codes')
+      .select('id, plan, max_uses, uses_count, active')
+      .eq('code', code)
+      .single()
+    if (!promo || !promo.active) return { success: false, error: 'Code invalide ou expiré.' }
+    if (promo.uses_count >= promo.max_uses) return { success: false, error: 'Ce code a déjà été utilisé le nombre maximum de fois.' }
+    const { error: useError } = await admin.from('promo_code_uses').insert({ code_id: promo.id, wedding_id: weddingId })
+    if (useError) return { success: false, error: 'Ce code a déjà été utilisé sur ce mariage.' }
+    await admin.from('promo_codes').update({ uses_count: promo.uses_count + 1 }).eq('id', promo.id)
+    await admin.from('weddings').update({ plan: promo.plan }).eq('id', weddingId)
+    revalidatePath(`/mariage/${slug}/compte`)
+    return { success: true }
+  }
 
   async function invitePartner(formData: FormData) {
     'use server'
@@ -126,6 +152,15 @@ export default async function ComptePage({ params }: { params: Promise<{ slug: s
             removeAction={removePartner}
           />
         </section>
+
+        {/* Formule */}
+        <PlanSection
+          plan={wedding.plan ?? null}
+          weddingId={wedding.id}
+          slug={slug}
+          redeemCode={redeemCode}
+          checkoutUrl={checkoutUrl(wedding.id, slug)}
+        />
 
         {/* Zone sensible */}
         <section className="bg-white rounded-2xl border border-stone-100 shadow-sm p-6">

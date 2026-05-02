@@ -23,7 +23,7 @@ export default async function ChecklistPage({ params }: { params: Promise<{ slug
     const assigned_to = (formData.get('assigned_to') as string).trim() || null
     const moment = formData.get('moment') as string
     if (!title) return
-    await supabase.from('day_tasks').insert({ wedding_id: wedding.id, title, assigned_to, moment })
+    await supabase.from('day_tasks').insert({ wedding_id: wedding!.id, title, assigned_to, moment })
     revalidatePath(`/mariage/${slug}/checklist`)
   }
 

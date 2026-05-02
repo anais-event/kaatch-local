@@ -1,5 +1,5 @@
 ﻿'use client'
-import KaatchChat from '../mariage/[slug]/KaatchChat'
+import KaatchChat from '../wedding/[slug]/KaatchChat'
 export default function KaatchChatLanding() {
   return <KaatchChat />
 }

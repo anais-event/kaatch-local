@@ -16,7 +16,7 @@ async function createTable(formData: FormData) {
     .select('*', { count: 'exact', head: true })
     .eq('wedding_id', weddingId)
   await supabase.from('seating_tables').insert({ wedding_id: weddingId, name, capacity, position_order: (count ?? 0) + 1 })
-  revalidatePath(`/wedding/${slug}/tables`)
+  revalidatePath(`/mariage/${slug}/tables`)
 }
 
 async function deleteTable(formData: FormData) {
@@ -27,7 +27,7 @@ async function deleteTable(formData: FormData) {
   // Désassigner les invités de cette table
   await supabase.from('guests').update({ table_id: null }).eq('table_id', id)
   await supabase.from('seating_tables').delete().eq('id', id)
-  revalidatePath(`/wedding/${slug}/tables`)
+  revalidatePath(`/mariage/${slug}/tables`)
 }
 
 async function assignGuest(formData: FormData) {
@@ -37,7 +37,7 @@ async function assignGuest(formData: FormData) {
   const guestId = formData.get('guest_id') as string
   const tableId = formData.get('table_id') as string || null
   await supabase.from('guests').update({ table_id: tableId }).eq('id', guestId)
-  revalidatePath(`/wedding/${slug}/tables`)
+  revalidatePath(`/mariage/${slug}/tables`)
 }
 
 async function updateTableName(formData: FormData) {
@@ -49,7 +49,7 @@ async function updateTableName(formData: FormData) {
   const capacity = parseInt(formData.get('capacity') as string) || 8
   if (!name) return
   await supabase.from('seating_tables').update({ name, capacity }).eq('id', id)
-  revalidatePath(`/wedding/${slug}/tables`)
+  revalidatePath(`/mariage/${slug}/tables`)
 }
 
 export default async function TablesPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -83,7 +83,7 @@ export default async function TablesPage({ params }: { params: Promise<{ slug: s
   return (
     <>
     <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-8">
-      <a href={`/wedding/${slug}`} className="text-sm text-[#4a5240] hover:underline mb-4 block"
+      <a href={`/mariage/${slug}`} className="text-sm text-[#4a5240] hover:underline mb-4 block"
          style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
         ← Retour aux préparatifs
       </a>

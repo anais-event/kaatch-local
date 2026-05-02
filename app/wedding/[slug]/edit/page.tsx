@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import SlugField from './SlugField'
+import CoverPositionPicker from './CoverPositionPicker'
 
 function toSlug(str: string) {
   return str
@@ -44,7 +45,7 @@ async function updateWedding(formData: FormData) {
     const { data: existing } = await supabase
       .from('weddings').select('id').eq('slug', newSlug).single()
     if (existing) {
-      redirect(`/wedding/${currentSlug}/edit?error=slug-taken`)
+      redirect(`/mariage/${currentSlug}/edit?error=slug-taken`)
     }
   }
 
@@ -59,7 +60,7 @@ async function updateWedding(formData: FormData) {
     })
     .eq('slug', currentSlug)
 
-  redirect(`/wedding/${newSlug}`)
+  redirect(`/mariage/${newSlug}`)
 }
 
 export default async function EditWedding({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ error?: string }> }) {
@@ -82,7 +83,7 @@ export default async function EditWedding({ params, searchParams }: { params: Pr
       <div className="w-full max-w-lg">
 
         <div className="mb-6">
-          <a href={`/wedding/${slug}`}
+          <a href={`/mariage/${slug}`}
              className="text-sm text-[#4a5240] hover:underline"
              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
             ← Retour
@@ -131,9 +132,12 @@ export default async function EditWedding({ params, searchParams }: { params: Pr
                 Photo de couverture
               </label>
               {wedding.cover_image_url && (
-                <img src={wedding.cover_image_url} alt="Couverture actuelle"
-                     className="w-full h-40 object-cover rounded-xl mb-3"
-                     style={{ objectPosition: `center ${wedding.cover_position_y ?? 50}%` }} />
+                <div className="mb-3">
+                  <CoverPositionPicker
+                    imageUrl={wedding.cover_image_url}
+                    defaultPosition={wedding.cover_position_y ?? 50}
+                  />
+                </div>
               )}
               <input
                 type="file"
@@ -142,28 +146,8 @@ export default async function EditWedding({ params, searchParams }: { params: Pr
                 className="w-full border border-stone-200 rounded-xl px-4 py-3 text-stone-500 bg-white file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:bg-[#f5f0e8] file:text-[#4a5240] hover:file:bg-stone-200 transition"
                 style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem' }}
               />
-              {wedding.cover_image_url && (
-                <div className="mt-3">
-                  <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.7rem', letterSpacing: '0.1em' }}
-                     className="text-stone-400 uppercase mb-1">
-                    Position verticale de la photo
-                  </p>
-                  <div className="flex items-center gap-3">
-                    <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-300">Haut</span>
-                    <input
-                      type="range"
-                      name="cover_position_y"
-                      min={0}
-                      max={100}
-                      defaultValue={wedding.cover_position_y ?? 50}
-                      className="flex-1 accent-[#4a5240]"
-                    />
-                    <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-300">Bas</span>
-                  </div>
-                  <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-300 mt-1">
-                    Glissez pour recadrer l'image — sauvegardez pour voir le résultat
-                  </p>
-                </div>
+              {!wedding.cover_image_url && (
+                <input type="hidden" name="cover_position_y" value="50" />
               )}
             </div>
 
@@ -220,7 +204,7 @@ export default async function EditWedding({ params, searchParams }: { params: Pr
                 Enregistrer
               </button>
               <a
-                href={`/wedding/${slug}`}
+                href={`/mariage/${slug}`}
                 className="flex-1 bg-stone-100 text-stone-500 py-3 rounded-full text-center hover:bg-stone-200 transition"
                 style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem' }}
               >

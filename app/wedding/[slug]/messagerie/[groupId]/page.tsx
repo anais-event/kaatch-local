@@ -16,7 +16,7 @@ async function sendMessage(formData: FormData) {
     author_name: author,
     wedding_id: formData.get('wedding_id') as string,
   })
-  revalidatePath(`/wedding/${slug}/messagerie/${group_id}`)
+  revalidatePath(`/mariage/${slug}/messagerie/${group_id}`)
 }
 
 function formatDateSeparator(date: Date): string {
@@ -46,7 +46,7 @@ export default async function WeddingGroupPage({
 
   const { data: group } = await supabase
     .from('message_groups').select('id, name').eq('id', groupId).single()
-  if (!group) redirect(`/wedding/${slug}/messagerie`)
+  if (!group) redirect(`/mariage/${slug}/messagerie`)
 
   const { data: messages } = await supabase
     .from('messages').select('id, content, author_name, created_at')
@@ -67,7 +67,7 @@ export default async function WeddingGroupPage({
 
       {/* Header groupe */}
       <div className="flex items-center gap-3 px-4 h-12 border-b border-stone-200 bg-white shrink-0">
-        <a href={`/wedding/${slug}/messagerie`}
+        <a href={`/mariage/${slug}/messagerie`}
            className="sm:hidden text-[#4a5240] text-xl leading-none">←</a>
         <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
           group.name === '@ToutLeMonde' ? 'bg-[#4a5240] text-white' : 'bg-[#4a5240]/10 text-[#4a5240]'

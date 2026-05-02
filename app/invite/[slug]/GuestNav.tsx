@@ -104,7 +104,7 @@ export default function GuestNav({ slug, isPreview }: { slug: string; isPreview?
         {/* Bottom */}
         <div className="border-t border-stone-100 px-2 py-3 space-y-0.5">
           {isPreview && (
-            <a href={`/wedding/${slug}`}
+            <a href={`/mariage/${slug}`}
               className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs text-[#4a5240] border border-[#4a5240]/20 hover:bg-[#4a5240] hover:text-white transition mb-1"
               style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3.5 h-3.5 shrink-0">
@@ -183,7 +183,7 @@ export default function GuestNav({ slug, isPreview }: { slug: string; isPreview?
             })}
             {isPreview && (
               <div className="border-t border-stone-100 px-5 py-3">
-                <a href={`/wedding/${slug}`}
+                <a href={`/mariage/${slug}`}
                   className="text-sm text-[#4a5240]"
                   style={{ fontWeight: 300 }}>
                   ← Espace mariés

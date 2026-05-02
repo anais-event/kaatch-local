@@ -44,31 +44,32 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
   const mounted = useRef(false)
 
   const sections: NavSection[] = [
-    { label: '🏠 Accueil', href: `/wedding/${slug}` },
+    { label: '🏠 Accueil', href: `/mariage/${slug}` },
     {
       label: 'Préparatifs',
       items: [
-        { label: 'Invités', sub: 'Liste, RSVP & faire-part', href: `/wedding/${slug}/guests` },
-        { label: 'Plan de table', sub: 'Placement & récap', href: `/wedding/${slug}/tables` },
-        { label: 'Budget', sub: 'Suivi des dépenses', href: `/wedding/${slug}/budget` },
-        { label: 'Prestataires', sub: 'Contacts & contrats', href: `/wedding/${slug}/prestataires` },
-        { label: 'Mot des mariés', sub: 'Message & règles', href: `/wedding/${slug}/regles` },
+        { label: 'Invités', sub: 'Liste, RSVP & faire-part', href: `/mariage/${slug}/guests` },
+        { label: 'Plan de table', sub: 'Placement & récap', href: `/mariage/${slug}/tables` },
+        { label: 'Budget', sub: 'Suivi des dépenses', href: `/mariage/${slug}/budget` },
+        { label: 'Prestataires', sub: 'Contacts & contrats', href: `/mariage/${slug}/prestataires` },
+        { label: 'Mot des mariés', sub: 'Message & règles', href: `/mariage/${slug}/regles` },
       ],
     },
     {
       label: 'Jour J',
       items: [
-        { label: 'Rétro-planning', sub: 'Checklist chronologique', href: `/wedding/${slug}/retro-planning` },
-        { label: 'Programme', sub: 'Déroulé de la journée', href: `/wedding/${slug}/programme` },
-        { label: 'Jeux & animations', sub: 'Idées pour la fête', href: `/wedding/${slug}/jeux` },
-        { label: 'Musique', sub: 'Playlist & suggestions', href: `/wedding/${slug}/musique` },
-        { label: 'Hébergements', sub: 'Options aux alentours', href: `/wedding/${slug}/hebergements` },
-        { label: 'QR Code', sub: 'Accès rapide jour J', href: `/wedding/${slug}/partager` },
+        { label: 'Rétro-planning', sub: 'Checklist avant le mariage', href: `/mariage/${slug}/retro-planning` },
+        { label: 'Checklist Jour J', sub: 'Qui fait quoi', href: `/mariage/${slug}/checklist` },
+        { label: 'Programme', sub: 'Déroulé de la journée', href: `/mariage/${slug}/programme` },
+        { label: 'Jeux & animations', sub: 'Idées pour la fête', href: `/mariage/${slug}/jeux` },
+        { label: 'Musique', sub: 'Playlist & suggestions', href: `/mariage/${slug}/musique` },
+        { label: 'Hébergements', sub: 'Options aux alentours', href: `/mariage/${slug}/hebergements` },
+        { label: 'QR Code', sub: 'Accès rapide jour J', href: `/mariage/${slug}/partager` },
       ],
     },
-    { label: '📸 Photos', href: `/wedding/${slug}/photos` },
-    { label: '📖 Livre d\'Or', href: `/wedding/${slug}/livre-dor` },
-    { label: '💬 Messagerie', href: `/wedding/${slug}/messagerie` },
+    { label: '📸 Photos', href: `/mariage/${slug}/photos` },
+    { label: '📖 Livre d\'Or', href: `/mariage/${slug}/livre-dor` },
+    { label: '💬 Messagerie', href: `/mariage/${slug}/messagerie` },
   ]
 
   // Auto-expand the active section in sidebar
@@ -78,7 +79,7 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
   const [sidebarExpanded, setSidebarExpanded] = useState<string | null>(activeSection)
 
   const isItemActive = (href: string) =>
-    href === `/wedding/${slug}` ? pathname === href : pathname.startsWith(href)
+    href === `/mariage/${slug}` ? pathname === href : pathname.startsWith(href)
   const isSectionActive = (section: NavSection) => {
     if (section.href) return isItemActive(section.href)
     return section.items?.some(item => isItemActive(item.href)) ?? false
@@ -128,7 +129,7 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
         {/* Logo */}
         <div className="px-5 py-5 border-b border-stone-100 flex items-start justify-between">
           <div>
-            <a href={`/wedding/${slug}`} className="flex items-center gap-2">
+            <a href={`/mariage/${slug}`} className="flex items-center gap-2">
               <img src="/logo.png" alt="Kaatch" className="w-7 h-7 object-contain" />
               <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.05rem' }}
                 className="text-[#2d3228] leading-tight">Kaatch</span>
@@ -221,7 +222,7 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
             </svg>
             Vue invités
           </a>
-          <a href={`/wedding/${slug}/compte`}
+          <a href={`/mariage/${slug}/compte`}
             className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs text-stone-600 hover:bg-stone-100 hover:text-[#4a5240] transition"
             style={{ fontFamily: 'var(--font-lato)', fontWeight: 400 }}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3.5 h-3.5 shrink-0">
@@ -274,7 +275,7 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
       {/* ─── MOBILE TOP BAR ─── */}
       <nav className={`md:hidden fixed top-0 left-0 right-0 z-50 bg-[#f5f0e8]/95 backdrop-blur border-b border-stone-200 shadow-sm transition-transform duration-300 ${navHidden ? '-translate-y-full' : ''}`}>
         <div className="flex items-center justify-between px-4 h-12">
-          <a href={`/wedding/${slug}`} className="flex items-center gap-2">
+          <a href={`/mariage/${slug}`} className="flex items-center gap-2">
             <img src="/logo.png" alt="Kaatch" className="w-6 h-6 object-contain" />
             <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1rem' }}
               className="text-[#2d3228]">Kaatch</span>
@@ -341,7 +342,7 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
               <a href={`/invite/${slug}`} target="_blank" className="flex flex-col px-6 py-2.5 border-b border-stone-50 text-stone-600">
                 <span style={{ fontWeight: 300, fontSize: '0.85rem' }}>Vue invités</span>
               </a>
-              <a href={`/wedding/${slug}/edit`} className="flex flex-col px-6 py-2.5 border-b border-stone-50 text-stone-600">
+              <a href={`/mariage/${slug}/edit`} className="flex flex-col px-6 py-2.5 border-b border-stone-50 text-stone-600">
                 <span style={{ fontWeight: 300, fontSize: '0.85rem' }}>Paramètres</span>
               </a>
               {userEmail && (

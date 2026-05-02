@@ -31,14 +31,14 @@ async function addStep(formData: FormData) {
     visible_to_guests: true,
   })
 
-  revalidatePath(`/wedding/${slug}/programme`)
+  revalidatePath(`/mariage/${slug}/programme`)
 }
 
 async function deleteStep(formData: FormData) {
   'use server'
   const supabase = await createSupabaseServerClient()
   await supabase.from('program_steps').delete().eq('id', formData.get('id') as string)
-  revalidatePath(`/wedding/${formData.get('slug') as string}/programme`)
+  revalidatePath(`/mariage/${formData.get('slug') as string}/programme`)
 }
 
 async function updateStep(formData: FormData) {
@@ -56,7 +56,7 @@ async function updateStep(formData: FormData) {
     visible_to_guests: visibleRaw === 'false' ? false : true,
   }).eq('id', formData.get('id') as string)
 
-  revalidatePath(`/wedding/${slug}/programme`)
+  revalidatePath(`/mariage/${slug}/programme`)
 }
 
 export default async function ProgrammePage({ params }: { params: Promise<{ slug: string }> }) {

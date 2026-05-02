@@ -32,7 +32,7 @@ async function addGuest(formData: FormData) {
     guest_type: (formData.get('guest_type') as string) || 'adulte',
     invited_parts: parts.length > 0 ? parts : ['ceremonie', 'vin_honneur', 'reception'],
   })
-  revalidatePath(`/wedding/${slug}/guests`)
+  revalidatePath(`/mariage/${slug}/guests`)
 }
 
 async function deleteGuest(formData: FormData) {
@@ -41,7 +41,7 @@ async function deleteGuest(formData: FormData) {
   const id = formData.get('id') as string
   const slug = formData.get('slug') as string
   await supabase.from('guests').delete().eq('id', id)
-  revalidatePath(`/wedding/${slug}/guests`)
+  revalidatePath(`/mariage/${slug}/guests`)
 }
 
 async function setRsvp(formData: FormData) {
@@ -51,7 +51,7 @@ async function setRsvp(formData: FormData) {
   const slug = formData.get('slug') as string
   const rsvp_status = formData.get('rsvp_status') as string
   await supabase.from('guests').update({ rsvp_status }).eq('id', id)
-  revalidatePath(`/wedding/${slug}/guests`)
+  revalidatePath(`/mariage/${slug}/guests`)
 }
 
 async function updateGuest(formData: FormData) {
@@ -70,7 +70,7 @@ async function updateGuest(formData: FormData) {
     gender: (formData.get('gender') as string) || null,
     invited_parts: parts.length > 0 ? parts : ['ceremonie', 'vin_honneur', 'reception'],
   }).eq('id', id)
-  revalidatePath(`/wedding/${slug}/guests`)
+  revalidatePath(`/mariage/${slug}/guests`)
 }
 
 async function generateTokens(formData: FormData) {
@@ -84,7 +84,7 @@ async function generateTokens(formData: FormData) {
   for (const g of (guests ?? [])) {
     await supabase.from('guests').update({ invite_token: crypto.randomUUID() }).eq('id', g.id)
   }
-  revalidatePath(`/wedding/${slug}/guests`)
+  revalidatePath(`/mariage/${slug}/guests`)
 }
 
 const RELATIONS = ['Ami(e)', 'Frère', 'Sœur', 'Père', 'Mère', 'Oncle', 'Tante', 'Cousin(e)', 'Collègue', 'Autre']
@@ -129,7 +129,7 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
       <div className="max-w-4xl mx-auto">
 
         <div className="mb-4">
-          <a href={`/wedding/${slug}`} className="text-sm text-[#4a5240] hover:underline"
+          <a href={`/mariage/${slug}`} className="text-sm text-[#4a5240] hover:underline"
              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
             ← Retour aux préparatifs
           </a>

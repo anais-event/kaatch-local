@@ -39,7 +39,7 @@ export default async function TablesRecapPage({ params }: { params: Promise<{ sl
     <div className="min-h-screen bg-white" style={{ fontFamily: 'Georgia, serif' }}>
       {/* Barre d'action (masquée à l'impression) */}
       <div className="print:hidden bg-[#f5f0e8] border-b border-stone-200 px-6 py-3 flex items-center justify-between">
-        <a href={`/wedding/${slug}/tables`}
+        <a href={`/mariage/${slug}/tables`}
            className="text-sm text-stone-500 hover:text-[#4a5240] transition"
            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
           ← Retour au plan de table

@@ -6,15 +6,14 @@ const PERIODS = [
     id: 'p18',
     label: '18 à 12 mois avant',
     emoji: '🌱',
-    color: '#4a5240',
     tasks: [
       { key: 'date', label: 'Fixer la date et le lieu de cérémonie' },
-      { key: 'budget', label: 'Définir le budget global', detail: 'Tenez compte de vos apports, aides familiales, épargne' },
+      { key: 'budget', label: 'Définir le budget global', detail: 'Apports, aides familiales, épargne' },
       { key: 'type', label: 'Choisir le type de mariage (civil, religieux, laïc…)' },
       { key: 'liste', label: 'Commencer la liste des invités' },
       { key: 'temoins', label: 'Choisir ses témoins' },
       { key: 'lieu', label: 'Visiter et réserver le lieu de réception' },
-      { key: 'photo', label: 'Réserver le photographe', detail: 'Les bons photographes se réservent très tôt' },
+      { key: 'photo', label: 'Réserver le photographe', detail: 'Les bons se réservent très tôt' },
       { key: 'robe', label: 'Commencer à chercher la robe / le costume' },
     ],
   },
@@ -22,7 +21,6 @@ const PERIODS = [
     id: 'p12',
     label: '12 à 9 mois avant',
     emoji: '🌿',
-    color: '#4a5240',
     tasks: [
       { key: 'traiteur', label: 'Réserver le traiteur' },
       { key: 'musique', label: 'Réserver le DJ ou le groupe de musique' },
@@ -37,24 +35,22 @@ const PERIODS = [
     id: 'p9',
     label: '9 à 6 mois avant',
     emoji: '📮',
-    color: '#4a5240',
     tasks: [
-      { key: 'faire_part_envoi', label: 'Envoyer les faire-parts', detail: 'Ou les save the date si la date est très anticipée' },
+      { key: 'faire_part_envoi', label: 'Envoyer les faire-parts', detail: 'Ou save the date si la date est très anticipée' },
       { key: 'liste_finale', label: 'Finaliser la liste des invités' },
       { key: 'menu', label: 'Choisir le menu avec le traiteur' },
       { key: 'coiffeur', label: 'Réserver le coiffeur et le maquilleur' },
       { key: 'alliances', label: 'Choisir les alliances' },
       { key: 'voyage', label: 'Commencer à planifier le voyage de noces' },
-      { key: 'kaatch', label: 'Créer l\'espace Kaatch — invités, programme, album 😉' },
+      { key: 'kaatch', label: "Créer l'espace Kaatch — invités, programme, album 😉" },
     ],
   },
   {
     id: 'p6',
     label: '6 à 3 mois avant',
     emoji: '📋',
-    color: '#4a5240',
     tasks: [
-      { key: 'prestataires_confirm', label: 'Confirmer et finaliser les détails avec chaque prestataire' },
+      { key: 'prestataires_confirm', label: 'Confirmer les détails avec chaque prestataire' },
       { key: 'essayages', label: 'Organiser les essayages de robe / costume' },
       { key: 'ceremonie_laique', label: 'Préparer la cérémonie laïque (si applicable)' },
       { key: 'playlist', label: 'Choisir la musique pour chaque moment' },
@@ -67,13 +63,12 @@ const PERIODS = [
     id: 'p1',
     label: 'Le dernier mois',
     emoji: '🗓️',
-    color: '#4a5240',
     tasks: [
       { key: 'confirmations', label: 'Confirmer les présences finales (RSVP)' },
       { key: 'plan_table_final', label: 'Finaliser le plan de table' },
       { key: 'enveloppes', label: 'Préparer les enveloppes / paiements prestataires', detail: 'Avoir les espèces ou chèques prêts' },
       { key: 'repetition', label: 'Répétition de la cérémonie', detail: 'Surtout pour les cérémonies laïques' },
-      { key: 'sac_survie', label: 'Préparer le sac de survie du jour J', detail: 'Aiguilles, sparadraps, rouge à lèvres, lingettes, bonbons…' },
+      { key: 'sac_survie', label: 'Préparer le sac de survie du jour J', detail: 'Aiguilles, sparadraps, rouge à lèvres, lingettes…' },
       { key: 'planning_temoins', label: 'Envoyer le planning détaillé aux témoins' },
       { key: 'delegation', label: 'Déléguer les rôles du jour J à des personnes de confiance' },
     ],
@@ -82,7 +77,6 @@ const PERIODS = [
     id: 'semaine',
     label: 'La semaine J',
     emoji: '✨',
-    color: '#4a5240',
     tasks: [
       { key: 'reconfirm', label: 'Reconfirmer chaque prestataire' },
       { key: 'deco_prep', label: 'Préparer la décoration et les petits cadeaux' },
@@ -98,14 +92,13 @@ export default async function RetroPlanningPage({ params }: { params: Promise<{ 
   const { slug } = await params
   const supabase = await createSupabaseServerClient()
 
-  const { data: wedding } = await supabase.from('weddings').select('id, date').eq('slug', slug).single()
+  const { data: wedding } = await supabase.from('weddings').select('id').eq('slug', slug).single()
   if (!wedding) return <div className="p-8">Mariage introuvable</div>
 
-  // Charger les tâches cochées
-  const { data: doneRows } = await supabase
-    .from('retro_planning')
-    .select('task_key, done')
-    .eq('wedding_id', wedding.id)
+  const [{ data: doneRows }, { data: customRows }] = await Promise.all([
+    supabase.from('retro_planning').select('task_key, done').eq('wedding_id', wedding.id),
+    supabase.from('retro_custom_tasks').select('*').eq('wedding_id', wedding.id).order('created_at'),
+  ])
 
   const doneSet = new Set((doneRows ?? []).filter(r => r.done).map(r => r.task_key))
 
@@ -116,7 +109,17 @@ export default async function RetroPlanningPage({ params }: { params: Promise<{ 
 
   return (
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
-      <RetroPlanningClient weddingId={wedding.id} initialPeriods={initialPeriods} weddingDate={wedding.date ?? null} />
+      <RetroPlanningClient
+        weddingId={wedding.id}
+        initialPeriods={initialPeriods}
+        initialCustomTasks={(customRows ?? []).map(r => ({
+          id: r.id,
+          period_id: r.period_id,
+          title: r.title,
+          assigned_to: r.assigned_to ?? null,
+          done: r.done,
+        }))}
+      />
     </div>
   )
 }

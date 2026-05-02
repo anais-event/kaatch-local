@@ -33,7 +33,7 @@ async function redeemCode(formData: FormData): Promise<{ success: boolean; error
   await admin.from('promo_codes').update({ uses_count: promo.uses_count + 1 }).eq('id', promo.id)
   await admin.from('weddings').update({ plan: promo.plan }).eq('id', weddingId)
 
-  revalidatePath(`/wedding/${slug}`)
+  revalidatePath(`/mariage/${slug}`)
   return { success: true }
 }
 
@@ -73,15 +73,15 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
     : null
 
   const systemChecklist = [
-    { label: 'Photo de couverture', done: !!wedding.cover_image_url, href: `/wedding/${slug}/edit` },
-    { label: 'Date fixée', done: !!wedding.date, href: `/wedding/${slug}/edit` },
-    { label: 'Lieu renseigné', done: !!wedding.location, href: `/wedding/${slug}/edit` },
-    { label: 'Invités ajoutés', done: (guestCount ?? 0) > 0, href: `/wedding/${slug}/guests` },
-    { label: 'Faire-parts envoyés', done: (guestCount ?? 0) > 0 && !!wedding.share_code, href: `/wedding/${slug}/partager` },
-    { label: 'Programme créé', done: (programmeCount ?? 0) > 0, href: `/wedding/${slug}/programme` },
-    { label: 'Plan de table', done: (tableCount ?? 0) > 0, href: `/wedding/${slug}/tables` },
-    { label: 'Mot des mariés', done: !!(wedding.couple_message || (ruleCount ?? 0) > 0), href: `/wedding/${slug}/regles` },
-    { label: 'Hébergements', done: (hebergementCount ?? 0) > 0, href: `/wedding/${slug}/hebergements` },
+    { label: 'Photo de couverture', done: !!wedding.cover_image_url, href: `/mariage/${slug}/edit` },
+    { label: 'Date fixée', done: !!wedding.date, href: `/mariage/${slug}/edit` },
+    { label: 'Lieu renseigné', done: !!wedding.location, href: `/mariage/${slug}/edit` },
+    { label: 'Invités ajoutés', done: (guestCount ?? 0) > 0, href: `/mariage/${slug}/guests` },
+    { label: 'Faire-parts envoyés', done: (guestCount ?? 0) > 0 && !!wedding.share_code, href: `/mariage/${slug}/partager` },
+    { label: 'Programme créé', done: (programmeCount ?? 0) > 0, href: `/mariage/${slug}/programme` },
+    { label: 'Plan de table', done: (tableCount ?? 0) > 0, href: `/mariage/${slug}/tables` },
+    { label: 'Mot des mariés', done: !!(wedding.couple_message || (ruleCount ?? 0) > 0), href: `/mariage/${slug}/regles` },
+    { label: 'Hébergements', done: (hebergementCount ?? 0) > 0, href: `/mariage/${slug}/hebergements` },
   ]
 
   return (
@@ -118,7 +118,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
 
 
 
-        <a href={`/wedding/${slug}/edit`}
+        <a href={`/mariage/${slug}/edit`}
            className="absolute top-4 right-4 text-xs text-white/70 hover:text-white border border-white/30 hover:border-white/60 px-3 py-1.5 rounded-lg backdrop-blur transition"
            style={{ fontWeight: 300 }}>
           Modifier
@@ -142,7 +142,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
 
                 {/* Invités */}
-                <a href={`/wedding/${slug}/guests`}
+                <a href={`/mariage/${slug}/guests`}
                    className="group bg-white rounded-xl border border-stone-100 p-4 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
                   <span className="text-2xl mb-1">👥</span>
                   <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.1rem' }} className="text-[#2d3228]">Invités</p>
@@ -158,7 +158,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
                 </a>
 
                 {/* Plan de table */}
-                <a href={`/wedding/${slug}/tables`}
+                <a href={`/mariage/${slug}/tables`}
                    className="group bg-white rounded-xl border border-stone-100 p-4 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
                   <span className="text-2xl mb-1">🪑</span>
                   <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.1rem' }} className="text-[#2d3228]">Plan de table</p>
@@ -171,7 +171,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
                 </a>
 
                 {/* Budget */}
-                <a href={`/wedding/${slug}/budget`}
+                <a href={`/mariage/${slug}/budget`}
                    className="group bg-white rounded-xl border border-stone-100 p-4 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
                   <span className="text-2xl mb-1">💰</span>
                   <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.1rem' }} className="text-[#2d3228]">Budget</p>
@@ -184,7 +184,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
                 </a>
 
                 {/* Prestataires */}
-                <a href={`/wedding/${slug}/prestataires`}
+                <a href={`/mariage/${slug}/prestataires`}
                    className="group bg-white rounded-xl border border-stone-100 p-4 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
                   <span className="text-2xl mb-1">🤝</span>
                   <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.1rem' }} className="text-[#2d3228]">Prestataires</p>
@@ -193,7 +193,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
                 </a>
 
                 {/* Mot des mariés */}
-                <a href={`/wedding/${slug}/regles`}
+                <a href={`/mariage/${slug}/regles`}
                    className="group bg-white rounded-xl border border-stone-100 p-4 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
                   <span className="text-2xl mb-1">💌</span>
                   <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.1rem' }} className="text-[#2d3228]">Mot des mariés</p>
@@ -211,7 +211,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
 
                 {/* Programme */}
-                <a href={`/wedding/${slug}/programme`}
+                <a href={`/mariage/${slug}/programme`}
                    className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
                   <span className="text-2xl mb-1">📋</span>
                   <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Programme</p>
@@ -224,7 +224,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
                 </a>
 
                 {/* Photos — vedette */}
-                <a href={`/wedding/${slug}/photos`}
+                <a href={`/mariage/${slug}/photos`}
                    className="group relative sm:col-span-2 rounded-xl overflow-hidden border border-stone-100 hover:shadow-md transition-all"
                    style={{ minHeight: '130px' }}>
                   {wedding.cover_image_url
@@ -248,7 +248,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
                 </a>
 
                 {/* Hébergements */}
-                <a href={`/wedding/${slug}/hebergements`}
+                <a href={`/mariage/${slug}/hebergements`}
                    className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all sm:col-start-1">
                   <span className="text-2xl mb-1">🏡</span>
                   <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Hébergements</p>
@@ -261,7 +261,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
                 </a>
 
                 {/* Musique */}
-                <a href={`/wedding/${slug}/musique`}
+                <a href={`/mariage/${slug}/musique`}
                    className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
                   <span className="text-2xl mb-1">🎵</span>
                   <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Musique</p>
@@ -270,7 +270,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
                 </a>
 
                 {/* Jeux & anim. */}
-                <a href={`/wedding/${slug}/jeux`}
+                <a href={`/mariage/${slug}/jeux`}
                    className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
                   <span className="text-2xl mb-1">🎉</span>
                   <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Jeux &amp; anim.</p>
@@ -279,7 +279,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
                 </a>
 
                 {/* QR Code */}
-                <a href={`/wedding/${slug}/partager`}
+                <a href={`/mariage/${slug}/partager`}
                    className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
                   <span className="text-2xl mb-1">📲</span>
                   <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">QR Code</p>
@@ -288,7 +288,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
                 </a>
 
                 {/* Livre d'Or */}
-                <a href={`/wedding/${slug}/livre-dor`}
+                <a href={`/mariage/${slug}/livre-dor`}
                    className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
                   <span className="text-2xl mb-1">📖</span>
                   <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Livre d&apos;Or</p>
@@ -314,7 +314,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
 
             {/* Infos rapides */}
             <div className="mt-4 bg-white rounded-xl border border-stone-100 divide-y divide-stone-50">
-              <a href={`/wedding/${slug}/partager`} className="group flex items-center justify-between px-4 py-3 hover:bg-stone-50/50 transition">
+              <a href={`/mariage/${slug}/partager`} className="group flex items-center justify-between px-4 py-3 hover:bg-stone-50/50 transition">
                 <div>
                   <p style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.14em' }} className="text-stone-400 uppercase">Lien invités</p>
                   <p style={{ fontWeight: 300, fontSize: '0.8rem' }}

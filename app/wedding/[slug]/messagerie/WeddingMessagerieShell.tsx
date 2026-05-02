@@ -24,7 +24,7 @@ export default function WeddingMessagerieShell({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
-  const isRoot = pathname === `/wedding/${slug}/messagerie`
+  const isRoot = pathname === `/mariage/${slug}/messagerie`
   const [newGroup, setNewGroup] = useState('')
   const [creating, setCreating] = useState(false)
 
@@ -63,7 +63,7 @@ export default function WeddingMessagerieShell({
             const isGeneral = group.name === '@ToutLeMonde'
             const isActive = pathname.includes(group.id)
             return (
-              <a key={group.id} href={`/wedding/${slug}/messagerie/${group.id}`}
+              <a key={group.id} href={`/mariage/${slug}/messagerie/${group.id}`}
                  className={`flex items-center gap-3 px-4 py-3 border-b border-stone-50 transition-colors ${
                    isActive ? 'bg-[#4a5240]/8' : 'hover:bg-stone-50'
                  }`}>

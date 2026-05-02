@@ -28,14 +28,14 @@ async function addAccommodation(formData: FormData) {
     type: (formData.get('type') as string) || null,
   })
 
-  revalidatePath(`/wedding/${slug}/hebergements`)
+  revalidatePath(`/mariage/${slug}/hebergements`)
 }
 
 async function deleteAccommodation(formData: FormData) {
   'use server'
   const supabase = await createSupabaseServerClient()
   await supabase.from('accommodations').delete().eq('id', formData.get('id') as string)
-  revalidatePath(`/wedding/${formData.get('slug') as string}/hebergements`)
+  revalidatePath(`/mariage/${formData.get('slug') as string}/hebergements`)
 }
 
 const TYPE_ICONS: Record<string, string> = {
@@ -69,7 +69,7 @@ export default async function HebergementsPage({ params }: { params: Promise<{ s
       <div className="max-w-2xl mx-auto">
 
         <div className="mb-6">
-          <a href={`/wedding/${slug}`} className="text-sm text-[#4a5240] hover:underline"
+          <a href={`/mariage/${slug}`} className="text-sm text-[#4a5240] hover:underline"
              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
             ← Retour au mariage
           </a>

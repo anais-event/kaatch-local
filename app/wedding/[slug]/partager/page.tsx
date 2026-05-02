@@ -10,7 +10,7 @@ async function saveShareCode(formData: FormData) {
   const share_code = (formData.get('share_code') as string).toUpperCase().trim()
 
   await supabase.from('weddings').update({ share_code }).eq('slug', slug)
-  revalidatePath(`/wedding/${slug}/partager`)
+  revalidatePath(`/mariage/${slug}/partager`)
 }
 
 export default async function PartagerPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -35,7 +35,7 @@ export default async function PartagerPage({ params }: { params: Promise<{ slug:
       <div className="max-w-lg mx-auto">
 
         <div className="mb-6">
-          <a href={`/wedding/${slug}`} className="text-sm text-[#4a5240] hover:underline"
+          <a href={`/mariage/${slug}`} className="text-sm text-[#4a5240] hover:underline"
              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
             ← Retour au mariage
           </a>

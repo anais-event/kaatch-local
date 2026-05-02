@@ -1,4 +1,4 @@
-'use server'
+﻿'use server'
 
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
@@ -54,5 +54,5 @@ export async function createWedding(formData: FormData) {
   console.log('🟢 Mariage créé:', data)
 
   // Redirige vers le dashboard du mariage
-  redirect(`/wedding/${slug}`)
+  redirect(`/mariage/${slug}`)
 }

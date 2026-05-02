@@ -18,14 +18,14 @@ async function addContact(formData: FormData) {
     instagram: (formData.get('instagram') as string) || null,
     visible_to_guests: formData.get('visible_to_guests') === 'on',
   })
-  revalidatePath(`/wedding/${slug}/contacts`)
+  revalidatePath(`/mariage/${slug}/contacts`)
 }
 
 async function deleteContact(formData: FormData) {
   'use server'
   const supabase = await createSupabaseServerClient()
   await supabase.from('wedding_contacts').delete().eq('id', formData.get('id') as string)
-  revalidatePath(`/wedding/${formData.get('slug') as string}/contacts`)
+  revalidatePath(`/mariage/${formData.get('slug') as string}/contacts`)
 }
 
 async function toggleVisibility(formData: FormData) {
@@ -34,7 +34,7 @@ async function toggleVisibility(formData: FormData) {
   const id = formData.get('id') as string
   const current = formData.get('current') === 'true'
   await supabase.from('wedding_contacts').update({ visible_to_guests: !current }).eq('id', id)
-  revalidatePath(`/wedding/${formData.get('slug') as string}/contacts`)
+  revalidatePath(`/mariage/${formData.get('slug') as string}/contacts`)
 }
 
 const ROLES = ['Fleuriste', 'DJ', 'Traiteur', 'Photographe', 'Vidéaste', 'Témoin mariée', 'Témoin marié', 'Officiant', 'Coiffeur/se', 'Maquilleur/se', 'Transporteur', 'Babysitter', 'Lieu de réception', 'Autre (préciser)']
@@ -57,7 +57,7 @@ export default async function ContactsPage({ params }: { params: Promise<{ slug:
       <div className="max-w-2xl mx-auto">
 
         <div className="mb-6">
-          <a href={`/wedding/${slug}`} className="text-sm text-[#4a5240] hover:underline"
+          <a href={`/mariage/${slug}`} className="text-sm text-[#4a5240] hover:underline"
              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
             ← Retour au mariage
           </a>

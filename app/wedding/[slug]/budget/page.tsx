@@ -26,7 +26,7 @@ async function setBudgetTotal(formData: FormData) {
     budget_total: parseFloat(formData.get('total') as string) || 0,
     budget_currency: formData.get('currency') as string,
   }).eq('slug', slug)
-  revalidatePath(`/wedding/${slug}/budget`)
+  revalidatePath(`/mariage/${slug}/budget`)
 }
 
 async function addCategory(formData: FormData) {
@@ -42,7 +42,7 @@ async function addCategory(formData: FormData) {
     color: formData.get('color') as string || '#4a5240',
     budget_allocated: parseFloat(formData.get('allocated') as string) || 0,
   })
-  revalidatePath(`/wedding/${slug}/budget`)
+  revalidatePath(`/mariage/${slug}/budget`)
 }
 
 async function deleteCategory(formData: FormData) {
@@ -50,7 +50,7 @@ async function deleteCategory(formData: FormData) {
   const supabase = await createSupabaseServerClient()
   const slug = formData.get('slug') as string
   await supabase.from('budget_categories').delete().eq('id', formData.get('id') as string)
-  revalidatePath(`/wedding/${slug}/budget`)
+  revalidatePath(`/mariage/${slug}/budget`)
 }
 
 async function addItem(formData: FormData) {
@@ -67,7 +67,7 @@ async function addItem(formData: FormData) {
     description: (formData.get('description') as string) || null,
     status: 'devis',
   })
-  revalidatePath(`/wedding/${slug}/budget`)
+  revalidatePath(`/mariage/${slug}/budget`)
 }
 
 async function deleteItem(formData: FormData) {
@@ -75,7 +75,7 @@ async function deleteItem(formData: FormData) {
   const supabase = await createSupabaseServerClient()
   const slug = formData.get('slug') as string
   await supabase.from('budget_items').delete().eq('id', formData.get('id') as string)
-  revalidatePath(`/wedding/${slug}/budget`)
+  revalidatePath(`/mariage/${slug}/budget`)
 }
 
 async function updateItem(formData: FormData) {
@@ -87,7 +87,7 @@ async function updateItem(formData: FormData) {
     estimated_amount: Number(formData.get('estimated') ?? 0),
     description: (formData.get('description') as string) || null,
   }).eq('id', formData.get('id') as string)
-  revalidatePath(`/wedding/${slug}/budget`)
+  revalidatePath(`/mariage/${slug}/budget`)
 }
 
 async function updateItemStatus(formData: FormData) {
@@ -97,7 +97,7 @@ async function updateItemStatus(formData: FormData) {
   await supabase.from('budget_items').update({
     status: formData.get('status') as string,
   }).eq('id', formData.get('id') as string)
-  revalidatePath(`/wedding/${slug}/budget`)
+  revalidatePath(`/mariage/${slug}/budget`)
 }
 
 async function addQuote(formData: FormData) {
@@ -117,7 +117,7 @@ async function addQuote(formData: FormData) {
     notes: (formData.get('notes') as string) || null,
     due_date: (formData.get('due_date') as string) || null,
   })
-  revalidatePath(`/wedding/${slug}/budget`)
+  revalidatePath(`/mariage/${slug}/budget`)
 }
 
 async function updateQuote(formData: FormData) {
@@ -132,7 +132,7 @@ async function updateQuote(formData: FormData) {
     notes: (formData.get('notes') as string) || null,
     due_date: (formData.get('due_date') as string) || null,
   }).eq('id', formData.get('id') as string)
-  revalidatePath(`/wedding/${slug}/budget`)
+  revalidatePath(`/mariage/${slug}/budget`)
 }
 
 async function deleteQuote(formData: FormData) {
@@ -140,7 +140,7 @@ async function deleteQuote(formData: FormData) {
   const supabase = await createSupabaseServerClient()
   const slug = formData.get('slug') as string
   await supabase.from('budget_quotes').delete().eq('id', formData.get('id') as string)
-  revalidatePath(`/wedding/${slug}/budget`)
+  revalidatePath(`/mariage/${slug}/budget`)
 }
 
 async function retainQuote(formData: FormData) {
@@ -157,7 +157,7 @@ async function retainQuote(formData: FormData) {
   const { data: quote } = await supabase.from('budget_quotes').select('paid_amount, amount').eq('id', quoteId).single()
   const newStatus = quote?.paid_amount >= quote?.amount ? 'solde' : quote?.paid_amount > 0 ? 'acompte' : 'devis'
   await supabase.from('budget_items').update({ status: newStatus }).eq('id', itemId)
-  revalidatePath(`/wedding/${slug}/budget`)
+  revalidatePath(`/mariage/${slug}/budget`)
 }
 
 async function saveBudgetFileMeta(formData: FormData) {
@@ -174,7 +174,7 @@ async function saveBudgetFileMeta(formData: FormData) {
     file_url: formData.get('file_url') as string,
     file_type: (formData.get('file_type') as string) || null,
   })
-  revalidatePath(`/wedding/${slug}/budget`)
+  revalidatePath(`/mariage/${slug}/budget`)
 }
 
 async function deleteBudgetFile(formData: FormData) {
@@ -187,7 +187,7 @@ async function deleteBudgetFile(formData: FormData) {
     await supabase.storage.from('budget-files').remove([filePath])
   }
   await supabase.from('budget_files').delete().eq('id', fileId)
-  revalidatePath(`/wedding/${slug}/budget`)
+  revalidatePath(`/mariage/${slug}/budget`)
 }
 
 async function refuseQuote(formData: FormData) {
@@ -195,7 +195,7 @@ async function refuseQuote(formData: FormData) {
   const supabase = await createSupabaseServerClient()
   const slug = formData.get('slug') as string
   await supabase.from('budget_quotes').update({ status: 'refuse' }).eq('id', formData.get('id') as string)
-  revalidatePath(`/wedding/${slug}/budget`)
+  revalidatePath(`/mariage/${slug}/budget`)
 }
 
 async function initDefaultCategories(formData: FormData) {
@@ -207,7 +207,7 @@ async function initDefaultCategories(formData: FormData) {
   await supabase.from('budget_categories').insert(
     DEFAULT_CATEGORIES.map((c, i) => ({ ...c, wedding_id: wedding.id, position: i }))
   )
-  revalidatePath(`/wedding/${slug}/budget`)
+  revalidatePath(`/mariage/${slug}/budget`)
 }
 
 export default async function BudgetPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -216,7 +216,7 @@ export default async function BudgetPage({ params }: { params: Promise<{ slug: s
 
   const { data: wedding } = await supabase
     .from('weddings').select('id, name, budget_total, budget_currency').eq('slug', slug).single()
-  if (!wedding) redirect(`/wedding/${slug}`)
+  if (!wedding) redirect(`/mariage/${slug}`)
 
   const { data: categories } = await supabase
     .from('budget_categories').select('*').eq('wedding_id', wedding.id).order('position').order('created_at')
@@ -234,7 +234,7 @@ export default async function BudgetPage({ params }: { params: Promise<{ slug: s
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         <div className="mb-8">
-          <a href={`/wedding/${slug}`} className="text-sm text-[#4a5240] hover:underline mb-4 block"
+          <a href={`/mariage/${slug}`} className="text-sm text-[#4a5240] hover:underline mb-4 block"
              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
             ← Retour aux préparatifs
           </a>

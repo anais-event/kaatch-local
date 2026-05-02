@@ -17,14 +17,14 @@ async function addSong(formData: FormData) {
     notes: (formData.get('notes') as string) || null,
     position: Number(formData.get('position') ?? 0),
   })
-  revalidatePath(`/wedding/${slug}/musique`)
+  revalidatePath(`/mariage/${slug}/musique`)
 }
 
 async function deleteSong(formData: FormData) {
   'use server'
   const supabase = await createSupabaseServerClient()
   await supabase.from('playlist_songs').delete().eq('id', formData.get('id') as string)
-  revalidatePath(`/wedding/${formData.get('slug') as string}/musique`)
+  revalidatePath(`/mariage/${formData.get('slug') as string}/musique`)
 }
 
 async function updateSong(formData: FormData) {
@@ -37,7 +37,7 @@ async function updateSong(formData: FormData) {
     notes: (formData.get('notes') as string) || null,
     moment: moment || null,
   }).eq('id', formData.get('id') as string)
-  revalidatePath(`/wedding/${formData.get('slug') as string}/musique`)
+  revalidatePath(`/mariage/${formData.get('slug') as string}/musique`)
 }
 
 async function addPlaylistLink(formData: FormData) {
@@ -52,14 +52,14 @@ async function addPlaylistLink(formData: FormData) {
     url: formData.get('url') as string,
     position: Number(formData.get('position') ?? 0),
   })
-  revalidatePath(`/wedding/${slug}/musique`)
+  revalidatePath(`/mariage/${slug}/musique`)
 }
 
 async function deletePlaylistLink(formData: FormData) {
   'use server'
   const supabase = await createSupabaseServerClient()
   await supabase.from('playlist_links').delete().eq('id', formData.get('id') as string)
-  revalidatePath(`/wedding/${formData.get('slug') as string}/musique`)
+  revalidatePath(`/mariage/${formData.get('slug') as string}/musique`)
 }
 
 export default async function MusiquePage({ params }: { params: Promise<{ slug: string }> }) {

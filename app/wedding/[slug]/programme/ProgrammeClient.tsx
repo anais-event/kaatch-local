@@ -34,7 +34,7 @@ export default function ProgrammeClient({ slug, steps, icons, addStep, deleteSte
       <div className="max-w-2xl mx-auto">
 
         <div className="mb-6">
-          <a href={`/wedding/${slug}`} className="text-sm text-[#4a5240] hover:underline"
+          <a href={`/mariage/${slug}`} className="text-sm text-[#4a5240] hover:underline"
              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
             ← Retour aux préparatifs
           </a>
@@ -46,7 +46,7 @@ export default function ProgrammeClient({ slug, steps, icons, addStep, deleteSte
             Programme de la journée
           </h1>
           <a
-            href={`/wedding/${slug}/programme/recap`}
+            href={`/mariage/${slug}/programme/recap`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 border border-stone-200 bg-white text-stone-600 px-3 py-1.5 rounded-xl text-xs hover:border-[#4a5240] hover:text-[#4a5240] transition shrink-0"

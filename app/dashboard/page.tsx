@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+﻿import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import { isPaid, checkoutUrl } from '@/lib/plan'
 
@@ -46,7 +46,7 @@ export default async function Dashboard() {
                    style={{ boxShadow: '0 2px 12px rgba(44,59,46,0.07)' }}>
 
                 {/* Cover + infos */}
-                <a href={`/wedding/${wedding.slug}`}
+                <a href={`/mariage/${wedding.slug}`}
                    className="group block relative h-48 bg-[#2C3B2E]">
                   {wedding.cover_image_url && (
                     <img src={wedding.cover_image_url} alt={wedding.name}

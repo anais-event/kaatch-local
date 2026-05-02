@@ -161,7 +161,7 @@ export default async function AdminPage() {
                       <div className="flex items-center gap-3 mt-0.5 flex-wrap">
                         <span className="text-xs text-stone-400">{dateStr}</span>
                         <span className="text-xs text-stone-400">·</span>
-                        <a href={`/wedding/${w.slug}`}
+                        <a href={`/mariage/${w.slug}`}
                            className="text-xs text-[#4a5240] hover:underline"
                            target="_blank" rel="noopener noreferrer">
                           /{w.slug}

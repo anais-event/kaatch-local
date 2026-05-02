@@ -25,14 +25,14 @@ export default async function ComptePage({ params }: { params: Promise<{ slug: s
     const email = (formData.get('co_owner_email') as string).trim().toLowerCase()
     const supabase = await createSupabaseServerClient()
     await supabase.from('weddings').update({ co_owner_email: email }).eq('slug', slug)
-    revalidatePath(`/wedding/${slug}/compte`)
+    revalidatePath(`/mariage/${slug}/compte`)
   }
 
   async function removePartner() {
     'use server'
     const supabase = await createSupabaseServerClient()
     await supabase.from('weddings').update({ co_owner_email: null }).eq('slug', slug)
-    revalidatePath(`/wedding/${slug}/compte`)
+    revalidatePath(`/mariage/${slug}/compte`)
   }
 
   async function toggleSuspend() {
@@ -40,7 +40,7 @@ export default async function ComptePage({ params }: { params: Promise<{ slug: s
     const supabase = await createSupabaseServerClient()
     const { data: w } = await supabase.from('weddings').select('is_suspended').eq('slug', slug).single()
     await supabase.from('weddings').update({ is_suspended: !w?.is_suspended }).eq('slug', slug)
-    revalidatePath(`/wedding/${slug}/compte`)
+    revalidatePath(`/mariage/${slug}/compte`)
   }
 
   async function deleteWedding() {
@@ -71,7 +71,7 @@ export default async function ComptePage({ params }: { params: Promise<{ slug: s
       <div className="max-w-lg mx-auto">
 
         <div className="mb-8">
-          <a href={`/wedding/${slug}`}
+          <a href={`/mariage/${slug}`}
              className="text-sm text-[#4a5240] hover:underline"
              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
             ← Retour

@@ -11,8 +11,8 @@ export default async function UpgradePage({ params }: { params: Promise<{ slug: 
     .eq('slug', slug)
     .single()
 
-  if (!wedding) redirect(`/wedding/${slug}`)
-  if (wedding.plan === 'mariage' || wedding.plan === 'pro') redirect(`/wedding/${slug}`)
+  if (!wedding) redirect(`/mariage/${slug}`)
+  if (wedding.plan === 'mariage' || wedding.plan === 'pro') redirect(`/mariage/${slug}`)
 
   const checkoutUrl = `/api/stripe/checkout?wedding_id=${wedding.id}&slug=${slug}`
 
@@ -81,7 +81,7 @@ export default async function UpgradePage({ params }: { params: Promise<{ slug: 
         </p>
 
         <div className="text-center mt-8">
-          <a href={`/wedding/${slug}`}
+          <a href={`/mariage/${slug}`}
              className="text-sm text-stone-400 hover:text-[#4a5240] transition"
              style={{ fontWeight: 300 }}>
             ← Retour au tableau de bord

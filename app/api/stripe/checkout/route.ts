@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
@@ -32,8 +32,8 @@ export async function GET(req: Request) {
       wedding_id: weddingId,
       plan: 'mariage',
     },
-    success_url: `${origin}/wedding/${slug}?payment=success`,
-    cancel_url: `${origin}/wedding/${slug}?payment=cancelled`,
+    success_url: `${origin}/mariage/${slug}?payment=success`,
+    cancel_url: `${origin}/mariage/${slug}?payment=cancelled`,
   })
 
   return NextResponse.redirect(session.url!)

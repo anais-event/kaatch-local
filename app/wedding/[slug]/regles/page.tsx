@@ -7,7 +7,7 @@ async function saveMessage(formData: FormData) {
   const slug = formData.get('slug') as string
   const message = (formData.get('message') as string) || ''
   await supabase.from('weddings').update({ couple_message: message }).eq('slug', slug)
-  revalidatePath(`/wedding/${slug}/regles`)
+  revalidatePath(`/mariage/${slug}/regles`)
 }
 
 async function addRule(formData: FormData) {
@@ -19,7 +19,7 @@ async function addRule(formData: FormData) {
   const { data: wedding } = await supabase.from('weddings').select('id').eq('slug', slug).single()
   if (!wedding) return
   await supabase.from('wedding_rules').insert({ wedding_id: wedding.id, text: text.trim(), position: 0 })
-  revalidatePath(`/wedding/${slug}/regles`)
+  revalidatePath(`/mariage/${slug}/regles`)
 }
 
 async function deleteRule(formData: FormData) {
@@ -28,7 +28,7 @@ async function deleteRule(formData: FormData) {
   const id = formData.get('id') as string
   const slug = formData.get('slug') as string
   await supabase.from('wedding_rules').delete().eq('id', id)
-  revalidatePath(`/wedding/${slug}/regles`)
+  revalidatePath(`/mariage/${slug}/regles`)
 }
 
 const SUGGESTIONS_MESSAGE = [
@@ -65,7 +65,7 @@ export default async function ReglesPage({ params }: { params: Promise<{ slug: s
   return (
     <div className="min-h-screen bg-[#f5f0e8] p-8" style={{ fontFamily: 'var(--font-lato)' }}>
       <div className="max-w-2xl mx-auto">
-        <a href={`/wedding/${slug}`} className="text-sm text-[#4a5240] hover:underline mb-6 block" style={{ fontWeight: 300 }}>
+        <a href={`/mariage/${slug}`} className="text-sm text-[#4a5240] hover:underline mb-6 block" style={{ fontWeight: 300 }}>
           ← Retour aux préparatifs
         </a>
         <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '2.5rem' }}

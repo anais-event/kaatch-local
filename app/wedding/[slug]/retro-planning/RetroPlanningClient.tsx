@@ -1,654 +1,345 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
 type Task = {
   key: string
   label: string
   detail?: string
   done: boolean
+  assigned_to?: string | null
+  custom?: boolean
+  id?: string
 }
 type Period = {
   id: string
   label: string
   emoji: string
-  color: string
   tasks: Task[]
 }
-
-// Maps period id to the offset in months BEFORE the wedding (negative = before wedding)
-// e.g. p18: tasks are due between -18 and -12 months → we use -15 as midpoint
-const PERIOD_MONTH_OFFSETS: Record<string, number> = {
-  p18: -18,
-  p12: -12,
-  p9:  -9,
-  p6:  -6,
-  p1:  -1,
-  semaine: 0, // wedding month
-}
-
-function addMonths(date: Date, months: number): Date {
-  const d = new Date(date)
-  d.setMonth(d.getMonth() + months)
-  return d
-}
-
-function startOfMonth(date: Date): Date {
-  return new Date(date.getFullYear(), date.getMonth(), 1)
-}
-
-function isSameMonth(a: Date, b: Date): boolean {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth()
-}
-
-function formatMonthLabel(date: Date): string {
-  return date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
-}
-
-function getDaysInMonth(year: number, month: number): number {
-  return new Date(year, month + 1, 0).getDate()
-}
-
-function getFirstDayOfWeek(year: number, month: number): number {
-  // Monday = 0
-  const day = new Date(year, month, 1).getDay()
-  return (day + 6) % 7
-}
-
-// Build the list of months to show in calendar view
-// From today (or earliest period) to wedding date (or +4 months from today)
-function buildMonthRange(weddingDate: Date | null, periods: Period[]): Date[] {
-  const today = startOfMonth(new Date())
-  const weddingMonth = weddingDate ? startOfMonth(weddingDate) : addMonths(today, 4)
-
-  // Find the earliest period that starts after today
-  let earliest = today
-  if (weddingDate) {
-    for (const periodId of Object.keys(PERIOD_MONTH_OFFSETS)) {
-      const offset = PERIOD_MONTH_OFFSETS[periodId]
-      const periodStart = startOfMonth(addMonths(weddingDate, offset))
-      if (periodStart < earliest) earliest = periodStart
-    }
-    // Don't go earlier than 18 months before wedding
-  }
-
-  const start = earliest < today ? today : earliest
-  const end = weddingMonth
-
-  const months: Date[] = []
-  let current = new Date(start)
-  while (current <= end) {
-    months.push(new Date(current))
-    current = addMonths(current, 1)
-  }
-  // Show at least 3 months
-  while (months.length < 3) {
-    months.push(addMonths(months[months.length - 1] ?? today, 1))
-  }
-  return months
-}
-
-// Get tasks that fall in a given month
-function getTasksForMonth(month: Date, weddingDate: Date | null, periods: Period[]): { task: Task; period: Period }[] {
-  if (!weddingDate) return []
-  const result: { task: Task; period: Period }[] = []
-  for (const period of periods) {
-    const offset = PERIOD_MONTH_OFFSETS[period.id]
-    if (offset === undefined) continue
-    const periodMonth = startOfMonth(addMonths(weddingDate, offset))
-    if (isSameMonth(periodMonth, month)) {
-      for (const task of period.tasks) {
-        result.push({ task, period })
-      }
-    }
-  }
-  return result
-}
-
-// Calendar month grid component
-function CalendarMonth({
-  month,
-  weddingDate,
-  periods,
-  selectedDay,
-  onSelectDay,
-}: {
-  month: Date
-  weddingDate: Date | null
-  periods: Period[]
-  selectedDay: string | null
-  onSelectDay: (key: string | null) => void
-}) {
-  const year = month.getFullYear()
-  const monthIdx = month.getMonth()
-  const daysInMonth = getDaysInMonth(year, monthIdx)
-  const firstDow = getFirstDayOfWeek(year, monthIdx)
-  const DAY_NAMES = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
-
-  const tasksForMonth = weddingDate ? getTasksForMonth(month, weddingDate, periods) : []
-  // All tasks fall on the same "month" – we'll show a dot on day 1 of the period month
-  // For wedding month, show on the wedding day; otherwise show tasks on 1st of month
-  const weddingIsThisMonth = weddingDate ? isSameMonth(weddingDate, month) : false
-
-  // Build a map: day number → tasks
-  const tasksByDay: Record<number, { task: Task; period: Period }[]> = {}
-  if (tasksForMonth.length > 0) {
-    // Spread tasks across days so they're visible — or show on day 1
-    // Show as a cluster on day 1 (clean approach, no external lib needed)
-    // Actually: show tasks on the "canonical" day for that period (1st of the month)
-    tasksByDay[1] = tasksForMonth
-  }
-  if (weddingDate && weddingIsThisMonth) {
-    const wd = weddingDate.getDate()
-    if (!tasksByDay[wd]) tasksByDay[wd] = []
-  }
-
-  const today = new Date()
-  const isToday = (day: number) =>
-    today.getFullYear() === year && today.getMonth() === monthIdx && today.getDate() === day
-
-  const isWeddingDay = (day: number) =>
-    weddingDate
-      ? weddingDate.getFullYear() === year && weddingDate.getMonth() === monthIdx && weddingDate.getDate() === day
-      : false
-
-  const dayKey = (day: number) => `${year}-${String(monthIdx + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-
-  // Total cells = firstDow blank + daysInMonth
-  const cells: (number | null)[] = [
-    ...Array(firstDow).fill(null),
-    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
-  ]
-
-  return (
-    <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-5">
-      <h3
-        style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.15rem' }}
-        className="text-[#2d3228] mb-4 capitalize"
-      >
-        {formatMonthLabel(month)}
-      </h3>
-      {/* Day headers */}
-      <div className="grid grid-cols-7 mb-1">
-        {DAY_NAMES.map((d, i) => (
-          <div key={i} className="text-center" style={{ fontSize: '0.7rem', fontWeight: 300, color: '#a8a29e' }}>
-            {d}
-          </div>
-        ))}
-      </div>
-      {/* Day cells */}
-      <div className="grid grid-cols-7 gap-y-1">
-        {cells.map((day, idx) => {
-          if (day === null) {
-            return <div key={idx} />
-          }
-          const dk = dayKey(day)
-          const hasTasks = !!tasksByDay[day]?.length
-          const isSelected = selectedDay === dk
-          const todayClass = isToday(day)
-          const weddingDay = isWeddingDay(day)
-          const allDone = hasTasks && tasksByDay[day].every(({ task }) => task.done)
-
-          return (
-            <button
-              key={idx}
-              onClick={() => {
-                if (hasTasks || weddingDay) {
-                  onSelectDay(isSelected ? null : dk)
-                }
-              }}
-              className={`relative flex flex-col items-center justify-start pt-1 rounded-lg h-9 transition-all
-                ${isSelected ? 'bg-[#4a5240] text-white' : ''}
-                ${weddingDay && !isSelected ? 'bg-[#4a5240]/10 border border-[#4a5240]/30' : ''}
-                ${todayClass && !isSelected && !weddingDay ? 'bg-stone-100' : ''}
-                ${hasTasks || weddingDay ? 'cursor-pointer' : 'cursor-default'}
-              `}
-            >
-              <span
-                style={{ fontSize: '0.78rem', fontWeight: 300, lineHeight: 1.1 }}
-                className={`${isSelected ? 'text-white' : todayClass ? 'text-[#4a5240] font-medium' : weddingDay ? 'text-[#4a5240]' : 'text-stone-600'}`}
-              >
-                {day}
-              </span>
-              {hasTasks && (
-                <span
-                  className={`w-1.5 h-1.5 rounded-full mt-0.5 ${
-                    isSelected ? 'bg-white' : allDone ? 'bg-[#4a5240]/40' : 'bg-[#4a5240]'
-                  }`}
-                />
-              )}
-              {weddingDay && !hasTasks && (
-                <span className="text-[8px] leading-none mt-0.5">💍</span>
-              )}
-            </button>
-          )
-        })}
-      </div>
-      {/* Period badge */}
-      {tasksForMonth.length > 0 && (
-        <div className="mt-3 pt-3 border-t border-stone-50">
-          <p style={{ fontSize: '0.72rem', fontWeight: 300 }} className="text-stone-400">
-            {tasksForMonth.length} tâche{tasksForMonth.length > 1 ? 's' : ''} • {tasksForMonth[0].period.label}
-          </p>
-        </div>
-      )}
-    </div>
-  )
-}
-
-// Popover / day detail panel
-function DayDetail({
-  dayKey,
-  weddingDate,
-  periods,
-  onToggle,
-}: {
-  dayKey: string
-  weddingDate: Date | null
-  periods: Period[]
-  onToggle: (periodId: string, taskKey: string, currentDone: boolean) => void
-}) {
-  const [year, month, day] = dayKey.split('-').map(Number)
-  const date = new Date(year, month - 1, day)
-  const tasksForMonth = weddingDate ? getTasksForMonth(date, weddingDate, periods) : []
-
-  if (tasksForMonth.length === 0) return null
-
-  const doneTasks = tasksForMonth.filter(({ task }) => task.done).length
-
-  return (
-    <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-5">
-      <div className="flex items-center justify-between mb-3">
-        <h3
-          style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.1rem' }}
-          className="text-[#2d3228]"
-        >
-          {tasksForMonth[0].period.emoji} {tasksForMonth[0].period.label}
-        </h3>
-        <span style={{ fontSize: '0.75rem', fontWeight: 300 }} className="text-stone-400">
-          {doneTasks}/{tasksForMonth.length} fait{doneTasks > 1 ? 'es' : ''}
-        </span>
-      </div>
-      <div className="divide-y divide-stone-50">
-        {tasksForMonth.map(({ task, period }) => (
-          <label
-            key={task.key}
-            className="flex items-start gap-4 py-3 cursor-pointer hover:bg-stone-50/50 transition-colors rounded"
-          >
-            <input
-              type="checkbox"
-              checked={task.done}
-              onChange={() => onToggle(period.id, task.key, task.done)}
-              className="mt-0.5 w-4 h-4 rounded border-stone-300 cursor-pointer accent-[#4a5240]"
-            />
-            <div className="flex-1 min-w-0">
-              <p
-                style={{ fontSize: '0.88rem', fontWeight: 300 }}
-                className={task.done ? 'text-stone-300 line-through' : 'text-stone-700'}
-              >
-                {task.label}
-              </p>
-              {task.detail && (
-                <p style={{ fontSize: '0.73rem', fontWeight: 300 }} className="text-stone-400 mt-0.5">
-                  {task.detail}
-                </p>
-              )}
-            </div>
-            {task.done && <span className="text-[#4a5240] text-sm mt-0.5 shrink-0">✓</span>}
-          </label>
-        ))}
-      </div>
-    </div>
-  )
+type CustomTask = {
+  id: string
+  period_id: string
+  title: string
+  assigned_to: string | null
+  done: boolean
 }
 
 export default function RetroPlanningClient({
   weddingId,
   initialPeriods,
-  weddingDate,
+  initialCustomTasks,
 }: {
   weddingId: string
   initialPeriods: Period[]
-  weddingDate: string | null
+  initialCustomTasks: CustomTask[]
 }) {
   const [periods, setPeriods] = useState(initialPeriods)
+  const [customTasks, setCustomTasks] = useState(initialCustomTasks)
   const [saving, setSaving] = useState<string | null>(null)
-  const [view, setView] = useState<'liste' | 'cartes' | 'calendrier'>('cartes')
-  const [selectedDay, setSelectedDay] = useState<string | null>(null)
-  const [selectedMonthKey, setSelectedMonthKey] = useState<string>('')
+  const [addingTo, setAddingTo] = useState<string | null>(null)
+  const [newTitle, setNewTitle] = useState('')
+  const [newAssignee, setNewAssignee] = useState('')
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editTitle, setEditTitle] = useState('')
+  const [editAssignee, setEditAssignee] = useState('')
+  const addInputRef = useRef<HTMLInputElement>(null)
 
-  const parsedWeddingDate = weddingDate ? new Date(weddingDate) : null
-
-  const totalTasks = periods.flatMap(p => p.tasks).length
-  const doneTasks = periods.flatMap(p => p.tasks).filter(t => t.done).length
+  const allPredefined = periods.flatMap(p => p.tasks)
+  const donePredefined = allPredefined.filter(t => t.done).length
+  const doneCustom = customTasks.filter(t => t.done).length
+  const totalTasks = allPredefined.length + customTasks.length
+  const doneTasks = donePredefined + doneCustom
   const pct = totalTasks ? Math.round((doneTasks / totalTasks) * 100) : 0
 
-  async function toggleTask(periodId: string, taskKey: string, currentDone: boolean) {
+  async function togglePredefined(periodId: string, taskKey: string, currentDone: boolean) {
     setSaving(taskKey)
-    setPeriods(prev =>
-      prev.map(p =>
+    setPeriods(prev => prev.map(p =>
+      p.id === periodId
+        ? { ...p, tasks: p.tasks.map(t => t.key === taskKey ? { ...t, done: !currentDone } : t) }
+        : p
+    ))
+    await fetch('/api/retro-planning', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ weddingId, taskKey, done: !currentDone }),
+    }).catch(() => {
+      setPeriods(prev => prev.map(p =>
         p.id === periodId
-          ? { ...p, tasks: p.tasks.map(t => (t.key === taskKey ? { ...t, done: !currentDone } : t)) }
+          ? { ...p, tasks: p.tasks.map(t => t.key === taskKey ? { ...t, done: currentDone } : t) }
           : p
-      )
-    )
-    try {
-      await fetch('/api/retro-planning', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ weddingId, taskKey, done: !currentDone }),
-      })
-    } catch {
-      setPeriods(prev =>
-        prev.map(p =>
-          p.id === periodId
-            ? { ...p, tasks: p.tasks.map(t => (t.key === taskKey ? { ...t, done: currentDone } : t)) }
-            : p
-        )
-      )
-    } finally {
-      setSaving(null)
-    }
+      ))
+    })
+    setSaving(null)
   }
 
-  const calendarMonths = view === 'calendrier' ? buildMonthRange(parsedWeddingDate, periods) : []
-
-  // Data for "cartes" view
-  const cartesMonths = (() => {
-    if (!parsedWeddingDate) return []
-    const months = buildMonthRange(parsedWeddingDate, periods)
-    return months.map(month => {
-      const tasks = getTasksForMonth(month, parsedWeddingDate, periods)
-      const remaining = tasks.filter(({ task }) => !task.done).length
-      const key = `${month.getFullYear()}-${month.getMonth()}`
-      const label = month.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
-      return { month, tasks, remaining, total: tasks.length, key, label }
+  async function addCustomTask(periodId: string) {
+    if (!newTitle.trim()) return
+    const res = await fetch('/api/retro-custom-tasks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ weddingId, periodId, title: newTitle.trim(), assigned_to: newAssignee.trim() || null }),
     })
-  })()
+    if (res.ok) {
+      const created: CustomTask = await res.json()
+      setCustomTasks(prev => [...prev, created])
+    }
+    setNewTitle('')
+    setNewAssignee('')
+    setAddingTo(null)
+  }
 
-  const activeCartesKey = selectedMonthKey || cartesMonths.find(m => m.remaining > 0)?.key || cartesMonths[0]?.key || ''
-  const selectedCarteData = cartesMonths.find(m => m.key === activeCartesKey)
+  async function toggleCustom(id: string, currentDone: boolean) {
+    setSaving(id)
+    setCustomTasks(prev => prev.map(t => t.id === id ? { ...t, done: !currentDone } : t))
+    await fetch(`/api/retro-custom-tasks/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ done: !currentDone }),
+    }).catch(() => {
+      setCustomTasks(prev => prev.map(t => t.id === id ? { ...t, done: currentDone } : t))
+    })
+    setSaving(null)
+  }
+
+  async function saveEdit(id: string) {
+    if (!editTitle.trim()) return
+    setCustomTasks(prev => prev.map(t => t.id === id ? { ...t, title: editTitle, assigned_to: editAssignee || null } : t))
+    await fetch(`/api/retro-custom-tasks/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: editTitle.trim(), assigned_to: editAssignee.trim() || null }),
+    })
+    setEditingId(null)
+  }
+
+  async function deleteCustom(id: string) {
+    setCustomTasks(prev => prev.filter(t => t.id !== id))
+    await fetch(`/api/retro-custom-tasks/${id}`, { method: 'DELETE' })
+  }
 
   return (
-    <div className="max-w-3xl mx-auto px-6 pt-8 pb-24">
-      <h1
-        style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '2.2rem' }}
-        className="text-[#2d3228] mb-1"
-      >
-        Rétro-planning
-      </h1>
-      <p style={{ fontWeight: 300, fontSize: '0.85rem' }} className="text-stone-400 mb-6">
-        Toutes les étapes clés, dans l'ordre. Cochez au fur et à mesure.
-      </p>
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-8 pb-24">
 
-      {/* Toggle */}
-      <div className="flex items-center gap-1 bg-white border border-stone-100 rounded-xl p-1 w-fit mb-6 shadow-sm">
-        {([['cartes', 'Mois'], ['liste', 'Liste'], ['calendrier', 'Calendrier']] as const).map(([v, label]) => (
-          <button
-            key={v}
-            onClick={() => { setView(v); setSelectedDay(null) }}
-            className={`px-4 py-1.5 rounded-lg transition-all text-sm ${
-              view === v ? 'bg-[#4a5240] text-white shadow-sm' : 'text-stone-400 hover:text-stone-600'
-            }`}
-            style={{ fontWeight: 300 }}
-          >
-            {label}
-          </button>
-        ))}
+      {/* Header */}
+      <div className="mb-8">
+        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '2rem' }}
+            className="text-[#2d3228] mb-1">Rétro-planning</h1>
+        <p style={{ fontWeight: 300, fontSize: '0.85rem' }} className="text-stone-400">
+          Toutes les étapes clés, dans l&apos;ordre. Ajoutez vos propres tâches et assignez-les.
+        </p>
       </div>
 
-      {/* Barre de progression */}
-      <div className="bg-white rounded-2xl border border-stone-100 p-5 mb-8">
-        <div className="flex items-center justify-between mb-2">
+      {/* Barre de progression globale */}
+      <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-5 mb-8">
+        <div className="flex items-center justify-between mb-3">
           <p style={{ fontWeight: 300, fontSize: '0.85rem' }} className="text-stone-500">
-            {doneTasks} tâche{doneTasks > 1 ? 's' : ''} sur {totalTasks} complétée{doneTasks > 1 ? 's' : ''}
+            {doneTasks} / {totalTasks} tâches complétées
           </p>
-          <p
-            style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.3rem' }}
-            className="text-[#4a5240]"
-          >
-            {pct}%
-          </p>
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.4rem' }}
+                className="text-[#4a5240]">{pct}%</span>
         </div>
-        <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
-          <div className="h-full bg-[#4a5240] rounded-full transition-all duration-700" style={{ width: `${pct}%` }} />
+        <div className="h-2.5 bg-stone-100 rounded-full overflow-hidden">
+          <div className="h-full rounded-full transition-all duration-700"
+               style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #4a5240, #6b7a5e)' }} />
         </div>
         {pct === 100 && (
-          <p
-            className="text-center mt-3 text-sm text-[#4a5240]"
-            style={{ fontFamily: 'var(--font-display)' }}
-          >
+          <p className="text-center mt-3 text-sm text-[#4a5240]" style={{ fontFamily: 'var(--font-display)' }}>
             🎉 Tout est prêt — profitez de chaque moment !
           </p>
         )}
       </div>
 
-      {/* LIST VIEW */}
-      {view === 'liste' && (
-        <div className="space-y-8">
-          {periods.map(period => {
-            const done = period.tasks.filter(t => t.done).length
-            const total = period.tasks.length
-            return (
-              <div key={period.id}>
-                <div className="flex items-center gap-3 mb-3">
+      {/* Périodes */}
+      <div className="space-y-6">
+        {periods.map(period => {
+          const periodCustom = customTasks.filter(t => t.period_id === period.id)
+          const totalP = period.tasks.length + periodCustom.length
+          const doneP = period.tasks.filter(t => t.done).length + periodCustom.filter(t => t.done).length
+          const pctP = totalP ? Math.round((doneP / totalP) * 100) : 0
+          const allDone = totalP > 0 && doneP === totalP
+
+          return (
+            <div key={period.id} className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
+
+              {/* Header période */}
+              <div className={`px-5 py-4 flex items-center justify-between border-b ${allDone ? 'bg-emerald-50 border-emerald-100' : 'border-stone-50'}`}>
+                <div className="flex items-center gap-3">
                   <span className="text-xl">{period.emoji}</span>
                   <div>
-                    <h2
-                      style={{
-                        fontFamily: 'var(--font-display)',
-                        fontWeight: 600,
-                        fontSize: '1.2rem',
-                        
-                      }}
-                      className="text-[#2d3228] leading-tight"
-                    >
+                    <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1rem' }}
+                       className={allDone ? 'text-emerald-700' : 'text-[#2d3228]'}>
                       {period.label}
-                    </h2>
+                    </p>
                     <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">
-                      {done}/{total} complété{done > 1 ? 's' : ''}
+                      {doneP}/{totalP} · {pctP}%
                     </p>
                   </div>
                 </div>
-                <div className="bg-white rounded-2xl border border-stone-100 divide-y divide-stone-50">
-                  {period.tasks.map(task => (
-                    <label
-                      key={task.key}
-                      className="flex items-start gap-4 px-5 py-3.5 cursor-pointer hover:bg-stone-50/50 transition-colors group"
-                    >
-                      <div className="mt-0.5 shrink-0">
+                <div className="flex items-center gap-3">
+                  {/* Mini progress ring */}
+                  <svg viewBox="0 0 28 28" className="w-7 h-7 -rotate-90">
+                    <circle cx="14" cy="14" r="11" fill="none" stroke="#f5f0e8" strokeWidth="3" />
+                    <circle cx="14" cy="14" r="11" fill="none"
+                      stroke={allDone ? '#10b981' : '#4a5240'} strokeWidth="3"
+                      strokeDasharray={`${2 * Math.PI * 11}`}
+                      strokeDashoffset={`${2 * Math.PI * 11 * (1 - pctP / 100)}`}
+                      strokeLinecap="round" style={{ transition: 'stroke-dashoffset 0.5s ease' }} />
+                  </svg>
+                </div>
+              </div>
+
+              {/* Tâches prédéfinies */}
+              <div className="divide-y divide-stone-50">
+                {period.tasks.map(task => (
+                  <label key={task.key}
+                         className="flex items-start gap-4 px-5 py-3.5 cursor-pointer hover:bg-stone-50/60 transition-colors group">
+                    <input
+                      type="checkbox"
+                      checked={task.done}
+                      disabled={saving === task.key}
+                      onChange={() => togglePredefined(period.id, task.key, task.done)}
+                      className="mt-0.5 w-4 h-4 shrink-0 rounded border-stone-300 accent-[#4a5240] cursor-pointer"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p style={{ fontSize: '0.88rem', fontWeight: 300, lineHeight: 1.5 }}
+                         className={task.done ? 'text-stone-300 line-through' : 'text-stone-700'}>
+                        {task.label}
+                      </p>
+                      {task.detail && !task.done && (
+                        <p style={{ fontSize: '0.72rem', fontWeight: 300 }} className="text-stone-400 mt-0.5">
+                          {task.detail}
+                        </p>
+                      )}
+                    </div>
+                    {task.done && <span className="text-emerald-500 shrink-0 mt-0.5 text-sm">✓</span>}
+                  </label>
+                ))}
+
+                {/* Tâches custom */}
+                {periodCustom.map(task => (
+                  <div key={task.id} className="flex items-start gap-4 px-5 py-3 hover:bg-stone-50/60 transition-colors group">
+                    {editingId === task.id ? (
+                      <div className="flex-1 space-y-2">
+                        <input
+                          value={editTitle}
+                          onChange={e => setEditTitle(e.target.value)}
+                          onKeyDown={e => { if (e.key === 'Enter') saveEdit(task.id); if (e.key === 'Escape') setEditingId(null) }}
+                          className="w-full border border-stone-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[#4a5240]"
+                          style={{ fontWeight: 300 }}
+                          autoFocus
+                        />
+                        <div className="flex items-center gap-2">
+                          <input
+                            value={editAssignee}
+                            onChange={e => setEditAssignee(e.target.value)}
+                            placeholder="Assigné à... (optionnel)"
+                            className="flex-1 border border-stone-200 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-[#4a5240]"
+                            style={{ fontWeight: 300 }}
+                          />
+                          <button onClick={() => saveEdit(task.id)}
+                                  className="text-xs bg-[#4a5240] text-white px-3 py-1.5 rounded-lg cursor-pointer"
+                                  style={{ fontWeight: 300 }}>
+                            OK
+                          </button>
+                          <button onClick={() => setEditingId(null)}
+                                  className="text-xs text-stone-400 px-2 py-1.5 cursor-pointer">
+                            ✕
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
                         <input
                           type="checkbox"
                           checked={task.done}
-                          disabled={saving === task.key}
-                          onChange={() => toggleTask(period.id, task.key, task.done)}
-                          className="w-4 h-4 rounded border-stone-300 text-[#4a5240] cursor-pointer accent-[#4a5240]"
+                          disabled={saving === task.id}
+                          onChange={() => toggleCustom(task.id, task.done)}
+                          className="mt-0.5 w-4 h-4 shrink-0 rounded border-stone-300 accent-[#4a5240] cursor-pointer"
                         />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p
-                          style={{ fontSize: '0.9rem', fontWeight: 300, lineHeight: 1.5 }}
-                          className={`transition-colors ${task.done ? 'text-stone-300 line-through' : 'text-stone-700'}`}
-                        >
-                          {task.label}
-                        </p>
-                        {task.detail && (
-                          <p style={{ fontSize: '0.75rem', fontWeight: 300, lineHeight: 1.5 }} className="text-stone-400 mt-0.5">
-                            {task.detail}
+                        <div className="flex-1 min-w-0">
+                          <p style={{ fontSize: '0.88rem', fontWeight: 300, lineHeight: 1.5 }}
+                             className={task.done ? 'text-stone-300 line-through' : 'text-stone-700'}>
+                            {task.title}
                           </p>
-                        )}
-                      </div>
-                      {task.done && <span className="text-[#4a5240] shrink-0 mt-0.5 text-sm">✓</span>}
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      )}
-
-      {/* CARTES VIEW — par mois */}
-      {view === 'cartes' && (
-        <div>
-          {!parsedWeddingDate ? (
-            <div className="bg-white rounded-2xl border border-stone-100 p-5 text-center">
-              <p style={{ fontWeight: 300, fontSize: '0.88rem' }} className="text-stone-400">
-                Ajoutez la date du mariage pour voir les tâches mois par mois.
-              </p>
-            </div>
-          ) : (
-            <>
-              {/* Sélecteur de mois avec badges */}
-              <div className="flex gap-2 overflow-x-auto pb-3 -mx-1 px-1 mb-5 scrollbar-hide">
-                {cartesMonths.map(m => {
-                  const isSelected = m.key === activeCartesKey
-                  const hasTasks = m.total > 0
-                  const allDone = hasTasks && m.remaining === 0
-                  return (
-                    <button
-                      key={m.key}
-                      onClick={() => setSelectedMonthKey(m.key)}
-                      className={`shrink-0 flex flex-col items-center px-3 py-2 rounded-xl border transition-all cursor-pointer ${
-                        isSelected
-                          ? 'bg-[#4a5240] border-[#4a5240] text-white shadow-sm'
-                          : hasTasks
-                            ? allDone
-                              ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
-                              : 'bg-white border-[#4a5240]/30 text-[#2d3228]'
-                            : 'bg-white border-stone-100 text-stone-300'
-                      }`}
-                    >
-                      <span style={{ fontWeight: 400, fontSize: '0.72rem', textTransform: 'capitalize', whiteSpace: 'nowrap' }}>
-                        {m.month.toLocaleDateString('fr-FR', { month: 'short' })}
-                      </span>
-                      <span style={{ fontWeight: 600, fontSize: '0.62rem' }}>
-                        {m.month.getFullYear()}
-                      </span>
-                      {hasTasks && (
-                        <span className={`mt-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none ${
-                          isSelected ? 'bg-white/20 text-white' :
-                          allDone ? 'bg-emerald-100 text-emerald-700' :
-                          'bg-[#4a5240]/10 text-[#4a5240]'
-                        }`}>
-                          {allDone ? '✓' : m.remaining}
-                        </span>
-                      )}
-                    </button>
-                  )
-                })}
-              </div>
-
-              {/* Carte du mois sélectionné */}
-              {selectedCarteData && (
-                <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
-                  <div className="px-5 py-4 border-b border-stone-50 flex items-center justify-between">
-                    <h3 style={{ fontWeight: 700, fontSize: '1rem' }} className="text-[#2d3228] capitalize">
-                      {selectedCarteData.label}
-                    </h3>
-                    {selectedCarteData.total > 0 ? (
-                      <span style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-stone-400">
-                        {selectedCarteData.total - selectedCarteData.remaining}/{selectedCarteData.total} fait{selectedCarteData.total - selectedCarteData.remaining > 1 ? 'es' : ''}
-                      </span>
-                    ) : (
-                      <span style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-stone-300 italic">Rien ce mois</span>
+                          {task.assigned_to && (
+                            <span className="inline-block mt-0.5 bg-[#4a5240]/10 text-[#4a5240] text-[11px] px-2 py-0.5 rounded-full"
+                                  style={{ fontWeight: 400 }}>
+                              👤 {task.assigned_to}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                          <button onClick={() => { setEditingId(task.id); setEditTitle(task.title); setEditAssignee(task.assigned_to ?? '') }}
+                                  className="p-1 text-stone-300 hover:text-stone-500 cursor-pointer" title="Modifier">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3.5 h-3.5">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+                            </svg>
+                          </button>
+                          <button onClick={() => deleteCustom(task.id)}
+                                  className="p-1 text-stone-300 hover:text-red-400 cursor-pointer" title="Supprimer">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3.5 h-3.5">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                            </svg>
+                          </button>
+                        </div>
+                        {task.done && <span className="text-emerald-500 shrink-0 mt-0.5 text-sm">✓</span>}
+                      </>
                     )}
                   </div>
+                ))}
+              </div>
 
-                  {selectedCarteData.total === 0 ? (
-                    <div className="px-5 py-10 text-center">
-                      <p style={{ fontWeight: 300, fontSize: '0.85rem' }} className="text-stone-300">Aucune tâche prévue ce mois.</p>
-                    </div>
-                  ) : (
-                    <div className="divide-y divide-stone-50">
-                      {selectedCarteData.tasks.map(({ task, period }) => (
-                        <label key={task.key}
-                               className="flex items-start gap-4 px-5 py-3.5 cursor-pointer hover:bg-stone-50/50 transition-colors">
-                          <input
-                            type="checkbox"
-                            checked={task.done}
-                            disabled={saving === task.key}
-                            onChange={() => toggleTask(period.id, task.key, task.done)}
-                            className="mt-0.5 shrink-0 w-4 h-4 rounded border-stone-300 accent-[#4a5240] cursor-pointer"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <p style={{ fontSize: '0.9rem', fontWeight: 300, lineHeight: 1.5 }}
-                               className={task.done ? 'text-stone-300 line-through' : 'text-stone-700'}>
-                              {task.label}
-                            </p>
-                            {task.detail && (
-                              <p style={{ fontSize: '0.75rem', fontWeight: 300 }} className="text-stone-400 mt-0.5">{task.detail}</p>
-                            )}
-                          </div>
-                          {task.done && <span className="text-[#4a5240] shrink-0 mt-0.5 text-sm">✓</span>}
-                        </label>
-                      ))}
-                    </div>
-                  )}
-
-                  {selectedCarteData.total > 0 && selectedCarteData.remaining === 0 && (
-                    <div className="px-5 py-3 border-t border-stone-50 text-center">
-                      <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem' }}
-                            className="text-[#4a5240]">✓ Toutes les tâches de ce mois sont faites !</span>
-                    </div>
-                  )}
+              {/* Formulaire ajout tâche */}
+              {addingTo === period.id ? (
+                <div className="px-5 py-3 border-t border-stone-50 bg-stone-50/50 space-y-2">
+                  <input
+                    ref={addInputRef}
+                    value={newTitle}
+                    onChange={e => setNewTitle(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') addCustomTask(period.id); if (e.key === 'Escape') setAddingTo(null) }}
+                    placeholder="Titre de la tâche..."
+                    className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#4a5240] bg-white"
+                    style={{ fontWeight: 300 }}
+                    autoFocus
+                  />
+                  <div className="flex items-center gap-2">
+                    <input
+                      value={newAssignee}
+                      onChange={e => setNewAssignee(e.target.value)}
+                      placeholder="Assigné à... (optionnel)"
+                      className="flex-1 border border-stone-200 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-[#4a5240] bg-white"
+                      style={{ fontWeight: 300 }}
+                    />
+                    <button onClick={() => addCustomTask(period.id)}
+                            disabled={!newTitle.trim()}
+                            className="text-xs bg-[#4a5240] text-white px-3 py-1.5 rounded-lg cursor-pointer disabled:opacity-40"
+                            style={{ fontWeight: 300 }}>
+                      Ajouter
+                    </button>
+                    <button onClick={() => { setAddingTo(null); setNewTitle(''); setNewAssignee('') }}
+                            className="text-xs text-stone-400 px-2 py-1.5 cursor-pointer">
+                      ✕
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="px-5 py-2.5 border-t border-stone-50">
+                  <button
+                    onClick={() => { setAddingTo(period.id); setNewTitle(''); setNewAssignee('') }}
+                    className="flex items-center gap-1.5 text-xs text-stone-400 hover:text-[#4a5240] transition cursor-pointer"
+                    style={{ fontWeight: 300 }}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    Ajouter une tâche
+                  </button>
                 </div>
               )}
-            </>
-          )}
-        </div>
-      )}
-
-      {/* CALENDAR VIEW */}
-      {view === 'calendrier' && (
-        <div className="space-y-6">
-          {!parsedWeddingDate && (
-            <div className="bg-white rounded-2xl border border-stone-100 p-5 text-center">
-              <p style={{ fontWeight: 300, fontSize: '0.88rem' }} className="text-stone-400">
-                Ajoutez la date de votre mariage pour voir les tâches placées dans le calendrier.
-              </p>
             </div>
-          )}
-
-          {calendarMonths.map((month, i) => {
-            const monthKey = `${month.getFullYear()}-${month.getMonth()}`
-            const tasksHere = parsedWeddingDate ? getTasksForMonth(month, parsedWeddingDate, periods) : []
-            // Find the dayKey used to show this month's tasks (always day 1 of period month)
-            const dayKeyForMonth = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, '0')}-01`
-            const isExpanded = selectedDay === dayKeyForMonth
-
-            return (
-              <div key={monthKey}>
-                <CalendarMonth
-                  month={month}
-                  weddingDate={parsedWeddingDate}
-                  periods={periods}
-                  selectedDay={selectedDay}
-                  onSelectDay={setSelectedDay}
-                />
-                {isExpanded && tasksHere.length > 0 && (
-                  <div className="mt-3">
-                    <DayDetail
-                      dayKey={dayKeyForMonth}
-                      weddingDate={parsedWeddingDate}
-                      periods={periods}
-                      onToggle={toggleTask}
-                    />
-                  </div>
-                )}
-              </div>
-            )
-          })}
-
-          {parsedWeddingDate && calendarMonths.length === 0 && (
-            <div className="bg-white rounded-2xl border border-stone-100 p-5 text-center">
-              <p style={{ fontWeight: 300, fontSize: '0.88rem' }} className="text-stone-400">
-                Aucun mois à afficher.
-              </p>
-            </div>
-          )}
-        </div>
-      )}
+          )
+        })}
+      </div>
     </div>
   )
 }

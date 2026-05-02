@@ -261,7 +261,7 @@ export default function MusiqueClient({ slug, songs, playlistLinks, addSong, del
   return (
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
       <div className="max-w-2xl mx-auto px-4 py-8">
-        <a href={`/wedding/${slug}`} className="text-sm text-[#4a5240] hover:underline mb-6 block" style={{ fontWeight: 300 }}>
+        <a href={`/mariage/${slug}`} className="text-sm text-[#4a5240] hover:underline mb-6 block" style={{ fontWeight: 300 }}>
           ← Retour
         </a>
 

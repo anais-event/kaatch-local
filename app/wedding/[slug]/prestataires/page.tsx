@@ -89,8 +89,8 @@ async function addPrestataire(formData: FormData) {
     await syncBudget(supabase, weddingId, vendor.id, name, category, montant_total, acompte)
   }
 
-  revalidatePath(`/wedding/${slug}/prestataires`)
-  revalidatePath(`/wedding/${slug}/budget`)
+  revalidatePath(`/mariage/${slug}/prestataires`)
+  revalidatePath(`/mariage/${slug}/budget`)
 }
 
 async function updatePrestataire(formData: FormData) {
@@ -121,8 +121,8 @@ async function updatePrestataire(formData: FormData) {
     await syncBudget(supabase, vendorOld.wedding_id, id, name, category, montant_total, acompte)
   }
 
-  revalidatePath(`/wedding/${slug}/prestataires`)
-  revalidatePath(`/wedding/${slug}/budget`)
+  revalidatePath(`/mariage/${slug}/prestataires`)
+  revalidatePath(`/mariage/${slug}/budget`)
 }
 
 async function deletePrestataire(formData: FormData) {
@@ -133,8 +133,8 @@ async function deletePrestataire(formData: FormData) {
   // La suppression du vendor supprime le budget_item lié (via ON DELETE SET NULL + on supprime manuellement)
   await supabase.from('budget_items').delete().eq('vendor_id', id)
   await supabase.from('vendors').delete().eq('id', id)
-  revalidatePath(`/wedding/${slug}/prestataires`)
-  revalidatePath(`/wedding/${slug}/budget`)
+  revalidatePath(`/mariage/${slug}/prestataires`)
+  revalidatePath(`/mariage/${slug}/budget`)
 }
 
 export default async function PrestatairesPage({ params }: { params: Promise<{ slug: string }> }) {

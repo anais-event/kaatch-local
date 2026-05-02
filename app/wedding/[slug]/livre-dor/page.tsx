@@ -32,7 +32,7 @@ export default async function LivreDorPage({ params }: { params: Promise<{ slug:
       .from('guestbook_entries')
       .update({ is_approved: !currentValue })
       .eq('id', entryId)
-    revalidatePath(`/wedding/${slug}/livre-dor`)
+    revalidatePath(`/mariage/${slug}/livre-dor`)
   }
 
   return (

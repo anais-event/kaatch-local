@@ -110,7 +110,7 @@ export default function PrestatairesClient({ slug, weddingId, vendors, addPresta
       <div className="max-w-3xl mx-auto px-4 py-8">
 
         {/* Back link */}
-        <a href={`/wedding/${slug}`} className="text-sm text-[#4a5240] hover:underline mb-4 block"
+        <a href={`/mariage/${slug}`} className="text-sm text-[#4a5240] hover:underline mb-4 block"
            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
           ← Retour aux préparatifs
         </a>

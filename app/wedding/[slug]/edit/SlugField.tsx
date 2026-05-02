@@ -24,7 +24,7 @@ export default function SlugField({ currentSlug }: { currentSlug: string }) {
       <div className="flex items-center border border-stone-200 rounded-xl bg-white overflow-hidden focus-within:border-[#4a5240] transition">
         <span style={{ fontWeight: 300, fontSize: '0.8rem' }}
               className="pl-4 text-stone-300 whitespace-nowrap shrink-0">
-          kaatch.fr/wedding/
+          kaatch.fr/mariage/
         </span>
         <input
           type="text"

@@ -162,7 +162,7 @@ export default function TablesClient({
               + Nouvelle table
             </button>
             <button
-              onClick={() => window.open(`/wedding/${slug}/tables/recap`, '_blank')}
+              onClick={() => window.open(`/mariage/${slug}/tables/recap`, '_blank')}
               className="flex items-center gap-2 bg-[#4a5240] text-white text-sm px-4 py-2 rounded-lg hover:bg-[#2d3228] transition cursor-pointer"
               style={{ fontWeight: 300 }}>
               Récap imprimable

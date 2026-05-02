@@ -31,7 +31,7 @@ async function uploadPhoto(formData: FormData) {
     })
   }))
 
-  revalidatePath(`/wedding/${slug}/photos`)
+  revalidatePath(`/mariage/${slug}/photos`)
 }
 
 async function deletePhoto(formData: FormData) {
@@ -40,7 +40,7 @@ async function deletePhoto(formData: FormData) {
   const slug = formData.get('slug') as string
   const photo_id = formData.get('photo_id') as string
   await supabase.from('photos').delete().eq('id', photo_id)
-  revalidatePath(`/wedding/${slug}/photos`)
+  revalidatePath(`/mariage/${slug}/photos`)
 }
 
 export default async function PhotosPage({ params }: { params: Promise<{ slug: string }> }) {

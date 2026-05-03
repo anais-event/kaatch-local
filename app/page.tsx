@@ -72,7 +72,7 @@ export default function Home() {
     { icon: '🔗', label: "Lien magique", detail: "Pas de compte à créer. Le lien dans le faire-part, et ils sont chez vous." },
     { icon: '📅', label: "Programme du jour", detail: "Sans avoir à déranger qui que ce soit." },
     { icon: '📝', label: "Livre d'or", detail: "Mots doux, vidéos, souvenirs — le tout depuis leur téléphone." },
-    { icon: '🏠', label: "Hébergements", detail: "Vos suggestions de logements, à portée de tap." },
+    { icon: '🏠', label: "Hébergements", detail: "Vos suggestions de logements, en un clic." },
     { icon: '💬', label: "Messagerie", detail: "Discussion directe entre invités." },
     { icon: '📸', label: "Album partagé", detail: "Toutes les photos, au même endroit, pour tout le monde." },
   ]
@@ -317,7 +317,7 @@ export default function Home() {
               Plus de Google Drive perdus, plus de groupes Facebook saturés, plus de centaines de messages WhatsApp avec le fameux &quot;tu m&apos;enverras les photos hein ?&quot;.
             </p>
             <p className="text-stone-600" style={{ fontSize: '1rem', lineHeight: 1.85 }}>
-              Un QR code sur les tables, les invités déposent leurs photos en deux taps. Tout atterrit au même endroit, vous décidez ce que vous gardez. Et dans dix ans, c&apos;est toujours là.
+              Un QR code sur les tables, les invités déposent leurs photos en deux 2 clics. Tout atterrit au même endroit, vous décidez ce que vous gardez. Et dans dix ans, c&apos;est toujours là.
             </p>
             <div className="mt-8 flex flex-wrap gap-2.5">
               {['Sans groupe Facebook', 'Sans Google Drive', 'Sans WhatsApp galère', 'Sans relancer personne'].map(t => (

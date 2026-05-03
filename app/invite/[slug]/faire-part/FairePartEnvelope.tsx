@@ -184,156 +184,6 @@ function CornerAccents() {
   )
 }
 
-async function drawFairePartCanvasNew(
-  personalUrl: string,
-  weddingName: string,
-  dateStr: string | null,
-  location: string | null,
-  coupleMessage: string | null,
-  qrCanvas: HTMLCanvasElement | null
-): Promise<string> {
-  // Get actual font family names from CSS variables (next/font assigns obfuscated names)
-  const cssVars = getComputedStyle(document.documentElement)
-  const FONT_D = cssVars.getPropertyValue('--font-cormorant').trim() || '"Cormorant Garamond", Georgia, serif'
-  const FONT_B = cssVars.getPropertyValue('--font-lato').trim() || 'Lato, sans-serif'
-
-  // Wait for fonts to be loaded in the page before drawing
-  await document.fonts.ready
-
-  const W = 600, H = 980
-  const DPR = 2
-  const canvas = document.createElement('canvas')
-  canvas.width = W * DPR; canvas.height = H * DPR
-  const ctx = canvas.getContext('2d')!
-  ctx.scale(DPR, DPR)
-  ctx.textAlign = 'center'
-
-  // ─── BACKGROUND ───
-  ctx.fillStyle = '#f5f0e8'
-  ctx.fillRect(0, 0, W, H)
-
-  // ─── DARK GREEN HEADER ───
-  ctx.fillStyle = '#4a5639'
-  ctx.fillRect(0, 0, W, 220)
-
-  // ─── HEADER: small caps label ───
-  ctx.fillStyle = 'rgba(255,255,255,0.45)'
-  ctx.font = `300 10px ${FONT_B}`
-  ctx.letterSpacing = '0.22em'
-  ctx.fillText('VOUS ÊTES INVITÉS AU MARIAGE DE', W / 2, 44)
-  ctx.letterSpacing = '0'
-
-  // ─── NAMES ───
-  const [name1, name2] = parseNames(weddingName)
-  ctx.fillStyle = '#ffffff'
-  if (name2) {
-    ctx.font = `italic 600 50px ${FONT_D}`
-    ctx.fillText(name1, W / 2, 106)
-    ctx.fillStyle = '#c9a96e'
-    ctx.font = `italic 300 18px ${FONT_D}`
-    ctx.fillText('&', W / 2, 132)
-    ctx.fillStyle = '#ffffff'
-    ctx.font = `italic 600 50px ${FONT_D}`
-    ctx.fillText(name2, W / 2, 192)
-  } else {
-    ctx.font = `italic 600 50px ${FONT_D}`
-    ctx.fillText(name1, W / 2, 154)
-  }
-
-  // ─── GOLD SEPARATOR LINE ───
-  const lineY = 238
-  const grad = ctx.createLinearGradient(80, lineY, W - 80, lineY)
-  grad.addColorStop(0, 'rgba(201,169,110,0)'); grad.addColorStop(0.5, 'rgba(201,169,110,0.6)'); grad.addColorStop(1, 'rgba(201,169,110,0)')
-  ctx.strokeStyle = grad; ctx.lineWidth = 0.8
-  ctx.beginPath(); ctx.moveTo(80, lineY); ctx.lineTo(W - 80, lineY); ctx.stroke()
-
-  // ─── DATE ───
-  let contentY = 278
-  if (dateStr) {
-    const d = dateStr.charAt(0).toUpperCase() + dateStr.slice(1)
-    ctx.fillStyle = '#2d3228'
-    ctx.font = `italic 300 19px ${FONT_D}`
-    ctx.fillText(d, W / 2, contentY)
-    contentY += 32
-  }
-
-  // ─── LOCATION ───
-  if (location) {
-    ctx.fillStyle = '#7a8070'
-    ctx.font = `300 11px ${FONT_B}`
-    ctx.letterSpacing = '0.1em'
-    ctx.fillText(location.replace(/\n/g, ' · ').toUpperCase(), W / 2, contentY)
-    ctx.letterSpacing = '0'
-    contentY += 30
-  }
-
-  // ─── COUPLE MESSAGE ───
-  if (coupleMessage) {
-    contentY += 16
-    // Ornament
-    ctx.fillStyle = '#c9a96e'
-    ctx.globalAlpha = 0.5
-    ctx.font = '11px serif'
-    ctx.fillText('◆', W / 2, contentY)
-    ctx.globalAlpha = 1
-    contentY += 24
-
-    ctx.fillStyle = '#5a5a52'
-    ctx.font = `italic 300 16px ${FONT_D}`
-    const maxW = W - 120
-    const words = coupleMessage.split(/\s+/)
-    let line = '', lines: string[] = []
-    for (const w of words) {
-      const t = line + (line ? ' ' : '') + w
-      if (ctx.measureText(t).width > maxW) { lines.push(line); line = w } else line = t
-    }
-    if (line) lines.push(line)
-    for (const l of lines.slice(0, 6)) {
-      ctx.fillText(l, W / 2, contentY)
-      contentY += 26
-    }
-  }
-
-  // ─── QR CODE ZONE ───
-  const qrTop = Math.max(contentY + 40, 660)
-  ctx.fillStyle = '#7a8070'
-  ctx.font = `300 9px ${FONT_B}`
-  ctx.letterSpacing = '0.18em'
-  ctx.fillText('VOTRE ESPACE PERSONNEL', W / 2, qrTop)
-  ctx.letterSpacing = '0'
-
-  const qrSize = 116
-  const qrX = W / 2 - qrSize / 2
-  const qrY2 = qrTop + 14
-
-  // Light cream bg behind QR
-  ctx.fillStyle = '#ede8df'
-  ctx.beginPath()
-  ctx.roundRect(qrX - 8, qrY2 - 8, qrSize + 16, qrSize + 16, 8)
-  ctx.fill()
-
-  if (qrCanvas) {
-    ctx.drawImage(qrCanvas, qrX, qrY2, qrSize, qrSize)
-  } else {
-    const QR = await import('qrcode')
-    const qrDataUrl = await QR.default.toDataURL(personalUrl, {
-      width: qrSize * 2, margin: 1,
-      color: { dark: '#2d3a22', light: '#ede8df' },
-    })
-    const qrImg = new Image()
-    await new Promise<void>(r => { qrImg.onload = () => r(); qrImg.src = qrDataUrl })
-    ctx.drawImage(qrImg, qrX, qrY2, qrSize, qrSize)
-  }
-
-  // ─── FOOTER ───
-  ctx.fillStyle = 'rgba(74,86,57,0.3)'
-  ctx.font = `300 9px ${FONT_B}`
-  ctx.letterSpacing = '0.12em'
-  ctx.fillText('KAATCH.FR', W / 2, H - 18)
-  ctx.letterSpacing = '0'
-
-  return canvas.toDataURL('image/png')
-}
 
 export default function FairePartEnvelope({
   weddingName, dateStr, location, coupleMessage, coverImageUrl, slug, personalUrl, paid = true,
@@ -342,6 +192,7 @@ export default function FairePartEnvelope({
   const [showRain, setShowRain] = useState(false)
   const [downloading, setDownloading] = useState(false)
   const qrRef = useRef<HTMLCanvasElement>(null)
+  const cardsRef = useRef<HTMLDivElement>(null)
   const [name1, name2] = parseNames(weddingName)
 
   useEffect(() => {
@@ -361,15 +212,36 @@ export default function FairePartEnvelope({
   }, [phase, personalUrl])
 
   const handleDownload = async () => {
+    if (!cardsRef.current) return
     setDownloading(true)
     try {
-      const dataUrl = await drawFairePartCanvasNew(
-        personalUrl, weddingName, dateStr, location, coupleMessage, qrRef.current
-      )
-      const a = document.createElement('a')
-      a.href = dataUrl
-      a.download = `faire-part-${weddingName.toLowerCase().replace(/\s+/g, '-')}.png`
-      a.click()
+      const [html2canvas, { jsPDF }] = await Promise.all([
+        import('html2canvas').then(m => m.default),
+        import('jspdf'),
+      ])
+      const canvas = await html2canvas(cardsRef.current, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: NIGHT,
+        logging: false,
+      })
+      const imgData = canvas.toDataURL('image/jpeg', 0.93)
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+      const pdfW = pdf.internal.pageSize.getWidth()
+      const pdfH = pdf.internal.pageSize.getHeight()
+      const ratio = canvas.height / canvas.width
+      const imgH = pdfW * ratio
+      if (imgH <= pdfH) {
+        // Fits on one page — center vertically
+        pdf.addImage(imgData, 'JPEG', 0, (pdfH - imgH) / 2, pdfW, imgH)
+      } else {
+        // Scale down to fit page height
+        const scale = pdfH / imgH
+        const scaledW = pdfW * scale
+        pdf.addImage(imgData, 'JPEG', (pdfW - scaledW) / 2, 0, scaledW, pdfH)
+      }
+      pdf.save(`faire-part-${weddingName.toLowerCase().replace(/\s+/g, '-')}.pdf`)
     } finally {
       setDownloading(false)
     }
@@ -530,6 +402,9 @@ export default function FairePartEnvelope({
         <div style={{ position:'relative', zIndex:10, width:'100%', maxWidth:440,
           margin:'0 auto', padding:'28px 16px 60px' }}>
 
+          {/* Cards wrapper — captured by html2canvas */}
+          <div ref={cardsRef} style={{ background: NIGHT, padding: '20px 0 20px' }}>
+
           {/* ── RECTO ── */}
           <div className="card-rise" style={{
             background: BG,
@@ -640,6 +515,7 @@ export default function FairePartEnvelope({
               </div>
             </div>
           </div>
+          </div>{/* end cardsRef */}
 
           {/* Buttons */}
           <div className="fade-up" style={{ display:'flex', flexDirection:'column',
@@ -651,7 +527,7 @@ export default function FairePartEnvelope({
                   fontFamily:'var(--font-lato)', fontWeight:600,
                   border:'none', cursor:'pointer', letterSpacing:'0.05em',
                   opacity: downloading ? 0.6 : 1 }}>
-                {downloading ? '…Génération' : '↓ Télécharger le faire-part'}
+                {downloading ? '…Génération en cours' : '↓ Télécharger le faire-part (PDF)'}
               </button>
             ) : (
               <div style={{ textAlign:'center' }}>

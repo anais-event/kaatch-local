@@ -83,7 +83,7 @@ export default async function PartagerPage({ params }: { params: Promise<{ slug:
             <div className="bg-white rounded-2xl p-5 mb-4 border border-stone-100">
               <p style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.1rem' }}
                  className="text-[#4a5240] mb-3">
-                Lien à partager
+                Lien à partager avec les invités
               </p>
 
               {/* URL display */}
@@ -105,7 +105,7 @@ export default async function PartagerPage({ params }: { params: Promise<{ slug:
               </p>
               <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.78rem' }}
                  className="text-stone-400 mb-5">
-                À imprimer sur les tables le jour J
+                À imprimer et déposer sur les tables le jour J
               </p>
               <QRCodeDisplay url={shareUrl} weddingName={wedding.name} weddingDate={wedding.date} />
             </div>

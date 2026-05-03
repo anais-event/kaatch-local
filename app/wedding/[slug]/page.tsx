@@ -65,26 +65,24 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
 
         {/* Encadré central date + lieu */}
         {(dateFormatted || wedding.location) && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="border border-white/30 backdrop-blur-sm bg-black/20 rounded-xl px-6 py-4 text-center text-white max-w-xs mx-4">
-              <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 'clamp(1.3rem, 4vw, 2rem)', lineHeight: 1.1 }}>
+          <div className="absolute inset-0 flex items-end justify-center pb-6 pointer-events-none">
+            <div className="border border-white/30 backdrop-blur-sm bg-black/20 rounded-lg px-4 py-2.5 text-center text-white max-w-xs mx-4">
+              <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 'clamp(1rem, 3vw, 1.4rem)', lineHeight: 1.1 }}>
                 {wedding.name}
               </h2>
               {dateFormatted && (
-                <p className="capitalize mt-2" style={{ fontWeight: 300, fontSize: '0.75rem', letterSpacing: '0.05em', opacity: 0.85 }}>
+                <p className="capitalize mt-1" style={{ fontWeight: 300, fontSize: '0.68rem', letterSpacing: '0.05em', opacity: 0.85 }}>
                   {dateFormatted}
                 </p>
               )}
               {wedding.location && (
-                <p style={{ fontWeight: 300, fontSize: '0.72rem', opacity: 0.7 }} className="mt-0.5">
+                <p style={{ fontWeight: 300, fontSize: '0.65rem', opacity: 0.7 }} className="mt-0.5">
                   {wedding.location}
                 </p>
               )}
             </div>
           </div>
         )}
-
-
 
         <a href={`/mariage/${slug}/edit`}
            className="absolute top-4 right-4 text-xs text-white/70 hover:text-white border border-white/30 hover:border-white/60 px-3 py-1.5 rounded-lg backdrop-blur transition"
@@ -93,181 +91,164 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
         </a>
       </div>
 
-      {/* Contenu principal — 2 colonnes */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-        <div className="flex gap-6 items-start flex-col lg:flex-row">
+      {/* Contenu principal */}
+      <div className="max-w-6xl mx-auto px-4 py-8">
 
-          {/* ── Colonne gauche : modules ── */}
-          <div className="flex-1 min-w-0 space-y-8">
+        {/* Countdown */}
+        {wedding.date && (
+          <div className="mb-8">
+            <Countdown date={wedding.date} />
+          </div>
+        )}
 
-            {/* PLANNING WIDGET */}
-            <PlanningWidget slug={slug} weddingId={wedding.id} weddingDate={wedding.date ?? null} />
+        <div className="flex flex-col lg:flex-row gap-8">
 
-            {/* PRÉPARATIFS */}
-            <div>
-              <p style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: '1.3rem' }}
-                 className="text-[#4a5240] mb-3">Préparatifs</p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {/* ── Colonne principale ── */}
+          <div className="flex-1 min-w-0">
 
-                {/* Invités */}
-                <a href={`/mariage/${slug}/guests`}
-                   className="group bg-white rounded-xl border border-stone-100 p-4 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
-                  <span className="text-2xl mb-1">👥</span>
-                  <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.1rem' }} className="text-[#2d3228]">Invités</p>
-                  <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400 mb-2">Faire-part & RSVP</p>
-                  <div className="flex items-end gap-1 mt-auto">
-                    <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.8rem', lineHeight: 1 }} className="text-[#2d3228]">{guestCount ?? 0}</span>
-                    <span style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400 mb-0.5">invités</span>
-                  </div>
-                  {(confirmedCount ?? 0) > 0 && (
-                    <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-emerald-600 mt-0.5">{confirmedCount} confirmé{(confirmedCount ?? 0) > 1 ? 's' : ''}</p>
-                  )}
-                  <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-1.5">Gérer →</p>
-                </a>
-
-                {/* Plan de table */}
-                <a href={`/mariage/${slug}/tables`}
-                   className="group bg-white rounded-xl border border-stone-100 p-4 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
-                  <span className="text-2xl mb-1">🪑</span>
-                  <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.1rem' }} className="text-[#2d3228]">Plan de table</p>
-                  <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400 mb-2">Placement & récap</p>
-                  <div className="flex items-end gap-1 mt-auto">
-                    <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.8rem', lineHeight: 1 }} className="text-[#2d3228]">{tableCount ?? 0}</span>
-                    <span style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400 mb-0.5">table{(tableCount ?? 0) > 1 ? 's' : ''}</span>
-                  </div>
-                  <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-1.5">Gérer →</p>
-                </a>
-
-                {/* Budget */}
-                <a href={`/mariage/${slug}/budget`}
-                   className="group bg-white rounded-xl border border-stone-100 p-4 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
-                  <span className="text-2xl mb-1">💰</span>
-                  <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.1rem' }} className="text-[#2d3228]">Budget</p>
-                  <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400 mb-2">Suivi des dépenses</p>
-                  <div className="flex items-end gap-1 mt-auto">
-                    <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.8rem', lineHeight: 1 }} className="text-[#2d3228]">{budgetCount ?? 0}</span>
-                    <span style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400 mb-0.5">poste{(budgetCount ?? 0) > 1 ? 's' : ''}</span>
-                  </div>
-                  <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-1.5">Gérer →</p>
-                </a>
-
-                {/* Prestataires */}
-                <a href={`/mariage/${slug}/prestataires`}
-                   className="group bg-white rounded-xl border border-stone-100 p-4 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
-                  <span className="text-2xl mb-1">🤝</span>
-                  <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.1rem' }} className="text-[#2d3228]">Prestataires</p>
-                  <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400 mb-2">Contacts & contrats</p>
-                  <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto">Gérer →</p>
-                </a>
-
-                {/* Mot des mariés */}
-                <a href={`/mariage/${slug}/regles`}
-                   className="group bg-white rounded-xl border border-stone-100 p-4 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
-                  <span className="text-2xl mb-1">💌</span>
-                  <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.1rem' }} className="text-[#2d3228]">Mot des mariés</p>
-                  <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400 mb-2">Message & infos pratiques</p>
-                  <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto">Gérer →</p>
-                </a>
-
-              </div>
+            {/* Stats */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+              <a href={`/mariage/${slug}/guests`} className="group bg-white rounded-xl border border-stone-100 p-4 hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                <p style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.14em' }} className="text-stone-400 uppercase mb-1">Invités</p>
+                <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '2rem', lineHeight: 1 }} className="text-[#2d3228]">{guestCount ?? 0}</p>
+                <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-300 mt-1">{confirmedCount ?? 0} confirmés</p>
+              </a>
+              <a href={`/mariage/${slug}/budget`} className="group bg-white rounded-xl border border-stone-100 p-4 hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                <p style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.14em' }} className="text-stone-400 uppercase mb-1">Budget</p>
+                <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '2rem', lineHeight: 1 }} className="text-[#2d3228]">{budgetCount ?? 0}</p>
+                <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-300 mt-1">postes</p>
+              </a>
+              <a href={`/mariage/${slug}/photos`} className="group bg-white rounded-xl border border-stone-100 p-4 hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                <p style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.14em' }} className="text-stone-400 uppercase mb-1">Photos</p>
+                <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '2rem', lineHeight: 1 }} className="text-[#2d3228]">{photoCount ?? 0}</p>
+                <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-300 mt-1">partagées</p>
+              </a>
+              <a href={`/mariage/${slug}/messages`} className="group bg-white rounded-xl border border-stone-100 p-4 hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                <p style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.14em' }} className="text-stone-400 uppercase mb-1">Messages</p>
+                <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '2rem', lineHeight: 1 }} className="text-[#2d3228]">{unreadMessages?.length ?? 0}</p>
+                <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-300 mt-1">non lus</p>
+              </a>
             </div>
 
-            {/* JOUR J */}
-            <div>
-              <p style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: '1.3rem' }}
-                 className="text-[#4a5240] mb-3">Jour J</p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-
-                {/* Programme */}
-                <a href={`/mariage/${slug}/programme`}
-                   className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
-                  <span className="text-2xl mb-1">📋</span>
-                  <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Programme</p>
-                  <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-3">Déroulé de la journée</p>
-                  <div className="flex items-end gap-1 mt-auto">
-                    <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '2rem', lineHeight: 1 }} className="text-[#2d3228]">{programmeCount ?? 0}</span>
-                    <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400 mb-0.5">étape{(programmeCount ?? 0) > 1 ? 's' : ''}</span>
-                  </div>
-                  <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-2">Gérer →</p>
-                </a>
-
-                {/* Photos — vedette */}
-                <a href={`/mariage/${slug}/photos`}
-                   className="group relative sm:col-span-2 rounded-xl overflow-hidden border border-stone-100 hover:shadow-md transition-all"
-                   style={{ minHeight: '130px' }}>
-                  {wedding.cover_image_url
-                    ? <img src={wedding.cover_image_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
-                    : <div className="absolute inset-0 bg-[#2d3228]" />
-                  }
-                  <div className="absolute inset-0 bg-gradient-to-br from-black/55 via-black/30 to-black/10" />
-                  <div className="relative z-10 p-5 flex flex-col h-full justify-between">
-                    <div>
-                      <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.3rem' }} className="text-white">Photos</p>
-                      <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-white/70">Album partagé avec les invités</p>
-                    </div>
-                    <div className="flex items-end justify-between mt-4">
-                      <div className="flex items-end gap-1.5">
-                        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '2.4rem', lineHeight: 1 }} className="text-white">{photoCount ?? 0}</span>
-                        <span style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-white/70 mb-0.5">photo{(photoCount ?? 0) > 1 ? 's' : ''}</span>
-                      </div>
-                      <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-white/60 group-hover:text-white transition">Voir l'album →</p>
-                    </div>
-                  </div>
-                </a>
-
-                {/* Hébergements */}
-                <a href={`/mariage/${slug}/hebergements`}
-                   className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all sm:col-start-1">
-                  <span className="text-2xl mb-1">🏡</span>
-                  <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Hébergements</p>
-                  <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-3">Options aux alentours</p>
-                  <div className="flex items-end gap-1 mt-auto">
-                    <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '2rem', lineHeight: 1 }} className="text-[#2d3228]">{hebergementCount ?? 0}</span>
-                    <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400 mb-0.5">option{(hebergementCount ?? 0) > 1 ? 's' : ''}</span>
-                  </div>
-                  <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-2">Gérer →</p>
-                </a>
-
-                {/* Musique */}
-                <a href={`/mariage/${slug}/musique`}
-                   className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
-                  <span className="text-2xl mb-1">🎵</span>
-                  <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Musique</p>
-                  <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-3">Playlist &amp; ambiance</p>
-                  <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto">Gérer →</p>
-                </a>
-
-                {/* Jeux & anim. */}
-                <a href={`/mariage/${slug}/jeux`}
-                   className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
-                  <span className="text-2xl mb-1">🎉</span>
-                  <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Jeux &amp; anim.</p>
-                  <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-3">Idées pour la fête</p>
-                  <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto">Gérer →</p>
-                </a>
-
-                {/* QR Code */}
-                <a href={`/mariage/${slug}/partager`}
-                   className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
-                  <span className="text-2xl mb-1">📲</span>
-                  <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">QR Code</p>
-                  <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-3">Accès rapide jour J</p>
-                  <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto">Gérer →</p>
-                </a>
-
-                {/* Livre d'Or */}
-                <a href={`/mariage/${slug}/livre-dor`}
-                   className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
-                  <span className="text-2xl mb-1">📖</span>
-                  <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Livre d&apos;Or</p>
-                  <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-3">Messages des invités</p>
-                  <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto">Gérer →</p>
-                </a>
-
-              </div>
+            {/* Planning */}
+            <div className="mb-8">
+              <PlanningWidget slug={slug} weddingId={wedding.id} />
             </div>
 
+            {/* Grille modules */}
+            <p style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: '1.3rem' }}
+               className="text-[#4a5240] mb-3">Modules</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
 
+              {/* Invités */}
+              <a href={`/mariage/${slug}/guests`}
+                 className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                <span className="text-2xl mb-1">👥</span>
+                <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Invités</p>
+                <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-3">Liste & RSVPs</p>
+                <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto">Gérer →</p>
+              </a>
+
+              {/* Budget */}
+              <a href={`/mariage/${slug}/budget`}
+                 className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                <span className="text-2xl mb-1">💰</span>
+                <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Budget</p>
+                <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-3">Dépenses & suivi</p>
+                <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto">Gérer →</p>
+              </a>
+
+              {/* Programme */}
+              <a href={`/mariage/${slug}/programme`}
+                 className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                <span className="text-2xl mb-1">📋</span>
+                <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Programme</p>
+                <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-3">Déroulé de la journée</p>
+                <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto">Gérer →</p>
+              </a>
+
+              {/* Plan de table */}
+              <a href={`/mariage/${slug}/tables`}
+                 className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                <span className="text-2xl mb-1">🪑</span>
+                <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Plan de table</p>
+                <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-3">Placement des invités</p>
+                <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto">Gérer →</p>
+              </a>
+
+              {/* Hébergements */}
+              <a href={`/mariage/${slug}/hebergements`}
+                 className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                <span className="text-2xl mb-1">🏨</span>
+                <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Hébergements</p>
+                <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-3">Logements & nuitées</p>
+                <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto">Gérer →</p>
+              </a>
+
+              {/* Photos */}
+              <a href={`/mariage/${slug}/photos`}
+                 className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                <span className="text-2xl mb-1">📷</span>
+                <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Photos</p>
+                <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-3">Galerie partagée</p>
+                <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto">Gérer →</p>
+              </a>
+
+              {/* Messages */}
+              <a href={`/mariage/${slug}/messages`}
+                 className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                <span className="text-2xl mb-1">💬</span>
+                <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Messages</p>
+                <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-3">Questions des invités</p>
+                <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto">Gérer →</p>
+              </a>
+
+              {/* Règles & infos */}
+              <a href={`/mariage/${slug}/regles`}
+                 className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                <span className="text-2xl mb-1">📜</span>
+                <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Infos & règles</p>
+                <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-3">Mot des mariés</p>
+                <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto">Gérer →</p>
+              </a>
+
+              {/* Musique */}
+              <a href={`/mariage/${slug}/musique`}
+                 className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                <span className="text-2xl mb-1">🎵</span>
+                <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Musique</p>
+                <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-3">Playlist & ambiance</p>
+                <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto">Gérer →</p>
+              </a>
+
+              {/* Jeux & anim. */}
+              <a href={`/mariage/${slug}/jeux`}
+                 className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                <span className="text-2xl mb-1">🎉</span>
+                <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Jeux &amp; anim.</p>
+                <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-3">Idées pour la fête</p>
+                <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto">Gérer →</p>
+              </a>
+
+              {/* QR Code */}
+              <a href={`/mariage/${slug}/partager`}
+                 className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                <span className="text-2xl mb-1">📲</span>
+                <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">QR Code</p>
+                <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-3">Accès rapide jour J</p>
+                <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto">Gérer →</p>
+              </a>
+
+              {/* Livre d'Or */}
+              <a href={`/mariage/${slug}/livre-dor`}
+                 className="group bg-white rounded-xl border border-stone-100 p-5 flex flex-col hover:border-[#4a5240]/30 hover:shadow-sm transition-all">
+                <span className="text-2xl mb-1">📖</span>
+                <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }} className="text-[#2d3228]">Livre d&apos;Or</p>
+                <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-3">Messages des invités</p>
+                <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition mt-auto">Gérer →</p>
+              </a>
+
+            </div>
           </div>
 
           {/* ── Colonne droite : mémo ── */}

@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 
-export default function Countdown({ weddingDate }: { weddingDate: string }) {
+export default function Countdown({ weddingDate, dark = false }: { weddingDate: string; dark?: boolean }) {
   const [diff, setDiff] = useState({ months: 0, days: 0, hours: 0, minutes: 0, past: false })
 
   useEffect(() => {
@@ -29,7 +29,7 @@ export default function Countdown({ weddingDate }: { weddingDate: string }) {
 
   if (diff.past) return (
     <div className="flex items-center gap-4 p-5 rounded-2xl bg-[#4a5240] text-white text-center justify-center">
-      <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem' }}>✨ C'est aujourd'hui !</span>
+      <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem' }}>✨ C&apos;est aujourd&apos;hui !</span>
     </div>
   )
 
@@ -40,10 +40,30 @@ export default function Countdown({ weddingDate }: { weddingDate: string }) {
     { value: diff.minutes, label: 'Min' },
   ].filter(u => u.value > 0 || u.label === 'Jours')
 
+  if (dark) return (
+    <div className="text-center">
+      <p style={{ fontWeight: 300, fontSize: '0.62rem', letterSpacing: '0.25em', fontFamily: 'var(--font-lato)' }}
+        className="text-white/40 uppercase mb-4">
+        Plus que
+      </p>
+      <div className="flex items-end justify-center gap-3">
+        {units.map(({ value, label }) => (
+          <div key={label} className="text-center">
+            <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: 'clamp(2.8rem, 9vw, 4rem)', lineHeight: 1, color: '#fff' }}>
+              {String(value).padStart(2, '0')}
+            </p>
+            <p style={{ fontWeight: 300, fontSize: '0.58rem', letterSpacing: '0.18em', fontFamily: 'var(--font-lato)' }}
+              className="text-white/40 uppercase mt-1">{label}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+
   return (
     <div className="p-5 rounded-2xl bg-white/80">
       <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }} className="text-stone-400 uppercase mb-3 text-center">Compte à rebours</p>
-      <div className={`grid gap-2 text-center`} style={{ gridTemplateColumns: `repeat(${units.length}, 1fr)` }}>
+      <div className="grid gap-2 text-center" style={{ gridTemplateColumns: `repeat(${units.length}, 1fr)` }}>
         {units.map(({ value, label }) => (
           <div key={label} className="bg-[#f5f0e8] rounded-xl py-3">
             <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '2rem', lineHeight: 1 }} className="text-[#4a5240]">

@@ -516,7 +516,7 @@ export default function Home() {
           </div>
           <div className="border-t border-stone-200 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-xs text-stone-400" style={{ fontWeight: 300 }}>
-              © 2025 Kaatch —{' '}
+              © 2026 Kaatch —{' '}
               <a href="mailto:bonjour@kaatch.fr" className="hover:text-[#2C3B2E] transition">bonjour@kaatch.fr</a>
               <span className="hidden sm:inline"> · Aucun groupe WhatsApp n&apos;a été maltraité dans la fabrication de ce site.</span>
             </p>

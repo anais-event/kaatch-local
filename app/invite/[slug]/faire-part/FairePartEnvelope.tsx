@@ -506,6 +506,25 @@ export default function FairePartEnvelope({
         </div>
       ))}
 
+      {/* Close button */}
+      {phase === 'revealed' && (
+        <a href={`/invite/${slug}`}
+          style={{ position:'fixed', top:14, right:16, zIndex:60,
+            background:'rgba(255,255,255,0.12)', backdropFilter:'blur(8px)',
+            border:'1px solid rgba(255,255,255,0.18)', borderRadius:99,
+            padding:'6px 14px', display:'flex', alignItems:'center', gap:6,
+            color:'rgba(255,255,255,0.75)', textDecoration:'none',
+            fontFamily:'var(--font-lato)', fontWeight:300, fontSize:'0.75rem',
+            letterSpacing:'0.04em', transition:'all 0.2s' }}
+          onMouseOver={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.22)')}
+          onMouseOut={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.12)')}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+          Mon espace
+        </a>
+      )}
+
       {/* Main content */}
       {phase === 'revealed' && (
         <div style={{ position:'relative', zIndex:10, width:'100%', maxWidth:440,

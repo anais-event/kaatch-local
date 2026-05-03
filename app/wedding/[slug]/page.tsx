@@ -58,7 +58,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
       {/* Hero */}
       <div className="relative w-full h-[42vh] min-h-[220px] overflow-hidden">
         {wedding.cover_image_url
-          ? <img src={wedding.cover_image_url} alt="" className="w-full h-full object-cover" />
+          ? <img src={wedding.cover_image_url} alt="" className="w-full h-full object-cover" style={{ objectPosition: `center ${wedding.cover_position_y ?? 50}%` }} />
           : <div className="w-full h-full bg-[#2d3228]" />
         }
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/70" />

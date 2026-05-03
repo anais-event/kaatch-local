@@ -230,18 +230,25 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
                 className="w-full border border-stone-200 rounded-xl px-4 py-3 outline-none focus:border-[#4a5240] transition text-stone-700 resize-none bg-[#f5f0e8]"
                 style={{ fontWeight: 300, fontSize: '0.9rem', lineHeight: 1.6 }}
               />
-              <button type="submit"
-                className="bg-[#4a5240] text-white px-5 py-2.5 rounded-xl hover:bg-[#2d3228] transition text-sm cursor-pointer"
-                style={{ fontWeight: 300, letterSpacing: '0.04em' }}>
-                {existingMessage ? 'Mettre à jour' : 'Envoyer le message'}
-              </button>
-              {existingMessage && (
-                <button type="submit" name="message" value=""
-                  className="ml-3 text-xs text-stone-400 hover:text-red-400 transition cursor-pointer"
-                  style={{ fontWeight: 300 }}>
-                  Supprimer le message
+              <div className="flex items-center gap-3">
+                <button type="submit"
+                  className="bg-[#4a5240] text-white px-5 py-2.5 rounded-xl hover:bg-[#2d3228] transition text-sm cursor-pointer"
+                  style={{ fontWeight: 300, letterSpacing: '0.04em' }}>
+                  {existingMessage ? 'Mettre à jour' : 'Envoyer le message'}
                 </button>
-              )}
+                {existingMessage && (
+                  <form action={saveMessage}>
+                    <input type="hidden" name="slug" value={slug} />
+                    <input type="hidden" name="guest_id" value={guest.id} />
+                    <input type="hidden" name="message" value="" />
+                    <button type="submit"
+                      className="text-xs text-stone-400 hover:text-red-400 transition cursor-pointer"
+                      style={{ fontWeight: 300 }}>
+                      Supprimer le message
+                    </button>
+                  </form>
+                )}
+              </div>
             </form>
           </div>
         )}

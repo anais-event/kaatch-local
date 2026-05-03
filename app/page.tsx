@@ -302,7 +302,7 @@ export default function Home() {
         <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-16 items-center">
           <div className="rounded-2xl overflow-hidden" style={{ boxShadow: SHADOW, height: 400 }}>
             <img
-              src="https://images.unsplash.com/photo-1529636798458-92182e662485?w=1200&q=80&auto=format&fit=crop"
+              src="/On the spot.jpg"
               alt=""
               className="w-full h-full object-cover"
             />

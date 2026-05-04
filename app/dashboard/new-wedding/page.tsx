@@ -24,23 +24,23 @@ export default function NewWedding() {
                      className="block text-stone-400 uppercase mb-3">
                 Vos prénoms
               </label>
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+              <div className="flex items-center gap-3">
                 <input
                   name="first_name"
                   type="text"
                   placeholder="Votre prénom"
                   required
-                  className="flex-1 border border-stone-200 rounded-xl px-4 py-3 outline-none focus:border-[#4a5240] transition text-stone-700 bg-white"
+                  className="min-w-0 flex-1 border border-stone-200 rounded-xl px-4 py-3 outline-none focus:border-[#4a5240] transition text-stone-700 bg-white"
                   style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem' }}
                 />
                 <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem' }}
-                      className="text-stone-300 text-center shrink-0">et</span>
+                      className="text-stone-300 shrink-0">et</span>
                 <input
                   name="partner_name"
                   type="text"
                   placeholder="Son prénom"
                   required
-                  className="flex-1 border border-stone-200 rounded-xl px-4 py-3 outline-none focus:border-[#4a5240] transition text-stone-700 bg-white"
+                  className="min-w-0 flex-1 border border-stone-200 rounded-xl px-4 py-3 outline-none focus:border-[#4a5240] transition text-stone-700 bg-white"
                   style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem' }}
                 />
               </div>
@@ -61,30 +61,6 @@ export default function NewWedding() {
                 className="w-full border border-stone-200 rounded-xl px-4 py-3 outline-none focus:border-[#4a5240] transition text-stone-700 bg-white"
                 style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}
               />
-            </div>
-
-            <div>
-              <label style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.7rem', letterSpacing: '0.15em' }}
-                     className="block text-stone-400 uppercase mb-3">
-                Ambiance
-              </label>
-              <div className="grid grid-cols-3 gap-3">
-                {[
-                  { value: 'elegant', emoji: '✨', label: 'Élégant' },
-                  { value: 'moderne', emoji: '🎨', label: 'Moderne' },
-                  { value: 'romantique', emoji: '🌸', label: 'Romantique' },
-                ].map((theme) => (
-                  <label key={theme.value} className="cursor-pointer">
-                    <input type="radio" name="theme" value={theme.value} className="peer sr-only"
-                      defaultChecked={theme.value === 'elegant'} />
-                    <div className="border-2 border-stone-200 rounded-2xl p-4 text-center peer-checked:border-[#4a5240] peer-checked:bg-[#f5f0e8] transition">
-                      <div className="text-2xl mb-2">{theme.emoji}</div>
-                      <div style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.8rem' }}
-                           className="text-stone-600">{theme.label}</div>
-                    </div>
-                  </label>
-                ))}
-              </div>
             </div>
 
             <button

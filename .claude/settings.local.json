@@ -79,7 +79,13 @@
       "Bash(grep -v \"^$\")",
       "Bash(git pull *)",
       "Bash(git stash *)",
-      "Bash(del \"C:\\\\Users\\\\anais\\\\Desktop\\\\kaatch\\\\.git\\\\index.lock\")"
+      "Bash(del \"C:\\\\Users\\\\anais\\\\Desktop\\\\kaatch\\\\.git\\\\index.lock\")",
+      "Bash(git restore *)",
+      "Bash(git show *)",
+      "Bash(git ls-tree *)",
+      "Bash(git rm *)",
+      "Bash(python3 -c ' *)",
+      "Bash(node -e ' *)"
     ]
   }
 }

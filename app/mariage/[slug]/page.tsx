@@ -132,7 +132,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
 
             {/* Planning */}
             <div className="mb-8">
-              <PlanningWidget slug={slug} weddingId={wedding.id} />
+              <PlanningWidget slug={slug} weddingId={wedding.id} weddingDate={wedding.date ?? null} />
             </div>
 
             {/* Grille modules */}

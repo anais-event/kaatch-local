@@ -34,7 +34,7 @@ export default function FileUploadButton({ slug, weddingId, quoteId, itemId, onS
 
       const { data: signedData } = await supabase.storage
         .from('budget-files')
-        .createSignedUrl(path, 60 * 60 * 24 * 365) // 1 an
+        .createSignedUrl(path, 60 * 60 * 24 * 365)
 
       const fileUrl = signedData?.signedUrl ?? path
 

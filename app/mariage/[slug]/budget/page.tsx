@@ -149,11 +149,8 @@ async function retainQuote(formData: FormData) {
   const slug = formData.get('slug') as string
   const quoteId = formData.get('id') as string
   const itemId = formData.get('item_id') as string
-  // Remettre tous les devis du poste en "en_attente"
   await supabase.from('budget_quotes').update({ status: 'en_attente' }).eq('item_id', itemId)
-  // Marquer celui-ci comme retenu
   await supabase.from('budget_quotes').update({ status: 'retenu' }).eq('id', quoteId)
-  // Mettre à jour le statut du poste
   const { data: quote } = await supabase.from('budget_quotes').select('paid_amount, amount').eq('id', quoteId).single()
   const newStatus = quote?.paid_amount >= quote?.amount ? 'solde' : quote?.paid_amount > 0 ? 'acompte' : 'devis'
   await supabase.from('budget_items').update({ status: newStatus }).eq('id', itemId)
@@ -218,17 +215,19 @@ export default async function BudgetPage({ params }: { params: Promise<{ slug: s
     .from('weddings').select('id, name, budget_total, budget_currency').eq('slug', slug).single()
   if (!wedding) redirect(`/mariage/${slug}`)
 
-  const { data: categories } = await supabase
-    .from('budget_categories').select('*').eq('wedding_id', wedding.id).order('position').order('created_at')
-
-  const { data: items } = await supabase
-    .from('budget_items').select('*').eq('wedding_id', wedding.id).order('created_at')
-
-  const { data: quotes } = await supabase
-    .from('budget_quotes').select('*').eq('wedding_id', wedding.id).order('created_at')
-
-  const { data: files } = await supabase
-    .from('budget_files').select('*').eq('wedding_id', wedding.id).order('created_at')
+  const [
+    { data: categories },
+    { data: items },
+    { data: quotes },
+    { data: files },
+    { data: contacts },
+  ] = await Promise.all([
+    supabase.from('budget_categories').select('*').eq('wedding_id', wedding.id).order('position').order('created_at'),
+    supabase.from('budget_items').select('*').eq('wedding_id', wedding.id).order('created_at'),
+    supabase.from('budget_quotes').select('*').eq('wedding_id', wedding.id).order('created_at'),
+    supabase.from('budget_files').select('*').eq('wedding_id', wedding.id).order('created_at'),
+    supabase.from('wedding_contacts').select('id, name, role, telephone, email').eq('wedding_id', wedding.id).order('name'),
+  ])
 
   return (
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
@@ -254,6 +253,7 @@ export default async function BudgetPage({ params }: { params: Promise<{ slug: s
           quotes={quotes ?? []}
           files={files ?? []}
           currencies={CURRENCIES}
+          contacts={contacts ?? []}
           actions={{ setBudgetTotal, addCategory, deleteCategory, addItem, updateItem, deleteItem, updateItemStatus, addQuote, updateQuote, deleteQuote, retainQuote, refuseQuote, initDefaultCategories, saveBudgetFileMeta, deleteBudgetFile }}
         />
       </div>

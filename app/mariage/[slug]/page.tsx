@@ -98,6 +98,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
         {wedding.date && (
           <div className="mb-8">
             <Countdown weddingDate={wedding.date} />
+
           </div>
         )}
 

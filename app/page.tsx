@@ -1,5 +1,4 @@
 import Image from 'next/image'
-import KaatchChatLanding from './_components/KaatchChatLanding'
 import ContactForm from './_components/ContactForm'
 import PublicNav from './_components/PublicNav'
 import ForumEmbed from './_components/ForumEmbed'
@@ -466,9 +465,6 @@ export default function Home() {
           </p>
         </div>
       </section>
-
-      {/* ── CHATBOT ── */}
-      <KaatchChatLanding />
 
       {/* ── CONTACT ── */}
       <section className="py-24 px-10 bg-[#f5f0e8] border-t border-stone-200">

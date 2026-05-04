@@ -1,40 +1,45 @@
 ﻿import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
+import { createClient } from '@supabase/supabase-js'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+function adminClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+}
 
-// Coupon lancement -20€, expire le 31/05/2026
-const LAUNCH_COUPON_ID = 'RJmSDmSI'
-const LAUNCH_COUPON_EXPIRES = new Date('2026-06-01T00:00:00Z')
+export async function POST(req: Request) {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+  
+  const body = await req.text()
+  const sig = req.headers.get('stripe-signature')
 
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url)
-  const weddingId = searchParams.get('wedding_id')
-  const slug = searchParams.get('slug')
-
-  if (!weddingId || !slug) {
-    return NextResponse.json({ error: 'wedding_id et slug requis' }, { status: 400 })
+  if (!sig) {
+    return NextResponse.json({ error: 'Missing signature' }, { status: 400 })
   }
 
-  const origin = new URL(req.url).origin
-  const isLaunchPeriod = new Date() < LAUNCH_COUPON_EXPIRES
+  let event: Stripe.Event
+  try {
+    event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!)
+  } catch (err) {
+    console.error('Webhook signature error:', err)
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
+  }
 
-  const session = await stripe.checkout.sessions.create({
-    mode: 'payment',
-    line_items: [
-      {
-        price: process.env.STRIPE_PRICE_ID!,
-        quantity: 1,
-      },
-    ],
-    ...(isLaunchPeriod ? { discounts: [{ coupon: LAUNCH_COUPON_ID }] } : {}),
-    metadata: {
-      wedding_id: weddingId,
-      plan: 'mariage',
-    },
-    success_url: `${origin}/mariage/${slug}?payment=success`,
-    cancel_url: `${origin}/mariage/${slug}?payment=cancelled`,
-  })
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object as Stripe.Checkout.Session
+    const weddingId = session.metadata?.wedding_id
+    const plan = session.metadata?.plan ?? 'mariage'
 
-  return NextResponse.redirect(session.url!)
+    if (weddingId) {
+      const supabase = adminClient()
+      await supabase
+        .from('weddings')
+        .update({ plan })
+        .eq('id', weddingId)
+    }
+  }
+
+  return NextResponse.json({ received: true })
 }

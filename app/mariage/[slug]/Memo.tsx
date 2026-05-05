@@ -2,35 +2,23 @@
 
 import { useState } from 'react'
 
-type SystemItem = { label: string; done: boolean; href?: string }
 type CustomItem = { id: string; label: string; done: boolean }
+type SystemItem = { label: string; done: boolean; href?: string }
 
 export default function Memo({
   slug,
-  systemItems,
+  systemItems: _systemItems,
   customItems: initialCustomItems,
 }: {
   slug: string
   systemItems: SystemItem[]
   customItems: CustomItem[]
 }) {
-  const [customItems, setCustomItems] = useState(initialCustomItems)
+  const [notes, setNotes] = useState(initialCustomItems)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editLabel, setEditLabel] = useState('')
   const [adding, setAdding] = useState(false)
   const [newLabel, setNewLabel] = useState('')
-  const [collapsed, setCollapsed] = useState(true)
-
-  const doneCount = systemItems.filter(i => i.done).length + customItems.filter(i => i.done).length
-  const total = systemItems.length + customItems.length
-  const pct = total > 0 ? Math.round((doneCount / total) * 100) : 0
-
-  async function handleToggle(id: string, done: boolean) {
-    setCustomItems(prev => prev.map(i => i.id === id ? { ...i, done: !done } : i))
-    await fetch(`/api/todos/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ done: !done }),
-    })
-  }
 
   async function handleAdd() {
     if (!newLabel.trim()) return
@@ -41,114 +29,157 @@ export default function Memo({
     })
     if (res.ok) {
       const item = await res.json()
-      setCustomItems(prev => [...prev, item])
+      setNotes(prev => [...prev, item])
       setNewLabel('')
       setAdding(false)
     }
   }
 
   async function handleDelete(id: string) {
-    setCustomItems(prev => prev.filter(i => i.id !== id))
+    setNotes(prev => prev.filter(n => n.id !== id))
     await fetch(`/api/todos/${id}`, { method: 'DELETE' })
   }
 
+  async function handleSaveEdit(id: string) {
+    const trimmed = editLabel.trim()
+    if (!trimmed) return
+    setNotes(prev => prev.map(n => n.id === id ? { ...n, label: trimmed } : n))
+    setEditingId(null)
+    await fetch(`/api/todos/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ label: trimmed }),
+    })
+  }
+
   return (
-    <div className="rounded-xl border border-amber-100 bg-[#fdfdf8] overflow-hidden">
+    <div style={{ fontFamily: 'var(--font-lato)' }}>
+      <div className="flex items-center justify-between mb-3">
+        <p style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.2em' }} className="text-stone-400 uppercase">
+          Notes
+        </p>
+        <button
+          onClick={() => { setAdding(true); setNewLabel('') }}
+          className="flex items-center gap-1 text-stone-400 hover:text-[#4a5240] transition cursor-pointer"
+          style={{ fontWeight: 300, fontSize: '0.72rem' }}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3 h-3">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          Ajouter
+        </button>
+      </div>
 
-      {/* Header */}
-      <button onClick={() => setCollapsed(c => !c)}
-        className="w-full px-5 pt-5 pb-3 bg-[#fdfdf8] cursor-pointer text-left">
-        <div className="flex items-center justify-between mb-1">
-          <div className="flex items-center gap-2">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3.5 h-3.5 text-amber-400">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
-            </svg>
-            <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1rem' }}
-               className="text-stone-600">Mémo</p>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+
+        {/* Nouvelle note en cours */}
+        {adding && (
+          <div className="bg-[#fefce8] border border-yellow-200 rounded-2xl p-4 shadow-sm col-span-1">
+            <textarea
+              autoFocus
+              value={newLabel}
+              onChange={e => setNewLabel(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleAdd() }
+                if (e.key === 'Escape') { setAdding(false); setNewLabel('') }
+              }}
+              placeholder="Votre note…"
+              className="w-full bg-transparent outline-none resize-none text-stone-600 placeholder:text-yellow-300"
+              style={{ fontWeight: 300, fontSize: '0.85rem', minHeight: '72px', lineHeight: 1.6 }}
+            />
+            <div className="flex gap-3 mt-2 justify-end">
+              <button
+                onClick={() => { setAdding(false); setNewLabel('') }}
+                className="text-xs text-stone-400 cursor-pointer hover:text-stone-600 transition"
+                style={{ fontWeight: 300 }}
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleAdd}
+                className="text-xs text-[#4a5240] cursor-pointer hover:text-[#2d3228] transition"
+                style={{ fontWeight: 400 }}
+              >
+                OK
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">{pct}% fait</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
-                 className={`w-3.5 h-3.5 text-stone-300 transition-transform ${collapsed ? '' : 'rotate-180'}`}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
-          </div>
-        </div>
-        {/* Barre fine */}
-        <div className="h-0.5 bg-amber-100 rounded-full overflow-hidden">
-          <div className="h-full bg-amber-300 rounded-full transition-all duration-500"
-               style={{ width: `${pct}%` }} />
-        </div>
-      </button>
-
-      {!collapsed && <div className="px-5 pb-5 space-y-0.5">
-        {/* Items automatiques */}
-        <p style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.18em' }}
-           className="text-stone-300 uppercase pt-3 pb-1.5">Checklist auto</p>
-        {systemItems.map(item => (
-          <a key={item.label} href={item.href ?? '#'}
-             className="flex items-center gap-2.5 py-1.5 group">
-            <span className={`text-sm shrink-0 ${item.done ? 'text-[#4a5240]' : 'text-stone-300'}`}>
-              {item.done ? '✓' : '○'}
-            </span>
-            <span style={{ fontWeight: 300, fontSize: '0.82rem' }}
-                  className={`transition group-hover:text-[#4a5240] ${item.done ? 'text-stone-300' : 'text-stone-600'}`}>
-              {item.label}
-            </span>
-          </a>
-        ))}
-
-        {/* Items custom */}
-        {customItems.length > 0 && (
-          <>
-            <p style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.18em' }}
-               className="text-stone-300 uppercase pt-3 pb-1.5">Ma liste</p>
-            {customItems.map(item => (
-              <div key={item.id} className="flex items-center gap-2.5 py-1.5 group">
-                <button onClick={() => handleToggle(item.id, item.done)}
-                  className={`text-sm shrink-0 cursor-pointer transition ${item.done ? 'text-[#4a5240]' : 'text-stone-300 hover:text-stone-500'}`}>
-                  {item.done ? '✓' : '○'}
-                </button>
-                <button onClick={() => handleToggle(item.id, item.done)}
-                  className={`flex-1 text-left transition cursor-pointer ${item.done ? 'text-stone-300' : 'text-stone-600'}`}
-                  style={{ fontWeight: 300, fontSize: '0.82rem' }}>
-                  {item.label}
-                </button>
-                <button onClick={() => handleDelete(item.id)}
-                  className="opacity-0 group-hover:opacity-100 text-stone-300 hover:text-red-400 transition text-base cursor-pointer shrink-0 leading-none">
-                  ×
-                </button>
-              </div>
-            ))}
-          </>
         )}
 
-        {/* Ajouter */}
-        <div className="pt-3">
-          {adding ? (
-            <div className="flex gap-2">
-              <input autoFocus type="text" value={newLabel}
-                onChange={e => setNewLabel(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') handleAdd(); if (e.key === 'Escape') { setAdding(false); setNewLabel('') } }}
-                placeholder="Nouvelle tâche…"
-                className="flex-1 bg-transparent border-b border-stone-300 outline-none text-stone-700 pb-0.5 text-sm"
-                style={{ fontWeight: 300, fontFamily: 'var(--font-lato)' }} />
-              <button onClick={handleAdd}
-                className="text-xs text-[#4a5240] hover:text-[#2d3228] transition cursor-pointer"
-                style={{ fontWeight: 300 }}>OK</button>
-              <button onClick={() => { setAdding(false); setNewLabel('') }}
-                className="text-xs text-stone-400 hover:text-stone-600 transition cursor-pointer"
-                style={{ fontWeight: 300 }}>✕</button>
-            </div>
-          ) : (
-            <button onClick={() => setAdding(true)}
-              className="text-xs text-stone-400 hover:text-[#4a5240] transition cursor-pointer flex items-center gap-1.5"
-              style={{ fontWeight: 300 }}>
-              <span className="text-base leading-none">+</span> Ajouter une tâche
-            </button>
-          )}
-        </div>
-      </div>}
+        {/* Notes existantes */}
+        {notes.map(note => (
+          <div
+            key={note.id}
+            className="relative bg-[#fefce8] border border-yellow-200 rounded-2xl p-4 shadow-sm group cursor-pointer"
+            onClick={() => {
+              if (editingId !== note.id) {
+                setEditingId(note.id)
+                setEditLabel(note.label)
+              }
+            }}
+          >
+            {editingId === note.id ? (
+              <>
+                <textarea
+                  autoFocus
+                  value={editLabel}
+                  onChange={e => setEditLabel(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSaveEdit(note.id) }
+                    if (e.key === 'Escape') setEditingId(null)
+                  }}
+                  onClick={e => e.stopPropagation()}
+                  className="w-full bg-transparent outline-none resize-none text-stone-700"
+                  style={{ fontWeight: 300, fontSize: '0.85rem', minHeight: '72px', lineHeight: 1.6 }}
+                />
+                <div className="flex gap-3 mt-2 justify-end">
+                  <button
+                    onClick={e => { e.stopPropagation(); setEditingId(null) }}
+                    className="text-xs text-stone-400 cursor-pointer hover:text-stone-600 transition"
+                    style={{ fontWeight: 300 }}
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    onClick={e => { e.stopPropagation(); handleSaveEdit(note.id) }}
+                    className="text-xs text-[#4a5240] cursor-pointer hover:text-[#2d3228] transition"
+                    style={{ fontWeight: 400 }}
+                  >
+                    OK
+                  </button>
+                </div>
+              </>
+            ) : (
+              <p
+                style={{ fontWeight: 300, fontSize: '0.82rem', lineHeight: 1.65 }}
+                className="text-stone-600 whitespace-pre-wrap break-words"
+              >
+                {note.label}
+              </p>
+            )}
+            {editingId !== note.id && (
+              <button
+                onClick={e => { e.stopPropagation(); handleDelete(note.id) }}
+                className="absolute top-2 right-2 w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 text-yellow-300 hover:text-red-400 transition cursor-pointer text-sm leading-none rounded-full hover:bg-red-50"
+              >
+                ×
+              </button>
+            )}
+          </div>
+        ))}
+
+        {/* Bouton + quand vide et pas en train d'ajouter */}
+        {notes.length === 0 && !adding && (
+          <button
+            onClick={() => { setAdding(true); setNewLabel('') }}
+            className="bg-[#fefce8]/60 border border-yellow-100 border-dashed rounded-2xl p-4 text-yellow-300 hover:text-yellow-400 hover:border-yellow-200 transition cursor-pointer flex items-center justify-center min-h-[80px]"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-5 h-5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+          </button>
+        )}
+      </div>
     </div>
   )
 }

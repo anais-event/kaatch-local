@@ -126,7 +126,7 @@ export default function PlanningWidget({ slug, weddingId, weddingDate }: Props) 
         <span style={{ fontSize: '1.1rem' }}>📅</span>
         <span style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: '1.15rem' }}
               className="text-[#4a5240] flex-1">
-          Planning mois par mois
+          Agenda mensuel
         </span>
 
         {/* Month selector — stop propagation so clicking it doesn't toggle */}

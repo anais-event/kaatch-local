@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 type Task = {
   key: string
@@ -22,21 +22,47 @@ type CustomTask = {
   done: boolean
 }
 
-function CheckCircle({ checked, onChange, saving }: {
+const PERIOD_COLORS: Record<string, string> = {
+  p18:     '#8b5cf6',
+  p12:     '#3b82f6',
+  p9:      '#06b6d4',
+  p6:      '#10b981',
+  p1:      '#f59e0b',
+  semaine: '#f97316',
+}
+
+const LS_KEY = 'retro_hidden_periods'
+
+function getHidden(): Set<string> {
+  if (typeof window === 'undefined') return new Set()
+  try {
+    const raw = localStorage.getItem(LS_KEY)
+    return raw ? new Set(JSON.parse(raw)) : new Set()
+  } catch {
+    return new Set()
+  }
+}
+
+function saveHidden(s: Set<string>) {
+  localStorage.setItem(LS_KEY, JSON.stringify([...s]))
+}
+
+function CheckCircle({ checked, onChange, saving, color }: {
   checked: boolean
   onChange: () => void
   saving?: boolean
+  color: string
 }) {
   return (
     <button
       type="button"
       onClick={onChange}
       disabled={saving}
-      className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all duration-200 mt-0.5 cursor-pointer disabled:cursor-wait ${
-        checked
-          ? 'bg-[#4a5240] border-[#4a5240]'
-          : 'border-stone-300 hover:border-[#4a5240]/50 bg-white'
-      }`}
+      className="w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all duration-200 mt-0.5 cursor-pointer disabled:cursor-wait"
+      style={{
+        backgroundColor: checked ? color : 'white',
+        borderColor: checked ? color : '#d6d3d1',
+      }}
     >
       {saving ? (
         <div className="w-1.5 h-1.5 rounded-full bg-stone-300 animate-pulse" />
@@ -58,7 +84,7 @@ export default function RetroPlanningClient({
   initialPeriods: Period[]
   initialCustomTasks: CustomTask[]
 }) {
-  const [periods, setPeriods] = useState(initialPeriods)
+  const [periodsState, setPeriodsState] = useState(initialPeriods)
   const [customTasks, setCustomTasks] = useState(initialCustomTasks)
   const [saving, setSaving] = useState<string | null>(null)
   const [addingTo, setAddingTo] = useState<string | null>(null)
@@ -67,9 +93,7 @@ export default function RetroPlanningClient({
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState('')
   const [editAssignee, setEditAssignee] = useState('')
-  const addInputRef = useRef<HTMLInputElement>(null)
-
-  // Auto-collapse periods where all tasks are done
+  const [hidden, setHidden] = useState<Set<string>>(new Set())
   const [collapsed, setCollapsed] = useState<Set<string>>(() => {
     const s = new Set<string>()
     initialPeriods.forEach(p => {
@@ -80,6 +104,11 @@ export default function RetroPlanningClient({
     })
     return s
   })
+  const addInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    setHidden(getHidden())
+  }, [])
 
   function toggleCollapse(id: string) {
     setCollapsed(prev => {
@@ -89,14 +118,31 @@ export default function RetroPlanningClient({
     })
   }
 
-  const allPredefined = periods.flatMap(p => p.tasks)
+  function hidePeriod(id: string) {
+    setHidden(prev => {
+      const next = new Set(prev)
+      next.add(id)
+      saveHidden(next)
+      return next
+    })
+  }
+
+  function restoreAll() {
+    const empty = new Set<string>()
+    saveHidden(empty)
+    setHidden(empty)
+  }
+
+  const visiblePeriods = periodsState.filter(p => !hidden.has(p.id))
+
+  const allPredefined = periodsState.flatMap(p => p.tasks)
   const doneTasks = allPredefined.filter(t => t.done).length + customTasks.filter(t => t.done).length
   const totalTasks = allPredefined.length + customTasks.length
   const pct = totalTasks ? Math.round((doneTasks / totalTasks) * 100) : 0
 
   async function togglePredefined(periodId: string, taskKey: string, currentDone: boolean) {
     setSaving(taskKey)
-    setPeriods(prev => prev.map(p =>
+    setPeriodsState(prev => prev.map(p =>
       p.id === periodId
         ? { ...p, tasks: p.tasks.map(t => t.key === taskKey ? { ...t, done: !currentDone } : t) }
         : p
@@ -106,7 +152,7 @@ export default function RetroPlanningClient({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ weddingId, taskKey, done: !currentDone }),
     }).catch(() => {
-      setPeriods(prev => prev.map(p =>
+      setPeriodsState(prev => prev.map(p =>
         p.id === periodId
           ? { ...p, tasks: p.tasks.map(t => t.key === taskKey ? { ...t, done: currentDone } : t) }
           : p
@@ -162,7 +208,7 @@ export default function RetroPlanningClient({
     <div className="max-w-2xl mx-auto px-4 pt-10 pb-24" style={{ fontFamily: 'var(--font-lato)' }}>
 
       {/* Header */}
-      <div className="mb-10">
+      <div className="mb-8">
         <h1
           style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontWeight: 300, fontSize: 'clamp(2.2rem, 6vw, 3rem)', lineHeight: 1.05 }}
           className="text-[#2d3228] mb-2"
@@ -175,7 +221,7 @@ export default function RetroPlanningClient({
       </div>
 
       {/* Progression globale */}
-      <div className="bg-white rounded-2xl border border-stone-100 p-5 mb-8">
+      <div className="bg-white rounded-2xl border border-stone-100 p-5 mb-6">
         <div className="flex items-baseline gap-3 mb-3">
           <span
             style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '2.6rem', lineHeight: 1 }}
@@ -198,83 +244,97 @@ export default function RetroPlanningClient({
         )}
       </div>
 
+      {/* Périodes masquées — bouton restaurer */}
+      {hidden.size > 0 && (
+        <div className="mb-4 flex items-center gap-2">
+          <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">
+            {hidden.size} période{hidden.size > 1 ? 's' : ''} masquée{hidden.size > 1 ? 's' : ''}
+          </span>
+          <button
+            onClick={restoreAll}
+            className="text-xs text-[#4a5240] hover:text-[#2d3228] underline cursor-pointer transition"
+            style={{ fontWeight: 300 }}
+          >
+            Restaurer
+          </button>
+        </div>
+      )}
+
       {/* Périodes */}
       <div className="space-y-3">
-        {periods.map(period => {
+        {visiblePeriods.map(period => {
+          const color = PERIOD_COLORS[period.id] ?? '#4a5240'
           const periodCustom = customTasks.filter(t => t.period_id === period.id)
           const totalP = period.tasks.length + periodCustom.length
           const doneP = period.tasks.filter(t => t.done).length + periodCustom.filter(t => t.done).length
           const pctP = totalP ? Math.round((doneP / totalP) * 100) : 0
           const allDone = totalP > 0 && doneP === totalP
           const isCollapsed = collapsed.has(period.id)
-          const remaining = totalP - doneP
 
           return (
             <div
               key={period.id}
-              className={`bg-white rounded-2xl border overflow-hidden transition-all ${
-                allDone ? 'border-emerald-100' : 'border-stone-100'
-              }`}
+              className="bg-white rounded-2xl border border-stone-100 overflow-hidden shadow-sm"
+              style={{ borderLeftWidth: 3, borderLeftColor: color }}
             >
-              {/* En-tête période — cliquable */}
-              <button
-                type="button"
-                onClick={() => toggleCollapse(period.id)}
-                className={`w-full px-5 py-4 flex items-center gap-4 text-left transition-colors hover:bg-stone-50/40 ${
-                  allDone ? 'bg-emerald-50/50' : ''
-                }`}
-              >
-                {/* Dot d'état */}
-                <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 transition-colors ${
-                  allDone ? 'bg-emerald-400' : doneP > 0 ? 'bg-[#4a5240]' : 'bg-stone-200'
-                }`} />
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <p
-                      style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.05rem' }}
-                      className={allDone ? 'text-emerald-700' : 'text-[#2d3228]'}
-                    >
-                      {period.label}
-                    </p>
-                    <span className="text-sm opacity-70">{period.emoji}</span>
+              {/* En-tête période */}
+              <div className="flex items-center gap-3 px-5 py-4">
+                <button
+                  type="button"
+                  onClick={() => toggleCollapse(period.id)}
+                  className="flex-1 flex items-center gap-3 text-left min-w-0"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-base">{period.emoji}</span>
+                      <p
+                        style={{ fontWeight: 400, fontSize: '0.9rem' }}
+                        className={allDone ? 'text-stone-400' : 'text-[#2d3228]'}
+                      >
+                        {period.label}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="h-1 bg-stone-100 rounded-full overflow-hidden w-24">
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{ width: `${pctP}%`, backgroundColor: allDone ? '#34d399' : color }}
+                        />
+                      </div>
+                      <span style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-400">
+                        {doneP}/{totalP}
+                      </span>
+                      {allDone && (
+                        <span style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-emerald-500">✓ Terminé</span>
+                      )}
+                    </div>
                   </div>
-                  {/* Barre de progression période */}
-                  <div className="h-1 bg-stone-100 rounded-full overflow-hidden w-32">
-                    <div
-                      className="h-full rounded-full transition-all duration-500"
-                      style={{ width: `${pctP}%`, background: allDone ? '#34d399' : '#4a5240' }}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 flex-shrink-0">
-                  {isCollapsed && !allDone && remaining > 0 && (
-                    <span style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-400">
-                      {remaining} restante{remaining > 1 ? 's' : ''}
-                    </span>
-                  )}
-                  {allDone && isCollapsed && (
-                    <span style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-emerald-500">✓ Terminé</span>
-                  )}
-                  {!isCollapsed && (
-                    <span style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-400">{doneP}/{totalP}</span>
-                  )}
                   <svg
                     viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}
-                    className={`w-4 h-4 text-stone-300 transition-transform duration-200 ${isCollapsed ? '' : 'rotate-180'}`}
+                    className={`w-4 h-4 text-stone-300 transition-transform duration-200 flex-shrink-0 ${isCollapsed ? '' : 'rotate-180'}`}
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                   </svg>
-                </div>
-              </button>
+                </button>
 
-              {/* Contenu (masqué si replié) */}
+                {/* Bouton masquer la période */}
+                <button
+                  type="button"
+                  onClick={() => hidePeriod(period.id)}
+                  className="p-1.5 text-stone-200 hover:text-stone-400 cursor-pointer rounded-lg hover:bg-stone-50 transition flex-shrink-0"
+                  title="Masquer cette période"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3.5 h-3.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Contenu */}
               {!isCollapsed && (
                 <>
-                  <div className="divide-y divide-stone-50/80">
+                  <div className="divide-y divide-stone-50/80 border-t border-stone-50">
 
-                    {/* Tâches prédéfinies */}
                     {period.tasks.map(task => (
                       <div
                         key={task.key}
@@ -283,6 +343,7 @@ export default function RetroPlanningClient({
                         <CheckCircle
                           checked={task.done}
                           saving={saving === task.key}
+                          color={color}
                           onChange={() => togglePredefined(period.id, task.key, task.done)}
                         />
                         <div className="flex-1 min-w-0">
@@ -301,7 +362,6 @@ export default function RetroPlanningClient({
                       </div>
                     ))}
 
-                    {/* Tâches custom */}
                     {periodCustom.map(task => (
                       <div
                         key={task.id}
@@ -316,7 +376,7 @@ export default function RetroPlanningClient({
                                 if (e.key === 'Enter') saveEdit(task.id)
                                 if (e.key === 'Escape') setEditingId(null)
                               }}
-                              className="w-full border border-stone-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[#4a5240]"
+                              className="w-full border border-stone-200 rounded-lg px-3 py-1.5 text-sm outline-none"
                               style={{ fontWeight: 300 }}
                               autoFocus
                             />
@@ -325,7 +385,7 @@ export default function RetroPlanningClient({
                                 value={editAssignee}
                                 onChange={e => setEditAssignee(e.target.value)}
                                 placeholder="Assigné à… (optionnel)"
-                                className="flex-1 border border-stone-200 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-[#4a5240]"
+                                className="flex-1 border border-stone-200 rounded-lg px-3 py-1.5 text-xs outline-none"
                                 style={{ fontWeight: 300 }}
                               />
                               <button
@@ -344,6 +404,7 @@ export default function RetroPlanningClient({
                             <CheckCircle
                               checked={task.done}
                               saving={saving === task.id}
+                              color={color}
                               onChange={() => toggleCustom(task.id, task.done)}
                             />
                             <div className="flex-1 min-w-0">
@@ -355,8 +416,8 @@ export default function RetroPlanningClient({
                               </p>
                               {task.assigned_to && !task.done && (
                                 <span
-                                  className="inline-block mt-0.5 bg-[#4a5240]/10 text-[#4a5240] rounded-full px-2 py-0.5"
-                                  style={{ fontSize: '0.65rem', fontWeight: 400 }}
+                                  className="inline-block mt-0.5 rounded-full px-2 py-0.5"
+                                  style={{ fontSize: '0.65rem', fontWeight: 400, backgroundColor: `${color}18`, color }}
                                 >
                                   {task.assigned_to}
                                 </span>

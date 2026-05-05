@@ -234,91 +234,54 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
       </div>
 
       {/* ── CONTENT ── */}
-      <div style={{
-        background: '#f5f0e8',
-        borderRadius: '28px 28px 0 0',
-        marginTop: -28,
-        position: 'relative', zIndex: 1,
-      }}>
-        <div style={{ maxWidth: 560, margin: '0 auto', padding: '36px 20px 40px' }}>
+      <div style={{ background: '#f5f0e8', borderRadius: '28px 28px 0 0', marginTop: -28, position: 'relative', zIndex: 1 }}>
+        <div style={{ maxWidth: 520, margin: '0 auto', padding: '32px 20px 40px', display: 'flex', flexDirection: 'column', gap: 12 }}>
 
           {/* RSVP */}
           {!isPreview && guest.id && (
-            <div style={{
-              background: '#fff',
-              borderRadius: 20,
-              border: rsvpStatus === 'confirme'
-                ? '1px solid #a7c4a0'
-                : rsvpStatus === 'decline'
-                ? '1px solid #e8b4b8'
-                : '1px solid #e7e2d8',
-              padding: '28px 24px',
-              marginBottom: 16,
-              position: 'relative',
-              overflow: 'hidden',
-            }}>
-              {/* Subtle corner ornament */}
-              <div style={{
-                position: 'absolute', top: 0, right: 0,
-                width: 60, height: 60,
-                background: rsvpStatus === 'confirme'
-                  ? 'linear-gradient(225deg, rgba(167,196,160,0.15) 0%, transparent 60%)'
-                  : rsvpStatus === 'decline'
-                  ? 'linear-gradient(225deg, rgba(232,180,184,0.15) 0%, transparent 60%)'
-                  : 'linear-gradient(225deg, rgba(201,169,110,0.08) 0%, transparent 60%)',
-                pointerEvents: 'none',
-              }} />
+            <div style={{ background: '#fff', borderRadius: 18, border: '1px solid #e7e2d8', padding: '22px 20px' }}>
+
+              <p style={{ fontSize: '0.6rem', letterSpacing: '0.28em', color: '#b8b4ac', textTransform: 'uppercase', marginBottom: 14, fontWeight: 300 }}>
+                Votre réponse
+              </p>
 
               {rsvpStatus === 'confirme' ? (
                 <>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-                    <div style={{
-                      width: 28, height: 28, borderRadius: '50%',
-                      background: '#4a7c59', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                    }}>
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                        <path d="M2 6l3 3 5-5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                    <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.3rem', color: '#2d4a34', margin: 0 }}>
-                      Présence confirmée
-                    </p>
-                  </div>
-                  <p style={{ fontSize: '0.78rem', color: '#6a9473', marginBottom: 16, marginLeft: 38 }}>
+                  <p style={{ fontSize: '0.85rem', color: '#3a3a37', marginBottom: 6, fontWeight: 300 }}>
+                    Présence confirmée
+                  </p>
+                  <p style={{ fontSize: '0.75rem', color: '#a09d95', marginBottom: 14, fontWeight: 300 }}>
                     Les mariés ont hâte de vous retrouver.
                   </p>
                   <form action={respondRsvp}>
                     <input type="hidden" name="slug" value={slug} />
                     <input type="hidden" name="guest_id" value={guest.id} />
                     <input type="hidden" name="status" value="decline" />
-                    <button type="submit" style={{ marginLeft: 38, fontSize: '0.72rem', color: '#b0b0a8', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                    <button type="submit" style={{ fontSize: '0.72rem', color: '#c0bdb8', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontWeight: 300, fontFamily: 'var(--font-lato)' }}>
                       Annuler ma présence
                     </button>
                   </form>
                 </>
               ) : rsvpStatus === 'decline' ? (
                 <>
-                  <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.3rem', color: '#8b4a4e', marginBottom: 6 }}>
+                  <p style={{ fontSize: '0.85rem', color: '#3a3a37', marginBottom: 6, fontWeight: 300 }}>
                     Invitation déclinée
                   </p>
-                  <p style={{ fontSize: '0.78rem', color: '#b87c80', marginBottom: 16 }}>
+                  <p style={{ fontSize: '0.75rem', color: '#a09d95', marginBottom: 14, fontWeight: 300 }}>
                     Vous nous manquerez…
                   </p>
                   <form action={respondRsvp}>
                     <input type="hidden" name="slug" value={slug} />
                     <input type="hidden" name="guest_id" value={guest.id} />
                     <input type="hidden" name="status" value="confirme" />
-                    <button type="submit" style={{ fontSize: '0.72rem', color: '#b0b0a8', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                    <button type="submit" style={{ fontSize: '0.72rem', color: '#c0bdb8', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontWeight: 300, fontFamily: 'var(--font-lato)' }}>
                       Finalement, je serai présent(e)
                     </button>
                   </form>
                 </>
               ) : (
                 <>
-                  <p style={{
-                    fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontWeight: 300,
-                    fontSize: '1.4rem', color: '#2d3228', marginBottom: 8, lineHeight: 1.2,
-                  }}>
+                  <p style={{ fontSize: '0.82rem', color: '#5a5855', marginBottom: 6, fontWeight: 300 }}>
                     Serez-vous des nôtres ?
                   </p>
 
@@ -326,10 +289,10 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 14 }}>
                       {invitedParts.map(p => (
                         <span key={p} style={{
-                          fontSize: '0.68rem', letterSpacing: '0.08em',
-                          background: '#f5f0e8', color: '#4a5240',
-                          padding: '4px 12px', borderRadius: 100,
-                          textTransform: 'uppercase',
+                          fontSize: '0.62rem', letterSpacing: '0.1em',
+                          background: '#f5f0e8', color: '#6b6863',
+                          padding: '3px 10px', borderRadius: 100,
+                          textTransform: 'uppercase', fontWeight: 300,
                         }}>
                           {PARTS_LABELS[p] ?? p}
                         </span>
@@ -337,8 +300,8 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
                     </div>
                   )}
 
-                  <p style={{ fontSize: '0.76rem', color: '#a09d95', marginBottom: 20 }}>
-                    Merci de confirmer votre présence pour que les mariés puissent s&apos;organiser.
+                  <p style={{ fontSize: '0.75rem', color: '#a09d95', marginBottom: 18, fontWeight: 300 }}>
+                    Confirmez votre présence pour que les mariés puissent s&apos;organiser.
                   </p>
 
                   <div style={{ display: 'flex', gap: 10 }}>
@@ -348,10 +311,9 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
                       <input type="hidden" name="status" value="confirme" />
                       <button type="submit" style={{
                         width: '100%', background: '#4a5240', color: '#fff',
-                        padding: '12px 16px', borderRadius: 12, border: 'none',
-                        fontSize: '0.8rem', letterSpacing: '0.06em', cursor: 'pointer',
+                        padding: '11px 16px', borderRadius: 10, border: 'none',
+                        fontSize: '0.78rem', cursor: 'pointer',
                         fontFamily: 'var(--font-lato)', fontWeight: 300,
-                        transition: 'background 0.2s',
                       }}>
                         Je serai présent(e)
                       </button>
@@ -363,10 +325,9 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
                       <button type="submit" style={{
                         width: '100%', background: 'transparent',
                         border: '1px solid #d4cfc6', color: '#8a8880',
-                        padding: '12px 16px', borderRadius: 12,
-                        fontSize: '0.8rem', cursor: 'pointer',
+                        padding: '11px 16px', borderRadius: 10,
+                        fontSize: '0.78rem', cursor: 'pointer',
                         fontFamily: 'var(--font-lato)', fontWeight: 300,
-                        transition: 'border-color 0.2s, color 0.2s',
                       }}>
                         Je ne pourrai pas
                       </button>
@@ -379,60 +340,48 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
 
           {/* Message aux mariés */}
           {!isPreview && guest.id && (
-            <div style={{ marginBottom: 16 }}>
-              <MessageModal
-                slug={slug}
-                guestId={guest.id}
-                existingMessage={existingMessage}
-                weddingName={wedding.name}
-                saveMessage={saveMessage}
-              />
-            </div>
+            <MessageModal
+              slug={slug}
+              guestId={guest.id}
+              existingMessage={existingMessage}
+              weddingName={wedding.name}
+              saveMessage={saveMessage}
+            />
           )}
 
           {/* GPS */}
           {wedding.location && (
-            <div style={{ textAlign: 'center', marginBottom: 16 }}>
+            <div style={{ textAlign: 'center' }}>
               <a
                 href={`https://maps.google.com/?q=${encodeURIComponent(wedding.location)}`}
                 target="_blank" rel="noopener noreferrer"
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: 8,
-                  fontSize: '0.74rem', letterSpacing: '0.08em',
-                  color: '#4a5240', border: '1px solid rgba(74,82,64,0.25)',
+                  fontSize: '0.72rem', letterSpacing: '0.06em',
+                  color: '#6b6863', border: '1px solid #d4cfc6',
                   background: '#fff', padding: '10px 20px', borderRadius: 100,
                   textDecoration: 'none',
                   fontFamily: 'var(--font-lato)', fontWeight: 300,
                 }}
               >
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                  <path d="M6 1C4.07 1 2.5 2.57 2.5 4.5c0 2.72 3.5 6.5 3.5 6.5s3.5-3.78 3.5-6.5C9.5 2.57 7.93 1 6 1zm0 4.75a1.25 1.25 0 110-2.5 1.25 1.25 0 010 2.5z" fill="#4a5240"/>
+                <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+                  <path d="M6 1C4.07 1 2.5 2.57 2.5 4.5c0 2.72 3.5 6.5 3.5 6.5s3.5-3.78 3.5-6.5C9.5 2.57 7.93 1 6 1zm0 4.75a1.25 1.25 0 110-2.5 1.25 1.25 0 010 2.5z" fill="#6b6863"/>
                 </svg>
-                Voir sur Google Maps
+                {wedding.location}
               </a>
             </div>
           )}
 
           {/* Nos petites attentions */}
           {rules && rules.length > 0 && (
-            <div style={{
-              background: '#fff', borderRadius: 20,
-              border: '1px solid #e7e2d8', padding: '24px',
-              marginBottom: 16,
-            }}>
-              <p style={{
-                fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontWeight: 300,
-                fontSize: '1.2rem', color: '#2d3228', marginBottom: 16,
-              }}>
-                Quelques petites attentions
+            <div style={{ background: '#fff', borderRadius: 18, border: '1px solid #e7e2d8', padding: '22px 20px' }}>
+              <p style={{ fontSize: '0.6rem', letterSpacing: '0.28em', color: '#b8b4ac', textTransform: 'uppercase', marginBottom: 14, fontWeight: 300 }}>
+                À savoir
               </p>
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {rules.map((rule, i) => (
-                  <li key={i} style={{
-                    display: 'flex', alignItems: 'flex-start', gap: 12,
-                    fontSize: '0.8rem', color: '#6b6863', lineHeight: 1.5,
-                  }}>
-                    <span style={{ color: '#c9a96e', flexShrink: 0, marginTop: 2, fontSize: '0.6rem' }}>◆</span>
+                  <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: '0.82rem', color: '#5a5855', lineHeight: 1.55, fontWeight: 300 }}>
+                    <span style={{ color: '#c9c5bc', flexShrink: 0, marginTop: 5, fontSize: '5px', lineHeight: 1 }}>●</span>
                     {rule.text}
                   </li>
                 ))}
@@ -442,13 +391,13 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
 
           {/* Déconnexion */}
           {!isPreview && (
-            <div style={{ textAlign: 'center', paddingTop: 8, paddingBottom: 32 }}>
+            <div style={{ textAlign: 'center', paddingTop: 4, paddingBottom: 24 }}>
               <form action={logout}>
                 <input type="hidden" name="slug" value={slug} />
                 <button type="submit" style={{
-                  fontSize: '0.68rem', color: '#c0bdb8', letterSpacing: '0.06em',
+                  fontSize: '0.65rem', color: '#c0bdb8', letterSpacing: '0.08em',
                   background: 'none', border: 'none', cursor: 'pointer',
-                  fontFamily: 'var(--font-lato)', fontWeight: 300,
+                  fontFamily: 'var(--font-lato)', fontWeight: 300, textTransform: 'uppercase',
                 }}>
                   Se déconnecter
                 </button>

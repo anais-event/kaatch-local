@@ -75,6 +75,19 @@ function TableView({ categories, items, quotes, files, budgetCurrency, getItemEf
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
   const [addingQuoteFor, setAddingQuoteFor] = useState<string | null>(null)
   const [editingQuote, setEditingQuote] = useState<string | null>(null)
+  const [addingQuickRow, setAddingQuickRow] = useState(false)
+  const [quickCatId, setQuickCatId] = useState(categories[0]?.id ?? '')
+
+  async function handleQuickAdd(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    const form = e.currentTarget
+    const fd = new FormData(form)
+    fd.set('slug', slug)
+    fd.set('category_id', quickCatId || categories[0]?.id || '')
+    await actions.addItem(fd)
+    form.reset()
+    setAddingQuickRow(false)
+  }
 
   const toggleRow = (id: string) => setExpandedRows(prev => {
     const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s
@@ -414,6 +427,59 @@ function TableView({ categories, items, quotes, files, budgetCurrency, getItemEf
               </Fragment>
             )
           })}
+          {/* Quick-add row */}
+          {categories.length > 0 && (
+            <tr className="border-t border-stone-100">
+              <td colSpan={8} className="px-4 py-2.5">
+                {!addingQuickRow ? (
+                  <button
+                    onClick={() => setAddingQuickRow(true)}
+                    className="flex items-center gap-1.5 text-stone-400 hover:text-[#4a5240] transition cursor-pointer"
+                    style={{ fontWeight: 300, fontSize: '0.78rem', fontFamily: 'var(--font-lato)' }}
+                  >
+                    <span className="text-base leading-none">+</span> Ajouter un poste
+                  </button>
+                ) : (
+                  <form onSubmit={handleQuickAdd} className="flex items-center gap-2 flex-wrap">
+                    <select
+                      value={quickCatId}
+                      onChange={e => setQuickCatId(e.target.value)}
+                      className="border border-stone-200 rounded-lg px-3 py-1.5 text-stone-600 bg-white focus:outline-none focus:border-[#4a5240]/50"
+                      style={{ fontWeight: 300, fontSize: '0.82rem', fontFamily: 'var(--font-lato)' }}
+                    >
+                      {categories.map(c => (
+                        <option key={c.id} value={c.id}>{c.icon} {c.name}</option>
+                      ))}
+                    </select>
+                    <input
+                      name="label" type="text" placeholder="Nom du poste" required autoFocus
+                      className="border border-stone-200 rounded-lg px-3 py-1.5 text-stone-700 flex-1 min-w-[140px] focus:outline-none focus:border-[#4a5240]/50"
+                      style={{ fontWeight: 300, fontSize: '0.82rem', fontFamily: 'var(--font-lato)' }}
+                    />
+                    <input
+                      name="estimated" type="number" placeholder="Montant estimé" min={0} step="0.01"
+                      className="border border-stone-200 rounded-lg px-3 py-1.5 text-stone-700 w-36 focus:outline-none focus:border-[#4a5240]/50"
+                      style={{ fontWeight: 300, fontSize: '0.82rem', fontFamily: 'var(--font-lato)' }}
+                    />
+                    <button
+                      type="submit"
+                      className="px-4 py-1.5 bg-[#4a5240] text-white rounded-lg hover:bg-[#2d3228] transition cursor-pointer"
+                      style={{ fontWeight: 300, fontSize: '0.78rem', fontFamily: 'var(--font-lato)' }}
+                    >
+                      Ajouter
+                    </button>
+                    <button
+                      type="button" onClick={() => setAddingQuickRow(false)}
+                      className="text-stone-400 hover:text-stone-600 transition cursor-pointer"
+                      style={{ fontWeight: 300, fontSize: '0.78rem', fontFamily: 'var(--font-lato)' }}
+                    >
+                      Annuler
+                    </button>
+                  </form>
+                )}
+              </td>
+            </tr>
+          )}
         </tbody>
         {items.length > 0 && (
           <tfoot>

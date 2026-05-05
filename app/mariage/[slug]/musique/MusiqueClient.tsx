@@ -162,9 +162,15 @@ export default function MusiqueClient({ slug, songs, playlistLinks, addSong, del
   }
 
   const exportText = MOMENTS.map(m => {
-    const ms = getSongs(m.key).filter(s => s.notes !== REPERE_SENTINEL)
+    const ms = getSongs(m.key)
     if (!ms.length) return null
-    return `${m.label.toUpperCase()}\n${ms.map((s, i) => `${i + 1}. ${s.title}${s.artist ? ` — ${s.artist}` : ''}${s.notes ? `\n   → ${s.notes}` : ''}`).join('\n')}`
+    let songIdx = 0
+    const lines = ms.map(s => {
+      if (s.notes === REPERE_SENTINEL) return `\n--- ${s.title} ---`
+      songIdx++
+      return `${songIdx}. ${s.title}${s.artist ? ` — ${s.artist}` : ''}${s.notes ? `\n   → ${s.notes}` : ''}`
+    })
+    return `${m.label.toUpperCase()}\n${lines.join('\n')}`
   }).filter(Boolean).join('\n\n')
 
   function SongSection({ momentKey, label, icon }: { momentKey: string | null, label: string, icon: string }) {

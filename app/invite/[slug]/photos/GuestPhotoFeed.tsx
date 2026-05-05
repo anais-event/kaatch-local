@@ -324,7 +324,7 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
 
       {/* Upload modal */}
       {showUpload && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 overflow-hidden"
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center px-4 pt-16 pb-28 sm:p-4 overflow-hidden"
           onClick={e => { if (e.target === e.currentTarget) setShowUpload(false) }}>
           <div className="bg-white rounded-2xl w-full max-w-md p-6 space-y-3 max-h-[85dvh] overflow-y-auto shadow-2xl">
             <div className="flex items-center justify-between mb-1">
@@ -423,25 +423,132 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
 
       {/* Lightbox */}
       {lightbox && currentPhoto && (
-        <div className="fixed inset-0 z-50 bg-black/90 flex" onClick={closeLightbox}>
-          {/* Image */}
-          <div className="flex-1 flex items-center justify-center relative" onClick={e => e.stopPropagation()}>
-            <img src={currentPhoto.url} alt="" className="max-h-screen object-contain select-none" style={{ maxHeight: '90vh', maxWidth: '100%' }} />
-            {photos.length > 1 && (<>
-              <button onClick={prevPhoto} className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 transition flex items-center justify-center cursor-pointer">
-                <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
-              </button>
-              <button onClick={nextPhoto} className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 transition flex items-center justify-center cursor-pointer">
-                <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
-              </button>
-            </>)}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
-              <span className="text-white/30 text-xs" style={{ fontWeight: 300 }}>{currentIdx + 1} / {photos.length}</span>
+        <div className="fixed inset-0 z-50 bg-black" onClick={closeLightbox}>
+
+          {/* Photo — plein écran */}
+          <div className="absolute inset-0 flex items-center justify-center" onClick={e => e.stopPropagation()}>
+            <img src={currentPhoto.url} alt="" className="object-contain select-none w-full h-full" style={{ maxHeight: '100dvh' }} />
+          </div>
+
+          {/* Flèches navigation */}
+          {photos.length > 1 && (<>
+            <button onClick={prevPhoto} className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 transition flex items-center justify-center cursor-pointer z-10">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+            </button>
+            <button onClick={nextPhoto} className="absolute right-3 md:right-72 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 transition flex items-center justify-center cursor-pointer z-10">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+            </button>
+          </>)}
+
+          {/* Compteur + fermer (mobile) */}
+          <div className="md:hidden absolute top-4 left-0 right-0 flex items-center justify-between px-4 z-10" onClick={e => e.stopPropagation()}>
+            <span className="text-white/50 text-xs" style={{ fontWeight: 300 }}>{currentIdx + 1} / {photos.length}</span>
+            <button onClick={closeLightbox} className="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 transition flex items-center justify-center cursor-pointer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          </div>
+
+          {/* ── MOBILE : panneau bas style Instagram ── */}
+          <div className="md:hidden absolute bottom-0 left-0 right-0 z-10" onClick={e => e.stopPropagation()}
+               style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.6) 70%, transparent 100%)' }}>
+            <div className="px-4 pt-8 pb-6 space-y-3">
+
+              {/* Auteur + moment */}
+              <div className="flex items-center justify-between">
+                <div>
+                  {(!currentPhoto.uploaded_by_name || currentPhoto.uploaded_by_name === 'Anonyme' || currentPhoto.uploaded_by_name === myName) && editingName ? (
+                    <form onSubmit={async e => {
+                      e.preventDefault()
+                      if (!editNameValue.trim()) return
+                      setSavingName(true)
+                      const fd = new FormData()
+                      fd.append('photo_id', currentPhoto.id)
+                      fd.append('slug', slug)
+                      fd.append('new_name', editNameValue.trim())
+                      await claimPhoto(fd)
+                      setSavingName(false)
+                      setEditingName(false)
+                    }} className="flex gap-2 items-center">
+                      <input type="text" value={editNameValue} onChange={e => setEditNameValue(e.target.value)} autoFocus
+                        placeholder="Votre prénom"
+                        className="border border-white/30 rounded-lg px-2.5 py-1 bg-white/10 text-white text-sm outline-none placeholder:text-white/40"
+                        style={{ fontWeight: 300 }} />
+                      <button type="submit" disabled={savingName || !editNameValue.trim()}
+                        className="bg-[#4a5240] text-white px-2.5 py-1 rounded-lg text-xs cursor-pointer disabled:opacity-40"
+                        style={{ fontWeight: 300 }}>{savingName ? '…' : '✓'}</button>
+                      <button type="button" onClick={() => setEditingName(false)} className="text-white/60 cursor-pointer">×</button>
+                    </form>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span className="text-white text-sm" style={{ fontWeight: 400 }}>
+                        {cleanName(currentPhoto.uploaded_by_name) || 'Anonyme'}
+                      </span>
+                      {(!currentPhoto.uploaded_by_name || currentPhoto.uploaded_by_name === 'Anonyme' || currentPhoto.uploaded_by_name === myName) && (
+                        <button onClick={() => { setEditingName(true); setEditNameValue(myName !== 'Anonyme' ? myName : '') }}
+                          className="text-[10px] text-white/50 hover:text-white/80 transition cursor-pointer underline underline-offset-2"
+                          style={{ fontWeight: 300 }}>
+                          {!currentPhoto.uploaded_by_name || currentPhoto.uploaded_by_name === 'Anonyme' ? "C'est moi" : 'Modifier'}
+                        </button>
+                      )}
+                    </div>
+                  )}
+                  {currentPhoto.moment_tag && (
+                    <span className="text-white/50 text-xs block mt-0.5" style={{ fontWeight: 300 }}>{currentPhoto.moment_tag}</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-3">
+                <button onClick={handleLike}
+                  className={`flex items-center gap-1.5 cursor-pointer ${lbLikedBy.includes(myName) ? 'text-red-400' : 'text-white/70'}`}>
+                  <span className="text-xl">❤️</span>
+                  <span className="text-sm text-white" style={{ fontWeight: 300 }}>{lbLikes}</span>
+                </button>
+                <button onClick={() => downloadPhotoBlob(currentPhoto.url)}
+                  className="flex items-center gap-1.5 text-white/70 hover:text-white transition cursor-pointer">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                </button>
+                {myName && currentPhoto.uploaded_by_name === myName && (
+                  <form onSubmit={e => {
+                    e.preventDefault()
+                    const fd = new FormData(e.currentTarget)
+                    closeLightbox()
+                    startTransition(() => deletePhoto(fd))
+                  }}>
+                    <input type="hidden" name="slug" value={slug} />
+                    <input type="hidden" name="photo_id" value={currentPhoto.id} />
+                    <input type="hidden" name="uploader_name" value={myName} />
+                    <button type="submit" className="text-red-400/80 hover:text-red-400 transition cursor-pointer">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
+                    </button>
+                  </form>
+                )}
+              </div>
+
+              {/* Commentaires */}
+              {lbComments.length > 0 && (
+                <div className="space-y-1 max-h-24 overflow-y-auto">
+                  {lbComments.slice(-3).map(c => (
+                    <p key={c.id} className="text-white/80 text-sm leading-snug" style={{ fontWeight: 300 }}>
+                      <span className="text-white font-medium">{c.author_name}</span> {c.content}
+                    </p>
+                  ))}
+                </div>
+              )}
+              <form onSubmit={handleComment} className="flex gap-2">
+                <input type="text" value={lbCommentText} onChange={e => setLbCommentText(e.target.value)}
+                  placeholder="Ajouter un commentaire…"
+                  className="flex-1 bg-white/15 border border-white/20 rounded-xl px-3 py-2 text-white text-sm outline-none focus:border-white/40 transition placeholder:text-white/40"
+                  style={{ fontWeight: 300 }} />
+                <button type="submit" disabled={lbCommenting || !lbCommentText.trim()}
+                  className="bg-[#4a5240] text-white px-3 py-2 rounded-xl text-sm hover:bg-[#2d3228] transition disabled:opacity-40 cursor-pointer">→</button>
+              </form>
             </div>
           </div>
 
-          {/* Side panel — light */}
-          <div className="w-64 bg-white flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+          {/* ── DESKTOP : panneau latéral ── */}
+          <div className="hidden md:flex absolute right-0 top-0 bottom-0 w-72 bg-white flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-4 py-3 border-b border-stone-100">
               <span className="text-stone-400 text-xs" style={{ fontWeight: 300 }}>{formatDateLong(currentPhoto.created_at)}</span>
               <button onClick={closeLightbox} className="w-7 h-7 rounded-full bg-stone-100 hover:bg-stone-200 transition flex items-center justify-center cursor-pointer">
@@ -464,31 +571,20 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
                     setSavingName(false)
                     setEditingName(false)
                   }} className="flex gap-2 items-center mt-1">
-                    <input
-                      type="text"
-                      value={editNameValue}
-                      onChange={e => setEditNameValue(e.target.value)}
-                      autoFocus
+                    <input type="text" value={editNameValue} onChange={e => setEditNameValue(e.target.value)} autoFocus
                       placeholder="Votre prénom"
                       className="flex-1 border border-stone-200 rounded-lg px-2.5 py-1.5 text-stone-700 text-sm outline-none focus:border-[#4a5240] transition"
-                      style={{ fontWeight: 300 }}
-                    />
+                      style={{ fontWeight: 300 }} />
                     <button type="submit" disabled={savingName || !editNameValue.trim()}
                       className="bg-[#4a5240] text-white px-2.5 py-1.5 rounded-lg text-xs hover:bg-[#2d3228] transition disabled:opacity-40 cursor-pointer"
-                      style={{ fontWeight: 300 }}>
-                      {savingName ? '…' : '✓'}
-                    </button>
-                    <button type="button" onClick={() => setEditingName(false)}
-                      className="text-stone-400 hover:text-stone-700 text-sm cursor-pointer px-1">×</button>
+                      style={{ fontWeight: 300 }}>{savingName ? '…' : '✓'}</button>
+                    <button type="button" onClick={() => setEditingName(false)} className="text-stone-400 hover:text-stone-700 text-sm cursor-pointer px-1">×</button>
                   </form>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <p className="text-stone-700 text-sm" style={{ fontWeight: 400 }}>
-                      {cleanName(currentPhoto.uploaded_by_name) || 'Anonyme'}
-                    </p>
+                    <p className="text-stone-700 text-sm" style={{ fontWeight: 400 }}>{cleanName(currentPhoto.uploaded_by_name) || 'Anonyme'}</p>
                     {(!currentPhoto.uploaded_by_name || currentPhoto.uploaded_by_name === 'Anonyme' || currentPhoto.uploaded_by_name === myName) && (
-                      <button
-                        onClick={() => { setEditingName(true); setEditNameValue(myName !== 'Anonyme' ? myName : '') }}
+                      <button onClick={() => { setEditingName(true); setEditNameValue(myName !== 'Anonyme' ? myName : '') }}
                         className="text-[10px] text-stone-400 hover:text-[#4a5240] transition cursor-pointer underline underline-offset-2"
                         style={{ fontWeight: 300 }}>
                         {!currentPhoto.uploaded_by_name || currentPhoto.uploaded_by_name === 'Anonyme' ? "C'est moi" : 'Modifier'}
@@ -523,7 +619,6 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
                   <span className="text-xs" style={{ fontWeight: 300 }}>Télécharger</span>
                 </button>
-                {/* Supprimer — uniquement sa propre photo */}
                 {myName && currentPhoto.uploaded_by_name === myName && (
                   <form onSubmit={e => {
                     e.preventDefault()
@@ -536,13 +631,10 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
                     <input type="hidden" name="uploader_name" value={myName} />
                     <button type="submit"
                       className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-red-50 hover:bg-red-100 transition text-red-400 cursor-pointer text-xs"
-                      style={{ fontWeight: 300 }}>
-                      🗑 Supprimer
-                    </button>
+                      style={{ fontWeight: 300 }}>🗑 Supprimer</button>
                   </form>
                 )}
               </div>
-              {/* Comments */}
               <div>
                 <p className="text-stone-400 text-xs mb-2" style={{ fontWeight: 300 }}>Commentaires {lbComments.length > 0 && `(${lbComments.length})`}</p>
                 <div className="space-y-2 mb-3">

@@ -55,6 +55,13 @@ async function addPlaylistLink(formData: FormData) {
   revalidatePath(`/mariage/${slug}/musique`)
 }
 
+async function acceptSuggestion(formData: FormData) {
+  'use server'
+  const supabase = await createSupabaseServerClient()
+  await supabase.from('playlist_songs').update({ suggested_by: null }).eq('id', formData.get('id') as string)
+  revalidatePath(`/mariage/${formData.get('slug') as string}/musique`)
+}
+
 async function deletePlaylistLink(formData: FormData) {
   'use server'
   const supabase = await createSupabaseServerClient()
@@ -85,6 +92,7 @@ export default async function MusiquePage({ params }: { params: Promise<{ slug: 
       updateSong={updateSong}
       addPlaylistLink={addPlaylistLink}
       deletePlaylistLink={deletePlaylistLink}
+      acceptSuggestion={acceptSuggestion}
     />
   )
 }

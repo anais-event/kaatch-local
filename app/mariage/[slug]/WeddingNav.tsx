@@ -3,7 +3,6 @@
 import { usePathname } from 'next/navigation'
 import { useState, useRef, useEffect } from 'react'
 import { logoutMaried } from './logout-action'
-import KaatchChat from './KaatchChat'
 import { createClient } from '@supabase/supabase-js'
 
 type NavItem = { label: string; href: string; sub?: string; target?: string }
@@ -372,7 +371,7 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
         ))}
       </div>
 
-      <KaatchChat />
+      {/* KaatchChat temporairement désactivé */}
     </>
   )
 }

@@ -52,12 +52,12 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
         { label: 'Budget', sub: 'Suivi des dépenses', href: `/mariage/${slug}/budget` },
         { label: 'Prestataires', sub: 'Contacts & contrats', href: `/mariage/${slug}/prestataires` },
         { label: 'Mot des mariés', sub: 'Message & règles', href: `/mariage/${slug}/regles` },
+        { label: 'Rétro-planning', sub: 'Checklist avant le mariage', href: `/mariage/${slug}/retro-planning` },
       ],
     },
     {
       label: 'Jour J',
       items: [
-        { label: 'Rétro-planning', sub: 'Checklist avant le mariage', href: `/mariage/${slug}/retro-planning` },
         { label: 'Checklist Jour J', sub: 'Qui fait quoi', href: `/mariage/${slug}/checklist` },
         { label: 'Programme', sub: 'Déroulé de la journée', href: `/mariage/${slug}/programme` },
         { label: 'Jeux & animations', sub: 'Idées pour la fête', href: `/mariage/${slug}/jeux` },

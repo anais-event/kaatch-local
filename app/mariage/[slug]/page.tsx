@@ -53,18 +53,23 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
   ]
 
   const modules = [
-    { href: 'guests',       emoji: '👥', label: 'Invités',       sub: 'Liste & RSVPs' },
-    { href: 'budget',       emoji: '💰', label: 'Budget',        sub: 'Dépenses & suivi' },
-    { href: 'programme',    emoji: '📋', label: 'Programme',     sub: 'Déroulé du jour' },
-    { href: 'tables',       emoji: '🪑', label: 'Plan de table', sub: 'Placement' },
-    { href: 'hebergements', emoji: '🏨', label: 'Hébergements',  sub: 'Logements' },
-    { href: 'photos',       emoji: '📷', label: 'Photos',        sub: 'Galerie partagée' },
-    { href: 'messages',     emoji: '💬', label: 'Messages',      sub: 'Questions invités' },
-    { href: 'regles',       emoji: '📜', label: 'Infos',         sub: "Mot des mariés" },
-    { href: 'musique',      emoji: '🎵', label: 'Musique',       sub: 'Playlist' },
-    { href: 'jeux',         emoji: '🎉', label: 'Jeux',          sub: 'Animations' },
-    { href: 'partager',     emoji: '📲', label: 'QR Code',       sub: 'Accès invités' },
-    { href: 'livre-dor',    emoji: '📖', label: "Livre d'Or",    sub: 'Messages' },
+    // Préparatifs
+    { href: 'guests',          emoji: '👥', label: 'Invités',        sub: 'Liste & RSVPs' },
+    { href: 'tables',          emoji: '🪑', label: 'Plan de table',  sub: 'Placement' },
+    { href: 'budget',          emoji: '💰', label: 'Budget',         sub: 'Dépenses & suivi' },
+    { href: 'regles',          emoji: '📜', label: 'Mot des mariés', sub: 'Message & infos' },
+    { href: 'retro-planning',  emoji: '🗓️', label: 'Rétro-planning', sub: 'Avant le jour J' },
+    // Jour J
+    { href: 'checklist',       emoji: '✅', label: 'Checklist J',    sub: 'Qui fait quoi' },
+    { href: 'programme',       emoji: '📋', label: 'Programme',      sub: 'Déroulé du jour' },
+    { href: 'jeux',            emoji: '🎉', label: 'Jeux',           sub: 'Animations' },
+    { href: 'musique',         emoji: '🎵', label: 'Musique',        sub: 'Playlist' },
+    { href: 'hebergements',    emoji: '🏨', label: 'Hébergements',   sub: 'Logements' },
+    { href: 'partager',        emoji: '📲', label: 'QR Code',        sub: 'Accès invités' },
+    // Autres
+    { href: 'photos',          emoji: '📷', label: 'Photos',         sub: 'Galerie partagée' },
+    { href: 'livre-dor',       emoji: '📖', label: "Livre d'Or",     sub: 'Messages' },
+    { href: 'messagerie',      emoji: '💬', label: 'Messagerie',     sub: 'Questions invités' },
   ]
 
   return (
@@ -130,7 +135,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
 
         {/* Modules */}
         <div>
-          <p style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.2em' }} className="text-stone-400 uppercase mb-3">Sections</p>
+          <p style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.2em' }} className="text-stone-400 uppercase mb-3">Rubriques</p>
           <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
             {modules.map(m => (
               <a key={m.href} href={`/mariage/${slug}/${m.href}`}

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 
 type Diff = { months: number; days: number; hours: number; minutes: number; past: boolean }
 
-export default function Countdown({ weddingDate, compact = false }: { weddingDate: string; compact?: boolean }) {
+export default function Countdown({ weddingDate, compact = false, small = false }: { weddingDate: string; compact?: boolean; small?: boolean }) {
   const [diff, setDiff] = useState<Diff | null>(null)
 
   useEffect(() => {
@@ -56,6 +56,20 @@ export default function Countdown({ weddingDate, compact = false }: { weddingDat
   ].filter(u => u.value > 0)
 
   const displayed = units.length > 0 ? units : [{ value: diff.days, label: 'jour' }]
+
+  // Version mini pour dashboard mariés
+  if (small) {
+    return (
+      <div className="flex items-center justify-center gap-5 py-3 px-4 bg-white/80 rounded-2xl">
+        {displayed.map(({ value, label }) => (
+          <div key={label} className="flex items-baseline gap-1">
+            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem', lineHeight: 1 }} className="text-[#4a5240]">{value}</span>
+            <span style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.08em' }} className="text-stone-400 uppercase">{label}</span>
+          </div>
+        ))}
+      </div>
+    )
+  }
 
   // Version compacte (dans le hero de la cover)
   if (compact) {

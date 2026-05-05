@@ -108,9 +108,6 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
       {/* Contenu */}
       <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
 
-        {/* Countdown */}
-        {wedding.date && <Countdown weddingDate={wedding.date} />}
-
         {/* Stats */}
         <div className="grid grid-cols-4 gap-2">
           {[
@@ -145,6 +142,9 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
             ))}
           </div>
         </div>
+
+        {/* Countdown */}
+        {wedding.date && <Countdown weddingDate={wedding.date} small />}
 
         {/* Notes & suivi */}
         <div>

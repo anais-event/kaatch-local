@@ -134,20 +134,9 @@ export default async function EditWedding({ params, searchParams }: { params: Pr
                      className="block text-stone-400 uppercase mb-2">
                 Photo de couverture
               </label>
-              {wedding.cover_image_url && (
-                <div className="mb-3">
-                  <CoverPositionPicker
-                    imageUrl={wedding.cover_image_url}
-                    defaultPosition={wedding.cover_position_y ?? 50}
-                  />
-                </div>
-              )}
-              <input
-                type="file"
-                name="cover_image"
-                accept="image/*"
-                className="w-full border border-stone-200 rounded-xl px-4 py-3 text-stone-500 bg-white file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:bg-[#f5f0e8] file:text-[#4a5240] hover:file:bg-stone-200 transition"
-                style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem' }}
+              <CoverPositionPicker
+                imageUrl={wedding.cover_image_url}
+                defaultPosition={wedding.cover_position_y ?? 50}
               />
               {!wedding.cover_image_url && (
                 <input type="hidden" name="cover_position_y" value="50" />

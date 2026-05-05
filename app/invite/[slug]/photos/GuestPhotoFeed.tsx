@@ -74,7 +74,9 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
   const [editingName, setEditingName] = useState(false)
   const [editNameValue, setEditNameValue] = useState('')
   const [savingName, setSavingName] = useState(false)
+  const [optimisticName, setOptimisticName] = useState<string | null>(null)
   const [, startTransition] = useTransition()
+  const lbTouchStart = useRef<number | null>(null)
 
   const fileRef = useRef<HTMLInputElement>(null)
   const tagRef = useRef<HTMLInputElement>(null)
@@ -108,9 +110,9 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
     setLightbox(id); setLbLikes(p.likes); setLbLikedBy(p.liked_by); setLbComments(p.comments)
   }, [photos])
 
-  const closeLightbox = () => { setLightbox(null); setLbComments([]); setEditingName(false) }
-  const prevPhoto = () => openLightbox(photos[(currentIdx - 1 + photos.length) % photos.length].id)
-  const nextPhoto = () => openLightbox(photos[(currentIdx + 1) % photos.length].id)
+  const closeLightbox = () => { setLightbox(null); setLbComments([]); setEditingName(false); setOptimisticName(null) }
+  const prevPhoto = () => { setOptimisticName(null); openLightbox(photos[(currentIdx - 1 + photos.length) % photos.length].id) }
+  const nextPhoto = () => { setOptimisticName(null); openLightbox(photos[(currentIdx + 1) % photos.length].id) }
 
   useEffect(() => {
     const fn = (e: KeyboardEvent) => {
@@ -423,7 +425,14 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
 
       {/* Lightbox */}
       {lightbox && currentPhoto && (
-        <div className="fixed inset-0 z-50 bg-black" onClick={closeLightbox}>
+        <div className="fixed inset-0 z-50 bg-black" onClick={closeLightbox}
+          onTouchStart={e => { lbTouchStart.current = e.touches[0].clientX }}
+          onTouchEnd={e => {
+            if (lbTouchStart.current === null) return
+            const delta = e.changedTouches[0].clientX - lbTouchStart.current
+            lbTouchStart.current = null
+            if (Math.abs(delta) > 50) { delta < 0 ? nextPhoto() : prevPhoto() }
+          }}>
 
           {/* Photo — plein écran */}
           <div className="absolute inset-0 flex items-center justify-center" onClick={e => e.stopPropagation()}>
@@ -456,7 +465,7 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
               {/* Auteur + moment */}
               <div className="flex items-center justify-between">
                 <div>
-                  {(!currentPhoto.uploaded_by_name || currentPhoto.uploaded_by_name === 'Anonyme' || currentPhoto.uploaded_by_name === myName) && editingName ? (
+                  {editingName ? (
                     <form onSubmit={async e => {
                       e.preventDefault()
                       if (!editNameValue.trim()) return
@@ -465,6 +474,7 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
                       fd.append('photo_id', currentPhoto.id)
                       fd.append('slug', slug)
                       fd.append('new_name', editNameValue.trim())
+                      setOptimisticName(editNameValue.trim())
                       await claimPhoto(fd)
                       setSavingName(false)
                       setEditingName(false)
@@ -481,9 +491,9 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
                   ) : (
                     <div className="flex items-center gap-2">
                       <span className="text-white text-sm" style={{ fontWeight: 400 }}>
-                        {cleanName(currentPhoto.uploaded_by_name) || 'Anonyme'}
+                        {optimisticName || cleanName(currentPhoto.uploaded_by_name) || 'Anonyme'}
                       </span>
-                      {(!currentPhoto.uploaded_by_name || currentPhoto.uploaded_by_name === 'Anonyme' || currentPhoto.uploaded_by_name === myName) && (
+                      {(!optimisticName && (!currentPhoto.uploaded_by_name || currentPhoto.uploaded_by_name === 'Anonyme' || currentPhoto.uploaded_by_name === myName)) && (
                         <button onClick={() => { setEditingName(true); setEditNameValue(myName !== 'Anonyme' ? myName : '') }}
                           className="text-[10px] text-white/50 hover:text-white/80 transition cursor-pointer underline underline-offset-2"
                           style={{ fontWeight: 300 }}>
@@ -528,10 +538,10 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
 
               {/* Commentaires */}
               {lbComments.length > 0 && (
-                <div className="space-y-1 max-h-24 overflow-y-auto">
-                  {lbComments.slice(-3).map(c => (
-                    <p key={c.id} className="text-white/80 text-sm leading-snug" style={{ fontWeight: 300 }}>
-                      <span className="text-white font-medium">{c.author_name}</span> {c.content}
+                <div className="space-y-1.5 max-h-32 overflow-y-auto">
+                  {lbComments.map(c => (
+                    <p key={c.id} className="text-white/85 text-sm leading-snug" style={{ fontWeight: 300 }}>
+                      <span className="text-white" style={{ fontWeight: 500 }}>{c.author_name}</span> {c.content}
                     </p>
                   ))}
                 </div>

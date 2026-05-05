@@ -324,9 +324,9 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
 
       {/* Upload modal */}
       {showUpload && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-4"
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 overflow-hidden"
           onClick={e => { if (e.target === e.currentTarget) setShowUpload(false) }}>
-          <div className="bg-white rounded-2xl w-full max-w-md p-6 space-y-3 max-h-[90vh] overflow-y-auto shadow-2xl">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6 space-y-3 max-h-[85dvh] overflow-y-auto shadow-2xl">
             <div className="flex items-center justify-between mb-1">
               <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: '1.4rem' }} className="text-[#2d3228]">Ajouter des photos</h2>
               <button onClick={() => setShowUpload(false)} className="text-stone-400 hover:text-stone-700 transition cursor-pointer text-xl leading-none">×</button>

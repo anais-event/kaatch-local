@@ -1,5 +1,4 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
-import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import GuestbookViewer from './GuestbookViewer'
 
@@ -21,19 +20,9 @@ export default async function LivreDorPage({ params }: { params: Promise<{ slug:
   // RLS SELECT policy is USING (true) — no service role needed
   const { data: entries } = await supabase
     .from('guestbook_entries')
-    .select('id, author_name, message, photo_url, created_at, is_approved')
+    .select('id, author_name, message, photo_url, created_at')
     .eq('wedding_id', wedding.id)
     .order('created_at', { ascending: true })
-
-  async function toggleApproval(entryId: string, currentValue: boolean) {
-    'use server'
-    const supabase = await createSupabaseServerClient()
-    await supabase
-      .from('guestbook_entries')
-      .update({ is_approved: !currentValue })
-      .eq('id', entryId)
-    revalidatePath(`/mariage/${slug}/livre-dor`)
-  }
 
   return (
     <div className="min-h-screen bg-[#f5f0e8] pt-20 pb-16">
@@ -55,7 +44,6 @@ export default async function LivreDorPage({ params }: { params: Promise<{ slug:
       <GuestbookViewer
         entries={entries ?? []}
         slug={slug}
-        toggleApproval={toggleApproval}
       />
     </div>
   )

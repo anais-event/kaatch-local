@@ -7,6 +7,7 @@ type Photo = {
   id: string; url: string; uploaded_by_name: string | null; moment_tag: string | null
   tagged_guests: string[]; created_at: string; likes: number; liked_by: string[]; comments: Comment[]
 }
+type FileItem = { moment: string; tagged: string[]; tagInput: string; tagSuggestions: string[] }
 
 function cleanName(name: string | null | undefined): string {
   if (!name) return ''
@@ -43,6 +44,8 @@ async function downloadZip(photos: Photo[]) {
   a.download = 'photos-mariage.zip'; a.click()
 }
 
+const emptyItem = (): FileItem => ({ moment: '', tagged: [], tagInput: '', tagSuggestions: [] })
+
 export default function GuestPhotoFeed({ photos, moments, guestName, guestNames, addLike, addComment, uploadPhoto, deletePhoto, claimPhoto, slug }: {
   photos: Photo[]; moments: string[]; guestNames: string[]; guestName: string; slug: string
   addLike: (fd: FormData) => Promise<void>
@@ -65,10 +68,7 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
   const [pendingFiles, setPendingFiles] = useState<File[]>([])
   const [uploaderName, setUploaderName] = useState(cleanName(guestName) || '')
   const [uploaderSuggestions, setUploaderSuggestions] = useState<string[]>([])
-  const [tagged, setTagged] = useState<string[]>([])
-  const [tagInput, setTagInput] = useState('')
-  const [tagSuggestions, setTagSuggestions] = useState<string[]>([])
-  const [selectedMoment, setSelectedMoment] = useState('')
+  const [fileItems, setFileItems] = useState<FileItem[]>([emptyItem()])
   const [uploading, setUploading] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [editingName, setEditingName] = useState(false)
@@ -79,7 +79,6 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
   const lbTouchStart = useRef<number | null>(null)
 
   const fileRef = useRef<HTMLInputElement>(null)
-  const tagRef = useRef<HTMLInputElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const myName = uploaderName || cleanName(guestName) || 'Anonyme'
 
@@ -92,6 +91,19 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
     if (dropdownOpen) document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [dropdownOpen])
+
+  // Sync fileItems length with pendingFiles
+  useEffect(() => {
+    if (pendingFiles.length === 0) {
+      setFileItems([emptyItem()])
+    } else {
+      setFileItems(prev => pendingFiles.map((_, i) => prev[i] ?? emptyItem()))
+    }
+  }, [pendingFiles.length])
+
+  function updateFileItem(i: number, update: Partial<FileItem>) {
+    setFileItems(prev => prev.map((item, idx) => idx === i ? { ...item, ...update } : item))
+  }
 
   const filtered = photos.filter(p => {
     if (!search.trim()) return true
@@ -159,15 +171,6 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
     setLbCommenting(false)
   }
 
-  const handleTagInput = (val: string) => {
-    setTagInput(val)
-    setTagSuggestions(val.trim() ? guestNames.filter(n => n.toLowerCase().includes(val.toLowerCase()) && !tagged.includes(n)).slice(0, 6) : [])
-  }
-  const addTag = (name: string) => {
-    if (name.trim() && !tagged.includes(name)) setTagged(p => [...p, name.trim()])
-    setTagInput(''); setTagSuggestions([]); tagRef.current?.focus()
-  }
-
   const handleUploaderInput = (val: string) => {
     setUploaderName(val)
     setUploaderSuggestions(val.trim() ? guestNames.filter(n => n.toLowerCase().includes(val.toLowerCase())).slice(0, 5) : [])
@@ -178,15 +181,37 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
     const fd = new FormData()
     fd.set('slug', slug)
     fd.set('uploader_name', uploaderName || cleanName(guestName) || 'Anonyme')
-    fd.set('moment_tag', selectedMoment)
-    fd.set('tagged_guests_raw', tagged.join(', '))
     const files = pendingFiles.length > 0 ? pendingFiles : Array.from(fileRef.current?.files ?? [])
-    files.forEach(f => fd.append('photo', f))
+    files.forEach((f, i) => {
+      fd.append('photo', f)
+      const item = fileItems[i] ?? fileItems[0] ?? emptyItem()
+      fd.append(`moment_tag_${i}`, item.moment)
+      fd.append(`tagged_guests_raw_${i}`, item.tagged.join(', '))
+    })
     await uploadPhoto(fd)
     setUploading(false); setShowUpload(false); setPendingFiles([])
-    setTagged([]); setSelectedMoment('')
+    setFileItems([emptyItem()])
     if (fileRef.current) fileRef.current.value = ''
   }
+
+  // Per-file tag helpers
+  function addTagToItem(i: number, name: string) {
+    const item = fileItems[i]
+    if (!item || item.tagged.includes(name)) return
+    updateFileItem(i, { tagged: [...item.tagged, name.trim()], tagInput: '', tagSuggestions: [] })
+  }
+  function handleItemTagInput(i: number, val: string) {
+    const item = fileItems[i]
+    if (!item) return
+    updateFileItem(i, {
+      tagInput: val,
+      tagSuggestions: val.trim()
+        ? guestNames.filter(n => n.toLowerCase().includes(val.toLowerCase()) && !item.tagged.includes(n)).slice(0, 6)
+        : [],
+    })
+  }
+
+  const multipleFiles = pendingFiles.length > 1
 
   return (
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
@@ -208,13 +233,11 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
                   className={`break-inside-avoid rounded-2xl overflow-hidden cursor-pointer group shadow-sm transition ${isSelected ? 'ring-2 ring-[#4a5240]' : ''}`}>
                   <div className="relative">
                     <img src={photo.url} alt="" className="w-full object-cover transition duration-300 group-hover:brightness-90" />
-                    {/* Checkbox — cliquer active le mode sélection */}
                     <div
                       onClick={e => { e.stopPropagation(); if (!selectMode) setSelectMode(true); toggleSelect(photo.id) }}
                       className={`absolute top-2 left-2 w-6 h-6 rounded-full border-2 flex items-center justify-center transition shadow cursor-pointer z-10 ${isSelected ? 'bg-[#4a5240] border-[#4a5240]' : 'bg-white/80 border-stone-300 opacity-0 group-hover:opacity-100'}`}>
                       {isSelected && <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={3} className="w-3 h-3"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
                     </div>
-                    {/* Download on hover */}
                     {!selectMode && (
                       <button onClick={e => { e.stopPropagation(); downloadPhotoBlob(photo.url) }}
                         className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition hover:bg-white shadow"
@@ -274,10 +297,8 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
 
       {/* FABs */}
       <div className="fixed bottom-24 right-5 z-20 flex flex-col items-end gap-3" ref={dropdownRef}>
-        {/* Dropdown menu */}
         {dropdownOpen && (
           <div className="mb-1 bg-white border border-stone-200 rounded-2xl shadow-2xl overflow-hidden w-64">
-            {/* Recherche */}
             <div className="px-4 pt-3 pb-2">
               <input type="text" value={search} onChange={e => setSearch(e.target.value)}
                 placeholder="🔍 Rechercher…"
@@ -285,7 +306,6 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
                 style={{ fontWeight: 300 }} />
             </div>
             <div className="border-t border-stone-100">
-              {/* Sélectionner */}
               <button onClick={() => { setSelectMode(s => !s); setSelectedIds(new Set()); setDropdownOpen(false) }}
                 className="w-full flex items-center gap-3 px-4 py-3 text-stone-600 hover:bg-stone-50 transition cursor-pointer text-left">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4 shrink-0">
@@ -293,7 +313,6 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
                 </svg>
                 <span className="text-sm" style={{ fontWeight: 300 }}>{selectMode ? 'Quitter la sélection' : 'Sélectionner'}</span>
               </button>
-              {/* Télécharger */}
               <button onClick={() => { handleDownload(); setDropdownOpen(false) }} disabled={zipping || filtered.length === 0}
                 className="w-full flex items-center gap-3 px-4 py-3 text-stone-600 hover:bg-stone-50 transition cursor-pointer text-left disabled:opacity-40">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4 shrink-0">
@@ -305,7 +324,6 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
           </div>
         )}
 
-        {/* Bouton menu ☰ */}
         <button onClick={() => setDropdownOpen(o => !o)}
           className="w-12 h-12 rounded-full bg-white border border-stone-200 text-stone-600 shadow-xl flex items-center justify-center hover:scale-105 transition-transform cursor-pointer"
           title="Options">
@@ -314,7 +332,6 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
           </svg>
         </button>
 
-        {/* Bouton + upload */}
         <button onClick={() => setShowUpload(true)}
           className="w-14 h-14 rounded-full bg-[#4a5240] text-white shadow-2xl flex items-center justify-center hover:scale-110 transition-transform cursor-pointer"
           title="Ajouter des photos">
@@ -374,44 +391,55 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
                 )}
               </div>
 
-              {/* Moment */}
-              {moments.length > 0 && (
-                <select value={selectedMoment} onChange={e => setSelectedMoment(e.target.value)}
-                  className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-stone-500 outline-none focus:border-[#4a5240] transition text-sm bg-white"
-                  style={{ fontWeight: 300 }}>
-                  <option value="">Quel moment ? (optionnel)</option>
-                  {moments.map(m => <option key={m} value={m}>{m}</option>)}
-                </select>
-              )}
-
-              {/* Tag guests */}
-              <div className="border border-stone-200 rounded-xl px-4 py-2.5 space-y-2">
-                <p className="text-stone-400 text-xs" style={{ fontWeight: 300 }}>Qui voit-on sur la photo ?</p>
-                {tagged.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5">
-                    {tagged.map(t => (
-                      <span key={t} className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#f5f0e8] text-[#4a5240]" style={{ fontSize: '0.78rem', fontWeight: 300 }}>
-                        {t}
-                        <button type="button" onClick={() => setTagged(p => p.filter(x => x !== t))} className="text-stone-400 hover:text-stone-700 cursor-pointer">×</button>
-                      </span>
-                    ))}
-                  </div>
-                )}
-                <div className="relative">
-                  <input ref={tagRef} type="text" value={tagInput} onChange={e => handleTagInput(e.target.value)}
-                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); if (tagInput.trim()) addTag(tagInput.trim()) } if (e.key === 'Escape') { setTagSuggestions([]); setTagInput('') } }}
-                    placeholder="Taper un nom…"
-                    className="w-full text-stone-700 outline-none text-sm" style={{ fontWeight: 300 }} />
-                  {tagSuggestions.length > 0 && (
-                    <div className="absolute left-0 top-full mt-1 bg-white border border-stone-100 rounded-xl overflow-hidden z-10 w-full shadow-lg">
-                      {tagSuggestions.map(s => (
-                        <button key={s} type="button" onMouseDown={e => { e.preventDefault(); addTag(s) }}
-                          className="w-full text-left px-4 py-2 text-stone-700 hover:bg-stone-50 transition text-sm cursor-pointer" style={{ fontWeight: 300 }}>{s}</button>
-                      ))}
-                    </div>
+              {/* Per-file controls: single file flat, multiple files per-section */}
+              {!multipleFiles ? (
+                <>
+                  {moments.length > 0 && (
+                    <select value={fileItems[0]?.moment ?? ''} onChange={e => updateFileItem(0, { moment: e.target.value })}
+                      className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-stone-500 outline-none focus:border-[#4a5240] transition text-sm bg-white"
+                      style={{ fontWeight: 300 }}>
+                      <option value="">Quel moment ? (optionnel)</option>
+                      {moments.map(m => <option key={m} value={m}>{m}</option>)}
+                    </select>
                   )}
+                  <FileTagInput
+                    item={fileItems[0] ?? emptyItem()}
+                    guestNames={guestNames}
+                    onTagInput={v => handleItemTagInput(0, v)}
+                    onAddTag={n => addTagToItem(0, n)}
+                    onRemoveTag={t => updateFileItem(0, { tagged: (fileItems[0]?.tagged ?? []).filter(x => x !== t) })}
+                  />
+                </>
+              ) : (
+                <div className="space-y-2">
+                  {pendingFiles.map((file, i) => {
+                    const item = fileItems[i] ?? emptyItem()
+                    return (
+                      <div key={i} className="border border-stone-200 rounded-xl p-3 space-y-2">
+                        <p className="text-stone-500 text-xs" style={{ fontWeight: 400 }}>
+                          📷 Photo {i + 1}
+                          <span className="text-stone-300 ml-1 font-normal">{file.name}</span>
+                        </p>
+                        {moments.length > 0 && (
+                          <select value={item.moment} onChange={e => updateFileItem(i, { moment: e.target.value })}
+                            className="w-full border border-stone-200 rounded-xl px-3 py-2 text-stone-500 outline-none focus:border-[#4a5240] transition text-sm bg-white"
+                            style={{ fontWeight: 300 }}>
+                            <option value="">Quel moment ?</option>
+                            {moments.map(m => <option key={m} value={m}>{m}</option>)}
+                          </select>
+                        )}
+                        <FileTagInput
+                          item={item}
+                          guestNames={guestNames}
+                          onTagInput={v => handleItemTagInput(i, v)}
+                          onAddTag={n => addTagToItem(i, n)}
+                          onRemoveTag={t => updateFileItem(i, { tagged: item.tagged.filter(x => x !== t) })}
+                        />
+                      </div>
+                    )
+                  })}
                 </div>
-              </div>
+              )}
 
               <button type="submit" disabled={uploading || (pendingFiles.length === 0 && !fileRef.current?.files?.length)}
                 className="w-full bg-[#4a5240] text-white py-3 rounded-xl text-sm hover:bg-[#2d3228] transition disabled:opacity-40 cursor-pointer"
@@ -425,7 +453,8 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
 
       {/* Lightbox */}
       {lightbox && currentPhoto && (
-        <div className="fixed inset-0 z-50 bg-black" onClick={closeLightbox}
+        <div className="fixed inset-0 z-50 bg-black" style={{ touchAction: 'none' }}
+          onClick={closeLightbox}
           onTouchStart={e => { lbTouchStart.current = e.touches[0].clientX }}
           onTouchEnd={e => {
             if (lbTouchStart.current === null) return
@@ -450,7 +479,9 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
           </>)}
 
           {/* Compteur + fermer (mobile) */}
-          <div className="md:hidden absolute top-4 left-0 right-0 flex items-center justify-between px-4 z-10" onClick={e => e.stopPropagation()}>
+          <div className="md:hidden absolute top-4 left-0 right-0 flex items-center justify-between px-4 z-10"
+            onClick={e => e.stopPropagation()}
+            onTouchStart={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
             <span className="text-white/50 text-xs" style={{ fontWeight: 300 }}>{currentIdx + 1} / {photos.length}</span>
             <button onClick={closeLightbox} className="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 transition flex items-center justify-center cursor-pointer">
               <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
@@ -458,8 +489,11 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
           </div>
 
           {/* ── MOBILE : panneau bas style Instagram ── */}
-          <div className="md:hidden absolute bottom-0 left-0 right-0 z-10" onClick={e => e.stopPropagation()}
-               style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.6) 70%, transparent 100%)' }}>
+          <div className="md:hidden absolute bottom-0 left-0 right-0 z-10"
+            onClick={e => e.stopPropagation()}
+            onTouchStart={e => e.stopPropagation()}
+            onTouchEnd={e => e.stopPropagation()}
+            style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.6) 70%, transparent 100%)', touchAction: 'pan-y' }}>
             <div className="px-4 pt-8 pb-6 space-y-3">
 
               {/* Auteur + moment */}
@@ -667,6 +701,48 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+function FileTagInput({ item, guestNames, onTagInput, onAddTag, onRemoveTag }: {
+  item: FileItem
+  guestNames: string[]
+  onTagInput: (val: string) => void
+  onAddTag: (name: string) => void
+  onRemoveTag: (name: string) => void
+}) {
+  return (
+    <div className="border border-stone-200 rounded-xl px-4 py-2.5 space-y-2">
+      <p className="text-stone-400 text-xs" style={{ fontWeight: 300 }}>Qui voit-on sur la photo ?</p>
+      {item.tagged.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {item.tagged.map(t => (
+            <span key={t} className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#f5f0e8] text-[#4a5240]" style={{ fontSize: '0.78rem', fontWeight: 300 }}>
+              {t}
+              <button type="button" onClick={() => onRemoveTag(t)} className="text-stone-400 hover:text-stone-700 cursor-pointer">×</button>
+            </span>
+          ))}
+        </div>
+      )}
+      <div className="relative">
+        <input type="text" value={item.tagInput}
+          onChange={e => onTagInput(e.target.value)}
+          onKeyDown={e => {
+            if (e.key === 'Enter') { e.preventDefault(); if (item.tagInput.trim()) onAddTag(item.tagInput.trim()) }
+            if (e.key === 'Escape') onTagInput('')
+          }}
+          placeholder="Taper un nom…"
+          className="w-full text-stone-700 outline-none text-sm" style={{ fontWeight: 300 }} />
+        {item.tagSuggestions.length > 0 && (
+          <div className="absolute left-0 top-full mt-1 bg-white border border-stone-100 rounded-xl overflow-hidden z-10 w-full shadow-lg">
+            {item.tagSuggestions.map(s => (
+              <button key={s} type="button" onMouseDown={e => { e.preventDefault(); onAddTag(s) }}
+                className="w-full text-left px-4 py-2 text-stone-700 hover:bg-stone-50 transition text-sm cursor-pointer" style={{ fontWeight: 300 }}>{s}</button>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

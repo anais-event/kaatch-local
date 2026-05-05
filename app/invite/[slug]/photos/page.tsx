@@ -62,16 +62,16 @@ async function uploadPhoto(formData: FormData) {
   const supabase = await createSupabaseServerClient()
   const slug = formData.get('slug') as string
   const uploader_name = formData.get('uploader_name') as string
-  const moment_tag = (formData.get('moment_tag') as string) || null
-  const tagged_guests_raw = (formData.get('tagged_guests_raw') as string) || ''
-  const tagged_guests = tagged_guests_raw.split(',').map((s: string) => s.trim()).filter(Boolean)
   const files = formData.getAll('photo') as File[]
 
   const { data: wedding } = await supabase.from('weddings').select('id').eq('slug', slug).single()
   if (!wedding) return
 
-  await Promise.all(files.map(async (file) => {
+  await Promise.all(files.map(async (file, i) => {
     if (!file || file.size === 0) return
+    const moment_tag = (formData.get(`moment_tag_${i}`) as string) || null
+    const tagged_raw = (formData.get(`tagged_guests_raw_${i}`) as string) || ''
+    const tagged_guests = tagged_raw.split(',').map((s: string) => s.trim()).filter(Boolean)
     const ext = file.name.split('.').pop()
     const path = `${wedding.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
     const bytes = await file.arrayBuffer()

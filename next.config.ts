@@ -6,14 +6,6 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '50mb',
     },
   },
-  async rewrites() {
-    return [
-      {
-        source: '/mariage/:path*',
-        destination: '/wedding/:path*',
-      },
-    ]
-  },
   async redirects() {
     return [
       {

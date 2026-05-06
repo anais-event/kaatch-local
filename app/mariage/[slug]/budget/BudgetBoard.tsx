@@ -5,7 +5,7 @@ import FileUploadButton from './FileUploadButton'
 
 type Category = { id: string; name: string; icon: string; color: string; budget_allocated: number }
 type Item = { id: string; category_id: string; label: string; estimated_amount: number; status: string; description: string | null }
-type Quote = { id: string; item_id: string; vendor_name: string | null; amount: number; paid_amount: number; currency: string; status: 'en_attente' | 'retenu' | 'refuse'; notes: string | null }
+type Quote = { id: string; item_id: string; vendor_name: string | null; amount: number; paid_amount: number; currency: string; status: 'en_attente' | 'retenu' | 'refuse'; notes: string | null; due_date: string | null }
 type BudgetFile = { id: string; quote_id: string | null; item_id: string | null; file_name: string; file_url: string; file_type: string | null }
 type ContactBasic = { id: string; name: string; role: string; telephone: string | null; email: string | null }
 type Actions = Record<string, (f: FormData) => Promise<void>>
@@ -44,8 +44,12 @@ function QuoteForm({ slug, itemId, currencies, defaultValues, onSubmit, onCancel
         <input name="paid_amount" type="number" placeholder="Acompte versé" min={0} defaultValue={defaultValues?.paid_amount || ''}
           className="border border-stone-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[#4a5240] bg-white text-stone-700" style={{ fontWeight: 300 }} />
       </div>
-      <input name="notes" type="text" placeholder="Notes (optionnel)" defaultValue={defaultValues?.notes ?? ''}
-        className="w-full border border-stone-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[#4a5240] bg-white text-stone-700" style={{ fontWeight: 300 }} />
+      <div className="grid grid-cols-2 gap-2">
+        <input name="due_date" type="date" defaultValue={defaultValues?.due_date ?? ''}
+          className="border border-stone-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[#4a5240] bg-white text-stone-500" style={{ fontWeight: 300 }} />
+        <input name="notes" type="text" placeholder="Notes (optionnel)" defaultValue={defaultValues?.notes ?? ''}
+          className="border border-stone-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[#4a5240] bg-white text-stone-700" style={{ fontWeight: 300 }} />
+      </div>
       <div className="flex gap-2">
         <button type="submit" className="bg-[#4a5240] text-white px-4 py-1.5 rounded-lg text-sm cursor-pointer hover:bg-[#2d3228] transition" style={{ fontWeight: 300 }}>
           {defaultValues ? 'Enregistrer' : 'Ajouter ce devis'}
@@ -899,6 +903,11 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
                                         {quote.notes && (
                                           <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className={`truncate ${isRetenu ? 'text-white/60' : 'text-stone-400'}`}>
                                             {quote.notes}
+                                          </p>
+                                        )}
+                                        {quote.due_date && (
+                                          <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className={isRetenu ? 'text-white/60' : 'text-amber-500'}>
+                                            Échéance {new Date(quote.due_date + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
                                           </p>
                                         )}
                                         {filesForQuote.length > 0 && (

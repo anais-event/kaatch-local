@@ -75,6 +75,15 @@ async function updateGuest(formData: FormData) {
   revalidatePath(`/mariage/${slug}/guests`)
 }
 
+async function updateFairePartTheme(formData: FormData) {
+  'use server'
+  const supabase = await createSupabaseServerClient()
+  const slug = formData.get('slug') as string
+  const theme = formData.get('theme') as string
+  await supabase.from('weddings').update({ faire_part_theme: theme }).eq('slug', slug)
+  revalidatePath(`/mariage/${slug}/guests`)
+}
+
 async function generateTokens(formData: FormData) {
   'use server'
   const supabase = await createSupabaseServerClient()
@@ -119,7 +128,7 @@ export default async function GuestsPage({
 
   const { data: wedding } = await supabase
     .from('weddings')
-    .select('id, name, date, location, cover_image_url, couple_message, plan')
+    .select('id, name, date, location, cover_image_url, couple_message, plan, faire_part_theme')
     .eq('slug', slug)
     .single()
 
@@ -243,6 +252,51 @@ export default async function GuestsPage({
                 </form>
               </div>
             )}
+
+            {/* Theme picker */}
+            <div className="bg-white rounded-2xl border border-stone-100 p-5">
+              <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
+                 className="text-stone-400 uppercase mb-4">
+                Thème du faire-part
+              </p>
+              <div className="flex gap-4">
+                {([
+                  { key: 'classique',  label: 'Classique',  night: '#0b1209', bg: '#4a5639', accent: '#c9a96e' },
+                  { key: 'champetre',  label: 'Champêtre',  night: '#ebeee4', bg: '#c5d4b0', accent: '#5a7040' },
+                  { key: 'romantique', label: 'Romantique', night: '#1a0a14', bg: '#6b3a4a', accent: '#d4a0b0' },
+                ] as const).map(th => {
+                  const active = (wedding.faire_part_theme ?? 'classique') === th.key
+                  return (
+                    <form key={th.key} action={updateFairePartTheme}>
+                      <input type="hidden" name="slug" value={slug} />
+                      <input type="hidden" name="theme" value={th.key} />
+                      <button type="submit" className="flex flex-col items-center gap-2 cursor-pointer group" style={{ background: 'transparent', border: 'none', padding: 0 }}>
+                        <div style={{
+                          width: 64, height: 88, borderRadius: 4, background: th.night,
+                          border: `2px solid ${active ? '#4a5240' : 'transparent'}`,
+                          overflow: 'hidden', position: 'relative', transition: 'border-color 0.2s',
+                          boxShadow: active ? '0 0 0 1px #4a5240' : '0 1px 4px rgba(0,0,0,0.12)',
+                        }}>
+                          <div style={{
+                            position: 'absolute', top: '15%', bottom: '15%', left: '12%', right: '12%',
+                            background: th.bg, borderRadius: 2, border: `1px solid ${th.accent}44`,
+                            display: 'flex', flexDirection: 'column', alignItems: 'center',
+                            justifyContent: 'center', gap: 3,
+                          }}>
+                            <div style={{ width: 20, height: 0.8, background: th.accent, opacity: 0.8 }} />
+                            <div style={{ width: 8, height: 8, borderRadius: '50%', border: `1px solid ${th.accent}`, opacity: 0.7 }} />
+                            <div style={{ width: 14, height: 0.8, background: th.accent, opacity: 0.5 }} />
+                          </div>
+                        </div>
+                        <p style={{ fontWeight: active ? 500 : 300, fontSize: '0.7rem' }} className={active ? 'text-[#4a5240]' : 'text-stone-500'}>
+                          {th.label}
+                        </p>
+                      </button>
+                    </form>
+                  )
+                })}
+              </div>
+            </div>
 
             <InvitationsTab
               guests={guestList}

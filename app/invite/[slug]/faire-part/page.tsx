@@ -9,7 +9,7 @@ export default async function FairePartPage({ params }: { params: Promise<{ slug
 
   const { data: wedding } = await supabase
     .from('weddings')
-    .select('id, name, date, location, couple_message, cover_image_url, plan')
+    .select('id, name, date, location, couple_message, cover_image_url, plan, faire_part_theme')
     .eq('slug', slug)
     .single()
 
@@ -48,6 +48,7 @@ export default async function FairePartPage({ params }: { params: Promise<{ slug
       slug={slug}
       personalUrl={personalUrl}
       paid={isPaid(wedding.plan)}
+    theme={wedding.faire_part_theme ?? 'classique'}
     />
   )
 }

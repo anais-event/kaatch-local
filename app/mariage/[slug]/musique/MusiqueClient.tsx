@@ -161,7 +161,11 @@ export default function MusiqueClient({ slug, songs, playlistLinks, addSong, del
     startTransition(() => deletePlaylistLink(fd))
   }
 
-  const exportText = MOMENTS.map(m => {
+  const playlistHeader = playlistLinks.length > 0
+    ? `PLAYLISTS DES MARIÉS\n${playlistLinks.map(pl => `${pl.name}: ${pl.url}`).join('\n')}\n\n`
+    : ''
+
+  const exportText = playlistHeader + MOMENTS.map(m => {
     const ms = getSongs(m.key)
     if (!ms.length) return null
     let songIdx = 0

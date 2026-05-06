@@ -23,6 +23,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
     { count: ruleCount },
     { data: todosData },
     { data: unreadMessages },
+    { count: pendingSuggestionsCount },
   ] = await Promise.all([
     supabase.from('guests').select('*', { count: 'exact', head: true }).eq('wedding_id', wedding.id),
     supabase.from('guests').select('*', { count: 'exact', head: true }).eq('wedding_id', wedding.id).eq('rsvp_status', 'confirme'),
@@ -34,6 +35,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
     supabase.from('wedding_rules').select('*', { count: 'exact', head: true }).eq('wedding_id', wedding.id),
     supabase.from('wedding_todos').select('*').eq('wedding_id', wedding.id).order('created_at'),
     supabase.from('messages').select('id').eq('wedding_id', wedding.id).eq('read', false).limit(99),
+    supabase.from('playlist_songs').select('*', { count: 'exact', head: true }).eq('wedding_id', wedding.id).not('suggested_by', 'is', null),
   ])
 
   const dateFormatted = wedding.date
@@ -63,7 +65,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
     { href: 'checklist',       emoji: '✅', label: 'Checklist J',    sub: 'Qui fait quoi' },
     { href: 'programme',       emoji: '📋', label: 'Programme',      sub: 'Déroulé du jour' },
     { href: 'jeux',            emoji: '🎉', label: 'Jeux',           sub: 'Animations' },
-    { href: 'musique',         emoji: '🎵', label: 'Musique',        sub: 'Playlist' },
+    { href: 'musique',         emoji: '🎵', label: 'Musique',        sub: 'Playlist', badge: (pendingSuggestionsCount ?? 0) > 0 ? pendingSuggestionsCount! : undefined },
     { href: 'hebergements',    emoji: '🏨', label: 'Hébergements',   sub: 'Logements' },
     { href: 'partager',        emoji: '📲', label: 'QR Code',        sub: 'Accès invités' },
     // Autres
@@ -140,7 +142,16 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
             {modules.map(m => (
               <a key={m.href} href={`/mariage/${slug}/${m.href}`}
                  className="group bg-white rounded-xl border border-stone-100 px-3 py-3 flex flex-col items-center text-center hover:border-[#4a5240]/30 hover:shadow-sm transition-all gap-1.5">
-                <span className="text-xl">{m.emoji}</span>
+                <span className="text-xl relative inline-block">
+                  {m.emoji}
+                  {'badge' in m && m.badge != null && (
+                    <span style={{ position:'absolute', top:-5, right:-7, background:'#ef4444', color:'white',
+                      borderRadius:'50%', minWidth:14, height:14, fontSize:'0.52rem', fontWeight:600,
+                      display:'flex', alignItems:'center', justifyContent:'center', padding:'0 2px', lineHeight:1 }}>
+                      {m.badge > 9 ? '9+' : m.badge}
+                    </span>
+                  )}
+                </span>
                 <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-700 leading-tight">{m.label}</p>
                 <p style={{ fontWeight: 300, fontSize: '0.6rem' }} className="text-stone-300 leading-tight hidden sm:block">{m.sub}</p>
               </a>

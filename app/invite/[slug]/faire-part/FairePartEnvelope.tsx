@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react'
 
+type ThemeKey = 'classique' | 'champetre' | 'romantique'
+
 type Props = {
   weddingName: string
   dateStr: string | null
@@ -11,13 +13,80 @@ type Props = {
   slug: string
   personalUrl: string
   paid?: boolean
+  theme?: string
 }
 
 type Phase = 'curtain-closed' | 'opening' | 'revealed'
 
-const BG = '#4a5639'
-const NIGHT = '#0b1209'
-const GOLD = '#c9a96e'
+const THEMES: Record<ThemeKey, {
+  label: string
+  bg: string
+  night: string
+  curtain: string
+  curtainShadow: string
+  accent: string
+  starColors: string[]
+  sparkleColor: string
+  glowColor: string
+  textColor: string
+  subtleText: string
+  borderColor: string
+  confirmText: string
+  qrDark: string
+  qrLight: string
+}> = {
+  classique: {
+    label: 'Classique',
+    bg: '#4a5639',
+    night: '#0b1209',
+    curtain: '#0e1a0b',
+    curtainShadow: 'rgba(0,0,0,0.6)',
+    accent: '#c9a96e',
+    starColors: ['#e2c97e', '#c9a96e', '#f5e6c0', 'rgba(255,255,255,0.85)'],
+    sparkleColor: 'rgba(201,169,110,0.65)',
+    glowColor: 'rgba(201,169,110,0.22)',
+    textColor: 'rgba(255,255,255,0.82)',
+    subtleText: 'rgba(255,255,255,0.5)',
+    borderColor: 'rgba(201,169,110,0.15)',
+    confirmText: 'rgba(255,255,255,0.7)',
+    qrDark: '#2d3a22',
+    qrLight: '#f0ede4',
+  },
+  champetre: {
+    label: 'Champêtre',
+    bg: '#c5d4b0',
+    night: '#ebeee4',
+    curtain: '#a8c090',
+    curtainShadow: 'rgba(60,80,40,0.25)',
+    accent: '#5a7040',
+    starColors: ['#5a7040', '#82a060', '#a8c088', 'rgba(80,100,55,0.55)'],
+    sparkleColor: 'rgba(80,110,55,0.45)',
+    glowColor: 'rgba(90,120,60,0.14)',
+    textColor: 'rgba(36,46,22,0.9)',
+    subtleText: 'rgba(36,46,22,0.5)',
+    borderColor: 'rgba(90,110,60,0.25)',
+    confirmText: 'rgba(36,46,22,0.7)',
+    qrDark: '#2d4018',
+    qrLight: '#ebeee4',
+  },
+  romantique: {
+    label: 'Romantique',
+    bg: '#6b3a4a',
+    night: '#1a0a14',
+    curtain: '#2d1220',
+    curtainShadow: 'rgba(0,0,0,0.55)',
+    accent: '#d4a0b0',
+    starColors: ['#d4a0b0', '#e8c4d0', '#f5dde5', 'rgba(255,200,220,0.75)'],
+    sparkleColor: 'rgba(210,150,175,0.6)',
+    glowColor: 'rgba(210,150,175,0.18)',
+    textColor: 'rgba(255,235,245,0.88)',
+    subtleText: 'rgba(255,220,235,0.5)',
+    borderColor: 'rgba(210,150,175,0.2)',
+    confirmText: 'rgba(255,225,238,0.7)',
+    qrDark: '#3d1828',
+    qrLight: '#f5e8f0',
+  },
+}
 
 const STARS = Array.from({ length: 90 }, (_, i) => ({
   id: i,
@@ -26,7 +95,6 @@ const STARS = Array.from({ length: 90 }, (_, i) => ({
   size: 1 + (i % 4) * 0.6,
   delay: ((i * 0.41) % 5).toFixed(2),
   duration: (2.2 + (i % 6) * 0.55).toFixed(2),
-  color: i % 5 === 0 ? '#e2c97e' : i % 5 === 1 ? '#c9a96e' : i % 5 === 2 ? '#f5e6c0' : 'rgba(255,255,255,0.85)',
   cross: i % 14 === 0,
 }))
 
@@ -45,9 +113,8 @@ const GOLD_RAIN = Array.from({ length: 38 }, (_, i) => ({
   delay: ((i * 0.18) % 4).toFixed(2),
   duration: (4.5 + (i % 7) * 0.6).toFixed(2),
   size: [10, 12, 14, 9, 16, 11][i % 6],
-  symbol: ['✦', '✧', '✦', '★', '✧', '✦'][i % 6],
+  symbol: (['✦', '✧', '✦', '★', '✧', '✦'] as const)[i % 6],
   drift: ((i % 3) - 1) * 18,
-  color: ['#e2c97e', '#c9a96e', '#f5e6c0', '#ffd980', '#d4a85a', '#fff0b0'][i % 6],
   opacity: 0.55 + (i % 5) * 0.09,
 }))
 
@@ -63,10 +130,8 @@ function GoldRingDecor({ size }: { size: number }) {
   const r = size / 2
   const r2 = r - 12
   return (
-    <svg
-      width={size} height={size}
-      viewBox={`0 0 ${size} ${size}`}
-      style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}
+         style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
       <defs>
         <linearGradient id="goldRing1" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="#e2c97e" />
@@ -80,11 +145,8 @@ function GoldRingDecor({ size }: { size: number }) {
           <stop offset="100%" stopColor="#e2c97e" />
         </linearGradient>
       </defs>
-      {/* Outer ring */}
       <circle cx={r} cy={r} r={r - 2} fill="none" stroke="url(#goldRing1)" strokeWidth="1.8" />
-      {/* Inner ring */}
       <circle cx={r} cy={r} r={r2 - 2} fill="none" stroke="url(#goldRing2)" strokeWidth="1.2" opacity="0.7" />
-      {/* Small decorative dots on outer ring */}
       {[0, 90, 180, 270].map(deg => {
         const rad = (deg * Math.PI) / 180
         const cx2 = r + (r - 2) * Math.cos(rad)
@@ -96,18 +158,14 @@ function GoldRingDecor({ size }: { size: number }) {
 }
 
 function TopLeavesSVG({ size }: { size: number }) {
-  const cx = size / 2
   return (
     <svg width={size * 0.7} height={50} viewBox={`0 0 ${size * 0.7} 50`} fill="none"
          style={{ position: 'absolute', top: -22, left: '50%', transform: 'translateX(-50%)', pointerEvents: 'none' }}>
       <g opacity="0.85">
-        {/* Center stem */}
         <path d={`M${size*0.35} 50 Q${size*0.35} 28 ${size*0.35} 8`} stroke="rgba(160,130,80,0.5)" strokeWidth="0.8" />
-        {/* Left leaves */}
         <path d={`M${size*0.35} 30 C${size*0.2} 10 ${size*0.05} 15 ${size*0.12} 28 C${size*0.05} 15 ${size*0.22} 8 ${size*0.35} 30Z`} fill="rgba(155,185,130,0.75)" />
         <path d={`M${size*0.35} 20 C${size*0.22} 3 ${size*0.1} 6 ${size*0.16} 18 C${size*0.1} 6 ${size*0.25} 0 ${size*0.35} 20Z`} fill="rgba(145,175,120,0.7)" />
         <path d={`M${size*0.35} 38 C${size*0.15} 22 ${size*0} 28 ${size*0.08} 40 C${size*0} 28 ${size*0.18} 20 ${size*0.35} 38Z`} fill="rgba(165,195,140,0.65)" />
-        {/* Right leaves */}
         <path d={`M${size*0.35} 30 C${size*0.5} 10 ${size*0.65} 15 ${size*0.58} 28 C${size*0.65} 15 ${size*0.48} 8 ${size*0.35} 30Z`} fill="rgba(155,185,130,0.75)" />
         <path d={`M${size*0.35} 20 C${size*0.48} 3 ${size*0.6} 6 ${size*0.54} 18 C${size*0.6} 6 ${size*0.45} 0 ${size*0.35} 20Z`} fill="rgba(145,175,120,0.7)" />
         <path d={`M${size*0.35} 38 C${size*0.55} 22 ${size*0.7} 28 ${size*0.62} 40 C${size*0.7} 28 ${size*0.52} 20 ${size*0.35} 38Z`} fill="rgba(165,195,140,0.65)" />
@@ -123,15 +181,12 @@ function BottomLeavesSVG({ size }: { size: number }) {
          style={{ position: 'absolute', bottom: -28, left: '50%', transform: 'translateX(-50%)', pointerEvents: 'none' }}>
       <g opacity="0.85">
         <path d={`M${hw*0.5} 0 Q${hw*0.5} 30 ${hw*0.5} 58`} stroke="rgba(160,130,80,0.5)" strokeWidth="0.8" />
-        {/* Center large leaves */}
         <path d={`M${hw*0.5} 15 C${hw*0.28} -5 ${hw*0.08} 5 ${hw*0.18} 22 C${hw*0.08} 5 ${hw*0.3} -8 ${hw*0.5} 15Z`} fill="rgba(155,185,130,0.75)" />
         <path d={`M${hw*0.5} 15 C${hw*0.72} -5 ${hw*0.92} 5 ${hw*0.82} 22 C${hw*0.92} 5 ${hw*0.7} -8 ${hw*0.5} 15Z`} fill="rgba(155,185,130,0.75)" />
         <path d={`M${hw*0.5} 28 C${hw*0.22} 8 ${hw*0} 18 ${hw*0.1} 34 C${hw*0} 18 ${hw*0.24} 6 ${hw*0.5} 28Z`} fill="rgba(145,175,120,0.7)" />
-        <path d={`M${hw*0.5} 28 C${hw*0.78} 8 ${hw} 18 ${hw*0.9} 34 C${hw} 18 ${hw*0.76} 6 ${hw*0.5} 28Z`} fill="rgba(145,175,120,0.7)" />
+        <path d={`M${hw*0.5} 28 C${hw*0.78} 8 ${hw*1} 18 ${hw*0.9} 34 C${hw*1} 18 ${hw*0.76} 6 ${hw*0.5} 28Z`} fill="rgba(145,175,120,0.7)" />
         <path d={`M${hw*0.5} 40 C${hw*0.3} 22 ${hw*0.12} 30 ${hw*0.2} 44 C${hw*0.12} 30 ${hw*0.32} 20 ${hw*0.5} 40Z`} fill="rgba(165,195,140,0.65)" />
         <path d={`M${hw*0.5} 40 C${hw*0.7} 22 ${hw*0.88} 30 ${hw*0.8} 44 C${hw*0.88} 30 ${hw*0.68} 20 ${hw*0.5} 40Z`} fill="rgba(165,195,140,0.65)" />
-        <path d={`M${hw*0.5} 50 C${hw*0.35} 38 ${hw*0.22} 44 ${hw*0.28} 55 C${hw*0.22} 44 ${hw*0.37} 36 ${hw*0.5} 50Z`} fill="rgba(150,180,125,0.6)" />
-        <path d={`M${hw*0.5} 50 C${hw*0.65} 38 ${hw*0.78} 44 ${hw*0.72} 55 C${hw*0.78} 44 ${hw*0.63} 36 ${hw*0.5} 50Z`} fill="rgba(150,180,125,0.6)" />
       </g>
     </svg>
   )
@@ -148,45 +203,37 @@ function GoldLeafSVG() {
           <stop offset="100%" stopColor="#a07840" />
         </linearGradient>
       </defs>
-      {/* Main leaf shape */}
       <path d="M38 5 Q12 15 8 45 Q14 58 26 52 Q40 46 38 5Z" fill="url(#gLeaf)" opacity="0.9" />
-      {/* Highlight */}
       <path d="M33 10 Q16 18 14 40 Q18 50 27 46 Q36 42 33 10Z" fill="rgba(226,201,126,0.35)" />
-      {/* Veins */}
       <path d="M38 5 Q22 25 16 52" stroke="rgba(120,80,30,0.5)" strokeWidth="0.8" fill="none" />
-      <path d="M30 12 Q22 28 20 46" stroke="rgba(120,80,30,0.35)" strokeWidth="0.5" fill="none" />
-      <path d="M36 20 Q28 32 24 50" stroke="rgba(120,80,30,0.3)" strokeWidth="0.5" fill="none" />
-      {/* Sub-leaf at bottom */}
       <path d="M20 52 Q5 45 3 58 Q8 66 18 62 Q28 58 20 52Z" fill="url(#gLeaf)" opacity="0.7" />
     </svg>
   )
 }
 
-function CornerAccents() {
+function CornerAccents({ color }: { color: string }) {
   const L = 28, T = 1.5
-  const C = '#c9a96e'
   const style: React.CSSProperties = { position: 'absolute', pointerEvents: 'none' }
   return (
     <>
       <svg width={L} height={L} viewBox={`0 0 ${L} ${L}`} style={{ ...style, top: 16, left: 16 }}>
-        <path d={`M${L} ${T} L${T} ${T} L${T} ${L}`} fill="none" stroke={C} strokeWidth={T} opacity="0.7" />
+        <path d={`M${L} ${T} L${T} ${T} L${T} ${L}`} fill="none" stroke={color} strokeWidth={T} opacity="0.7" />
       </svg>
       <svg width={L} height={L} viewBox={`0 0 ${L} ${L}`} style={{ ...style, top: 16, right: 16 }}>
-        <path d={`M0 ${T} L${L - T} ${T} L${L - T} ${L}`} fill="none" stroke={C} strokeWidth={T} opacity="0.7" />
+        <path d={`M0 ${T} L${L - T} ${T} L${L - T} ${L}`} fill="none" stroke={color} strokeWidth={T} opacity="0.7" />
       </svg>
       <svg width={L} height={L} viewBox={`0 0 ${L} ${L}`} style={{ ...style, bottom: 16, left: 16 }}>
-        <path d={`M${T} 0 L${T} ${L - T} L${L} ${L - T}`} fill="none" stroke={C} strokeWidth={T} opacity="0.7" />
+        <path d={`M${T} 0 L${T} ${L - T} L${L} ${L - T}`} fill="none" stroke={color} strokeWidth={T} opacity="0.7" />
       </svg>
       <svg width={L} height={L} viewBox={`0 0 ${L} ${L}`} style={{ ...style, bottom: 16, right: 16 }}>
-        <path d={`M${L - T} 0 L${L - T} ${L - T} L0 ${L - T}`} fill="none" stroke={C} strokeWidth={T} opacity="0.7" />
+        <path d={`M${L - T} 0 L${L - T} ${L - T} L0 ${L - T}`} fill="none" stroke={color} strokeWidth={T} opacity="0.7" />
       </svg>
     </>
   )
 }
 
-
 export default function FairePartEnvelope({
-  weddingName, dateStr, location, coupleMessage, coverImageUrl, slug, personalUrl, paid = true,
+  weddingName, dateStr, location, coupleMessage, coverImageUrl, slug, personalUrl, paid = true, theme: themeProp,
 }: Props) {
   const [phase, setPhase] = useState<Phase>('curtain-closed')
   const [showRain, setShowRain] = useState(false)
@@ -194,6 +241,11 @@ export default function FairePartEnvelope({
   const qrRef = useRef<HTMLCanvasElement>(null)
   const cardsRef = useRef<HTMLDivElement>(null)
   const [name1, name2] = parseNames(weddingName)
+
+  const themeKey: ThemeKey = (['classique', 'champetre', 'romantique'] as const).includes(themeProp as ThemeKey)
+    ? (themeProp as ThemeKey)
+    : 'classique'
+  const t = THEMES[themeKey]
 
   useEffect(() => {
     const t1 = setTimeout(() => { setPhase('opening'); setShowRain(true) }, 600)
@@ -206,10 +258,10 @@ export default function FairePartEnvelope({
     import('qrcode').then(QRCode => {
       QRCode.toCanvas(qrRef.current!, personalUrl, {
         width: 100, margin: 1,
-        color: { dark: '#2d3a22', light: '#f0ede4' },
+        color: { dark: t.qrDark, light: t.qrLight },
       }).catch(() => {})
     })
-  }, [phase, personalUrl])
+  }, [phase, personalUrl, t.qrDark, t.qrLight])
 
   const handleDownload = async () => {
     if (!cardsRef.current) return
@@ -220,11 +272,8 @@ export default function FairePartEnvelope({
         import('jspdf'),
       ])
       const canvas = await html2canvas(cardsRef.current, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: NIGHT,
-        logging: false,
+        scale: 2, useCORS: true, allowTaint: true,
+        backgroundColor: t.night, logging: false,
       })
       const imgData = canvas.toDataURL('image/jpeg', 0.93)
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
@@ -233,10 +282,8 @@ export default function FairePartEnvelope({
       const ratio = canvas.height / canvas.width
       const imgH = pdfW * ratio
       if (imgH <= pdfH) {
-        // Fits on one page — center vertically
         pdf.addImage(imgData, 'JPEG', 0, (pdfH - imgH) / 2, pdfW, imgH)
       } else {
-        // Scale down to fit page height
         const scale = pdfH / imgH
         const scaledW = pdfW * scale
         pdf.addImage(imgData, 'JPEG', (pdfW - scaledW) / 2, 0, scaledW, pdfH)
@@ -252,7 +299,7 @@ export default function FairePartEnvelope({
   return (
     <div style={{
       position: 'fixed', inset: 0,
-      background: NIGHT,
+      background: t.night,
       overflow: phase === 'revealed' ? 'auto' : 'hidden',
       display: 'flex', flexDirection: 'column', alignItems: 'center',
       justifyContent: phase === 'revealed' ? 'flex-start' : 'center',
@@ -294,29 +341,23 @@ export default function FairePartEnvelope({
         .gold-star { animation-name:gold-fall; animation-timing-function:cubic-bezier(0.25,0.46,0.45,0.94); animation-fill-mode:forwards; }
       `}</style>
 
-      {/* ── STARFIELD (always visible) ── */}
+      {/* ── STARFIELD ── */}
       <div style={{ position:'fixed', inset:0, zIndex:1, pointerEvents:'none', overflow:'hidden' }}>
-
-        {/* Radial gold glows */}
         <div className="glow" style={{ position:'absolute', top:'15%', left:'50%', transform:'translateX(-50%)',
           width:400, height:400, borderRadius:'50%',
-          background:'radial-gradient(circle, rgba(201,169,110,0.22) 0%, transparent 65%)',
+          background:`radial-gradient(circle, ${t.glowColor} 0%, transparent 65%)`,
           animationDuration:'6s', animationDelay:'0s' }} />
         <div className="glow" style={{ position:'absolute', bottom:'20%', left:'30%',
           width:250, height:250, borderRadius:'50%',
-          background:'radial-gradient(circle, rgba(201,169,110,0.14) 0%, transparent 65%)',
+          background:`radial-gradient(circle, ${t.glowColor.replace('0.22','0.14').replace('0.18','0.11').replace('0.15','0.10')} 0%, transparent 65%)`,
           animationDuration:'8s', animationDelay:'2s' }} />
-        <div className="glow" style={{ position:'absolute', top:'40%', right:'15%',
-          width:200, height:200, borderRadius:'50%',
-          background:'radial-gradient(circle, rgba(255,220,160,0.1) 0%, transparent 65%)',
-          animationDuration:'7s', animationDelay:'1s' }} />
 
-        {/* Tiny twinkling stars */}
         {STARS.map(s => (
           s.cross ? (
             <div key={s.id} className="sparkle"
               style={{ position:'absolute', left:`${s.x}%`, top:`${s.y}%`,
-                color: s.color, fontSize: s.size * 6,
+                color: t.starColors[s.id % 4],
+                fontSize: s.size * 6,
                 animationDuration:`${s.duration}s`, animationDelay:`${s.delay}s`,
                 lineHeight:1, transform:'translate(-50%,-50%)' }}>
               ✦
@@ -325,17 +366,16 @@ export default function FairePartEnvelope({
             <div key={s.id} className="twinkle"
               style={{ position:'absolute', left:`${s.x}%`, top:`${s.y}%`,
                 width: s.size, height: s.size, borderRadius:'50%',
-                background: s.color,
+                background: t.starColors[s.id % 4],
                 animationDuration:`${s.duration}s`, animationDelay:`${s.delay}s`,
                 transform:'translate(-50%,-50%)' }} />
           )
         ))}
 
-        {/* Larger gold sparkles */}
         {SPARKLES.map(s => (
           <div key={s.id} className="sparkle"
             style={{ position:'absolute', left:`${s.x}%`, top:`${s.y}%`,
-              color:'rgba(201,169,110,0.65)', fontSize: s.size,
+              color: t.sparkleColor, fontSize: s.size,
               animationDuration:`${s.duration}s`, animationDelay:`${s.delay}s`,
               lineHeight:1, transform:'translate(-50%,-50%)' }}>
             ✧
@@ -346,30 +386,28 @@ export default function FairePartEnvelope({
       {/* Curtains */}
       <div className={phase === 'opening' || phase === 'revealed' ? 'curtain-l' : ''}
         style={{ position:'absolute', top:0, left:0, width:'50%', height:'100%', zIndex:30,
-          background:'linear-gradient(180deg,#0e1a0b 0%,#060e04 100%)',
-          boxShadow:'inset -8px 0 20px rgba(0,0,0,0.6)' }} />
+          background:`linear-gradient(180deg,${t.curtain} 0%,${t.night} 100%)`,
+          boxShadow:`inset -8px 0 20px ${t.curtainShadow}` }} />
       <div className={phase === 'opening' || phase === 'revealed' ? 'curtain-r' : ''}
         style={{ position:'absolute', top:0, right:0, width:'50%', height:'100%', zIndex:30,
-          background:'linear-gradient(180deg,#0e1a0b 0%,#060e04 100%)',
-          boxShadow:'inset 8px 0 20px rgba(0,0,0,0.6)' }} />
+          background:`linear-gradient(180deg,${t.curtain} 0%,${t.night} 100%)`,
+          boxShadow:`inset 8px 0 20px ${t.curtainShadow}` }} />
 
-      {/* Gold center line */}
       {phase === 'curtain-closed' && (
         <div style={{ position:'absolute', left:'50%', top:0, width:1, height:'100%',
-          background:'rgba(201,169,110,0.4)', zIndex:35 }} />
+          background:`${t.accent}66`, zIndex:35 }} />
       )}
-
-      {/* Pulsing star */}
       {phase === 'curtain-closed' && (
         <div className="star-pulse"
-          style={{ position:'absolute', zIndex:40, color:GOLD, fontSize:'2.2rem' }}>✦</div>
+          style={{ position:'absolute', zIndex:40, color:t.accent, fontSize:'2.2rem' }}>✦</div>
       )}
 
-      {/* Pluie d'étoiles dorées */}
+      {/* Pluie de symboles */}
       {showRain && GOLD_RAIN.map(s => (
         <div key={s.id} className="gold-star"
           style={{ position:'absolute', top:0, left:`${s.left}%`,
-            color: s.color, fontSize: s.size, lineHeight:1,
+            color: t.starColors[s.id % t.starColors.length],
+            fontSize: s.size, lineHeight:1,
             opacity: s.opacity, zIndex:28, pointerEvents:'none',
             animationDuration:`${s.duration}s`, animationDelay:`${s.delay}s`,
             ['--drift' as string]: `${s.drift}px`,
@@ -402,53 +440,49 @@ export default function FairePartEnvelope({
         <div style={{ position:'relative', zIndex:10, width:'100%', maxWidth:440,
           margin:'0 auto', padding:'28px 16px 60px' }}>
 
-          {/* Cards wrapper — captured by html2canvas */}
-          <div ref={cardsRef} style={{ background: NIGHT, padding: '20px 0 20px' }}>
+          <div ref={cardsRef} style={{ background: t.night, padding: '20px 0 20px' }}>
 
           {/* ── RECTO ── */}
           <div className="card-rise" style={{
-            background: BG,
+            background: t.bg,
             borderRadius: 3,
             boxShadow: '0 24px 64px rgba(0,0,0,0.5)',
             padding: '36px 20px 44px',
             textAlign: 'center',
             marginBottom: 4,
-            border: '1px solid rgba(201,169,110,0.15)',
+            border: `1px solid ${t.borderColor}`,
           }}>
-            {/* Top text */}
-            <p style={{ color:'rgba(255,255,255,0.82)', fontFamily:'Georgia, serif',
+            <p style={{ color: t.textColor, fontFamily:'Georgia, serif',
               fontStyle:'italic', fontSize:'1rem', margin:'0 0 28px' }}>
               Vous êtes invités au mariage de
             </p>
 
-            {/* Ring */}
             <div style={{ position:'relative', width:RING, height:RING, margin:'0 auto 28px' }}>
               <GoldRingDecor size={RING} />
               <TopLeavesSVG size={RING} />
               <BottomLeavesSVG size={RING} />
               <GoldLeafSVG />
 
-              {/* Names */}
               <div style={{ position:'absolute', inset:0, display:'flex', flexDirection:'column',
                 alignItems:'center', justifyContent:'center', gap:2 }}>
-                <p style={{ color:'#fff', fontFamily:'Georgia, serif', fontWeight:600,
+                <p style={{ color: t.textColor, fontFamily:'Georgia, serif', fontWeight:600,
                   fontSize:'clamp(1.2rem,5vw,1.65rem)', letterSpacing:'0.12em',
                   textTransform:'uppercase', margin:0, lineHeight:1.1 }}>
                   {name1}
                 </p>
-                <p style={{ color:GOLD, fontFamily:'Georgia, serif', fontSize:'1.1rem',
+                <p style={{ color: t.accent, fontFamily:'Georgia, serif', fontSize:'1.1rem',
                   margin:'3px 0', lineHeight:1 }}>
                   &amp;
                 </p>
                 {name2 && (
-                  <p style={{ color:'#fff', fontFamily:'Georgia, serif', fontWeight:600,
+                  <p style={{ color: t.textColor, fontFamily:'Georgia, serif', fontWeight:600,
                     fontSize:'clamp(1.2rem,5vw,1.65rem)', letterSpacing:'0.12em',
                     textTransform:'uppercase', margin:0, lineHeight:1.1 }}>
                     {name2}
                   </p>
                 )}
                 {dateStr && (
-                  <p style={{ color:'rgba(255,255,255,0.78)', fontFamily:'Georgia, serif',
+                  <p style={{ color: t.textColor, fontFamily:'Georgia, serif',
                     fontStyle:'italic', fontSize:'0.85rem', marginTop:10, lineHeight:1.4,
                     padding:'0 20px' }}>
                     {dateStr.charAt(0).toUpperCase() + dateStr.slice(1)}
@@ -457,31 +491,29 @@ export default function FairePartEnvelope({
               </div>
             </div>
 
-            {/* Location */}
             {location && (
-              <p style={{ color:'rgba(255,255,255,0.7)', fontFamily:'Georgia, serif',
+              <p style={{ color: t.subtleText, fontFamily:'Georgia, serif',
                 fontStyle:'italic', fontSize:'0.9rem', lineHeight:1.7, margin:0 }}>
                 {location}
               </p>
             )}
-            <p style={{ color:'rgba(255,255,255,0.45)', fontFamily:'Georgia, serif',
+            <p style={{ color: t.subtleText, fontFamily:'Georgia, serif',
               fontStyle:'italic', fontSize:'0.78rem', marginTop:8 }}>
               pour célébrer ce moment d&apos;amour
             </p>
           </div>
 
           {/* ── VERSO ── */}
-          <div style={{ position:'relative', background:'#4c5a3b', borderRadius:3,
+          <div style={{ position:'relative', background: t.bg, borderRadius:3,
             padding:'50px 32px 52px', textAlign:'center', marginBottom:20,
             boxShadow:'0 24px 64px rgba(0,0,0,0.5)',
-            border:'1px solid rgba(201,169,110,0.15)' }}>
-            <CornerAccents />
+            border: `1px solid ${t.borderColor}` }}>
+            <CornerAccents color={t.accent} />
 
-            {/* Message */}
             {coupleMessage ? (
               <div style={{ position:'relative', zIndex:1, padding:'10px 16px' }}>
                 {coupleMessage.split('\n').filter(Boolean).map((line, i) => (
-                  <p key={i} style={{ color:'rgba(255,255,255,0.88)', fontFamily:'Georgia, serif',
+                  <p key={i} style={{ color: t.textColor, fontFamily:'Georgia, serif',
                     fontStyle:'italic', fontSize:'0.95rem', lineHeight:1.85,
                     margin:'0 0 10px' }}>
                     {line}
@@ -489,41 +521,46 @@ export default function FairePartEnvelope({
                 ))}
               </div>
             ) : (
-              <p style={{ color:'rgba(255,255,255,0.5)', fontFamily:'Georgia, serif',
+              <p style={{ color: t.subtleText, fontFamily:'Georgia, serif',
                 fontStyle:'italic', fontSize:'0.9rem' }}>
                 Nous sommes ravis de vous compter parmi nous.
               </p>
             )}
 
-            {/* Confirm */}
             <div style={{ position:'relative', zIndex:1, marginTop:24 }}>
-              <p style={{ color:'rgba(255,255,255,0.7)', fontFamily:'Arial, sans-serif',
+              <p style={{ color: t.confirmText, fontFamily:'Arial, sans-serif',
                 fontWeight:300, fontSize:'0.62rem', letterSpacing:'0.16em',
                 textTransform:'uppercase', margin:'0 0 4px' }}>
                 Merci de nous confirmer votre présence
               </p>
-              <p style={{ color:GOLD, fontSize:'1.1rem', margin:'0 0 14px' }}>↓</p>
+              <p style={{ color: t.accent, fontSize:'1.1rem', margin:'0 0 14px' }}>↓</p>
 
-              {/* QR */}
-              <canvas ref={qrRef} width={100} height={100}
-                style={{ borderRadius:8, display:'block', margin:'0 auto' }} />
+              {/* QR clickable — redirige vers espace invité */}
+              <a href={personalUrl} target="_blank" rel="noopener noreferrer"
+                 style={{ display:'block', width:100, margin:'0 auto', borderRadius:8, overflow:'hidden',
+                   cursor:'pointer', transition:'opacity 0.2s', opacity:1 }}
+                 onMouseOver={e => (e.currentTarget.style.opacity = '0.85')}
+                 onMouseOut={e => (e.currentTarget.style.opacity = '1')}
+                 title="Ouvrir mon espace invité">
+                <canvas ref={qrRef} width={100} height={100}
+                  style={{ borderRadius:8, display:'block' }} />
+              </a>
 
-              {/* Hearts */}
               <div style={{ display:'flex', justifyContent:'center', gap:8, marginTop:8,
-                color:'rgba(201,169,110,0.55)', fontSize:'12px' }}>
+                color:`${t.accent}88`, fontSize:'12px' }}>
                 <span>♡</span><span>♡</span><span>♡</span>
               </div>
             </div>
           </div>
-          </div>{/* end cardsRef */}
+          </div>
 
           {/* Buttons */}
           <div className="fade-up" style={{ display:'flex', flexDirection:'column',
             alignItems:'center', gap:10 }}>
             {paid ? (
               <button onClick={handleDownload} disabled={downloading}
-                style={{ background:GOLD, color:'#2d3a22', borderRadius:10,
-                  padding:'11px 32px', fontSize:'0.82rem',
+                style={{ background: t.accent, color: themeKey === 'champetre' ? '#2d4018' : '#2d3a22',
+                  borderRadius:10, padding:'11px 32px', fontSize:'0.82rem',
                   fontFamily:'var(--font-lato)', fontWeight:600,
                   border:'none', cursor:'pointer', letterSpacing:'0.05em',
                   opacity: downloading ? 0.6 : 1 }}>

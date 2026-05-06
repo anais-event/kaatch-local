@@ -122,11 +122,11 @@ export default function ImportGuests({ weddingId, slug }: { weddingId: string; s
   const preview = step !== 'upload' ? applyMapping().slice(0, 5) : []
 
   return (
-    <div className="mb-6">
+    <div>
       <button
         onClick={() => { setOpen(!open); if (!open) setStep('upload') }}
-        className="text-sm border border-[#4a5240] text-[#4a5240] px-4 py-2 rounded-lg hover:bg-[#4a5240] hover:text-white transition cursor-pointer"
-        style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, letterSpacing: '0.05em' }}>
+        className="text-xs text-stone-400 hover:text-[#4a5240] transition cursor-pointer underline underline-offset-2"
+        style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, background: 'transparent', border: 'none' }}>
         Importer depuis Excel / Google Sheets
       </button>
 

@@ -207,8 +207,6 @@ export default async function GuestsPage({
         {/* ── TAB LISTE ── */}
         {tab === 'liste' && (
           <>
-            <ImportGuests weddingId={wedding.id} slug={slug} />
-
             <AddGuestForm
               weddingId={wedding.id}
               slug={slug}
@@ -217,20 +215,22 @@ export default async function GuestsPage({
               paid={paid}
             />
 
-            <GuestListSection total={total}>
-              <GuestList
-                guests={guestList}
-                tables={tables ?? []}
-                slug={slug}
-                baseUrl={baseUrl}
-                wedding={weddingPreview}
-                setRsvp={setRsvp}
-                deleteGuest={deleteGuest}
-                updateGuest={updateGuest}
-                paid={paid}
-                weddingId={wedding.id}
-              />
-            </GuestListSection>
+            <GuestList
+              guests={guestList}
+              tables={tables ?? []}
+              slug={slug}
+              baseUrl={baseUrl}
+              wedding={weddingPreview}
+              setRsvp={setRsvp}
+              deleteGuest={deleteGuest}
+              updateGuest={updateGuest}
+              paid={paid}
+              weddingId={wedding.id}
+            />
+
+            <div className="mt-6 text-center">
+              <ImportGuests weddingId={wedding.id} slug={slug} />
+            </div>
           </>
         )}
 

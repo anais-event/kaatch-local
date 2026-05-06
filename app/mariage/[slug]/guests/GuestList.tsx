@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from 'react'
 import CopyLinkButton from './CopyLinkButton'
-import PublipostagePanel from './PublipostagePanel'
 
 const PARTS_LABELS: Record<string, string> = {
   ceremonie: 'Cérémonie',
@@ -130,8 +129,6 @@ export default function GuestList({ guests: initialGuests, tables, slug, baseUrl
 
   return (
     <div>
-      <PublipostagePanel guests={guests} weddingId={resolvedWeddingId} slug={slug} />
-
       {/* Filtres + recherche */}
       <div className="space-y-3 mb-4">
         {/* Tabs filtre */}

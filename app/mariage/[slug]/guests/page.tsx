@@ -6,6 +6,8 @@ import GuestListSection from './GuestListSection'
 import ImportGuests from './ImportGuests'
 import AddGuestForm from './AddGuestForm'
 import ExportGuestsButton from './ExportGuestsButton'
+import InvitationsTab from './InvitationsTab'
+import PublipostagePanel from './PublipostagePanel'
 import { isPaid, FREE_GUEST_LIMIT } from '@/lib/plan'
 
 async function addGuest(formData: FormData) {
@@ -87,10 +89,32 @@ async function generateTokens(formData: FormData) {
   revalidatePath(`/mariage/${slug}/guests`)
 }
 
-const RELATIONS = ['Ami(e)', 'Frère', 'Sœur', 'Père', 'Mère', 'Oncle', 'Tante', 'Cousin(e)', 'Collègue', 'Autre']
+type Tab = 'liste' | 'invitations' | 'synthese'
+const TABS: { key: Tab; label: string }[] = [
+  { key: 'liste',        label: 'Liste' },
+  { key: 'invitations',  label: 'Faire-part' },
+  { key: 'synthese',     label: 'Synthèse' },
+]
 
-export default async function GuestsPage({ params }: { params: Promise<{ slug: string }> }) {
+const PARTS_LABELS: Record<string, string> = {
+  ceremonie:    'Cérémonie',
+  vin_honneur:  'Vin d\'honneur',
+  reception:    'Réception',
+}
+
+export default async function GuestsPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>
+  searchParams: Promise<{ tab?: string }>
+}) {
   const { slug } = await params
+  const { tab: tabParam = 'liste' } = await searchParams
+  const tab: Tab = (['liste', 'invitations', 'synthese'] as const).includes(tabParam as Tab)
+    ? (tabParam as Tab)
+    : 'liste'
+
   const supabase = await createSupabaseServerClient()
 
   const { data: wedding } = await supabase
@@ -99,18 +123,19 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
     .eq('slug', slug)
     .single()
 
-  if (!wedding) return <div className="p-8">Mariage introuvable 😢</div>
+  if (!wedding) return <div className="p-8">Mariage introuvable</div>
 
   const [{ data: guests }, { data: tables }] = await Promise.all([
     supabase.from('guests').select('*').eq('wedding_id', wedding.id).order('first_name', { ascending: true }),
     supabase.from('seating_tables').select('id, name').eq('wedding_id', wedding.id),
   ])
 
-  const total = guests?.length ?? 0
-  const confirmed = guests?.filter(g => g.rsvp_status === 'confirme').length ?? 0
-  const declined = guests?.filter(g => g.rsvp_status === 'decline').length ?? 0
-  const pending = guests?.filter(g => g.rsvp_status === 'en_attente').length ?? 0
-  const withoutToken = (guests ?? []).filter(g => !g.invite_token)
+  const guestList = guests ?? []
+  const total = guestList.length
+  const confirmed = guestList.filter(g => g.rsvp_status === 'confirme').length
+  const declined  = guestList.filter(g => g.rsvp_status === 'decline').length
+  const pending   = guestList.filter(g => g.rsvp_status === 'en_attente').length
+  const withoutToken = guestList.filter(g => !g.invite_token)
 
   const h = await headers()
   const host = h.get('host') ?? 'kaatch.fr'
@@ -124,87 +149,225 @@ export default async function GuestsPage({ params }: { params: Promise<{ slug: s
     coupleMessage: wedding.couple_message,
   }
 
+  const paid = isPaid(wedding.plan)
+
   return (
-    <div className="min-h-screen bg-[#f5f0e8] p-4 md:p-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-[#f5f0e8] p-4 md:p-8" style={{ fontFamily: 'var(--font-lato)' }}>
+      <div className="max-w-3xl mx-auto">
 
         <div className="mb-4">
-          <a href={`/mariage/${slug}`} className="text-sm text-[#4a5240] hover:underline"
-             style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
-            ← Retour aux préparatifs
+          <a href={`/mariage/${slug}`} className="text-sm text-[#4a5240] hover:underline" style={{ fontWeight: 300 }}>
+            ← Retour au dashboard
           </a>
         </div>
 
-        <div className="flex items-center justify-between mb-5">
-          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '2rem' }}
+        {/* Header */}
+        <div className="flex items-baseline justify-between mb-6">
+          <h1 style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontWeight: 300, fontSize: 'clamp(2rem, 6vw, 2.8rem)', lineHeight: 1 }}
               className="text-[#2d3228]">
-            Invités {total > 0 && <span style={{ fontSize: '1.2rem' }} className="text-stone-400">({total})</span>}
+            Invités
+            {total > 0 && (
+              <span style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '1rem' }}
+                    className="text-stone-400 ml-2 not-italic">
+                {total}
+              </span>
+            )}
           </h1>
-          {total > 0 && <ExportGuestsButton guests={guests ?? []} weddingName={wedding.name} />}
+          {tab === 'liste' && total > 0 && (
+            <ExportGuestsButton guests={guestList} weddingName={wedding.name} />
+          )}
         </div>
 
-        {/* ── RSVP Stats ── */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
-          {[
-            { label: `Confirmé${confirmed > 1 ? 's' : ''}`, value: confirmed, color: 'text-[#4a5240]' },
-            { label: 'En attente', value: pending, color: 'text-stone-400' },
-            { label: `Décliné${declined > 1 ? 's' : ''}`, value: declined, color: 'text-red-400' },
-          ].map(s => (
-            <div key={s.label} className="bg-white rounded-xl border border-stone-100 p-3 text-center">
-              <p className={`text-2xl font-bold ${s.color}`} style={{ fontFamily: 'var(--font-display)' }}>{s.value}</p>
-              <p className="text-[10px] text-stone-400 uppercase tracking-wide mt-0.5"
-                 style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>{s.label}</p>
-            </div>
+        {/* Tab navigation */}
+        <div className="flex border-b border-stone-200 mb-6">
+          {TABS.map(t => (
+            <a key={t.key}
+               href={`?tab=${t.key}`}
+               className={`px-5 py-3 text-sm transition border-b-2 -mb-px ${
+                 tab === t.key
+                   ? 'border-[#4a5240] text-[#4a5240]'
+                   : 'border-transparent text-stone-400 hover:text-stone-600'
+               }`}
+               style={{ fontWeight: tab === t.key ? 400 : 300 }}>
+              {t.label}
+            </a>
           ))}
         </div>
 
-        {/* ── Générer les liens ── */}
-        {withoutToken.length > 0 && (
-          <div className="mb-4 flex items-center justify-between bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 flex-wrap gap-2">
-            <p className="text-xs text-amber-700" style={{ fontWeight: 300 }}>
-              {withoutToken.length} invité{withoutToken.length > 1 ? 's' : ''} sans lien d'invitation
-            </p>
-            <form action={generateTokens}>
-              <input type="hidden" name="slug" value={slug} />
-              <button type="submit"
-                className="bg-[#4a5240] text-white px-4 py-1.5 rounded-xl text-xs hover:bg-[#2d3228] transition cursor-pointer whitespace-nowrap"
-                style={{ fontWeight: 300 }}>
-                Générer les liens ({withoutToken.length})
-              </button>
-            </form>
+        {/* ── TAB LISTE ── */}
+        {tab === 'liste' && (
+          <>
+            <ImportGuests weddingId={wedding.id} slug={slug} />
+
+            <AddGuestForm
+              weddingId={wedding.id}
+              slug={slug}
+              addGuest={addGuest}
+              guestCount={total}
+              paid={paid}
+            />
+
+            <GuestListSection total={total}>
+              <GuestList
+                guests={guestList}
+                tables={tables ?? []}
+                slug={slug}
+                baseUrl={baseUrl}
+                wedding={weddingPreview}
+                setRsvp={setRsvp}
+                deleteGuest={deleteGuest}
+                updateGuest={updateGuest}
+                paid={paid}
+                weddingId={wedding.id}
+              />
+            </GuestListSection>
+          </>
+        )}
+
+        {/* ── TAB INVITATIONS ── */}
+        {tab === 'invitations' && (
+          <div className="space-y-6">
+            {withoutToken.length > 0 && (
+              <div className="flex items-center justify-between bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 flex-wrap gap-2">
+                <p className="text-xs text-amber-700" style={{ fontWeight: 300 }}>
+                  {withoutToken.length} invité{withoutToken.length > 1 ? 's' : ''} sans lien personnel — générez-les pour pouvoir envoyer les faire-parts.
+                </p>
+                <form action={generateTokens}>
+                  <input type="hidden" name="slug" value={slug} />
+                  <button type="submit"
+                    className="bg-[#4a5240] text-white px-4 py-1.5 rounded-xl text-xs hover:bg-[#2d3228] transition cursor-pointer whitespace-nowrap"
+                    style={{ fontWeight: 300 }}>
+                    Générer les liens ({withoutToken.length})
+                  </button>
+                </form>
+              </div>
+            )}
+
+            <InvitationsTab
+              guests={guestList}
+              slug={slug}
+              baseUrl={baseUrl}
+              wedding={weddingPreview}
+              weddingId={wedding.id}
+              paid={paid}
+            />
+
+            <div>
+              <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
+                 className="text-stone-400 uppercase mb-3">
+                Envoi groupé
+              </p>
+              <PublipostagePanel guests={guestList} weddingId={wedding.id} slug={slug} />
+            </div>
           </div>
         )}
-        {withoutToken.length === 0 && total > 0 && (
-          <p className="text-xs text-emerald-600 mb-4" style={{ fontWeight: 300 }}>✓ Tous les liens d'invitation sont prêts</p>
+
+        {/* ── TAB SYNTHÈSE ── */}
+        {tab === 'synthese' && (
+          <div className="space-y-5">
+
+            {/* RSVP */}
+            <div className="bg-white rounded-2xl border border-stone-100 p-5">
+              <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
+                 className="text-stone-400 uppercase mb-4">
+                RSVP
+              </p>
+              <div className="space-y-3">
+                {[
+                  { label: 'Confirmés',  value: confirmed, total, color: '#4ade80' },
+                  { label: 'En attente', value: pending,   total, color: '#d6d3d1' },
+                  { label: 'Déclinés',   value: declined,  total, color: '#fca5a5' },
+                ].map(s => (
+                  <div key={s.label}>
+                    <div className="flex justify-between mb-1">
+                      <span style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-600">{s.label}</span>
+                      <span style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-400 tabular-nums">
+                        {s.value} / {s.total}
+                      </span>
+                    </div>
+                    <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden">
+                      <div className="h-full rounded-full transition-all"
+                           style={{ width: `${s.total > 0 ? (s.value / s.total) * 100 : 0}%`, backgroundColor: s.color }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Type invités */}
+            {total > 0 && (() => {
+              const adultes = guestList.filter(g => (g as { guest_type?: string }).guest_type !== 'enfant').length
+              const enfants = guestList.filter(g => (g as { guest_type?: string }).guest_type === 'enfant').length
+              return (
+                <div className="bg-white rounded-2xl border border-stone-100 p-5">
+                  <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
+                     className="text-stone-400 uppercase mb-4">
+                    Composition
+                  </p>
+                  <div className="flex gap-6">
+                    {[
+                      { label: 'Adultes', value: adultes },
+                      { label: 'Enfants', value: enfants },
+                    ].map(s => (
+                      <div key={s.label}>
+                        <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '2rem', lineHeight: 1 }}
+                           className="text-[#2d3228]">
+                          {s.value}
+                        </p>
+                        <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mt-0.5">{s.label}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            })()}
+
+            {/* Parts invitées */}
+            {total > 0 && (
+              <div className="bg-white rounded-2xl border border-stone-100 p-5">
+                <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
+                   className="text-stone-400 uppercase mb-4">
+                  Par moment
+                </p>
+                <div className="space-y-2">
+                  {(['ceremonie', 'vin_honneur', 'reception'] as const).map(part => {
+                    const count = guestList.filter(g => {
+                      const parts = (g as { invited_parts?: string[] }).invited_parts
+                      return !parts || parts.includes(part)
+                    }).length
+                    return (
+                      <div key={part} className="flex items-center gap-3">
+                        <span style={{ fontWeight: 300, fontSize: '0.78rem', width: '8rem', flexShrink: 0 }}
+                              className="text-stone-500">
+                          {PARTS_LABELS[part]}
+                        </span>
+                        <div className="flex-1 h-1.5 bg-stone-100 rounded-full overflow-hidden">
+                          <div className="h-full bg-[#4a5240] rounded-full"
+                               style={{ width: `${total > 0 ? (count / total) * 100 : 0}%` }} />
+                        </div>
+                        <span style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-stone-400 tabular-nums w-6 text-right">
+                          {count}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Export */}
+            {total > 0 && (
+              <div className="bg-white rounded-2xl border border-stone-100 p-5">
+                <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
+                   className="text-stone-400 uppercase mb-3">
+                  Export
+                </p>
+                <ExportGuestsButton guests={guestList} weddingName={wedding.name} />
+              </div>
+            )}
+
+          </div>
         )}
-
-        {/* ── Import Excel ── */}
-        <ImportGuests weddingId={wedding.id} slug={slug} />
-
-        {/* ── Formulaire d'ajout (collapsible) ── */}
-        <AddGuestForm
-          weddingId={wedding.id}
-          slug={slug}
-          addGuest={addGuest}
-          guestCount={total}
-          paid={isPaid(wedding.plan)}
-        />
-
-        {/* ── Tableau unifié invités ── */}
-        <GuestListSection total={total}>
-          <GuestList
-            guests={guests ?? []}
-            tables={tables ?? []}
-            slug={slug}
-            baseUrl={baseUrl}
-            wedding={weddingPreview}
-            setRsvp={setRsvp}
-            deleteGuest={deleteGuest}
-            updateGuest={updateGuest}
-            paid={isPaid(wedding.plan)}
-            weddingId={wedding.id}
-          />
-        </GuestListSection>
 
       </div>
     </div>

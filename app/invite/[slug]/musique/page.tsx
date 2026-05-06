@@ -86,6 +86,7 @@ export default async function MusiqueGuestPage({ params }: { params: Promise<{ s
       artist: (formData.get('artist') as string)?.trim() || null,
       moment: (formData.get('moment') as string) || null,
       notes: (formData.get('notes') as string)?.trim() || null,
+      song_url: (formData.get('song_url') as string)?.trim() || null,
       suggested_by: guestName,
     })
     revalidatePath(`/invite/${slug}/musique`)
@@ -170,6 +171,12 @@ export default async function MusiqueGuestPage({ params }: { params: Promise<{ s
                 <option key={m.key} value={m.key}>{m.emoji} {m.label}</option>
               ))}
             </select>
+            <input
+              name="song_url"
+              placeholder="Lien Spotify / Deezer / YouTube (optionnel)"
+              className="w-full border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-700 placeholder:text-stone-300 focus:outline-none focus:border-[#4a5240] transition"
+              style={{ fontWeight: 300 }}
+            />
             <textarea
               name="notes"
               placeholder="Un petit mot pour les mariés ? (optionnel)"

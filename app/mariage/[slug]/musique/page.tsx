@@ -15,6 +15,7 @@ async function addSong(formData: FormData) {
     title: formData.get('title') as string,
     artist: (formData.get('artist') as string) || null,
     notes: (formData.get('notes') as string) || null,
+    song_url: (formData.get('song_url') as string) || null,
     position: Number(formData.get('position') ?? 0),
   })
   revalidatePath(`/mariage/${slug}/musique`)
@@ -35,6 +36,7 @@ async function updateSong(formData: FormData) {
     title: formData.get('title') as string,
     artist: (formData.get('artist') as string) || null,
     notes: (formData.get('notes') as string) || null,
+    song_url: (formData.get('song_url') as string) || null,
     moment: moment || null,
   }).eq('id', formData.get('id') as string)
   revalidatePath(`/mariage/${formData.get('slug') as string}/musique`)

@@ -60,7 +60,7 @@ export default function ChecklistClient({ tasks, addTask, toggleTask, deleteTask
 
       {/* Header */}
       <div className="mb-6">
-        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '2rem' }}
+        <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.4rem' }}
             className="text-[#2d3228] mb-1">Checklist Jour J</h1>
         <p style={{ fontWeight: 300, fontSize: '0.85rem' }} className="text-stone-400">
           Organisez les tâches par moment et assignez-les à vos témoins, prestataires ou proches.

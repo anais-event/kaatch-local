@@ -75,7 +75,7 @@ export default async function HebergementsPage({ params }: { params: Promise<{ s
           </a>
         </div>
 
-        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '2.5rem' }}
+        <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.4rem' }}
             className="text-[#2d3228] mb-4">
           Hébergements
         </h1>

@@ -45,7 +45,7 @@ export default async function GuestHebergementsPage({ params }: { params: Promis
           </a>
         </div>
 
-        <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 700, fontSize: '2rem' }}
+        <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.5rem' }}
             className="text-[#2d3228] mb-2">
           Hébergements
         </h1>

@@ -41,7 +41,7 @@ export default async function PartagerPage({ params }: { params: Promise<{ slug:
           </a>
         </div>
 
-        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '2rem' }}
+        <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.4rem' }}
             className="text-[#2d3228] mb-1">
           Partager avec tes invités
         </h1>

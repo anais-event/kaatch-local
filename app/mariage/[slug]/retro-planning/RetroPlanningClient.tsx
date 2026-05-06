@@ -292,7 +292,7 @@ export default function RetroPlanningClient({
       {/* ── Header ── */}
       <div className="mb-8">
         <h1
-          style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontWeight: 300, fontSize: 'clamp(2.4rem, 7vw, 3.4rem)', lineHeight: 1.05, letterSpacing: '-0.01em' }}
+          style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.4rem' }}
           className="text-[#2d3228]">
           Guide de préparation
         </h1>

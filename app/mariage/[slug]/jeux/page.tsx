@@ -126,7 +126,7 @@ export default async function JeuxPage({ params }: { params: Promise<{ slug: str
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
       <div className="max-w-3xl mx-auto px-6 pt-8 pb-24">
 
-        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '2.2rem' }}
+        <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.4rem' }}
             className="text-[#2d3228] mb-1">Idées de jeux & animations</h1>
         <p style={{ fontWeight: 300, fontSize: '0.85rem' }} className="text-stone-400 mb-10">
           Des idées testées et approuvées, par moment de la journée. Partagez vos coups de cœur avec vos témoins !

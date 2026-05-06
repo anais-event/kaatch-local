@@ -41,7 +41,7 @@ export default function ProgrammeClient({ slug, steps, icons, addStep, deleteSte
         </div>
 
         <div className="flex items-center justify-between mb-8">
-          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '2.5rem' }}
+          <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.4rem' }}
               className="text-[#2d3228]">
             Programme de la journée
           </h1>

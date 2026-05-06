@@ -34,7 +34,7 @@ export default async function GuestProgrammePage({ params }: { params: Promise<{
           <ProgrammePDF slug={slug} weddingName={wedding.name} steps={steps ?? []} />
         </div>
 
-        <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 700, fontSize: '2rem' }}
+        <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.5rem' }}
             className="text-[#2d3228] mb-8">
           Programme de la journée
         </h1>

@@ -196,7 +196,10 @@ export default function RetroPlanningClient({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ weddingId, periodId, title: newTitle.trim(), assigned_to: newAssignee.trim() || null, deadline: newDeadline || null }),
     })
-    if (res.ok) setCustomTasks(prev => [...prev, await res.json()])
+    if (res.ok) {
+      const task = await res.json()
+      setCustomTasks(prev => [...prev, task])
+    }
     setNewTitle(''); setNewAssignee(''); setNewDeadline(''); setAddingTo(null)
   }
 

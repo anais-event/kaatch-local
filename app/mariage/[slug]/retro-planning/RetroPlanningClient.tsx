@@ -56,12 +56,19 @@ function CheckCircle({ checked, onChange, saving, color }: {
 }) {
   return (
     <button type="button" onClick={onChange} disabled={saving}
-      className="w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all duration-200 cursor-pointer disabled:cursor-wait"
-      style={{ backgroundColor: checked ? color : 'white', borderColor: checked ? color : '#e7e5e4' }}>
+      className="w-4 h-4 rounded flex-shrink-0 flex items-center justify-center transition-all duration-150 cursor-pointer disabled:cursor-wait"
+      style={{
+        backgroundColor: 'white',
+        borderWidth: '1.5px',
+        borderStyle: 'solid',
+        borderColor: checked ? color : '#d6d3d1',
+      }}>
       {saving
-        ? <div className="w-1.5 h-1.5 rounded-full bg-stone-300 animate-pulse" />
+        ? <div className="w-1 h-1 rounded-full bg-stone-300 animate-pulse" />
         : checked
-          ? <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={3} className="w-2.5 h-2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+          ? <svg viewBox="0 0 24 24" fill="none" strokeWidth={3} className="w-2.5 h-2.5" style={{ stroke: color }}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
           : null}
     </button>
   )
@@ -73,35 +80,36 @@ function DeadlineChip({ value, onChange, color, overdueable = true }: {
   color: string
   overdueable?: boolean
 }) {
+  const inputRef = useRef<HTMLInputElement>(null)
   const overdue = overdueable && value && isOverdue(value)
   return (
     <div className="relative flex-shrink-0">
       <input
+        ref={inputRef}
         type="date"
         value={value ?? ''}
         onChange={e => onChange(e.target.value)}
-        className="opacity-0 absolute inset-0 w-full h-full cursor-pointer z-10"
+        className="absolute opacity-0 pointer-events-none w-px h-px"
+        tabIndex={-1}
       />
-      <span
-        className="flex items-center gap-1 px-2.5 py-1 rounded-full cursor-pointer select-none whitespace-nowrap"
+      <button
+        type="button"
+        onClick={() => inputRef.current?.showPicker()}
+        className="flex items-center gap-1 px-2 py-0.5 rounded cursor-pointer select-none whitespace-nowrap transition-colors"
         style={{
           fontFamily: 'var(--font-lato)',
           fontWeight: 300,
-          fontSize: '0.7rem',
-          background: value
-            ? (overdue ? '#fef2f2' : `${color}15`)
-            : '#f5f5f4',
-          color: value
-            ? (overdue ? '#dc2626' : color)
-            : '#a8a29e',
-          border: `1px solid ${value ? (overdue ? '#fecaca' : `${color}30`) : '#e7e5e4'}`,
+          fontSize: '0.68rem',
+          background: value ? (overdue ? '#fef2f2' : `${color}10`) : 'transparent',
+          color: value ? (overdue ? '#dc2626' : color) : '#c7c3c0',
+          border: `1px solid ${value ? (overdue ? '#fecaca' : `${color}25`) : '#e7e5e4'}`,
         }}
       >
         {value
-          ? <><span style={{ fontSize: '0.6rem' }}>{overdue ? '!' : '◆'}</span>{formatDate(value)}</>
-          : <><span style={{ fontSize: '0.7rem' }}>+</span> date</>
+          ? <>{overdue ? <span style={{ fontSize: '0.55rem', marginRight: 1 }}>▲</span> : null}{formatDate(value)}</>
+          : '+ date'
         }
-      </span>
+      </button>
     </div>
   )
 }
@@ -295,27 +303,21 @@ export default function RetroPlanningClient({
 
       {/* ── Barre de progression + vue toggle ── */}
       <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-5 mb-6">
-        <div className="flex items-end justify-between mb-2">
-          <div className="flex items-baseline gap-2.5">
-            <span
-              style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '2.8rem', lineHeight: 1 }}
-              className="text-[#4a5240]">
-              {pct}<span style={{ fontSize: '1.4rem' }}>%</span>
-            </span>
-            <span style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-400 mb-1">
-              {doneTasks} / {totalTasks} tâches
-            </span>
-          </div>
-          {pct === 100 && (
-            <span style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-emerald-500 mb-1">
-              Tout est prêt ✓
-            </span>
-          )}
+        <div className="flex items-center justify-between mb-3">
+          <span style={{ fontWeight: 300, fontSize: '0.7rem', letterSpacing: '0.12em', textTransform: 'uppercase' }} className="text-stone-400">
+            Avancement
+          </span>
+          <span style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-400 tabular-nums">
+            {pct === 100
+              ? <span className="text-emerald-500">Tout est prêt ✓</span>
+              : <>{doneTasks} / {totalTasks} tâches</>
+            }
+          </span>
         </div>
-        <div className="h-1 bg-stone-100 rounded-full overflow-hidden mb-4">
+        <div className="h-px bg-stone-100 rounded-full overflow-hidden mb-4">
           <div
-            className="h-full rounded-full transition-all duration-700"
-            style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #4a5240 0%, #7a9068 100%)' }}
+            className="h-full transition-all duration-700"
+            style={{ width: `${pct}%`, backgroundColor: '#4a5240' }}
           />
         </div>
 
@@ -369,46 +371,34 @@ export default function RetroPlanningClient({
                 <div key={period.id} className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
 
                   {/* Period header */}
-                  <div className="flex items-center gap-0 pl-0 pr-4 py-0">
+                  <div className="flex items-center gap-0">
                     {/* Colored accent bar */}
                     <div className="w-1 self-stretch rounded-l-2xl flex-shrink-0" style={{ backgroundColor: color }} />
 
                     <button type="button" onClick={() => toggleCollapse(period.id)}
-                      className="flex-1 flex items-center gap-3 px-4 py-4 text-left cursor-pointer">
-                      <span style={{ fontSize: '1.1rem', lineHeight: 1 }}>{period.emoji}</span>
+                      className="flex-1 flex items-center gap-4 px-5 py-4 text-left cursor-pointer">
                       <div className="flex-1 min-w-0">
                         <p
-                          style={{ fontFamily: 'var(--font-cormorant)', fontWeight: allDone ? 400 : 500, fontSize: '1.05rem', lineHeight: 1.2 }}
-                          className={allDone ? 'text-stone-400' : 'text-[#2d3228]'}>
+                          style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.1rem', lineHeight: 1.2, letterSpacing: '-0.01em' }}
+                          className={allDone ? 'text-stone-300' : 'text-[#2d3228]'}>
                           {period.label}
                         </p>
-                        {allDone && (
-                          <p style={{ fontWeight: 300, fontSize: '0.65rem', marginTop: '0.1rem' }} className="text-emerald-400">
-                            Terminé ✓
-                          </p>
-                        )}
                       </div>
 
-                      {/* Counter pill */}
                       <span
-                        className="rounded-full px-2.5 py-0.5 flex-shrink-0"
-                        style={{
-                          fontWeight: 300,
-                          fontSize: '0.68rem',
-                          background: allDone ? '#d1fae5' : `${color}15`,
-                          color: allDone ? '#059669' : color,
-                        }}>
+                        className="flex-shrink-0 tabular-nums"
+                        style={{ fontWeight: 300, fontSize: '0.7rem', color: allDone ? '#86efac' : '#a8a29e' }}>
                         {doneP}/{totalP}
                       </span>
 
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}
-                        className={`w-4 h-4 text-stone-300 flex-shrink-0 transition-transform duration-200 ${isCollapsed ? '' : 'rotate-180'}`}>
+                        className={`w-3.5 h-3.5 text-stone-300 flex-shrink-0 transition-transform duration-200 ${isCollapsed ? '' : 'rotate-180'}`}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                       </svg>
                     </button>
 
                     <button type="button" onClick={() => hidePeriod(period.id)}
-                      className="p-2 text-stone-200 hover:text-stone-400 cursor-pointer rounded-lg hover:bg-stone-50 transition flex-shrink-0"
+                      className="p-2 mr-1 text-stone-200 hover:text-stone-400 cursor-pointer rounded-lg hover:bg-stone-50 transition flex-shrink-0"
                       title="Masquer cette période">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3.5 h-3.5">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />

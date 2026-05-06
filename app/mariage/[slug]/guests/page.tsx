@@ -162,33 +162,34 @@ export default async function GuestsPage({
         </div>
 
         {/* Header */}
-        <div className="flex items-baseline justify-between mb-6">
-          <h1 style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontWeight: 300, fontSize: 'clamp(2rem, 6vw, 2.8rem)', lineHeight: 1 }}
-              className="text-[#2d3228]">
-            Invités
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 style={{ fontWeight: 600, fontSize: '1.4rem', letterSpacing: '-0.02em', lineHeight: 1 }}
+                className="text-[#2d3228]">
+              Invités
+            </h1>
             {total > 0 && (
-              <span style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '1rem' }}
-                    className="text-stone-400 ml-2 not-italic">
-                {total}
-              </span>
+              <p style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-stone-400 mt-0.5">
+                {confirmed} confirmé{confirmed > 1 ? 's' : ''} · {pending} en attente · {declined} décliné{declined > 1 ? 's' : ''}
+              </p>
             )}
-          </h1>
+          </div>
           {tab === 'liste' && total > 0 && (
             <ExportGuestsButton guests={guestList} weddingName={wedding.name} />
           )}
         </div>
 
         {/* Tab navigation */}
-        <div className="flex border-b border-stone-200 mb-6">
+        <div className="flex border-b border-stone-100 mb-7">
           {TABS.map(t => (
             <a key={t.key}
                href={`?tab=${t.key}`}
-               className={`px-5 py-3 text-sm transition border-b-2 -mb-px ${
+               className={`px-4 py-2.5 text-sm transition-all border-b-2 -mb-px ${
                  tab === t.key
-                   ? 'border-[#4a5240] text-[#4a5240]'
-                   : 'border-transparent text-stone-400 hover:text-stone-600'
+                   ? 'border-[#4a5240] text-[#2d3228]'
+                   : 'border-transparent text-stone-400 hover:text-stone-500'
                }`}
-               style={{ fontWeight: tab === t.key ? 400 : 300 }}>
+               style={{ fontWeight: tab === t.key ? 500 : 300, fontSize: '0.82rem' }}>
               {t.label}
             </a>
           ))}

@@ -78,7 +78,7 @@ export default async function TablesPage({ params }: { params: Promise<{ slug: s
       .order('first_name'),
   ])
 
-  const visibleGuests = (guests ?? []).filter(g => g.rsvp_status !== 'declined')
+  const visibleGuests = (guests ?? []).filter(g => g.rsvp_status !== 'decline')
 
   return (
     <>

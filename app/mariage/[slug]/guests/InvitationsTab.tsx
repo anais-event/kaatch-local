@@ -116,9 +116,8 @@ export default function InvitationsTab({ guests, slug, baseUrl, wedding, wedding
 
               return (
                 <li key={g.id} className="flex items-center gap-3 px-5 py-3.5">
-                  <div className="w-8 h-8 rounded-full bg-[#f5f0e8] flex items-center justify-center shrink-0">
-                    <span style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '0.95rem' }}
-                          className="text-[#4a5240]">
+                  <div className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center shrink-0">
+                    <span style={{ fontWeight: 500, fontSize: '0.72rem' }} className="text-stone-500">
                       {g.first_name[0]?.toUpperCase()}
                     </span>
                   </div>

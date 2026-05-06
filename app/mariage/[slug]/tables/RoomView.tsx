@@ -144,7 +144,7 @@ export default function RoomView({ tables, guests }: Props) {
 
   function startDrag(e: React.MouseEvent | React.TouchEvent, id: string) {
     e.stopPropagation()
-    const pt = svgPoint('touches' in e ? e.touches[0] : e.nativeEvent as MouseEvent)
+    const pt = svgPoint('touches' in e ? (e.touches[0] as unknown as Touch) : e.nativeEvent as MouseEvent)
     if (!pt) return
     const pos = positions[id] ?? { x: W / 2, y: H / 2 }
     setDragging({ id, ox: pos.x - pt.x, oy: pos.y - pt.y })

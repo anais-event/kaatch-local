@@ -2,7 +2,7 @@ import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
 import Countdown from './Countdown'
 import Memo from './Memo'
-import PlanningWidget from './PlanningWidget'
+import EcheancesWidget from './EcheancesWidget'
 import { isPaid } from '@/lib/plan'
 
 export default async function WeddingPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -130,8 +130,8 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
           ))}
         </div>
 
-        {/* Planning */}
-        <PlanningWidget slug={slug} weddingId={wedding.id} weddingDate={wedding.date ?? null} />
+        {/* Échéances rétro-planning */}
+        <EcheancesWidget slug={slug} weddingId={wedding.id} />
 
         {/* Modules */}
         <div>

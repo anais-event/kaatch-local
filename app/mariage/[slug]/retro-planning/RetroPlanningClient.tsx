@@ -56,8 +56,8 @@ function CheckCircle({ checked, onChange, saving, color }: {
 }) {
   return (
     <button type="button" onClick={onChange} disabled={saving}
-      className="w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all duration-200 mt-0.5 cursor-pointer disabled:cursor-wait"
-      style={{ backgroundColor: checked ? color : 'white', borderColor: checked ? color : '#d6d3d1' }}>
+      className="w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all duration-200 cursor-pointer disabled:cursor-wait"
+      style={{ backgroundColor: checked ? color : 'white', borderColor: checked ? color : '#e7e5e4' }}>
       {saving
         ? <div className="w-1.5 h-1.5 rounded-full bg-stone-300 animate-pulse" />
         : checked
@@ -67,26 +67,40 @@ function CheckCircle({ checked, onChange, saving, color }: {
   )
 }
 
-function DeadlineChip({ value, onChange, color }: { value: string | null; onChange: (v: string) => void; color: string }) {
-  const overdue = value && isOverdue(value)
+function DeadlineChip({ value, onChange, color, overdueable = true }: {
+  value: string | null
+  onChange: (v: string) => void
+  color: string
+  overdueable?: boolean
+}) {
+  const overdue = overdueable && value && isOverdue(value)
   return (
     <div className="relative flex-shrink-0">
       <input
         type="date"
         value={value ?? ''}
         onChange={e => onChange(e.target.value)}
-        className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+        className="opacity-0 absolute inset-0 w-full h-full cursor-pointer z-10"
       />
       <span
-        className="text-xs px-2 py-0.5 rounded-full flex items-center gap-1 cursor-pointer"
+        className="flex items-center gap-1 px-2.5 py-1 rounded-full cursor-pointer select-none whitespace-nowrap"
         style={{
+          fontFamily: 'var(--font-lato)',
           fontWeight: 300,
-          background: value ? (overdue ? '#fee2e2' : `${color}18`) : '#f5f5f4',
-          color: value ? (overdue ? '#ef4444' : color) : '#a8a29e',
+          fontSize: '0.7rem',
+          background: value
+            ? (overdue ? '#fef2f2' : `${color}15`)
+            : '#f5f5f4',
+          color: value
+            ? (overdue ? '#dc2626' : color)
+            : '#a8a29e',
+          border: `1px solid ${value ? (overdue ? '#fecaca' : `${color}30`) : '#e7e5e4'}`,
         }}
       >
-        {value ? (overdue ? '⚠️ ' : '📅 ') : '+ date'}
-        {value ? formatDate(value) : ''}
+        {value
+          ? <><span style={{ fontSize: '0.6rem' }}>{overdue ? '!' : '◆'}</span>{formatDate(value)}</>
+          : <><span style={{ fontSize: '0.7rem' }}>+</span> date</>
+        }
       </span>
     </div>
   )
@@ -212,7 +226,6 @@ export default function RetroPlanningClient({
     await fetch(`/api/retro-custom-tasks/${id}`, { method: 'DELETE' })
   }
 
-  // ─── Timeline data ───────────────────────────────────────────────
   type FlatTask = {
     id: string
     type: 'predefined' | 'custom'
@@ -263,48 +276,80 @@ export default function RetroPlanningClient({
   const visiblePeriods = periodsState.filter(p => !hidden.has(p.id))
 
   return (
-    <div className="max-w-2xl mx-auto px-4 pt-10 pb-24" style={{ fontFamily: 'var(--font-lato)' }}>
+    <div className="max-w-2xl mx-auto px-4 pt-10 pb-28" style={{ fontFamily: 'var(--font-lato)' }}>
 
-      {/* Header */}
-      <div className="mb-6">
-        <h1 style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontWeight: 300, fontSize: 'clamp(2.2rem, 6vw, 3rem)', lineHeight: 1.05 }}
-            className="text-[#2d3228] mb-1">
+      {/* ── Header ── */}
+      <div className="mb-8">
+        <h1
+          style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontWeight: 300, fontSize: 'clamp(2.4rem, 7vw, 3.4rem)', lineHeight: 1.05, letterSpacing: '-0.01em' }}
+          className="text-[#2d3228]">
           Guide de préparation
         </h1>
-        <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-400">
-          Toutes vos étapes — avec deadlines et responsables.
+        <p style={{ fontWeight: 300, fontSize: '0.8rem', marginTop: '0.4rem' }} className="text-stone-400">
+          Toutes vos étapes — deadlines, responsables, vue chronologique.
         </p>
       </div>
 
-      {/* Progression + view toggle */}
-      <div className="bg-white rounded-2xl border border-stone-100 p-5 mb-6">
-        <div className="flex items-baseline gap-3 mb-3">
-          <span style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '2.6rem', lineHeight: 1 }} className="text-[#4a5240]">{pct}%</span>
-          <span style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-400">{doneTasks} / {totalTasks} tâches</span>
+      {/* ── Barre de progression + vue toggle ── */}
+      <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-5 mb-6">
+        <div className="flex items-end justify-between mb-2">
+          <div className="flex items-baseline gap-2.5">
+            <span
+              style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '2.8rem', lineHeight: 1 }}
+              className="text-[#4a5240]">
+              {pct}<span style={{ fontSize: '1.4rem' }}>%</span>
+            </span>
+            <span style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-400 mb-1">
+              {doneTasks} / {totalTasks} tâches
+            </span>
+          </div>
+          {pct === 100 && (
+            <span style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-emerald-500 mb-1">
+              Tout est prêt ✓
+            </span>
+          )}
         </div>
-        <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden mb-4">
-          <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #4a5240, #7a9068)' }} />
+        <div className="h-1 bg-stone-100 rounded-full overflow-hidden mb-4">
+          <div
+            className="h-full rounded-full transition-all duration-700"
+            style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #4a5240 0%, #7a9068 100%)' }}
+          />
         </div>
 
-        {/* Vue toggle */}
-        <div className="flex bg-[#f5f0e8] rounded-xl p-1 gap-1">
-          {([['periods', '📋 Par période'], ['timeline', '📅 Chronologie']] as const).map(([key, label]) => (
-            <button key={key} onClick={() => setView(key)}
-              className={`flex-1 py-1.5 rounded-lg text-xs transition cursor-pointer ${view === key ? 'bg-white shadow-sm text-[#2d3228]' : 'text-stone-400 hover:text-stone-600'}`}
-              style={{ fontWeight: view === key ? 400 : 300 }}>
+        <div className="flex bg-[#f5f0e8] rounded-xl p-1 gap-0.5">
+          {([['periods', 'Par période'], ['timeline', 'Chronologie']] as const).map(([key, label]) => (
+            <button key={key} onClick={() => setView(key)} className="flex-1 cursor-pointer"
+              style={{
+                fontFamily: 'var(--font-lato)',
+                fontWeight: view === key ? 400 : 300,
+                fontSize: '0.78rem',
+                padding: '0.4rem 0',
+                borderRadius: '0.625rem',
+                background: view === key ? 'white' : 'transparent',
+                color: view === key ? '#2d3228' : '#a8a29e',
+                boxShadow: view === key ? '0 1px 3px rgba(0,0,0,0.07)' : 'none',
+                transition: 'all 0.15s',
+                border: 'none',
+              }}>
               {label}
             </button>
           ))}
         </div>
       </div>
 
-      {/* ─── VUE PAR PÉRIODE ─── */}
+      {/* ── VUE PAR PÉRIODE ── */}
       {view === 'periods' && (
         <>
           {hidden.size > 0 && (
             <div className="mb-4 flex items-center gap-2">
-              <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">{hidden.size} période{hidden.size > 1 ? 's' : ''} masquée{hidden.size > 1 ? 's' : ''}</span>
-              <button onClick={restoreAll} className="text-xs text-[#4a5240] hover:underline cursor-pointer" style={{ fontWeight: 300 }}>Restaurer</button>
+              <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">
+                {hidden.size} période{hidden.size > 1 ? 's' : ''} masquée{hidden.size > 1 ? 's' : ''}
+              </span>
+              <button onClick={restoreAll}
+                style={{ fontWeight: 300, fontSize: '0.72rem' }}
+                className="text-[#4a5240] hover:underline cursor-pointer">
+                Restaurer
+              </button>
             </div>
           )}
 
@@ -314,35 +359,53 @@ export default function RetroPlanningClient({
               const periodCustom = customTasks.filter(t => t.period_id === period.id)
               const totalP = period.tasks.length + periodCustom.length
               const doneP = period.tasks.filter(t => t.done).length + periodCustom.filter(t => t.done).length
-              const pctP = totalP ? Math.round((doneP / totalP) * 100) : 0
               const allDone = totalP > 0 && doneP === totalP
               const isCollapsed = collapsed.has(period.id)
 
               return (
-                <div key={period.id} className="bg-white rounded-2xl border border-stone-100 overflow-hidden shadow-sm"
-                  style={{ borderLeftWidth: 3, borderLeftColor: color }}>
-                  <div className="flex items-center gap-3 px-5 py-4">
-                    <button type="button" onClick={() => toggleCollapse(period.id)} className="flex-1 flex items-center gap-3 text-left min-w-0">
+                <div key={period.id} className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
+
+                  {/* Period header */}
+                  <div className="flex items-center gap-0 pl-0 pr-4 py-0">
+                    {/* Colored accent bar */}
+                    <div className="w-1 self-stretch rounded-l-2xl flex-shrink-0" style={{ backgroundColor: color }} />
+
+                    <button type="button" onClick={() => toggleCollapse(period.id)}
+                      className="flex-1 flex items-center gap-3 px-4 py-4 text-left cursor-pointer">
+                      <span style={{ fontSize: '1.1rem', lineHeight: 1 }}>{period.emoji}</span>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-base">{period.emoji}</span>
-                          <p style={{ fontWeight: 400, fontSize: '0.9rem' }} className={allDone ? 'text-stone-400' : 'text-[#2d3228]'}>{period.label}</p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="h-1 bg-stone-100 rounded-full overflow-hidden w-24">
-                            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pctP}%`, backgroundColor: allDone ? '#34d399' : color }} />
-                          </div>
-                          <span style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-400">{doneP}/{totalP}</span>
-                          {allDone && <span style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-emerald-500">✓ Terminé</span>}
-                        </div>
+                        <p
+                          style={{ fontFamily: 'var(--font-cormorant)', fontWeight: allDone ? 400 : 500, fontSize: '1.05rem', lineHeight: 1.2 }}
+                          className={allDone ? 'text-stone-400' : 'text-[#2d3228]'}>
+                          {period.label}
+                        </p>
+                        {allDone && (
+                          <p style={{ fontWeight: 300, fontSize: '0.65rem', marginTop: '0.1rem' }} className="text-emerald-400">
+                            Terminé ✓
+                          </p>
+                        )}
                       </div>
+
+                      {/* Counter pill */}
+                      <span
+                        className="rounded-full px-2.5 py-0.5 flex-shrink-0"
+                        style={{
+                          fontWeight: 300,
+                          fontSize: '0.68rem',
+                          background: allDone ? '#d1fae5' : `${color}15`,
+                          color: allDone ? '#059669' : color,
+                        }}>
+                        {doneP}/{totalP}
+                      </span>
+
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}
-                        className={`w-4 h-4 text-stone-300 transition-transform duration-200 flex-shrink-0 ${isCollapsed ? '' : 'rotate-180'}`}>
+                        className={`w-4 h-4 text-stone-300 flex-shrink-0 transition-transform duration-200 ${isCollapsed ? '' : 'rotate-180'}`}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                       </svg>
                     </button>
+
                     <button type="button" onClick={() => hidePeriod(period.id)}
-                      className="p-1.5 text-stone-200 hover:text-stone-400 cursor-pointer rounded-lg hover:bg-stone-50 transition flex-shrink-0"
+                      className="p-2 text-stone-200 hover:text-stone-400 cursor-pointer rounded-lg hover:bg-stone-50 transition flex-shrink-0"
                       title="Masquer cette période">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3.5 h-3.5">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
@@ -350,29 +413,37 @@ export default function RetroPlanningClient({
                     </button>
                   </div>
 
+                  {/* Tasks */}
                   {!isCollapsed && (
                     <>
-                      <div className="divide-y divide-stone-50/80 border-t border-stone-50">
+                      <div className="border-t border-stone-50 divide-y divide-stone-50">
+
                         {/* Predefined tasks */}
                         {period.tasks.map(task => (
-                          <div key={task.key} className="flex items-center gap-3 px-5 py-3 hover:bg-stone-50/40 transition-colors group">
-                            <CheckCircle checked={task.done} saving={saving === task.key} color={color} onChange={() => togglePredefined(period.id, task.key, task.done)} />
+                          <div key={task.key}
+                            className="flex items-start gap-3 px-5 py-3 hover:bg-stone-50/50 transition-colors group">
+                            <div className="pt-0.5">
+                              <CheckCircle checked={task.done} saving={saving === task.key} color={color} onChange={() => togglePredefined(period.id, task.key, task.done)} />
+                            </div>
                             <div className="flex-1 min-w-0">
-                              <p style={{ fontSize: '0.85rem', fontWeight: 300, lineHeight: 1.55 }}
+                              <p style={{ fontSize: '0.84rem', fontWeight: 300, lineHeight: 1.5 }}
                                 className={task.done ? 'text-stone-300 line-through' : 'text-stone-700'}>
                                 {task.label}
                               </p>
                               {task.detail && !task.done && (
-                                <p style={{ fontSize: '0.7rem', fontWeight: 300 }} className="text-stone-400 mt-0.5">{task.detail}</p>
+                                <p style={{ fontSize: '0.7rem', fontWeight: 300 }} className="text-stone-400 mt-0.5 leading-snug">
+                                  {task.detail}
+                                </p>
+                              )}
+                              {task.assigned_to && !task.done && (
+                                <span className="inline-flex items-center mt-1 px-2 py-0.5 rounded-full"
+                                  style={{ fontSize: '0.65rem', fontWeight: 300, background: `${color}12`, color }}>
+                                  {task.assigned_to}
+                                </span>
                               )}
                             </div>
                             {!task.done && (
-                              <div className="flex items-center gap-2 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                                {task.assigned_to && (
-                                  <span className="text-xs px-2 py-0.5 rounded-full bg-stone-100 text-stone-500" style={{ fontWeight: 300 }}>
-                                    {task.assigned_to}
-                                  </span>
-                                )}
+                              <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity pt-0.5">
                                 <DeadlineChip
                                   value={task.deadline}
                                   color={color}
@@ -385,48 +456,63 @@ export default function RetroPlanningClient({
 
                         {/* Custom tasks */}
                         {periodCustom.map(task => (
-                          <div key={task.id} className="flex items-center gap-3 px-5 py-3 hover:bg-stone-50/40 transition-colors group">
+                          <div key={task.id}
+                            className="flex items-start gap-3 px-5 py-3 hover:bg-stone-50/50 transition-colors group">
                             {editingId === task.id ? (
-                              <div className="flex-1 space-y-2">
+                              <div className="flex-1 space-y-2 py-0.5">
                                 <input value={editTitle} onChange={e => setEditTitle(e.target.value)}
                                   onKeyDown={e => { if (e.key === 'Enter') saveEdit(task.id); if (e.key === 'Escape') setEditingId(null) }}
-                                  className="w-full border border-stone-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[#4a5240]"
-                                  style={{ fontWeight: 300 }} autoFocus />
+                                  className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#4a5240]/50 bg-white"
+                                  style={{ fontWeight: 300, fontFamily: 'var(--font-lato)' }} autoFocus />
                                 <div className="flex gap-2">
                                   <input value={editAssignee} onChange={e => setEditAssignee(e.target.value)}
                                     placeholder="Assigné à… (optionnel)"
-                                    className="flex-1 border border-stone-200 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-[#4a5240]"
-                                    style={{ fontWeight: 300 }} />
-                                  <button onClick={() => saveEdit(task.id)} className="text-xs bg-[#4a5240] text-white px-3 py-1.5 rounded-lg cursor-pointer" style={{ fontWeight: 300 }}>OK</button>
-                                  <button onClick={() => setEditingId(null)} className="text-xs text-stone-400 cursor-pointer px-1">✕</button>
+                                    className="flex-1 border border-stone-200 rounded-xl px-3 py-1.5 text-xs outline-none focus:border-[#4a5240]/50 bg-white"
+                                    style={{ fontWeight: 300, fontFamily: 'var(--font-lato)' }} />
+                                  <button onClick={() => saveEdit(task.id)}
+                                    className="text-xs bg-[#4a5240] text-white px-4 py-1.5 rounded-xl cursor-pointer hover:bg-[#2d3228] transition"
+                                    style={{ fontWeight: 300 }}>
+                                    OK
+                                  </button>
+                                  <button onClick={() => setEditingId(null)}
+                                    className="text-xs text-stone-400 cursor-pointer px-1 hover:text-stone-600 transition"
+                                    style={{ fontWeight: 300 }}>
+                                    ✕
+                                  </button>
                                 </div>
                               </div>
                             ) : (
                               <>
-                                <CheckCircle checked={task.done} saving={saving === task.id} color={color} onChange={() => toggleCustom(task.id, task.done)} />
+                                <div className="pt-0.5">
+                                  <CheckCircle checked={task.done} saving={saving === task.id} color={color} onChange={() => toggleCustom(task.id, task.done)} />
+                                </div>
                                 <div className="flex-1 min-w-0">
-                                  <p style={{ fontSize: '0.85rem', fontWeight: 300, lineHeight: 1.55 }}
+                                  <p style={{ fontSize: '0.84rem', fontWeight: 300, lineHeight: 1.5 }}
                                     className={task.done ? 'text-stone-300 line-through' : 'text-stone-700'}>
                                     {task.title}
                                   </p>
                                   {task.assigned_to && !task.done && (
-                                    <span className="inline-block mt-0.5 rounded-full px-2 py-0.5"
-                                      style={{ fontSize: '0.65rem', fontWeight: 400, backgroundColor: `${color}18`, color }}>
+                                    <span className="inline-flex items-center mt-1 px-2 py-0.5 rounded-full"
+                                      style={{ fontSize: '0.65rem', fontWeight: 300, background: `${color}12`, color }}>
                                       {task.assigned_to}
                                     </span>
                                   )}
                                 </div>
                                 {!task.done && (
-                                  <div className="flex items-center gap-2 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <div className="flex items-center gap-1.5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity pt-0.5">
                                     <DeadlineChip value={task.deadline} color={color} onChange={v => saveCustomMeta(task.id, { deadline: v })} />
-                                    <button onClick={() => { setEditingId(task.id); setEditTitle(task.title); setEditAssignee(task.assigned_to ?? '') }}
-                                      className="p-1.5 text-stone-300 hover:text-stone-600 cursor-pointer rounded-lg hover:bg-stone-100 transition">
+                                    <button
+                                      onClick={() => { setEditingId(task.id); setEditTitle(task.title); setEditAssignee(task.assigned_to ?? '') }}
+                                      className="p-1.5 text-stone-300 hover:text-stone-600 cursor-pointer rounded-lg hover:bg-stone-100 transition"
+                                      title="Modifier">
                                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3.5 h-3.5">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
                                       </svg>
                                     </button>
-                                    <button onClick={() => deleteCustom(task.id)}
-                                      className="p-1.5 text-stone-300 hover:text-red-400 cursor-pointer rounded-lg hover:bg-red-50 transition">
+                                    <button
+                                      onClick={() => deleteCustom(task.id)}
+                                      className="p-1.5 text-stone-300 hover:text-red-400 cursor-pointer rounded-lg hover:bg-red-50 transition"
+                                      title="Supprimer">
                                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3.5 h-3.5">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                                       </svg>
@@ -439,39 +525,43 @@ export default function RetroPlanningClient({
                         ))}
                       </div>
 
-                      {/* Add task */}
+                      {/* Add task area */}
                       {addingTo === period.id ? (
-                        <div className="px-5 py-3 border-t border-stone-50 bg-stone-50/40 space-y-2">
+                        <div className="px-5 py-4 border-t border-stone-50 bg-[#f9f8f6] space-y-2.5">
                           <input ref={addInputRef} value={newTitle} onChange={e => setNewTitle(e.target.value)}
                             onKeyDown={e => { if (e.key === 'Enter') addCustomTask(period.id); if (e.key === 'Escape') setAddingTo(null) }}
                             placeholder="Titre de la tâche…"
-                            className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#4a5240] bg-white"
-                            style={{ fontWeight: 300 }} autoFocus />
+                            className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#4a5240]/50 bg-white"
+                            style={{ fontWeight: 300, fontFamily: 'var(--font-lato)' }} autoFocus />
                           <div className="grid grid-cols-2 gap-2">
                             <input value={newAssignee} onChange={e => setNewAssignee(e.target.value)}
-                              placeholder="Assigné à… (optionnel)"
-                              className="border border-stone-200 rounded-xl px-3 py-1.5 text-xs outline-none focus:border-[#4a5240] bg-white"
-                              style={{ fontWeight: 300 }} />
+                              placeholder="Assigné à…"
+                              className="border border-stone-200 rounded-xl px-3 py-2 text-xs outline-none focus:border-[#4a5240]/50 bg-white"
+                              style={{ fontWeight: 300, fontFamily: 'var(--font-lato)' }} />
                             <input type="date" value={newDeadline} onChange={e => setNewDeadline(e.target.value)}
-                              className="border border-stone-200 rounded-xl px-3 py-1.5 text-xs outline-none focus:border-[#4a5240] bg-white text-stone-500"
-                              style={{ fontWeight: 300 }} />
+                              className="border border-stone-200 rounded-xl px-3 py-2 text-xs outline-none focus:border-[#4a5240]/50 bg-white text-stone-500"
+                              style={{ fontWeight: 300, fontFamily: 'var(--font-lato)' }} />
                           </div>
                           <div className="flex gap-2">
                             <button onClick={() => addCustomTask(period.id)} disabled={!newTitle.trim()}
-                              className="flex-1 bg-[#4a5240] text-white py-1.5 rounded-xl text-xs cursor-pointer disabled:opacity-40 hover:bg-[#2d3228] transition"
-                              style={{ fontWeight: 300 }}>Ajouter</button>
+                              className="flex-1 bg-[#4a5240] text-white py-2 rounded-xl text-xs cursor-pointer disabled:opacity-40 hover:bg-[#2d3228] transition"
+                              style={{ fontWeight: 300 }}>
+                              Ajouter
+                            </button>
                             <button onClick={() => { setAddingTo(null); setNewTitle(''); setNewAssignee(''); setNewDeadline('') }}
-                              className="text-xs text-stone-400 cursor-pointer px-2 hover:text-stone-600">✕</button>
+                              className="text-xs text-stone-400 cursor-pointer px-3 hover:text-stone-600 transition"
+                              style={{ fontWeight: 300 }}>
+                              Annuler
+                            </button>
                           </div>
                         </div>
                       ) : (
-                        <div className="px-5 py-2.5 border-t border-stone-50">
-                          <button onClick={() => { setAddingTo(period.id); setNewTitle(''); setNewAssignee(''); setNewDeadline('') }}
-                            className="flex items-center gap-1.5 text-xs text-stone-400 hover:text-[#4a5240] transition cursor-pointer"
-                            style={{ fontWeight: 300 }}>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                            </svg>
+                        <div className="px-5 py-3 border-t border-stone-50">
+                          <button
+                            onClick={() => { setAddingTo(period.id); setNewTitle(''); setNewAssignee(''); setNewDeadline('') }}
+                            className="flex items-center gap-2 text-stone-400 hover:text-[#4a5240] transition cursor-pointer group/add"
+                            style={{ fontWeight: 300, fontSize: '0.78rem' }}>
+                            <span className="w-5 h-5 rounded-full border border-stone-200 group-hover/add:border-[#4a5240]/40 flex items-center justify-center transition text-xs leading-none">+</span>
                             Ajouter une tâche
                           </button>
                         </div>
@@ -485,14 +575,16 @@ export default function RetroPlanningClient({
         </>
       )}
 
-      {/* ─── VUE CHRONOLOGIE ─── */}
+      {/* ── VUE CHRONOLOGIE ── */}
       {view === 'timeline' && (
-        <div className="space-y-6">
+        <div className="space-y-8">
           {withDeadline.length === 0 && noDeadline.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-stone-100 p-8 text-center">
-              <p className="text-3xl mb-3">📅</p>
-              <p style={{ fontWeight: 300, fontSize: '0.85rem' }} className="text-stone-400">
-                Aucune deadline définie — passez en vue "Par période" pour en ajouter.
+            <div className="bg-white rounded-2xl border border-stone-100 p-10 text-center">
+              <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontWeight: 300, fontSize: '1.5rem' }} className="text-stone-300 mb-2">
+                Aucune deadline définie
+              </p>
+              <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-400">
+                Passez en vue "Par période" pour ajouter des dates.
               </p>
             </div>
           ) : (
@@ -501,33 +593,43 @@ export default function RetroPlanningClient({
                 const hasOverdue = tasks.some(t => isOverdue(t.deadline!))
                 return (
                   <div key={month}>
-                    <div className="flex items-center gap-3 mb-2">
-                      <p style={{ fontWeight: 400, fontSize: '0.78rem', letterSpacing: '0.06em' }}
-                        className={`uppercase ${hasOverdue ? 'text-red-400' : 'text-stone-500'}`}>
-                        {hasOverdue ? '⚠️ ' : ''}{monthLabel(month)}
+                    {/* Month separator */}
+                    <div className="flex items-center gap-3 mb-3">
+                      <p
+                        style={{ fontFamily: 'var(--font-cormorant)', fontWeight: hasOverdue ? 600 : 500, fontStyle: 'italic', fontSize: '1.1rem', letterSpacing: '0.01em' }}
+                        className={hasOverdue ? 'text-red-400' : 'text-[#4a5240]'}>
+                        {hasOverdue && <span style={{ fontStyle: 'normal', fontSize: '0.85rem' }}>⚠ </span>}{monthLabel(month)}
                       </p>
                       <div className="flex-1 h-px bg-stone-100" />
                     </div>
+
                     <div className="space-y-1.5">
                       {tasks.map(t => {
                         const color = PERIOD_COLORS[t.periodId] ?? '#4a5240'
                         const overdue = isOverdue(t.deadline!)
                         return (
-                          <div key={t.id} className="bg-white rounded-xl border border-stone-100 flex items-center gap-3 px-4 py-2.5 hover:shadow-sm transition-shadow">
+                          <div key={t.id}
+                            className="bg-white rounded-xl border border-stone-100 flex items-center gap-3 px-4 py-3 hover:shadow-sm transition-shadow">
                             <CheckCircle checked={t.done} saving={saving === t.id} color={color} onChange={() => toggleFlatTask(t)} />
                             <div className="flex-1 min-w-0">
-                              <p style={{ fontWeight: 300, fontSize: '0.85rem' }} className="text-stone-700 truncate">{t.label}</p>
-                              <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-300 truncate">{t.periodLabel}</p>
+                              <p style={{ fontWeight: 300, fontSize: '0.84rem' }} className="text-stone-700 truncate">{t.label}</p>
+                              <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-400 mt-0.5 truncate">{t.periodLabel}</p>
                             </div>
                             <div className="flex items-center gap-2 flex-shrink-0">
                               {t.assigned_to && (
-                                <span className="text-xs px-2 py-0.5 rounded-full bg-stone-100 text-stone-400" style={{ fontWeight: 300 }}>
+                                <span className="px-2 py-0.5 rounded-full"
+                                  style={{ fontWeight: 300, fontSize: '0.65rem', background: `${color}12`, color }}>
                                   {t.assigned_to}
                                 </span>
                               )}
-                              <span className="text-xs px-2 py-0.5 rounded-full"
-                                style={{ fontWeight: 300, background: overdue ? '#fee2e2' : `${color}18`, color: overdue ? '#ef4444' : color }}>
-                                {overdue ? `⚠️ ${formatDate(t.deadline!)}` : formatDate(t.deadline!)}
+                              <span className="px-2.5 py-1 rounded-full"
+                                style={{
+                                  fontWeight: 300, fontSize: '0.7rem',
+                                  background: overdue ? '#fef2f2' : `${color}15`,
+                                  color: overdue ? '#dc2626' : color,
+                                  border: `1px solid ${overdue ? '#fecaca' : `${color}25`}`,
+                                }}>
+                                {overdue && <span style={{ fontSize: '0.6rem' }}>! </span>}{formatDate(t.deadline!)}
                               </span>
                             </div>
                           </div>
@@ -540,20 +642,24 @@ export default function RetroPlanningClient({
 
               {noDeadline.length > 0 && (
                 <div>
-                  <div className="flex items-center gap-3 mb-2">
-                    <p style={{ fontWeight: 400, fontSize: '0.78rem', letterSpacing: '0.06em' }} className="text-stone-300 uppercase">Sans date</p>
+                  <div className="flex items-center gap-3 mb-3">
+                    <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400, fontStyle: 'italic', fontSize: '1rem' }} className="text-stone-300">
+                      Sans date
+                    </p>
                     <div className="flex-1 h-px bg-stone-100" />
-                    <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-300">{noDeadline.length} tâche{noDeadline.length > 1 ? 's' : ''}</span>
+                    <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-300">
+                      {noDeadline.length} tâche{noDeadline.length > 1 ? 's' : ''}
+                    </span>
                   </div>
                   <div className="space-y-1.5">
                     {noDeadline.map(t => {
                       const color = PERIOD_COLORS[t.periodId] ?? '#4a5240'
                       return (
-                        <div key={t.id} className="bg-white rounded-xl border border-stone-100 flex items-center gap-3 px-4 py-2.5 opacity-60">
+                        <div key={t.id} className="bg-white rounded-xl border border-stone-100 flex items-center gap-3 px-4 py-3 opacity-50">
                           <CheckCircle checked={t.done} saving={saving === t.id} color={color} onChange={() => toggleFlatTask(t)} />
                           <div className="flex-1 min-w-0">
-                            <p style={{ fontWeight: 300, fontSize: '0.85rem' }} className="text-stone-600 truncate">{t.label}</p>
-                            <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-300 truncate">{t.periodLabel}</p>
+                            <p style={{ fontWeight: 300, fontSize: '0.84rem' }} className="text-stone-600 truncate">{t.label}</p>
+                            <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-400 mt-0.5 truncate">{t.periodLabel}</p>
                           </div>
                         </div>
                       )
@@ -563,8 +669,8 @@ export default function RetroPlanningClient({
               )}
 
               {doneFlat.length > 0 && (
-                <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-300 text-center">
-                  + {doneFlat.length} tâche{doneFlat.length > 1 ? 's' : ''} terminée{doneFlat.length > 1 ? 's' : ''}
+                <p style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-stone-300 text-center pt-2">
+                  {doneFlat.length} tâche{doneFlat.length > 1 ? 's' : ''} terminée{doneFlat.length > 1 ? 's' : ''} ✓
                 </p>
               )}
             </>

@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
 import TablesClient from './TablesClient'
+import RoomView from './RoomView'
 import PageIntro from '../PageIntro'
 
 async function createTable(formData: FormData) {
@@ -52,8 +53,18 @@ async function updateTableName(formData: FormData) {
   revalidatePath(`/mariage/${slug}/tables`)
 }
 
-export default async function TablesPage({ params }: { params: Promise<{ slug: string }> }) {
+type Tab = 'brouillon' | 'salle'
+
+export default async function TablesPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>
+  searchParams: Promise<{ tab?: string }>
+}) {
   const { slug } = await params
+  const { tab: tabParam = 'brouillon' } = await searchParams
+  const tab: Tab = tabParam === 'salle' ? 'salle' : 'brouillon'
   const supabase = await createSupabaseServerClient()
 
   const { data: wedding } = await supabase
@@ -80,30 +91,72 @@ export default async function TablesPage({ params }: { params: Promise<{ slug: s
 
   const visibleGuests = (guests ?? []).filter(g => g.rsvp_status !== 'decline')
 
+  const TABS = [
+    { key: 'brouillon' as Tab, label: 'Brouillon' },
+    { key: 'salle'     as Tab, label: 'Vue salle' },
+  ]
+
   return (
-    <>
     <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-8">
       <a href={`/mariage/${slug}`} className="text-sm text-[#4a5240] hover:underline mb-4 block"
          style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
         ← Retour aux préparatifs
       </a>
-      <PageIntro
-        what="Répartissez vos invités confirmés dans des tables nommées. Chaque table a une capacité définie pour éviter les oublis."
-        how="Créez vos tables (nom + capacité), sélectionnez une table à gauche, puis cliquez sur 'Ajouter' pour y placer un invité. Téléchargez le récap pour le jour J."
-        guests="Les invités ne voient pas le plan de table — c'est uniquement un outil d'organisation pour les mariés."
-      />
+
+      <div className="flex items-center justify-between mb-2">
+        <div>
+          <h1 style={{ fontWeight: 600, fontSize: '1.4rem', letterSpacing: '-0.02em', lineHeight: 1, fontFamily: 'var(--font-lato)' }}
+              className="text-[#2d3228]">
+            Plan de table
+          </h1>
+          <p style={{ fontWeight: 300, fontSize: '0.75rem', fontFamily: 'var(--font-lato)' }} className="text-stone-400 mt-0.5">
+            {visibleGuests.filter(g => g.table_id).length} placés · {visibleGuests.filter(g => !g.table_id).length} à placer
+          </p>
+        </div>
+      </div>
+
+      <div className="flex border-b border-stone-100 mb-6">
+        {TABS.map(t => (
+          <a key={t.key}
+             href={`?tab=${t.key}`}
+             className={`px-4 py-2.5 text-sm transition-all border-b-2 -mb-px ${
+               tab === t.key
+                 ? 'border-[#4a5240] text-[#2d3228]'
+                 : 'border-transparent text-stone-400 hover:text-stone-500'
+             }`}
+             style={{ fontWeight: tab === t.key ? 500 : 300, fontSize: '0.82rem', fontFamily: 'var(--font-lato)' }}>
+            {t.label}
+          </a>
+        ))}
+      </div>
+
+      {tab === 'brouillon' && (
+        <>
+          <PageIntro
+            what="Répartissez vos invités confirmés dans des tables nommées. Chaque table a une capacité définie pour éviter les oublis."
+            how="Créez vos tables (nom + capacité), sélectionnez une table à gauche, puis cliquez sur Ajouter pour y placer un invité."
+            guests="Les invités ne voient pas le plan de table — uniquement un outil d'organisation pour les mariés."
+          />
+          <TablesClient
+            slug={slug}
+            weddingId={wedding.id}
+            weddingName={wedding.name}
+            tables={tables ?? []}
+            guests={visibleGuests}
+            createTable={createTable}
+            deleteTable={deleteTable}
+            assignGuest={assignGuest}
+            updateTableName={updateTableName}
+          />
+        </>
+      )}
+
+      {tab === 'salle' && (
+        <RoomView
+          tables={tables ?? []}
+          guests={visibleGuests}
+        />
+      )}
     </div>
-    <TablesClient
-      slug={slug}
-      weddingId={wedding.id}
-      weddingName={wedding.name}
-      tables={tables ?? []}
-      guests={visibleGuests}
-      createTable={createTable}
-      deleteTable={deleteTable}
-      assignGuest={assignGuest}
-      updateTableName={updateTableName}
-    />
-    </>
   )
 }

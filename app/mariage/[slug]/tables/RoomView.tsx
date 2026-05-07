@@ -275,12 +275,11 @@ export default function RoomView({ tables, guests, weddingId, roomObjects: initi
     }
   }
 
-  async function exportPNG() {
+  async function exportPDF() {
     const svg = svgRef.current
     if (!svg) return
     setExporting(true)
     try {
-      // Serialize SVG then draw to canvas
       const svgData = new XMLSerializer().serializeToString(svg)
       const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' })
       const url = URL.createObjectURL(svgBlob)
@@ -295,13 +294,29 @@ export default function RoomView({ tables, guests, weddingId, roomObjects: initi
       canvas.width = svg.clientWidth * scale
       canvas.height = svg.clientHeight * scale
       const ctx = canvas.getContext('2d')!
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
       ctx.scale(scale, scale)
       ctx.drawImage(img, 0, 0)
       URL.revokeObjectURL(url)
-      const link = document.createElement('a')
-      link.download = 'plan-de-table.png'
-      link.href = canvas.toDataURL('image/png')
-      link.click()
+      const imgData = canvas.toDataURL('image/png')
+      const { jsPDF } = await import('jspdf')
+      // Landscape A4
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
+      const W_mm = pdf.internal.pageSize.getWidth()
+      const H_mm = pdf.internal.pageSize.getHeight()
+      // Fit image maintaining aspect ratio
+      const imgRatio = canvas.width / canvas.height
+      const pageRatio = W_mm / H_mm
+      let iw = W_mm, ih = H_mm
+      if (imgRatio > pageRatio) { ih = W_mm / imgRatio } else { iw = H_mm * imgRatio }
+      const ox = (W_mm - iw) / 2
+      const oy = (H_mm - ih) / 2
+      pdf.addImage(imgData, 'PNG', ox, oy, iw, ih)
+      pdf.setFontSize(6)
+      pdf.setTextColor(200, 200, 200)
+      pdf.text('Plan de table — Kaatch', W_mm - 4, H_mm - 3, { align: 'right' })
+      pdf.save('plan-de-table.pdf')
     } finally {
       setExporting(false)
     }
@@ -415,10 +430,10 @@ export default function RoomView({ tables, guests, weddingId, roomObjects: initi
             )}
           </div>
 
-          <button onClick={exportPNG} disabled={exporting}
+          <button onClick={exportPDF} disabled={exporting}
             style={{ fontWeight: 300, fontSize: '0.72rem' }}
             className="text-stone-400 hover:text-[#4a5240] transition cursor-pointer border border-stone-200 px-3 py-1.5 rounded-xl hover:border-[#4a5240]/30 disabled:opacity-50">
-            {exporting ? '…' : '↓ Exporter PNG'}
+            {exporting ? '…' : '↓ Exporter PDF'}
           </button>
 
           <button onClick={resetLayout}

@@ -75,7 +75,7 @@ export default async function TablesPage({
 
   if (!wedding) return <div className="p-8">Mariage introuvable</div>
 
-  const [{ data: tables }, { data: guests }] = await Promise.all([
+  const [{ data: tables }, { data: guests }, { data: roomObjects }] = await Promise.all([
     supabase
       .from('seating_tables')
       .select('*')
@@ -87,6 +87,11 @@ export default async function TablesPage({
       .select('id, first_name, last_name, rsvp_status, table_id, relation, guest_type')
       .eq('wedding_id', wedding.id)
       .order('first_name'),
+    supabase
+      .from('room_objects')
+      .select('*')
+      .eq('wedding_id', wedding.id)
+      .order('created_at', { ascending: true }),
   ])
 
   const visibleGuests = (guests ?? []).filter(g => g.rsvp_status !== 'decline')
@@ -152,6 +157,8 @@ export default async function TablesPage({
         <RoomView
           tables={tables ?? []}
           guests={visibleGuests}
+          weddingId={wedding.id}
+          roomObjects={roomObjects ?? []}
         />
       )}
     </div>

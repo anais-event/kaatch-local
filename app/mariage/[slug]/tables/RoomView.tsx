@@ -42,7 +42,7 @@ const R = 46
 
 // Palette d'objets disponibles
 const OBJECT_PALETTE: { type: string; label: string; emoji: string; w: number; h: number; fill: string; stroke: string }[] = [
-  { type: 'scene',      label: 'Scène',          emoji: '🎭', w: 200, h: 55,  fill: '#ede8df', stroke: '#b8b0a4' },
+  { type: 'scene',      label: 'Scène',           emoji: '🎭', w: 200, h: 55,  fill: '#ede8df', stroke: '#b8b0a4' },
   { type: 'dancefloor', label: 'Piste de danse',  emoji: '💃', w: 150, h: 150, fill: '#e8e4f0', stroke: '#a09ab8' },
   { type: 'bar',        label: 'Bar',             emoji: '🍹', w: 110, h: 50,  fill: '#f0ede8', stroke: '#b8b0a4' },
   { type: 'cocktail',   label: 'Cocktail',        emoji: '🥂', w: 110, h: 50,  fill: '#f0ede8', stroke: '#b8b0a4' },
@@ -50,6 +50,8 @@ const OBJECT_PALETTE: { type: string; label: string; emoji: string; w: number; h
   { type: 'photobooth', label: 'Photobooth',      emoji: '📸', w: 85,  h: 85,  fill: '#f0ede8', stroke: '#b8b0a4' },
   { type: 'entrance',   label: 'Entrée',          emoji: '🚪', w: 55,  h: 18,  fill: '#e8f0e4', stroke: '#8faa80' },
   { type: 'garden',     label: 'Jardin / Terrasse',emoji: '🌿', w: 160, h: 80,  fill: '#e8f0e4', stroke: '#8faa80' },
+  { type: 'toilettes',  label: 'Toilettes',       emoji: '🚻', w: 70,  h: 55,  fill: '#e8eef5', stroke: '#7fa8c0' },
+  { type: 'custom',     label: 'Personnalisé',    emoji: '✏️', w: 120, h: 55,  fill: '#f5f5f0', stroke: '#b0aba0' },
 ]
 
 function getPalette(type: string) {
@@ -97,6 +99,10 @@ export default function RoomView({ tables, guests, weddingId, roomObjects: initi
   const [saving, setSaving] = useState(false)
   const [addingObj, setAddingObj] = useState(false)
   const [showPalette, setShowPalette] = useState(false)
+  const [customLabelInput, setCustomLabelInput] = useState('')
+  const [showCustomInput, setShowCustomInput] = useState(false)
+  const [exporting, setExporting] = useState(false)
+  const svgWrapRef = useRef<HTMLDivElement>(null)
 
   const svgPoint = useCallback((e: MouseEvent | Touch): { x: number; y: number } | null => {
     const svg = svgRef.current
@@ -242,10 +248,12 @@ export default function RoomView({ tables, guests, weddingId, roomObjects: initi
     setSelectedTable(null)
   }
 
-  async function addObject(type: string) {
+  async function addObject(type: string, labelOverride?: string) {
     const def = OBJECT_PALETTE.find(p => p.type === type)!
     setAddingObj(true)
     setShowPalette(false)
+    setShowCustomInput(false)
+    setCustomLabelInput('')
     try {
       const res = await fetch('/api/room-object', {
         method: 'POST',
@@ -257,13 +265,45 @@ export default function RoomView({ tables, guests, weddingId, roomObjects: initi
           pos_y: H / 2,
           width: def.w,
           height: def.h,
-          label: def.label,
+          label: labelOverride ?? def.label,
         }),
       })
       const obj = await res.json()
       if (obj.id) setObjects(prev => [...prev, obj])
     } finally {
       setAddingObj(false)
+    }
+  }
+
+  async function exportPNG() {
+    const svg = svgRef.current
+    if (!svg) return
+    setExporting(true)
+    try {
+      // Serialize SVG then draw to canvas
+      const svgData = new XMLSerializer().serializeToString(svg)
+      const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' })
+      const url = URL.createObjectURL(svgBlob)
+      const img = new Image()
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve()
+        img.onerror = reject
+        img.src = url
+      })
+      const scale = 2
+      const canvas = document.createElement('canvas')
+      canvas.width = svg.clientWidth * scale
+      canvas.height = svg.clientHeight * scale
+      const ctx = canvas.getContext('2d')!
+      ctx.scale(scale, scale)
+      ctx.drawImage(img, 0, 0)
+      URL.revokeObjectURL(url)
+      const link = document.createElement('a')
+      link.download = 'plan-de-table.png'
+      link.href = canvas.toDataURL('image/png')
+      link.click()
+    } finally {
+      setExporting(false)
     }
   }
 
@@ -314,7 +354,7 @@ export default function RoomView({ tables, guests, weddingId, roomObjects: initi
           {/* Add object button */}
           <div className="relative">
             <button
-              onClick={() => setShowPalette(p => !p)}
+              onClick={() => { setShowPalette(p => !p); setShowCustomInput(false) }}
               disabled={addingObj}
               style={{ fontWeight: 300, fontSize: '0.78rem', fontFamily: 'var(--font-lato)' }}
               className="flex items-center gap-1.5 bg-[#4a5240] text-white px-3 py-1.5 rounded-xl hover:bg-[#2d3228] transition cursor-pointer disabled:opacity-50">
@@ -326,7 +366,7 @@ export default function RoomView({ tables, guests, weddingId, roomObjects: initi
                 <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
                    className="text-stone-400 uppercase mb-2.5">Ajouter un élément</p>
                 <div className="grid grid-cols-2 gap-1.5">
-                  {OBJECT_PALETTE.map(obj => (
+                  {OBJECT_PALETTE.filter(o => o.type !== 'custom').map(obj => (
                     <button key={obj.type}
                       onClick={() => addObject(obj.type)}
                       className="flex items-center gap-2 px-2.5 py-2 rounded-xl hover:bg-[#f5f0e8] transition text-left cursor-pointer"
@@ -336,9 +376,50 @@ export default function RoomView({ tables, guests, weddingId, roomObjects: initi
                     </button>
                   ))}
                 </div>
+                {/* Custom element */}
+                <div className="mt-2 pt-2 border-t border-stone-50">
+                  {showCustomInput ? (
+                    <div className="flex gap-1.5">
+                      <input
+                        autoFocus
+                        type="text"
+                        placeholder="Nom de l'élément…"
+                        value={customLabelInput}
+                        onChange={e => setCustomLabelInput(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter' && customLabelInput.trim()) addObject('custom', customLabelInput.trim())
+                          if (e.key === 'Escape') { setShowCustomInput(false); setCustomLabelInput('') }
+                        }}
+                        className="flex-1 text-xs px-2.5 py-1.5 rounded-lg border border-stone-200 outline-none focus:border-[#4a5240]"
+                        style={{ fontWeight: 300 }}
+                      />
+                      <button
+                        onClick={() => customLabelInput.trim() && addObject('custom', customLabelInput.trim())}
+                        disabled={!customLabelInput.trim()}
+                        className="px-2.5 py-1.5 rounded-lg bg-[#4a5240] text-white text-xs disabled:opacity-40 cursor-pointer"
+                        style={{ fontWeight: 300 }}>
+                        ✓
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setShowCustomInput(true)}
+                      className="w-full flex items-center gap-2 px-2.5 py-2 rounded-xl hover:bg-[#f5f0e8] transition text-left cursor-pointer"
+                      style={{ fontWeight: 300, fontSize: '0.78rem', color: '#44403c' }}>
+                      <span>✏️</span>
+                      <span>Personnalisé…</span>
+                    </button>
+                  )}
+                </div>
               </div>
             )}
           </div>
+
+          <button onClick={exportPNG} disabled={exporting}
+            style={{ fontWeight: 300, fontSize: '0.72rem' }}
+            className="text-stone-400 hover:text-[#4a5240] transition cursor-pointer border border-stone-200 px-3 py-1.5 rounded-xl hover:border-[#4a5240]/30 disabled:opacity-50">
+            {exporting ? '…' : '↓ Exporter PNG'}
+          </button>
 
           <button onClick={resetLayout}
             style={{ fontWeight: 300, fontSize: '0.72rem' }}
@@ -352,7 +433,7 @@ export default function RoomView({ tables, guests, weddingId, roomObjects: initi
 
         {/* SVG Room */}
         <div className="flex-1 min-w-0">
-          <div className="rounded-2xl border border-stone-200 overflow-hidden bg-white shadow-sm"
+          <div ref={svgWrapRef} className="rounded-2xl border border-stone-200 overflow-hidden bg-white shadow-sm"
                style={{ cursor: dragging ? 'grabbing' : 'default' }}>
             <svg
               ref={svgRef}
@@ -552,21 +633,36 @@ export default function RoomView({ tables, guests, weddingId, roomObjects: initi
             </div>
           )}
 
-          {/* Unassigned guests */}
+          {/* Unassigned guests — visually distinct section */}
           {unassigned.length > 0 && (
-            <div className="bg-white rounded-2xl border border-amber-100 overflow-hidden">
-              <div className="px-4 py-3 border-b border-stone-50">
-                <p style={{ fontWeight: 500, fontSize: '0.82rem' }} className="text-amber-600">Sans table · {unassigned.length}</p>
+            <div className="rounded-2xl overflow-hidden" style={{ background: 'linear-gradient(135deg, #fff7ed 0%, #fef3c7 100%)', border: '1.5px dashed #f59e0b' }}>
+              <div className="px-4 py-3 flex items-center gap-2 border-b border-amber-100">
+                <span className="w-5 h-5 rounded-full bg-amber-400 flex items-center justify-center shrink-0">
+                  <span style={{ fontWeight: 700, fontSize: '0.6rem', color: 'white', lineHeight: 1 }}>{unassigned.length}</span>
+                </span>
+                <div className="flex-1">
+                  <p style={{ fontWeight: 500, fontSize: '0.8rem' }} className="text-amber-700">Invités à placer</p>
+                  <p style={{ fontWeight: 300, fontSize: '0.62rem' }} className="text-amber-400">
+                    Assignez-les via l'onglet Organisation
+                  </p>
+                </div>
               </div>
-              <ul className="px-4 py-1 max-h-48 overflow-y-auto divide-y divide-stone-50">
+              <ul className="px-3 py-1.5 max-h-52 overflow-y-auto space-y-0.5">
                 {unassigned.map(g => (
-                  <li key={g.id} className="flex items-center gap-2 py-2">
-                    <div className="w-6 h-6 rounded-full bg-amber-50 flex items-center justify-center shrink-0">
-                      <span style={{ fontWeight: 500, fontSize: '0.6rem' }} className="text-amber-400">{g.first_name[0]?.toUpperCase()}</span>
+                  <li key={g.id} className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-amber-50 transition">
+                    <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0"
+                         style={{ background: '#fde68a', border: '1px solid #f59e0b' }}>
+                      <span style={{ fontWeight: 600, fontSize: '0.6rem', color: '#92400e' }}>{g.first_name[0]?.toUpperCase()}</span>
                     </div>
-                    <span style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-stone-600 truncate">
+                    <span style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-amber-900 truncate">
                       {g.first_name}{g.last_name ? ` ${g.last_name}` : ''}
                     </span>
+                    {g.guest_type === 'enfant' && (
+                      <span style={{ fontSize: '0.6rem' }} className="text-amber-400 shrink-0">🧒</span>
+                    )}
+                    {g.guest_type === 'animal' && (
+                      <span style={{ fontSize: '0.6rem' }} className="text-amber-400 shrink-0">🐾</span>
+                    )}
                   </li>
                 ))}
               </ul>

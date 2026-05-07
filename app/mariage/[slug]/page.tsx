@@ -50,7 +50,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
     { label: 'Faire-parts envoyés', done: (guestCount ?? 0) > 0 && !!wedding.share_code, href: `/mariage/${slug}/partager` },
     { label: 'Programme créé', done: (programmeCount ?? 0) > 0, href: `/mariage/${slug}/programme` },
     { label: 'Plan de table', done: (tableCount ?? 0) > 0, href: `/mariage/${slug}/tables` },
-    { label: 'Mot des mariés', done: !!(wedding.couple_message || (ruleCount ?? 0) > 0), href: `/mariage/${slug}/regles` },
+    { label: 'Infos mariage', done: !!(wedding.couple_message && wedding.date && wedding.location), href: `/mariage/${slug}/edit` },
     { label: 'Hébergements', done: (hebergementCount ?? 0) > 0, href: `/mariage/${slug}/hebergements` },
   ]
 
@@ -59,7 +59,6 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
     { href: 'guests',          emoji: '👥', label: 'Invités',        sub: 'Liste & RSVPs' },
     { href: 'tables',          emoji: '🪑', label: 'Plan de table',  sub: 'Placement' },
     { href: 'budget',          emoji: '💰', label: 'Budget',         sub: 'Dépenses & suivi' },
-    { href: 'regles',          emoji: '📜', label: 'Mot des mariés', sub: 'Message & infos' },
     { href: 'retro-planning',  emoji: '🗓️', label: 'Rétro-planning', sub: 'Avant le jour J' },
     // Jour J
     { href: 'checklist',       emoji: '✅', label: 'Checklist J',    sub: 'Qui fait quoi' },
@@ -85,25 +84,26 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
         }
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/70" />
 
-        {(dateFormatted || wedding.location) && (
-          <div className="absolute inset-0 flex items-end justify-center pb-6 pointer-events-none">
-            <div className="border border-white/30 backdrop-blur-sm bg-black/20 rounded-lg px-4 py-2.5 text-center text-white max-w-xs mx-4">
-              <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 'clamp(1rem, 3vw, 1.4rem)', lineHeight: 1.1, color: 'white' }}>
-                {wedding.name}
-              </h2>
-              {dateFormatted && (
-                <p className="capitalize mt-1" style={{ fontWeight: 300, fontSize: '0.68rem', letterSpacing: '0.05em', opacity: 0.85 }}>
-                  {dateFormatted}
-                </p>
-              )}
-              {wedding.location && (
-                <p style={{ fontWeight: 300, fontSize: '0.65rem', opacity: 0.7 }} className="mt-0.5">
-                  {wedding.location}
-                </p>
-              )}
-            </div>
-          </div>
-        )}
+        <div className="absolute inset-0 flex items-end justify-center pb-6">
+          <a href={`/mariage/${slug}/edit`} className="border border-white/30 backdrop-blur-sm bg-black/20 rounded-lg px-4 py-2.5 text-center text-white max-w-xs mx-4 hover:bg-black/35 hover:border-white/50 transition group">
+            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 'clamp(1rem, 3vw, 1.4rem)', lineHeight: 1.1, color: 'white' }}>
+              {wedding.name}
+            </h2>
+            {dateFormatted && (
+              <p className="capitalize mt-1" style={{ fontWeight: 300, fontSize: '0.68rem', letterSpacing: '0.05em', opacity: 0.85 }}>
+                {dateFormatted}
+              </p>
+            )}
+            {wedding.location && (
+              <p style={{ fontWeight: 300, fontSize: '0.65rem', opacity: 0.7 }} className="mt-0.5">
+                {wedding.location}
+              </p>
+            )}
+            <p style={{ fontWeight: 300, fontSize: '0.6rem', opacity: 0, letterSpacing: '0.08em' }} className="group-hover:opacity-60 transition mt-1 uppercase tracking-widest">
+              ✏ Modifier
+            </p>
+          </a>
+        </div>
 
         <a href={`/mariage/${slug}/edit`}
            className="absolute top-4 right-4 text-xs text-white/70 hover:text-white border border-white/30 hover:border-white/60 px-3 py-1.5 rounded-lg backdrop-blur transition"

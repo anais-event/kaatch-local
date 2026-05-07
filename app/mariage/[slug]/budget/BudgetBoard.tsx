@@ -1,6 +1,6 @@
 'use client'
 
-import { Fragment, useState, useMemo } from 'react'
+import { Fragment, useState, useMemo, useTransition } from 'react'
 import FileUploadButton from './FileUploadButton'
 
 type Category = { id: string; name: string; icon: string; color: string; budget_allocated: number }
@@ -17,19 +17,19 @@ function fmt(amount: number, currency: string) {
   catch { return `${amount} ${currency}` }
 }
 
-const STATUS_OPTIONS = [
-  { key: 'devis',   label: 'Devis',   dot: 'bg-stone-300',  pill: 'bg-stone-100 text-stone-500' },
-  { key: 'acompte', label: 'Acompte', dot: 'bg-amber-400',  pill: 'bg-amber-50 text-amber-600' },
-  { key: 'solde',   label: 'Soldé',   dot: 'bg-emerald-400',pill: 'bg-emerald-50 text-emerald-600' },
+const STATUS_CFG = [
+  { key: 'devis',   label: 'Devis',   dot: '#d6d3d1', pill: '#f5f5f4', text: '#78716c' },
+  { key: 'acompte', label: 'Acompte', dot: '#fbbf24', pill: '#fffbeb', text: '#b45309' },
+  { key: 'solde',   label: 'Soldé',   dot: '#34d399', pill: '#ecfdf5', text: '#059669' },
 ]
-const getStatus = (key: string) => STATUS_OPTIONS.find(s => s.key === key) ?? STATUS_OPTIONS[0]
+const getStatus = (key: string) => STATUS_CFG.find(s => s.key === key) ?? STATUS_CFG[0]
 
-function QuoteForm({ slug, itemId, currencies, defaultValues, onSubmit, onCancel }: {
+function QuoteInlineForm({ slug, itemId, currencies, defaultValues, onSubmit, onCancel }: {
   slug: string; itemId: string; currencies: string[]
   defaultValues?: Quote; onSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>; onCancel: () => void
 }) {
   return (
-    <form onSubmit={onSubmit} className="bg-white border border-stone-200 rounded-xl p-3 space-y-2">
+    <form onSubmit={onSubmit} className="bg-[#f5f0e8]/60 border border-stone-200 rounded-xl p-3 space-y-2">
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
         <input name="vendor_name" type="text" placeholder="Prestataire" defaultValue={defaultValues?.vendor_name ?? ''} autoFocus
           className="col-span-2 border border-stone-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[#4a5240] bg-white text-stone-700" style={{ fontWeight: 300 }} />
@@ -39,475 +39,24 @@ function QuoteForm({ slug, itemId, currencies, defaultValues, onSubmit, onCancel
         </select>
       </div>
       <div className="grid grid-cols-2 gap-2">
-        <input name="amount" type="number" placeholder="Montant devis" min={0} defaultValue={defaultValues?.amount || ''} required
+        <input name="amount" type="number" placeholder="Montant devis (€)" min={0} defaultValue={defaultValues?.amount || ''} required
           className="border border-stone-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[#4a5240] bg-white text-stone-700" style={{ fontWeight: 300 }} />
-        <input name="paid_amount" type="number" placeholder="Acompte versé" min={0} defaultValue={defaultValues?.paid_amount || ''}
+        <input name="paid_amount" type="number" placeholder="Déjà versé (€)" min={0} defaultValue={defaultValues?.paid_amount || ''}
           className="border border-stone-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[#4a5240] bg-white text-stone-700" style={{ fontWeight: 300 }} />
       </div>
       <div className="grid grid-cols-2 gap-2">
         <input name="due_date" type="date" defaultValue={defaultValues?.due_date ?? ''}
           className="border border-stone-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[#4a5240] bg-white text-stone-500" style={{ fontWeight: 300 }} />
-        <input name="notes" type="text" placeholder="Notes (optionnel)" defaultValue={defaultValues?.notes ?? ''}
+        <input name="notes" type="text" placeholder="Notes" defaultValue={defaultValues?.notes ?? ''}
           className="border border-stone-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[#4a5240] bg-white text-stone-700" style={{ fontWeight: 300 }} />
       </div>
       <div className="flex gap-2">
         <button type="submit" className="bg-[#4a5240] text-white px-4 py-1.5 rounded-lg text-sm cursor-pointer hover:bg-[#2d3228] transition" style={{ fontWeight: 300 }}>
-          {defaultValues ? 'Enregistrer' : 'Ajouter ce devis'}
+          {defaultValues ? 'Enregistrer' : 'Ajouter'}
         </button>
         <button type="button" onClick={onCancel} className="text-stone-400 text-sm px-3 cursor-pointer" style={{ fontWeight: 300 }}>Annuler</button>
       </div>
     </form>
-  )
-}
-
-/* ── TableView ── */
-function TableView({ categories, items, quotes, files, budgetCurrency, getItemEffective, editingItem, setEditingItem, onCycleStatus, actions, slug, weddingId, contacts }: {
-  categories: Category[]
-  items: Item[]
-  quotes: Quote[]
-  files: BudgetFile[]
-  budgetCurrency: string
-  getItemEffective: (item: Item) => { amount: number; paid: number; currency: string; vendor: string | null }
-  editingItem: string | null
-  setEditingItem: (id: string | null) => void
-  onCycleStatus: (item: Item) => Promise<void>
-  actions: Actions
-  slug: string
-  weddingId: string
-  contacts: ContactBasic[]
-}) {
-  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
-  const [addingQuoteFor, setAddingQuoteFor] = useState<string | null>(null)
-  const [editingQuote, setEditingQuote] = useState<string | null>(null)
-  const [addingQuickRow, setAddingQuickRow] = useState(false)
-  const [quickCatId, setQuickCatId] = useState(categories[0]?.id ?? '')
-
-  async function handleQuickAdd(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    const form = e.currentTarget
-    const fd = new FormData(form)
-    fd.set('slug', slug)
-    fd.set('category_id', quickCatId || categories[0]?.id || '')
-    await actions.addItem(fd)
-    form.reset()
-    setAddingQuickRow(false)
-  }
-
-  const toggleRow = (id: string) => setExpandedRows(prev => {
-    const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s
-  })
-
-  const totalEngaged  = items.reduce((s, i) => s + getItemEffective(i).amount, 0)
-  const totalPaid     = items.reduce((s, i) => s + getItemEffective(i).paid, 0)
-  const totalRemaining = totalEngaged - totalPaid
-  const getCat = (catId: string) => categories.find(c => c.id === catId)
-
-  const findContact = (vendorName: string | null) => {
-    if (!vendorName) return null
-    const vn = vendorName.toLowerCase()
-    return contacts.find(c => c.name.toLowerCase().includes(vn) || vn.includes(c.name.toLowerCase()))
-  }
-
-  async function callAction(action: string, data: Record<string, string>) {
-    const fd = new FormData()
-    fd.set('slug', slug)
-    Object.entries(data).forEach(([k, v]) => fd.set(k, v))
-    await actions[action](fd)
-  }
-
-  return (
-    <div className="bg-white rounded-2xl border border-stone-100 overflow-x-auto">
-      <table className="w-full min-w-[700px] border-collapse">
-        <thead>
-          <tr className="border-b border-stone-50">
-            {['Catégorie', 'Poste', 'Statut', 'Prestataire retenu', 'Montant', 'Payé', 'Reste', 'Devis'].map(h => (
-              <th key={h} className="px-4 py-3 text-left"
-                  style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em', color: '#a8a29e', textTransform: 'uppercase' }}>
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {items.map(item => {
-            const cat = getCat(item.category_id)
-            const eff = getItemEffective(item)
-            const st = getStatus(item.status)
-            const iQuotes = quotes.filter(q => q.item_id === item.id && q.status !== 'refuse')
-            const allItemQuotes = quotes.filter(q => q.item_id === item.id)
-            const remaining = eff.amount - eff.paid
-            const isExpanded = expandedRows.has(item.id)
-            const matchedContact = findContact(eff.vendor)
-
-            return (
-              <Fragment key={item.id}>
-                <tr
-                  className={`border-b border-stone-50 hover:bg-stone-50/50 transition group cursor-pointer ${isExpanded ? 'bg-[#f5f0e8]/30' : ''}`}
-                  onClick={() => { if (editingItem !== item.id) toggleRow(item.id) }}
-                >
-                  {/* Catégorie */}
-                  <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
-                    {cat && (
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: cat.color }} />
-                        <span style={{ fontWeight: 300, fontSize: '0.8rem', fontFamily: 'var(--font-lato)' }} className="text-stone-500 whitespace-nowrap">
-                          {cat.icon} {cat.name}
-                        </span>
-                      </div>
-                    )}
-                  </td>
-
-                  {/* Poste */}
-                  <td className="px-4 py-3" onClick={e => { if (editingItem === item.id) e.stopPropagation() }}>
-                    {editingItem === item.id ? (
-                      <form className="flex gap-2 items-center flex-wrap"
-                        onClick={e => e.stopPropagation()}
-                        onSubmit={async e => {
-                          e.preventDefault()
-                          const fd = new FormData(e.currentTarget)
-                          fd.set('slug', slug)
-                          fd.set('id', item.id)
-                          await actions.updateItem(fd)
-                          setEditingItem(null)
-                        }}>
-                        <input name="label" defaultValue={item.label} required autoFocus
-                          className="border border-[#4a5240] rounded-lg px-2 py-1 text-sm outline-none bg-white text-stone-700 w-36" style={{ fontWeight: 400 }} />
-                        <input name="estimated" type="number" defaultValue={item.estimated_amount || ''} placeholder="Estimé" min={0}
-                          className="w-20 border border-stone-200 rounded-lg px-2 py-1 text-sm outline-none bg-white text-stone-700" style={{ fontWeight: 300 }} />
-                        <button type="submit" className="bg-[#4a5240] text-white px-2 py-1 rounded-lg text-xs cursor-pointer" style={{ fontWeight: 300 }}>OK</button>
-                        <button type="button" onClick={() => setEditingItem(null)} className="text-stone-400 text-xs cursor-pointer">✕</button>
-                      </form>
-                    ) : (
-                      <span className="text-stone-700" style={{ fontWeight: 400, fontSize: '0.85rem', fontFamily: 'var(--font-lato)' }}>
-                        {item.label}
-                      </span>
-                    )}
-                  </td>
-
-                  {/* Statut */}
-                  <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
-                    <button onClick={() => onCycleStatus(item)}
-                      className={`text-xs px-2 py-0.5 rounded-full cursor-pointer transition ${st.pill}`}
-                      style={{ fontWeight: 300, fontSize: '0.72rem', fontFamily: 'var(--font-lato)' }}>
-                      {st.label}
-                    </button>
-                  </td>
-
-                  {/* Prestataire retenu */}
-                  <td className="px-4 py-3">
-                    {eff.vendor ? (
-                      matchedContact ? (
-                        <a href={`/mariage/${slug}/contacts`}
-                           onClick={e => e.stopPropagation()}
-                           className="flex items-center gap-1 text-[#4a5240] hover:underline"
-                           style={{ fontWeight: 300, fontSize: '0.82rem', fontFamily: 'var(--font-lato)' }}>
-                          {eff.vendor}
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3 h-3 opacity-60 shrink-0">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                          </svg>
-                        </a>
-                      ) : (
-                        <span style={{ fontWeight: 300, fontSize: '0.82rem', fontFamily: 'var(--font-lato)' }} className="text-stone-500">
-                          {eff.vendor}
-                        </span>
-                      )
-                    ) : (
-                      <span className="text-stone-300">—</span>
-                    )}
-                  </td>
-
-                  {/* Montant */}
-                  <td className="px-4 py-3 text-right">
-                    <span style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1rem' }} className="text-stone-700">
-                      {fmt(eff.amount, eff.currency)}
-                    </span>
-                  </td>
-
-                  {/* Payé */}
-                  <td className="px-4 py-3 text-right">
-                    {eff.paid > 0
-                      ? <span style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1rem' }} className="text-emerald-600">{fmt(eff.paid, eff.currency)}</span>
-                      : <span className="text-stone-300" style={{ fontWeight: 300, fontSize: '0.8rem' }}>—</span>
-                    }
-                  </td>
-
-                  {/* Reste */}
-                  <td className="px-4 py-3 text-right">
-                    {remaining > 0
-                      ? <span style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1rem' }} className="text-amber-500">{fmt(remaining, eff.currency)}</span>
-                      : <span className="text-emerald-500" style={{ fontWeight: 400, fontSize: '0.8rem' }}>✓</span>
-                    }
-                  </td>
-
-                  {/* Devis + expand */}
-                  <td className="px-4 py-3 text-center">
-                    <div className="flex items-center justify-center gap-1.5">
-                      {iQuotes.length > 0
-                        ? <span className="text-xs bg-stone-100 text-stone-500 px-2 py-0.5 rounded-full" style={{ fontWeight: 300 }}>{iQuotes.length}</span>
-                        : <span className="text-stone-200" style={{ fontWeight: 300, fontSize: '0.8rem' }}>—</span>
-                      }
-                      <span className="text-stone-300 text-xs">{isExpanded ? '▲' : '▼'}</span>
-                    </div>
-                  </td>
-                </tr>
-
-                {/* Expanded row */}
-                {isExpanded && (
-                  <tr className="border-b border-stone-50">
-                    <td colSpan={8} className="px-5 py-4 bg-[#f5f0e8]/20">
-                      <div className="space-y-3">
-
-                        {/* Contact info si trouvé */}
-                        {matchedContact && (
-                          <div className="flex items-center gap-3 flex-wrap text-xs bg-white rounded-xl px-4 py-2.5 border border-stone-100 w-fit">
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#4a5240] shrink-0" />
-                            <span style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }} className="text-stone-400">{matchedContact.role}</span>
-                            <span style={{ fontFamily: 'var(--font-lato)', fontWeight: 500 }} className="text-[#2d3228]">{matchedContact.name}</span>
-                            {matchedContact.telephone && (
-                              <a href={`tel:${matchedContact.telephone}`}
-                                 className="text-[#4a5240] hover:underline" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
-                                {matchedContact.telephone}
-                              </a>
-                            )}
-                            {matchedContact.email && (
-                              <a href={`mailto:${matchedContact.email}`}
-                                 className="text-[#4a5240] hover:underline" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
-                                {matchedContact.email}
-                              </a>
-                            )}
-                            <a href={`/mariage/${slug}/contacts`}
-                               className="text-[#4a5240] hover:underline border-l border-stone-200 pl-3 ml-1"
-                               style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
-                              Voir la fiche →
-                            </a>
-                          </div>
-                        )}
-
-                        {/* Devis cards */}
-                        {allItemQuotes.length > 0 && (
-                          <div className="flex flex-wrap gap-2">
-                            {allItemQuotes.map(quote => {
-                              const isRetenu = quote.status === 'retenu'
-                              const isRefuse = quote.status === 'refuse'
-                              const filesForQuote = files.filter(f => f.quote_id === quote.id)
-
-                              return editingQuote === quote.id ? (
-                                <div key={quote.id} className="w-full">
-                                  <QuoteForm slug={slug} itemId={item.id} currencies={CURRENCIES} defaultValues={quote}
-                                    onSubmit={async e => {
-                                      e.preventDefault()
-                                      const fd = new FormData(e.currentTarget)
-                                      fd.set('slug', slug)
-                                      fd.set('id', quote.id)
-                                      await actions.updateQuote(fd)
-                                      setEditingQuote(null)
-                                    }}
-                                    onCancel={() => setEditingQuote(null)} />
-                                </div>
-                              ) : (
-                                <div key={quote.id}
-                                  onClick={() => setEditingQuote(quote.id)}
-                                  className={`relative flex flex-col gap-1.5 px-4 py-3 rounded-xl border cursor-pointer transition min-w-[150px] max-w-[220px] ${
-                                    isRetenu ? 'bg-[#4a5240] border-[#4a5240]' :
-                                    isRefuse  ? 'bg-stone-50 border-stone-100 opacity-40' :
-                                    'bg-white border-stone-200 hover:border-stone-300 hover:shadow-sm'
-                                  }`}>
-                                  {isRetenu && <span className="absolute -top-2 left-3 text-[9px] bg-white text-[#4a5240] px-1.5 py-0.5 rounded-full font-semibold">✦ Retenu</span>}
-                                  <p style={{ fontWeight: isRetenu ? 500 : 400, fontSize: '0.82rem' }}
-                                     className={isRetenu ? 'text-white' : 'text-stone-700'}>
-                                    {quote.vendor_name || <span className="italic opacity-40">Prestataire</span>}
-                                  </p>
-                                  <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.3rem', lineHeight: 1 }}
-                                     className={isRetenu ? 'text-white' : 'text-[#2d3228]'}>
-                                    {fmt(quote.amount, quote.currency)}
-                                  </p>
-                                  {quote.paid_amount > 0 && (
-                                    <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className={isRetenu ? 'text-white/70' : 'text-emerald-500'}>
-                                      {fmt(quote.paid_amount, quote.currency)} acompte
-                                    </p>
-                                  )}
-                                  {quote.notes && (
-                                    <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className={`truncate ${isRetenu ? 'text-white/60' : 'text-stone-400'}`}>
-                                      {quote.notes}
-                                    </p>
-                                  )}
-                                  {filesForQuote.length > 0 && (
-                                    <div className="flex flex-wrap gap-1 mt-0.5" onClick={e => e.stopPropagation()}>
-                                      {filesForQuote.map(f => (
-                                        <a key={f.id} href={f.file_url} target="_blank" rel="noopener noreferrer"
-                                          className={`text-[10px] flex items-center gap-0.5 px-1.5 py-0.5 rounded-md ${isRetenu ? 'bg-white/20 text-white' : 'bg-stone-100 text-stone-500'} hover:opacity-80`}>
-                                          {f.file_type?.includes('pdf') ? '📄' : '🖼️'} {f.file_name.slice(0, 12)}…
-                                        </a>
-                                      ))}
-                                    </div>
-                                  )}
-                                  <div className="flex gap-1 mt-1 flex-wrap" onClick={e => e.stopPropagation()}>
-                                    {!isRetenu && !isRefuse && (
-                                      <button onClick={() => callAction('retainQuote', { id: quote.id, item_id: item.id })}
-                                        className="text-[10px] px-2 py-0.5 rounded-full border border-[#4a5240]/30 text-[#4a5240] hover:bg-[#4a5240] hover:text-white transition cursor-pointer" style={{ fontWeight: 400 }}>
-                                        Retenir
-                                      </button>
-                                    )}
-                                    {isRetenu && (
-                                      <button onClick={() => callAction('retainQuote', { id: quote.id, item_id: item.id })}
-                                        className="text-[10px] text-white/50 hover:text-white transition cursor-pointer" style={{ fontWeight: 300 }}>
-                                        Annuler
-                                      </button>
-                                    )}
-                                    {!isRetenu && !isRefuse && (
-                                      <button onClick={() => callAction('refuseQuote', { id: quote.id })}
-                                        className="text-[10px] text-stone-300 hover:text-red-400 transition cursor-pointer" style={{ fontWeight: 300 }}>
-                                        Refuser
-                                      </button>
-                                    )}
-                                    <FileUploadButton slug={slug} weddingId={weddingId} quoteId={quote.id} onSave={actions.saveBudgetFileMeta} />
-                                    <button onClick={() => callAction('deleteQuote', { id: quote.id })}
-                                      className="p-0.5 text-stone-200 hover:text-red-400 transition cursor-pointer ml-auto">
-                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3 h-3">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                      </svg>
-                                    </button>
-                                  </div>
-                                </div>
-                              )
-                            })}
-
-                            {addingQuoteFor !== item.id && (
-                              <button onClick={() => setAddingQuoteFor(item.id)}
-                                className="flex flex-col items-center justify-center gap-1 px-4 py-3 rounded-xl border-2 border-dashed border-stone-200 text-stone-300 hover:border-[#4a5240] hover:text-[#4a5240] transition cursor-pointer min-w-[80px]">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4">
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                </svg>
-                                <span style={{ fontWeight: 300, fontSize: '0.68rem' }}>Devis</span>
-                              </button>
-                            )}
-                          </div>
-                        )}
-
-                        {allItemQuotes.length === 0 && addingQuoteFor !== item.id && (
-                          <button onClick={() => setAddingQuoteFor(item.id)}
-                            className="flex items-center gap-1.5 text-xs text-stone-400 hover:text-[#4a5240] transition cursor-pointer" style={{ fontWeight: 300 }}>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                            </svg>
-                            Ajouter un premier devis
-                          </button>
-                        )}
-
-                        {addingQuoteFor === item.id && (
-                          <QuoteForm slug={slug} itemId={item.id} currencies={CURRENCIES}
-                            onSubmit={async e => {
-                              e.preventDefault()
-                              const fd = new FormData(e.currentTarget)
-                              fd.set('slug', slug)
-                              fd.set('item_id', item.id)
-                              await actions.addQuote(fd)
-                              setAddingQuoteFor(null)
-                            }}
-                            onCancel={() => setAddingQuoteFor(null)} />
-                        )}
-
-                        {/* Actions poste */}
-                        <div className="flex gap-3 pt-1" onClick={e => e.stopPropagation()}>
-                          <button onClick={() => setEditingItem(item.id)}
-                            className="flex items-center gap-1 text-xs text-stone-400 hover:text-[#4a5240] transition cursor-pointer" style={{ fontWeight: 300 }}>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3 h-3">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
-                            </svg>
-                            Modifier le poste
-                          </button>
-                          <button onClick={async () => {
-                            if (!confirm('Supprimer ce poste ?')) return
-                            await callAction('deleteItem', { id: item.id })
-                          }}
-                            className="text-xs text-stone-300 hover:text-red-400 transition cursor-pointer" style={{ fontWeight: 300 }}>
-                            Supprimer
-                          </button>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </Fragment>
-            )
-          })}
-          {/* Quick-add row */}
-          {categories.length > 0 && (
-            <tr className="border-t border-stone-100">
-              <td colSpan={8} className="px-4 py-2.5">
-                {!addingQuickRow ? (
-                  <button
-                    onClick={() => setAddingQuickRow(true)}
-                    className="flex items-center gap-1.5 text-stone-400 hover:text-[#4a5240] transition cursor-pointer"
-                    style={{ fontWeight: 300, fontSize: '0.78rem', fontFamily: 'var(--font-lato)' }}
-                  >
-                    <span className="text-base leading-none">+</span> Ajouter un poste
-                  </button>
-                ) : (
-                  <form onSubmit={handleQuickAdd} className="flex items-center gap-2 flex-wrap">
-                    <select
-                      value={quickCatId}
-                      onChange={e => setQuickCatId(e.target.value)}
-                      className="border border-stone-200 rounded-lg px-3 py-1.5 text-stone-600 bg-white focus:outline-none focus:border-[#4a5240]/50"
-                      style={{ fontWeight: 300, fontSize: '0.82rem', fontFamily: 'var(--font-lato)' }}
-                    >
-                      {categories.map(c => (
-                        <option key={c.id} value={c.id}>{c.icon} {c.name}</option>
-                      ))}
-                    </select>
-                    <input
-                      name="label" type="text" placeholder="Nom du poste" required autoFocus
-                      className="border border-stone-200 rounded-lg px-3 py-1.5 text-stone-700 flex-1 min-w-[140px] focus:outline-none focus:border-[#4a5240]/50"
-                      style={{ fontWeight: 300, fontSize: '0.82rem', fontFamily: 'var(--font-lato)' }}
-                    />
-                    <input
-                      name="estimated" type="number" placeholder="Montant estimé" min={0} step="0.01"
-                      className="border border-stone-200 rounded-lg px-3 py-1.5 text-stone-700 w-36 focus:outline-none focus:border-[#4a5240]/50"
-                      style={{ fontWeight: 300, fontSize: '0.82rem', fontFamily: 'var(--font-lato)' }}
-                    />
-                    <button
-                      type="submit"
-                      className="px-4 py-1.5 bg-[#4a5240] text-white rounded-lg hover:bg-[#2d3228] transition cursor-pointer"
-                      style={{ fontWeight: 300, fontSize: '0.78rem', fontFamily: 'var(--font-lato)' }}
-                    >
-                      Ajouter
-                    </button>
-                    <button
-                      type="button" onClick={() => setAddingQuickRow(false)}
-                      className="text-stone-400 hover:text-stone-600 transition cursor-pointer"
-                      style={{ fontWeight: 300, fontSize: '0.78rem', fontFamily: 'var(--font-lato)' }}
-                    >
-                      Annuler
-                    </button>
-                  </form>
-                )}
-              </td>
-            </tr>
-          )}
-        </tbody>
-        {items.length > 0 && (
-          <tfoot>
-            <tr className="bg-stone-50/50 border-t border-stone-100">
-              <td colSpan={4} className="px-4 py-3">
-                <span style={{ fontWeight: 300, fontSize: '0.7rem', letterSpacing: '0.12em', fontFamily: 'var(--font-lato)' }} className="text-stone-400 uppercase">
-                  Total — {items.length} poste{items.length > 1 ? 's' : ''}
-                </span>
-              </td>
-              <td className="px-4 py-3 text-right">
-                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.05rem' }} className="text-stone-700">{fmt(totalEngaged, budgetCurrency)}</span>
-              </td>
-              <td className="px-4 py-3 text-right">
-                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.05rem' }} className="text-emerald-600">{fmt(totalPaid, budgetCurrency)}</span>
-              </td>
-              <td className="px-4 py-3 text-right">
-                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.05rem' }} className="text-amber-500">{fmt(totalRemaining, budgetCurrency)}</span>
-              </td>
-              <td />
-            </tr>
-          </tfoot>
-        )}
-      </table>
-    </div>
   )
 }
 
@@ -517,40 +66,36 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
   currencies: string[]; contacts: ContactBasic[]; actions: Actions
 }) {
   const [search, setSearch] = useState('')
-  const [viewMode, setViewMode] = useState<'cartes' | 'tableau'>('tableau')
   const [editBudget, setEditBudget] = useState(false)
   const [addingCat, setAddingCat] = useState(false)
-  const [expandedCats, setExpandedCats] = useState<Set<string>>(new Set(categories.map(c => c.id)))
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set())
   const [addingItemFor, setAddingItemFor] = useState<string | null>(null)
   const [addingQuoteFor, setAddingQuoteFor] = useState<string | null>(null)
   const [editingQuote, setEditingQuote] = useState<string | null>(null)
   const [editingItem, setEditingItem] = useState<string | null>(null)
+  const [catAllocations, setCatAllocations] = useState<Record<string, number>>(
+    Object.fromEntries(categories.map(c => [c.id, c.budget_allocated ?? 0]))
+  )
+  const [editingCatAlloc, setEditingCatAlloc] = useState<string | null>(null)
+  const [catAllocValue, setCatAllocValue] = useState('')
+  const [, startTransition] = useTransition()
 
   const filteredItems = useMemo(() => {
     if (!search.trim()) return items
     const q = search.toLowerCase()
-    return items.filter(item => {
-      if (item.label.toLowerCase().includes(q)) return true
-      return quotes.filter(qt => qt.item_id === item.id).some(qt => qt.vendor_name?.toLowerCase().includes(q))
-    })
+    return items.filter(item =>
+      item.label.toLowerCase().includes(q) ||
+      quotes.filter(qt => qt.item_id === item.id).some(qt => qt.vendor_name?.toLowerCase().includes(q))
+    )
   }, [items, quotes, search])
 
-  const getItemEffective = (item: Item) => {
-    const iQuotes = quotes.filter(q => q.item_id === item.id)
-    const retained = iQuotes.find(q => q.status === 'retenu')
+  function getEffective(item: Item) {
+    const iQ = quotes.filter(q => q.item_id === item.id)
+    const retained = iQ.find(q => q.status === 'retenu')
     if (retained) return { amount: retained.amount, paid: retained.paid_amount, currency: retained.currency, vendor: retained.vendor_name }
-    if (iQuotes.length > 0) {
-      const first = iQuotes[0]
-      return { amount: first.amount, paid: first.paid_amount, currency: first.currency, vendor: first.vendor_name }
-    }
+    if (iQ.length > 0) return { amount: iQ[0].amount, paid: iQ[0].paid_amount, currency: iQ[0].currency, vendor: iQ[0].vendor_name }
     return { amount: item.estimated_amount, paid: 0, currency: budgetCurrency, vendor: null }
   }
-
-  const totalEngaged   = filteredItems.reduce((s, i) => s + getItemEffective(i).amount, 0)
-  const totalPaid      = filteredItems.reduce((s, i) => s + getItemEffective(i).paid, 0)
-  const totalRemaining = totalEngaged - totalPaid
-  const pctEngaged     = budgetTotal > 0 ? Math.min(100, (totalEngaged / budgetTotal) * 100) : 0
 
   async function call(action: string, data: Record<string, string>) {
     const fd = new FormData()
@@ -559,118 +104,114 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
     await actions[action](fd)
   }
 
-  const toggleCat  = (id: string) => setExpandedCats(prev  => { const s = new Set(prev);  s.has(id) ? s.delete(id) : s.add(id); return s })
-  const toggleItem = (id: string) => setExpandedItems(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s })
-
-  const handleCycleStatus = async (item: Item) => {
-    const opts = STATUS_OPTIONS.map(s => s.key)
-    const next = opts[(opts.indexOf(item.status) + 1) % opts.length]
+  async function cycleStatus(item: Item) {
+    const keys = STATUS_CFG.map(s => s.key)
+    const next = keys[(keys.indexOf(item.status) + 1) % keys.length]
     await call('updateItemStatus', { id: item.id, status: next })
   }
 
-  return (
-    <div className="space-y-4">
+  function toggleItem(id: string) {
+    setExpandedItems(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s })
+  }
 
-      {/* ── Enveloppe globale ── */}
-      <div className="bg-white rounded-2xl border border-stone-100 p-5 sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-start gap-4 mb-4">
-          <div className="flex-1">
-            <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.2em' }} className="text-stone-400 uppercase mb-1">Enveloppe globale</p>
+  function saveCatAlloc(catId: string) {
+    const val = parseFloat(catAllocValue) || 0
+    setCatAllocations(prev => ({ ...prev, [catId]: val }))
+    setEditingCatAlloc(null)
+    startTransition(async () => {
+      const fd = new FormData()
+      fd.set('slug', slug)
+      fd.set('id', catId)
+      fd.set('allocated', String(val))
+      await actions.updateCategoryAllocated(fd)
+    })
+  }
+
+  function findContact(vendorName: string | null) {
+    if (!vendorName) return null
+    const vn = vendorName.toLowerCase()
+    return contacts.find(c => c.name.toLowerCase().includes(vn) || vn.includes(c.name.toLowerCase()))
+  }
+
+  const totalEngaged   = filteredItems.reduce((s, i) => s + getEffective(i).amount, 0)
+  const totalPaid      = filteredItems.reduce((s, i) => s + getEffective(i).paid, 0)
+  const totalRemaining = totalEngaged - totalPaid
+  const pctEngaged     = budgetTotal > 0 ? Math.min(100, (totalEngaged / budgetTotal) * 100) : 0
+  const pctPaid        = budgetTotal > 0 ? Math.min(100, (totalPaid / budgetTotal) * 100) : 0
+
+  const LABEL = { fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.15em', textTransform: 'uppercase' as const, color: '#a8a29e' }
+  const AMT   = { fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '0.95rem' }
+
+  return (
+    <div className="space-y-4" style={{ fontFamily: 'var(--font-lato)' }}>
+
+      {/* ── Résumé compact ── */}
+      <div className="bg-white rounded-2xl border border-stone-100 px-5 py-4">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-2">
             {editBudget ? (
-              <form onSubmit={async e => { e.preventDefault(); const fd = new FormData(e.currentTarget); fd.set('slug', slug); await actions.setBudgetTotal(fd); setEditBudget(false) }} className="flex gap-2 flex-wrap">
+              <form onSubmit={async e => { e.preventDefault(); const fd = new FormData(e.currentTarget); fd.set('slug', slug); await actions.setBudgetTotal(fd); setEditBudget(false) }}
+                    className="flex gap-2 items-center">
                 <input name="total" type="number" defaultValue={budgetTotal || ''} min={0} step={100} placeholder="Ex : 25000" autoFocus
-                  className="border border-stone-200 rounded-xl px-4 py-2 outline-none focus:border-[#4a5240] text-stone-700 w-32 text-sm" style={{ fontWeight: 300 }} />
+                  className="border border-stone-200 rounded-xl px-3 py-1.5 outline-none focus:border-[#4a5240] text-stone-700 w-28 text-sm" style={{ fontWeight: 300 }} />
                 <select name="currency" defaultValue={budgetCurrency}
-                  className="border border-stone-200 rounded-xl px-3 py-2 outline-none text-stone-700 bg-white text-sm" style={{ fontWeight: 300 }}>
+                  className="border border-stone-200 rounded-xl px-2 py-1.5 outline-none text-stone-700 bg-white text-sm" style={{ fontWeight: 300 }}>
                   {currencies.map(c => <option key={c}>{c}</option>)}
                 </select>
-                <button type="submit" className="bg-[#4a5240] text-white px-4 py-2 rounded-xl text-sm cursor-pointer" style={{ fontWeight: 300 }}>OK</button>
-                <button type="button" onClick={() => setEditBudget(false)} className="text-stone-400 text-sm cursor-pointer" style={{ fontWeight: 300 }}>Annuler</button>
+                <button type="submit" className="bg-[#4a5240] text-white px-3 py-1.5 rounded-xl text-sm cursor-pointer" style={{ fontWeight: 300 }}>OK</button>
+                <button type="button" onClick={() => setEditBudget(false)} className="text-stone-400 text-sm cursor-pointer" style={{ fontWeight: 300 }}>✕</button>
               </form>
             ) : (
-              <button onClick={() => setEditBudget(true)} className="flex items-baseline gap-2 group cursor-pointer">
-                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '2.2rem', lineHeight: 1 }} className="text-[#2d3228]">
-                  {budgetTotal > 0 ? fmt(budgetTotal, budgetCurrency) : '— Définir le budget'}
-                </span>
-                <span className="text-xs text-stone-300 group-hover:text-[#4a5240] transition" style={{ fontWeight: 300 }}>modifier</span>
+              <button onClick={() => setEditBudget(true)} className="flex items-center gap-2 cursor-pointer group">
+                <span style={LABEL}>Enveloppe</span>
+                <span style={{ ...AMT, color: '#2d3228' }}>{budgetTotal > 0 ? fmt(budgetTotal, budgetCurrency) : '—'}</span>
+                <span className="text-[10px] text-stone-300 group-hover:text-[#4a5240] transition" style={{ fontWeight: 300 }}>✎</span>
               </button>
             )}
           </div>
-          {items.length > 0 && (
-            <div className="flex gap-5 text-right shrink-0">
-              <div>
-                <p style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.12em' }} className="text-stone-400 uppercase">Engagé</p>
-                <p style={{ fontWeight: 500, fontSize: '1rem' }} className="text-stone-700">{fmt(totalEngaged, budgetCurrency)}</p>
-              </div>
-              <div>
-                <p style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.12em' }} className="text-stone-400 uppercase">Payé</p>
-                <p style={{ fontWeight: 500, fontSize: '1rem' }} className="text-emerald-600">{fmt(totalPaid, budgetCurrency)}</p>
-              </div>
-              <div>
-                <p style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.12em' }} className="text-stone-400 uppercase">Reste</p>
-                <p style={{ fontWeight: 500, fontSize: '1rem' }} className="text-amber-600">{fmt(totalRemaining, budgetCurrency)}</p>
-              </div>
+          <div className="flex gap-5">
+            <div className="text-right">
+              <p style={LABEL}>Engagé</p>
+              <p style={{ ...AMT, color: '#4a5240' }}>{fmt(totalEngaged, budgetCurrency)}</p>
             </div>
-          )}
+            <div className="text-right">
+              <p style={LABEL}>Payé</p>
+              <p style={{ ...AMT, color: '#16a34a' }}>{fmt(totalPaid, budgetCurrency)}</p>
+            </div>
+            <div className="text-right">
+              <p style={LABEL}>Reste</p>
+              <p style={{ ...AMT, color: totalRemaining > 0 ? '#b45309' : '#a8a29e' }}>{fmt(totalRemaining, budgetCurrency)}</p>
+            </div>
+          </div>
         </div>
         {budgetTotal > 0 && items.length > 0 && (
-          <>
-            <div className="flex justify-between text-xs text-stone-400 mb-1.5" style={{ fontWeight: 300 }}>
-              <span>{Math.round(pctEngaged)}% de l'enveloppe engagé</span>
-              <span>{fmt(Math.max(0, budgetTotal - totalEngaged), budgetCurrency)} disponible</span>
+          <div className="mt-3">
+            <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden flex">
+              <div className="bg-emerald-400 transition-all" style={{ width: `${pctPaid}%` }} />
+              <div className="bg-amber-300 transition-all" style={{ width: `${Math.max(0, pctEngaged - pctPaid)}%` }} />
             </div>
-            <div className="h-2.5 bg-stone-100 rounded-full overflow-hidden flex">
-              <div className="bg-emerald-400 transition-all" style={{ width: `${budgetTotal > 0 ? (totalPaid/budgetTotal)*100 : 0}%` }} />
-              <div className="bg-amber-300 transition-all" style={{ width: `${budgetTotal > 0 ? (totalRemaining/budgetTotal)*100 : 0}%` }} />
-            </div>
-            <div className="flex gap-4 mt-1.5">
-              {[['bg-emerald-400','Payé'],['bg-amber-300','Reste à payer'],['bg-stone-100 border border-stone-200','Disponible']].map(([cls,lbl]) => (
-                <span key={lbl} className="flex items-center gap-1 text-xs text-stone-400" style={{ fontWeight: 300 }}>
-                  <span className={`w-2 h-2 rounded-full ${cls}`}/>{lbl}
-                </span>
-              ))}
-            </div>
-          </>
+          </div>
         )}
       </div>
 
-      {/* ── Barre recherche + toggle vue + bouton catégorie ── */}
+      {/* ── Barre actions ── */}
       <div className="flex gap-3 items-center flex-wrap">
         <div className="flex-1 relative min-w-[200px]">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}
-               className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
+               className="w-4 h-4 text-stone-300 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
           </svg>
           <input type="text" value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Rechercher un poste ou prestataire…"
             className="w-full pl-10 pr-4 py-2.5 bg-white border border-stone-200 rounded-xl outline-none focus:border-[#4a5240] transition text-stone-700 text-sm"
             style={{ fontWeight: 300 }} />
-          {search && <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-300 hover:text-stone-500 cursor-pointer">✕</button>}
+          {search && <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-300 hover:text-stone-500 cursor-pointer text-xs">✕</button>}
         </div>
-
-        {categories.length > 0 && (
-          <div className="flex bg-white border border-stone-200 rounded-xl overflow-hidden shrink-0">
-            <button onClick={() => setViewMode('cartes')}
-              className={`px-3 py-2 text-xs flex items-center gap-1.5 transition cursor-pointer ${viewMode === 'cartes' ? 'bg-[#4a5240] text-white' : 'text-stone-400 hover:text-[#4a5240]'}`}
-              style={{ fontWeight: 300 }}>
-              <span>☰</span><span className="hidden sm:inline">Cartes</span>
-            </button>
-            <button onClick={() => setViewMode('tableau')}
-              className={`px-3 py-2 text-xs flex items-center gap-1.5 transition cursor-pointer border-l border-stone-200 ${viewMode === 'tableau' ? 'bg-[#4a5240] text-white' : 'text-stone-400 hover:text-[#4a5240]'}`}
-              style={{ fontWeight: 300 }}>
-              <span>⊞</span><span className="hidden sm:inline">Tableau</span>
-            </button>
-          </div>
-        )}
-
-        {categories.length > 0 && !addingCat && (
+        {!addingCat && categories.length > 0 && (
           <button onClick={() => setAddingCat(true)}
-            className="flex items-center gap-1.5 px-4 py-2.5 bg-white border border-stone-200 rounded-xl text-xs text-stone-400 hover:border-[#4a5240] hover:text-[#4a5240] transition cursor-pointer shrink-0"
+            className="flex items-center gap-1.5 px-4 py-2.5 bg-white border border-stone-200 rounded-xl text-xs text-stone-500 hover:border-[#4a5240] hover:text-[#4a5240] transition cursor-pointer shrink-0"
             style={{ fontWeight: 300 }}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-            <span className="hidden sm:inline">Catégorie</span>
+            + Catégorie
           </button>
         )}
       </div>
@@ -678,10 +219,11 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
       {/* Formulaire nouvelle catégorie */}
       {addingCat && (
         <div className="bg-white rounded-2xl border border-stone-100 p-5">
-          <p style={{ fontWeight: 500, fontSize: '0.9rem' }} className="text-[#2d3228] mb-4">Nouvelle catégorie</p>
+          <p style={{ fontWeight: 500, fontSize: '0.88rem' }} className="text-[#2d3228] mb-4">Nouvelle catégorie</p>
           <form onSubmit={async e => { e.preventDefault(); const fd = new FormData(e.currentTarget); fd.set('slug', slug); await actions.addCategory(fd); setAddingCat(false) }} className="space-y-3">
             <div className="flex gap-2 flex-wrap">
-              <input name="icon" type="text" defaultValue="💰" maxLength={2} className="w-12 border border-stone-200 rounded-xl px-2 py-2 text-center outline-none text-lg bg-white" />
+              <input name="icon" type="text" defaultValue="💰" maxLength={2}
+                className="w-12 border border-stone-200 rounded-xl px-2 py-2 text-center outline-none text-lg bg-white" />
               <input name="name" type="text" placeholder="Nom de la catégorie" required autoFocus
                 className="flex-1 min-w-[160px] border border-stone-200 rounded-xl px-4 py-2 outline-none focus:border-[#4a5240] transition text-stone-700 text-sm bg-white" style={{ fontWeight: 300 }} />
               <input name="allocated" type="number" placeholder="Budget alloué (optionnel)" min={0}
@@ -706,7 +248,7 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
       {/* ── État vide ── */}
       {categories.length === 0 ? (
         <div className="text-center py-14 bg-white rounded-2xl border border-stone-100">
-          <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem' }} className="text-stone-400 mb-2">Aucune catégorie</p>
+          <p style={{ fontWeight: 300, fontSize: '1rem' }} className="text-stone-400 mb-2">Aucune catégorie</p>
           <p style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-300 mb-6">Commencez avec nos suggestions ou créez les vôtres</p>
           <button onClick={async () => { const fd = new FormData(); fd.set('slug', slug); await actions.initDefaultCategories(fd) }}
             className="bg-[#4a5240] text-white px-6 py-2.5 rounded-xl text-sm hover:bg-[#2d3228] transition cursor-pointer mr-3" style={{ fontWeight: 300 }}>
@@ -717,318 +259,389 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
             Créer manuellement
           </button>
         </div>
-      ) : viewMode === 'tableau' ? (
-        <TableView
-          categories={categories}
-          items={filteredItems}
-          quotes={quotes}
-          files={files}
-          budgetCurrency={budgetCurrency}
-          getItemEffective={getItemEffective}
-          editingItem={editingItem}
-          setEditingItem={setEditingItem}
-          onCycleStatus={handleCycleStatus}
-          actions={actions}
-          slug={slug}
-          weddingId={weddingId}
-          contacts={contacts}
-        />
       ) : (
-        /* ── Accordéon catégories (vue Cartes) ── */
-        <div className="space-y-3">
-          {categories.map(cat => {
-            const catItems = filteredItems.filter(i => i.category_id === cat.id)
-            const isOpen = expandedCats.has(cat.id)
-            const catTotal = catItems.reduce((s, i) => s + getItemEffective(i).amount, 0)
-            const catPaid  = catItems.reduce((s, i) => s + getItemEffective(i).paid, 0)
-            const pct = cat.budget_allocated > 0 ? Math.min(100, catTotal / cat.budget_allocated * 100) : null
+        /* ── Tableau groupé par catégorie ── */
+        <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden overflow-x-auto">
+          <table className="w-full min-w-[680px] border-collapse">
+            <thead>
+              <tr className="border-b border-stone-100">
+                {['Poste', 'Prestataire retenu', 'Montant', 'Payé', 'Reste', 'Statut', ''].map((h, i) => (
+                  <th key={i} className={`px-4 py-3 ${i <= 1 ? 'text-left' : i === 6 ? 'text-center' : 'text-right'}`}
+                      style={LABEL}>
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {categories.map(cat => {
+                const catItems = filteredItems.filter(i => i.category_id === cat.id)
+                const catEngaged = catItems.reduce((s, i) => s + getEffective(i).amount, 0)
+                const catPaid    = catItems.reduce((s, i) => s + getEffective(i).paid, 0)
+                const alloc      = catAllocations[cat.id] ?? 0
+                const overBudget = alloc > 0 && catEngaged > alloc
 
-            return (
-              <div key={cat.id} className="bg-white rounded-2xl border border-stone-100 overflow-hidden">
-
-                <div className="px-5 py-4 flex items-center gap-3 cursor-pointer select-none" onClick={() => toggleCat(cat.id)}>
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-base shrink-0"
-                       style={{ backgroundColor: cat.color + '20', border: `1.5px solid ${cat.color}40` }}>
-                    {cat.icon}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h3 style={{ fontWeight: 500, fontSize: '0.95rem' }} className="text-[#2d3228]">{cat.name}</h3>
-                      <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">{catItems.length} poste{catItems.length !== 1 ? 's' : ''}</span>
-                    </div>
-                    {pct !== null && (
-                      <div className="flex items-center gap-2 mt-1">
-                        <div className="flex-1 h-1 bg-stone-100 rounded-full overflow-hidden max-w-[120px]">
-                          <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: cat.color }} />
+                return (
+                  <Fragment key={cat.id}>
+                    {/* ── Category header row ── */}
+                    <tr className="border-b border-stone-100" style={{ background: cat.color + '08' }}>
+                      <td className="px-4 py-2.5" colSpan={2}>
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: cat.color }} />
+                          <span style={{ fontWeight: 500, fontSize: '0.82rem', color: '#2d3228' }}>{cat.icon} {cat.name}</span>
+                          <span style={{ fontWeight: 300, fontSize: '0.7rem', color: '#a8a29e' }}>{catItems.length} poste{catItems.length !== 1 ? 's' : ''}</span>
                         </div>
-                        <span style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400">{Math.round(pct)}% du budget alloué</span>
-                      </div>
-                    )}
-                  </div>
-                  {catItems.length > 0 && (
-                    <div className="text-right hidden sm:block shrink-0">
-                      <p style={{ fontWeight: 500, fontSize: '0.95rem' }} className="text-stone-700">{fmt(catTotal, budgetCurrency)}</p>
-                      {catPaid > 0 && <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-emerald-500">{fmt(catPaid, budgetCurrency)} payé</p>}
-                    </div>
-                  )}
-                  <span className="text-stone-300 text-xs ml-1">{isOpen ? '▲' : '▼'}</span>
-                </div>
+                      </td>
+                      <td className="px-4 py-2.5 text-right">
+                        <span style={{ fontWeight: 500, fontSize: '0.82rem', color: overBudget ? '#ef4444' : '#44403c' }}>
+                          {catEngaged > 0 ? fmt(catEngaged, budgetCurrency) : <span style={{ color: '#d6d3d1' }}>—</span>}
+                        </span>
+                        {alloc > 0 && (
+                          <span style={{ fontWeight: 300, fontSize: '0.68rem', color: '#a8a29e', display: 'block' }}>
+                            / {fmt(alloc, budgetCurrency)}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2.5 text-right">
+                        {catPaid > 0
+                          ? <span style={{ fontWeight: 500, fontSize: '0.82rem', color: '#16a34a' }}>{fmt(catPaid, budgetCurrency)}</span>
+                          : <span style={{ color: '#d6d3d1' }}>—</span>}
+                      </td>
+                      <td className="px-4 py-2.5 text-right">
+                        {catEngaged > catPaid
+                          ? <span style={{ fontWeight: 300, fontSize: '0.82rem', color: '#b45309' }}>{fmt(catEngaged - catPaid, budgetCurrency)}</span>
+                          : <span style={{ color: '#d6d3d1' }}>—</span>}
+                      </td>
+                      <td className="px-4 py-2.5 text-right">
+                        {/* Budget alloué éditable */}
+                        {editingCatAlloc === cat.id ? (
+                          <input type="number" value={catAllocValue}
+                            onChange={e => setCatAllocValue(e.target.value)}
+                            onBlur={() => saveCatAlloc(cat.id)}
+                            onKeyDown={e => { if (e.key === 'Enter') saveCatAlloc(cat.id); if (e.key === 'Escape') setEditingCatAlloc(null) }}
+                            autoFocus
+                            className="w-24 text-right border border-[#4a5240]/40 rounded px-2 py-0.5 text-xs focus:outline-none focus:border-[#4a5240]"
+                            placeholder="Budget" style={{ fontWeight: 300 }} />
+                        ) : (
+                          <button onClick={() => { setEditingCatAlloc(cat.id); setCatAllocValue(String(alloc || '')) }}
+                            title="Définir le budget alloué"
+                            className="text-xs text-stone-300 hover:text-[#4a5240] transition cursor-pointer"
+                            style={{ fontWeight: 300, background: 'transparent', border: 'none' }}>
+                            {alloc > 0 ? `alloué: ${fmt(alloc, budgetCurrency)}` : '+ budget alloué'}
+                          </button>
+                        )}
+                      </td>
+                      <td className="px-4 py-2.5 text-right">
+                        <button onClick={async () => { if (!confirm(`Supprimer "${cat.name}" ?`)) return; await call('deleteCategory', { id: cat.id }) }}
+                          className="text-[10px] text-stone-200 hover:text-red-400 transition cursor-pointer" style={{ fontWeight: 300 }}>
+                          Supprimer
+                        </button>
+                      </td>
+                    </tr>
 
-                {isOpen && (
-                  <div className="border-t border-stone-50">
-
-                    {catItems.length === 0 && addingItemFor !== cat.id && (
-                      <p style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-300 italic text-center py-5">Aucun poste dans cette catégorie</p>
-                    )}
-
+                    {/* ── Item rows ── */}
                     {catItems.map(item => {
+                      const eff = getEffective(item)
+                      const st  = getStatus(item.status)
                       const iQuotes = quotes.filter(q => q.item_id === item.id)
+                      const activeQ = iQuotes.filter(q => q.status !== 'refuse')
                       const retained = iQuotes.find(q => q.status === 'retenu')
-                      const activeQuotes = iQuotes.filter(q => q.status !== 'refuse')
-                      const eff = getItemEffective(item)
-                      const isItemOpen = expandedItems.has(item.id)
-                      const st = getStatus(item.status)
-                      const paidPct = eff.amount > 0 ? Math.min(100, (eff.paid / eff.amount) * 100) : 0
+                      const isExpanded = expandedItems.has(item.id)
+                      const contact = findContact(eff.vendor)
+                      const remaining = eff.amount - eff.paid
 
                       return (
-                        <div key={item.id} className="border-b border-stone-50 last:border-0">
+                        <Fragment key={item.id}>
+                          <tr
+                            className={`border-b border-stone-50 hover:bg-stone-50/40 transition group cursor-pointer ${isExpanded ? 'bg-[#f5f0e8]/20' : ''}`}
+                            onClick={() => { if (editingItem !== item.id) toggleItem(item.id) }}
+                          >
+                            {/* Poste */}
+                            <td className="px-4 pl-8 py-3" onClick={e => { if (editingItem === item.id) e.stopPropagation() }}>
+                              {editingItem === item.id ? (
+                                <form className="flex gap-2 items-center" onClick={e => e.stopPropagation()}
+                                  onSubmit={async e => { e.preventDefault(); const fd = new FormData(e.currentTarget); fd.set('slug', slug); fd.set('id', item.id); await actions.updateItem(fd); setEditingItem(null) }}>
+                                  <input name="label" defaultValue={item.label} required autoFocus
+                                    className="border border-[#4a5240] rounded-lg px-2 py-1 text-sm outline-none bg-white text-stone-700 w-36" style={{ fontWeight: 400 }} />
+                                  <input name="estimated" type="number" defaultValue={item.estimated_amount || ''} placeholder="Estimé €" min={0}
+                                    className="w-20 border border-stone-200 rounded-lg px-2 py-1 text-sm outline-none bg-white text-stone-700" style={{ fontWeight: 300 }} />
+                                  <button type="submit" className="bg-[#4a5240] text-white px-2 py-1 rounded-lg text-xs cursor-pointer" style={{ fontWeight: 300 }}>OK</button>
+                                  <button type="button" onClick={() => setEditingItem(null)} className="text-stone-400 text-xs cursor-pointer">✕</button>
+                                </form>
+                              ) : (
+                                <span style={{ fontWeight: 400, fontSize: '0.85rem', color: '#44403c' }}>{item.label}</span>
+                              )}
+                            </td>
 
-                          <div className="flex items-center gap-3 px-5 py-3.5 hover:bg-stone-50/40 group transition">
+                            {/* Prestataire */}
+                            <td className="px-4 py-3">
+                              {eff.vendor ? (
+                                contact ? (
+                                  <a href={`/mariage/${slug}/contacts`} onClick={e => e.stopPropagation()}
+                                     className="flex items-center gap-1 hover:text-[#4a5240] transition"
+                                     style={{ fontWeight: 300, fontSize: '0.82rem', color: '#4a5240' }}>
+                                    {eff.vendor} ↗
+                                  </a>
+                                ) : (
+                                  <span style={{ fontWeight: 300, fontSize: '0.82rem', color: '#78716c' }}>{eff.vendor}</span>
+                                )
+                              ) : (
+                                <span style={{ color: '#d6d3d1', fontSize: '0.82rem' }}>—</span>
+                              )}
+                            </td>
 
-                            <button title="Changer le statut"
-                              onClick={async e => { e.stopPropagation(); await handleCycleStatus(item) }}
-                              className="shrink-0 cursor-pointer group/dot">
-                              <span className={`w-2.5 h-2.5 rounded-full block transition group-hover/dot:scale-125 ${st.dot}`} />
-                            </button>
+                            {/* Montant */}
+                            <td className="px-4 py-3 text-right">
+                              {eff.amount > 0
+                                ? <span style={{ fontWeight: 500, fontSize: '0.9rem', color: '#44403c' }}>{fmt(eff.amount, eff.currency)}</span>
+                                : <span style={{ color: '#d6d3d1' }}>—</span>}
+                            </td>
 
-                            {editingItem === item.id ? (
-                              <form className="flex-1 flex gap-2 flex-wrap items-center"
-                                onSubmit={async e => { e.preventDefault(); const fd = new FormData(e.currentTarget); fd.set('slug', slug); fd.set('id', item.id); await actions.updateItem(fd); setEditingItem(null) }}>
-                                <input name="label" defaultValue={item.label} required autoFocus
-                                  className="flex-1 min-w-[140px] border border-[#4a5240] rounded-lg px-3 py-1 text-sm outline-none bg-white text-stone-700" style={{ fontWeight: 400 }} />
-                                <input name="estimated" type="number" defaultValue={item.estimated_amount || ''} placeholder="Estimé" min={0}
-                                  className="w-24 border border-stone-200 rounded-lg px-3 py-1 text-sm outline-none focus:border-[#4a5240] bg-white text-stone-700" style={{ fontWeight: 300 }} />
-                                <button type="submit" className="bg-[#4a5240] text-white px-3 py-1 rounded-lg text-sm cursor-pointer" style={{ fontWeight: 300 }}>OK</button>
-                                <button type="button" onClick={() => setEditingItem(null)} className="text-stone-400 text-sm cursor-pointer">✕</button>
-                              </form>
-                            ) : (
-                              <div className="flex-1 min-w-0 cursor-pointer" onClick={() => toggleItem(item.id)}>
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <p style={{ fontWeight: 400, fontSize: '0.88rem' }} className="text-stone-700">{item.label}</p>
-                                  {retained?.vendor_name && (
-                                    <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">· {retained.vendor_name}</span>
-                                  )}
-                                  {activeQuotes.length > 0 && (
-                                    <span style={{ fontWeight: 300, fontSize: '0.66rem' }} className="bg-stone-100 text-stone-500 px-1.5 py-0.5 rounded-full">
-                                      {activeQuotes.length} devis{retained ? ' · retenu ✦' : activeQuotes.length > 1 ? ' · à choisir' : ''}
-                                    </span>
-                                  )}
+                            {/* Payé */}
+                            <td className="px-4 py-3 text-right">
+                              {eff.paid > 0
+                                ? <span style={{ fontWeight: 400, fontSize: '0.9rem', color: '#16a34a' }}>{fmt(eff.paid, eff.currency)}</span>
+                                : <span style={{ color: '#d6d3d1' }}>—</span>}
+                            </td>
+
+                            {/* Reste */}
+                            <td className="px-4 py-3 text-right">
+                              {remaining > 0
+                                ? <span style={{ fontWeight: 300, fontSize: '0.88rem', color: '#b45309' }}>{fmt(remaining, eff.currency)}</span>
+                                : eff.paid > 0
+                                  ? <span style={{ fontSize: '0.78rem', color: '#16a34a' }}>✓ soldé</span>
+                                  : <span style={{ color: '#d6d3d1' }}>—</span>}
+                            </td>
+
+                            {/* Statut */}
+                            <td className="px-4 py-3 text-center" onClick={e => e.stopPropagation()}>
+                              <button onClick={() => cycleStatus(item)} title="Changer le statut"
+                                className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full cursor-pointer transition"
+                                style={{ fontWeight: 300, fontSize: '0.7rem', background: st.pill, color: st.text }}>
+                                <span className="w-1.5 h-1.5 rounded-full" style={{ background: st.dot }} />
+                                {st.label}
+                              </button>
+                            </td>
+
+                            {/* Devis + actions */}
+                            <td className="px-4 py-3 text-center" onClick={e => e.stopPropagation()}>
+                              <div className="flex items-center justify-center gap-2">
+                                {activeQ.length > 0 ? (
+                                  <span className="text-xs bg-stone-100 text-stone-500 px-2 py-0.5 rounded-full" style={{ fontWeight: 300 }}>
+                                    {activeQ.length} devis{retained ? ' ✦' : ''}
+                                  </span>
+                                ) : (
+                                  <button onClick={() => { setAddingQuoteFor(item.id); if (!expandedItems.has(item.id)) toggleItem(item.id) }}
+                                    className="text-xs text-stone-300 hover:text-[#4a5240] transition cursor-pointer" style={{ fontWeight: 300 }}>
+                                    + devis
+                                  </button>
+                                )}
+                                <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition">
+                                  <button onClick={() => setEditingItem(item.id)} title="Modifier"
+                                    className="p-1 text-stone-300 hover:text-[#4a5240] transition cursor-pointer rounded">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3 h-3">
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+                                    </svg>
+                                  </button>
+                                  <button onClick={async () => { if (!confirm('Supprimer ce poste ?')) return; await call('deleteItem', { id: item.id }) }}
+                                    className="p-1 text-stone-300 hover:text-red-400 transition cursor-pointer rounded">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3 h-3">
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                  </button>
                                 </div>
-                                {eff.amount > 0 && (
-                                  <div className="flex items-center gap-2 mt-1">
-                                    <div className="w-20 h-1 bg-stone-100 rounded-full overflow-hidden">
-                                      <div className="h-full bg-emerald-400 rounded-full" style={{ width: `${paidPct}%` }} />
+                              </div>
+                            </td>
+                          </tr>
+
+                          {/* ── Devis panel ── */}
+                          {isExpanded && (
+                            <tr className="border-b border-stone-50">
+                              <td colSpan={7} className="px-8 py-4 bg-[#f5f0e8]/20">
+                                <div className="space-y-3">
+
+                                  {/* Contact info */}
+                                  {contact && (
+                                    <div className="flex items-center gap-3 flex-wrap text-xs bg-white rounded-xl px-4 py-2.5 border border-stone-100 w-fit">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-[#4a5240] shrink-0" />
+                                      <span style={{ fontWeight: 300, color: '#a8a29e' }}>{contact.role}</span>
+                                      <span style={{ fontWeight: 500, color: '#2d3228' }}>{contact.name}</span>
+                                      {contact.telephone && <a href={`tel:${contact.telephone}`} className="text-[#4a5240] hover:underline" style={{ fontWeight: 300 }}>{contact.telephone}</a>}
+                                      {contact.email && <a href={`mailto:${contact.email}`} className="text-[#4a5240] hover:underline" style={{ fontWeight: 300 }}>{contact.email}</a>}
                                     </div>
-                                    <span style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-400">
-                                      {paidPct > 0 ? `${Math.round(paidPct)}% payé` : <span className={st.pill.split(' ')[1]}>{st.label}</span>}
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                            )}
+                                  )}
 
-                            {editingItem !== item.id && (<>
-                              <div className="text-right shrink-0">
-                                <p style={{ fontWeight: 500, fontSize: '0.9rem' }} className="text-stone-700">{fmt(eff.amount, eff.currency)}</p>
-                                {eff.paid > 0 && eff.paid < eff.amount && (
-                                  <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-amber-500">{fmt(eff.amount - eff.paid, eff.currency)} restant</p>
-                                )}
-                                {eff.paid > 0 && eff.paid >= eff.amount && (
-                                  <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-emerald-500">Soldé ✓</p>
-                                )}
-                              </div>
-                              <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition shrink-0">
-                                <button onClick={() => setEditingItem(item.id)} title="Modifier"
-                                  className="p-1.5 text-stone-300 hover:text-[#4a5240] transition cursor-pointer rounded-lg hover:bg-stone-100">
-                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3.5 h-3.5">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
-                                  </svg>
-                                </button>
-                                <button onClick={async () => { if (!confirm('Supprimer ce poste ?')) return; await call('deleteItem', { id: item.id }) }}
-                                  className="p-1.5 text-stone-300 hover:text-red-400 transition cursor-pointer rounded-lg hover:bg-red-50">
-                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3.5 h-3.5">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                  </svg>
-                                </button>
-                              </div>
-                            </>)}
-                          </div>
+                                  {/* Quote cards */}
+                                  {iQuotes.length > 0 && (
+                                    <div className="flex flex-wrap gap-2">
+                                      {iQuotes.map(quote => {
+                                        const isRet = quote.status === 'retenu'
+                                        const isRef = quote.status === 'refuse'
+                                        const qFiles = files.filter(f => f.quote_id === quote.id)
 
-                          {isItemOpen && (
-                            <div className="bg-[#f5f0e8]/40 px-5 py-4 border-t border-stone-50 space-y-3">
-                              {iQuotes.length > 0 && (
-                                <div className="flex flex-wrap gap-2">
-                                  {iQuotes.map(quote => {
-                                    const isRetenu = quote.status === 'retenu'
-                                    const isRefuse = quote.status === 'refuse'
-                                    const filesForQuote = files.filter(f => f.quote_id === quote.id)
-
-                                    return editingQuote === quote.id ? (
-                                      <div key={quote.id} className="w-full">
-                                        <QuoteForm slug={slug} itemId={item.id} currencies={CURRENCIES} defaultValues={quote}
-                                          onSubmit={async e => { e.preventDefault(); const fd = new FormData(e.currentTarget); fd.set('slug', slug); fd.set('id', quote.id); await actions.updateQuote(fd); setEditingQuote(null) }}
-                                          onCancel={() => setEditingQuote(null)} />
-                                      </div>
-                                    ) : (
-                                      <div key={quote.id} onClick={() => setEditingQuote(quote.id)}
-                                        className={`relative flex flex-col gap-1.5 px-4 py-3 rounded-xl border cursor-pointer transition min-w-[150px] max-w-[220px] ${
-                                          isRetenu ? 'bg-[#4a5240] border-[#4a5240]' :
-                                          isRefuse  ? 'bg-stone-50 border-stone-100 opacity-40' :
-                                          'bg-white border-stone-200 hover:border-stone-300 hover:shadow-sm'
-                                        }`}>
-                                        {isRetenu && <span className="absolute -top-2 left-3 text-[9px] bg-white text-[#4a5240] px-1.5 py-0.5 rounded-full font-semibold">✦ Retenu</span>}
-                                        <p style={{ fontWeight: isRetenu ? 500 : 400, fontSize: '0.82rem' }}
-                                           className={isRetenu ? 'text-white' : 'text-stone-700'}>
-                                          {quote.vendor_name || <span className="italic opacity-40">Prestataire</span>}
-                                        </p>
-                                        <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.3rem', lineHeight: 1 }}
-                                           className={isRetenu ? 'text-white' : 'text-[#2d3228]'}>
-                                          {fmt(quote.amount, quote.currency)}
-                                        </p>
-                                        {quote.paid_amount > 0 && (
-                                          <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className={isRetenu ? 'text-white/70' : 'text-emerald-500'}>
-                                            {fmt(quote.paid_amount, quote.currency)} acompte
-                                          </p>
-                                        )}
-                                        {quote.notes && (
-                                          <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className={`truncate ${isRetenu ? 'text-white/60' : 'text-stone-400'}`}>
-                                            {quote.notes}
-                                          </p>
-                                        )}
-                                        {quote.due_date && (
-                                          <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className={isRetenu ? 'text-white/60' : 'text-amber-500'}>
-                                            Échéance {new Date(quote.due_date + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
-                                          </p>
-                                        )}
-                                        {filesForQuote.length > 0 && (
-                                          <div className="flex flex-wrap gap-1 mt-0.5" onClick={e => e.stopPropagation()}>
-                                            {filesForQuote.map(f => (
-                                              <a key={f.id} href={f.file_url} target="_blank" rel="noopener noreferrer"
-                                                className={`text-[10px] flex items-center gap-0.5 px-1.5 py-0.5 rounded-md ${isRetenu ? 'bg-white/20 text-white' : 'bg-stone-100 text-stone-500'} hover:opacity-80`}>
-                                                {f.file_type?.includes('pdf') ? '📄' : '🖼️'} {f.file_name.slice(0, 12)}…
-                                              </a>
-                                            ))}
+                                        return editingQuote === quote.id ? (
+                                          <div key={quote.id} className="w-full">
+                                            <QuoteInlineForm slug={slug} itemId={item.id} currencies={CURRENCIES} defaultValues={quote}
+                                              onSubmit={async e => { e.preventDefault(); const fd = new FormData(e.currentTarget); fd.set('slug', slug); fd.set('id', quote.id); await actions.updateQuote(fd); setEditingQuote(null) }}
+                                              onCancel={() => setEditingQuote(null)} />
                                           </div>
-                                        )}
-                                        <div className="flex gap-1 mt-1 flex-wrap" onClick={e => e.stopPropagation()}>
-                                          {!isRetenu && !isRefuse && (
-                                            <button onClick={() => call('retainQuote', { id: quote.id, item_id: item.id })}
-                                              className="text-[10px] px-2 py-0.5 rounded-full border border-[#4a5240]/30 text-[#4a5240] hover:bg-[#4a5240] hover:text-white transition cursor-pointer" style={{ fontWeight: 400 }}>
-                                              Retenir
-                                            </button>
-                                          )}
-                                          {isRetenu && (
-                                            <button onClick={() => call('retainQuote', { id: quote.id, item_id: item.id })}
-                                              className="text-[10px] text-white/50 hover:text-white transition cursor-pointer" style={{ fontWeight: 300 }}>
-                                              Annuler
-                                            </button>
-                                          )}
-                                          {!isRetenu && !isRefuse && (
-                                            <button onClick={() => call('refuseQuote', { id: quote.id })}
-                                              className="text-[10px] text-stone-300 hover:text-red-400 transition cursor-pointer" style={{ fontWeight: 300 }}>
-                                              Refuser
-                                            </button>
-                                          )}
-                                          <FileUploadButton slug={slug} weddingId={weddingId} quoteId={quote.id} onSave={actions.saveBudgetFileMeta} />
-                                          <button onClick={() => call('deleteQuote', { id: quote.id })}
-                                            className="p-0.5 text-stone-200 hover:text-red-400 transition cursor-pointer ml-auto">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3 h-3">
-                                              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                          </button>
-                                        </div>
-                                      </div>
-                                    )
-                                  })}
+                                        ) : (
+                                          <div key={quote.id} onClick={() => setEditingQuote(quote.id)}
+                                            className={`relative flex flex-col gap-1.5 px-4 py-3 rounded-xl border cursor-pointer transition min-w-[140px] max-w-[200px] ${
+                                              isRet ? 'bg-[#4a5240] border-[#4a5240]' :
+                                              isRef ? 'bg-stone-50 border-stone-100 opacity-40' :
+                                              'bg-white border-stone-200 hover:border-stone-300 hover:shadow-sm'}`}>
+                                            {isRet && <span className="absolute -top-2 left-3 text-[9px] bg-white text-[#4a5240] px-1.5 py-0.5 rounded-full font-semibold">✦ Retenu</span>}
+                                            <p style={{ fontWeight: isRet ? 500 : 400, fontSize: '0.82rem', color: isRet ? 'white' : '#44403c' }}>
+                                              {quote.vendor_name || <span className="italic opacity-40">Prestataire</span>}
+                                            </p>
+                                            <p style={{ fontWeight: 600, fontSize: '1.15rem', lineHeight: 1, color: isRet ? 'white' : '#2d3228' }}>
+                                              {fmt(quote.amount, quote.currency)}
+                                            </p>
+                                            {quote.paid_amount > 0 && (
+                                              <p style={{ fontWeight: 300, fontSize: '0.65rem', color: isRet ? 'rgba(255,255,255,0.7)' : '#16a34a' }}>
+                                                {fmt(quote.paid_amount, quote.currency)} versé
+                                              </p>
+                                            )}
+                                            {quote.due_date && (
+                                              <p style={{ fontWeight: 300, fontSize: '0.65rem', color: isRet ? 'rgba(255,255,255,0.6)' : '#b45309' }}>
+                                                Échéance {new Date(quote.due_date + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                                              </p>
+                                            )}
+                                            {quote.notes && (
+                                              <p style={{ fontWeight: 300, fontSize: '0.65rem', color: isRet ? 'rgba(255,255,255,0.6)' : '#a8a29e' }} className="truncate">
+                                                {quote.notes}
+                                              </p>
+                                            )}
+                                            {qFiles.length > 0 && (
+                                              <div className="flex flex-wrap gap-1 mt-0.5" onClick={e => e.stopPropagation()}>
+                                                {qFiles.map(f => (
+                                                  <a key={f.id} href={f.file_url} target="_blank" rel="noopener noreferrer"
+                                                    className={`text-[10px] flex items-center gap-0.5 px-1.5 py-0.5 rounded-md ${isRet ? 'bg-white/20 text-white' : 'bg-stone-100 text-stone-500'} hover:opacity-80`}>
+                                                    {f.file_type?.includes('pdf') ? '📄' : '🖼️'} {f.file_name.slice(0, 10)}…
+                                                  </a>
+                                                ))}
+                                              </div>
+                                            )}
+                                            <div className="flex gap-1 mt-1 flex-wrap" onClick={e => e.stopPropagation()}>
+                                              {!isRet && !isRef && (
+                                                <button onClick={() => call('retainQuote', { id: quote.id, item_id: item.id })}
+                                                  className="text-[10px] px-2 py-0.5 rounded-full border border-[#4a5240]/30 text-[#4a5240] hover:bg-[#4a5240] hover:text-white transition cursor-pointer" style={{ fontWeight: 400 }}>
+                                                  Retenir
+                                                </button>
+                                              )}
+                                              {isRet && (
+                                                <button onClick={() => call('retainQuote', { id: quote.id, item_id: item.id })}
+                                                  className="text-[10px] text-white/50 hover:text-white cursor-pointer" style={{ fontWeight: 300 }}>
+                                                  Annuler
+                                                </button>
+                                              )}
+                                              {!isRet && !isRef && (
+                                                <button onClick={() => call('refuseQuote', { id: quote.id })}
+                                                  className="text-[10px] text-stone-300 hover:text-red-400 cursor-pointer" style={{ fontWeight: 300 }}>
+                                                  Refuser
+                                                </button>
+                                              )}
+                                              <FileUploadButton slug={slug} weddingId={weddingId} quoteId={quote.id} onSave={actions.saveBudgetFileMeta} />
+                                              <button onClick={() => call('deleteQuote', { id: quote.id })}
+                                                className="p-0.5 text-stone-200 hover:text-red-400 cursor-pointer ml-auto">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3 h-3">
+                                                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                              </button>
+                                            </div>
+                                          </div>
+                                        )
+                                      })}
+                                      {addingQuoteFor !== item.id && (
+                                        <button onClick={() => setAddingQuoteFor(item.id)}
+                                          className="flex flex-col items-center justify-center gap-1 px-4 py-3 rounded-xl border-2 border-dashed border-stone-200 text-stone-300 hover:border-[#4a5240] hover:text-[#4a5240] transition cursor-pointer min-w-[80px]">
+                                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                          </svg>
+                                          <span style={{ fontWeight: 300, fontSize: '0.68rem' }}>Devis</span>
+                                        </button>
+                                      )}
+                                    </div>
+                                  )}
 
-                                  {addingQuoteFor !== item.id && (
+                                  {iQuotes.length === 0 && addingQuoteFor !== item.id && (
                                     <button onClick={() => setAddingQuoteFor(item.id)}
-                                      className="flex flex-col items-center justify-center gap-1 px-4 py-3 rounded-xl border-2 border-dashed border-stone-200 text-stone-300 hover:border-[#4a5240] hover:text-[#4a5240] transition cursor-pointer min-w-[80px]">
-                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4">
+                                      className="flex items-center gap-1.5 text-xs text-stone-400 hover:text-[#4a5240] transition cursor-pointer" style={{ fontWeight: 300 }}>
+                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                                       </svg>
-                                      <span style={{ fontWeight: 300, fontSize: '0.68rem' }}>Devis</span>
+                                      Ajouter un premier devis
                                     </button>
                                   )}
+
+                                  {addingQuoteFor === item.id && (
+                                    <QuoteInlineForm slug={slug} itemId={item.id} currencies={CURRENCIES}
+                                      onSubmit={async e => { e.preventDefault(); const fd = new FormData(e.currentTarget); fd.set('slug', slug); fd.set('item_id', item.id); await actions.addQuote(fd); setAddingQuoteFor(null) }}
+                                      onCancel={() => setAddingQuoteFor(null)} />
+                                  )}
                                 </div>
-                              )}
-
-                              {addingQuoteFor === item.id && (
-                                <QuoteForm slug={slug} itemId={item.id} currencies={CURRENCIES}
-                                  onSubmit={async e => { e.preventDefault(); const fd = new FormData(e.currentTarget); fd.set('slug', slug); fd.set('item_id', item.id); await actions.addQuote(fd); setAddingQuoteFor(null) }}
-                                  onCancel={() => setAddingQuoteFor(null)} />
-                              )}
-
-                              {iQuotes.length === 0 && addingQuoteFor !== item.id && (
-                                <button onClick={() => setAddingQuoteFor(item.id)}
-                                  className="flex items-center gap-1.5 text-xs text-stone-400 hover:text-[#4a5240] transition cursor-pointer" style={{ fontWeight: 300 }}>
-                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                  </svg>
-                                  Ajouter un premier devis
-                                </button>
-                              )}
-                            </div>
+                              </td>
+                            </tr>
                           )}
-                        </div>
+                        </Fragment>
                       )
                     })}
 
-                    <div className="px-5 py-3 border-t border-stone-50 flex items-center justify-between gap-4">
-                      {addingItemFor === cat.id ? (
-                        <form onSubmit={async e => { e.preventDefault(); const fd = new FormData(e.currentTarget); fd.set('slug', slug); fd.set('category_id', cat.id); await actions.addItem(fd); setAddingItemFor(null) }}
-                              className="flex gap-2 flex-1 flex-wrap">
-                          <input name="label" type="text" placeholder={ITEM_PLACEHOLDER[cat.name] ?? 'Nom du poste'} required autoFocus
-                            className="flex-1 min-w-[160px] border border-stone-200 rounded-xl px-3 py-1.5 text-sm outline-none focus:border-[#4a5240] bg-white text-stone-700" style={{ fontWeight: 300 }} />
-                          <input name="estimated" type="number" placeholder="Budget estimé" min={0}
-                            className="w-32 border border-stone-200 rounded-xl px-3 py-1.5 text-sm outline-none focus:border-[#4a5240] bg-white text-stone-700" style={{ fontWeight: 300 }} />
-                          <button type="submit" className="bg-[#4a5240] text-white px-4 py-1.5 rounded-xl text-sm cursor-pointer" style={{ fontWeight: 300 }}>Créer</button>
-                          <button type="button" onClick={() => setAddingItemFor(null)} className="text-stone-400 text-sm cursor-pointer" style={{ fontWeight: 300 }}>✕</button>
-                        </form>
-                      ) : (
-                        <button onClick={() => setAddingItemFor(cat.id)}
-                          className="flex items-center gap-1.5 text-xs text-stone-400 hover:text-[#4a5240] transition cursor-pointer" style={{ fontWeight: 300 }}>
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                          </svg>
-                          Ajouter un poste
-                        </button>
-                      )}
-                      <button onClick={async () => { if (!confirm(`Supprimer "${cat.name}" et tous ses postes ?`)) return; await call('deleteCategory', { id: cat.id }) }}
-                        className="text-xs text-stone-200 hover:text-red-400 transition cursor-pointer shrink-0" style={{ fontWeight: 300 }}>
-                        Supprimer la catégorie
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )
-          })}
+                    {/* ── Add item row ── */}
+                    <tr className="border-b border-stone-100">
+                      <td colSpan={7} className="px-8 py-2.5">
+                        {addingItemFor === cat.id ? (
+                          <form onSubmit={async e => { e.preventDefault(); const fd = new FormData(e.currentTarget); fd.set('slug', slug); fd.set('category_id', cat.id); await actions.addItem(fd); setAddingItemFor(null) }}
+                                className="flex gap-2 flex-wrap items-center">
+                            <input name="label" type="text" placeholder="Nom du poste" required autoFocus
+                              className="flex-1 min-w-[140px] border border-stone-200 rounded-xl px-3 py-1.5 text-sm outline-none focus:border-[#4a5240] bg-white text-stone-700" style={{ fontWeight: 300 }} />
+                            <input name="estimated" type="number" placeholder="Budget estimé (€)" min={0}
+                              className="w-36 border border-stone-200 rounded-xl px-3 py-1.5 text-sm outline-none focus:border-[#4a5240] bg-white text-stone-700" style={{ fontWeight: 300 }} />
+                            <button type="submit" className="bg-[#4a5240] text-white px-4 py-1.5 rounded-xl text-sm cursor-pointer" style={{ fontWeight: 300 }}>Créer</button>
+                            <button type="button" onClick={() => setAddingItemFor(null)} className="text-stone-400 text-sm cursor-pointer" style={{ fontWeight: 300 }}>✕</button>
+                          </form>
+                        ) : (
+                          <button onClick={() => setAddingItemFor(cat.id)}
+                            className="flex items-center gap-1.5 text-xs text-stone-300 hover:text-[#4a5240] transition cursor-pointer" style={{ fontWeight: 300 }}>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
+                            Ajouter un poste
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  </Fragment>
+                )
+              })}
+            </tbody>
+
+            {/* ── Total footer ── */}
+            {items.length > 0 && (
+              <tfoot>
+                <tr className="bg-stone-50/60 border-t-2 border-stone-100">
+                  <td colSpan={2} className="px-4 py-3">
+                    <span style={{ fontWeight: 300, fontSize: '0.7rem', letterSpacing: '0.12em', color: '#a8a29e', textTransform: 'uppercase' }}>
+                      Total — {items.length} poste{items.length > 1 ? 's' : ''}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <span style={{ fontWeight: 600, fontSize: '0.95rem', color: '#44403c' }}>{fmt(totalEngaged, budgetCurrency)}</span>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <span style={{ fontWeight: 600, fontSize: '0.95rem', color: '#16a34a' }}>{fmt(totalPaid, budgetCurrency)}</span>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <span style={{ fontWeight: 600, fontSize: '0.95rem', color: '#b45309' }}>{fmt(totalRemaining, budgetCurrency)}</span>
+                  </td>
+                  <td colSpan={2} />
+                </tr>
+              </tfoot>
+            )}
+          </table>
         </div>
       )}
     </div>
   )
-}
-
-const ITEM_PLACEHOLDER: Record<string, string> = {
-  'Lieu & réception': 'ex: Domaine de la Roseraie',
-  'Traiteur': 'ex: Buffet cocktail',
-  'Photo & vidéo': 'ex: Photographe',
-  'Fleurs & déco': 'ex: Compositions florales',
-  'Musique & DJ': 'ex: DJ pour la soirée',
-  'Robe & costume': 'ex: Robe de mariée',
-  'Transport': 'ex: Location voiture de prestige',
-  'Faire-part': 'ex: Impressions faire-parts',
-  'Lune de miel': 'ex: Vols aller-retour',
-  'Divers': 'ex: Cadeaux invités',
 }

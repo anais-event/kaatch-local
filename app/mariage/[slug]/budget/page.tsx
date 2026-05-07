@@ -2,7 +2,6 @@ import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import BudgetBoard from './BudgetBoard'
-import BudgetGlobalView from './BudgetGlobalView'
 
 export const DEFAULT_CATEGORIES = [
   { name: 'Lieu & réception', icon: '🏛️', color: '#8b7355' },
@@ -220,14 +219,10 @@ async function initDefaultCategories(formData: FormData) {
 
 export default async function BudgetPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ slug: string }>
-  searchParams: Promise<{ tab?: string }>
 }) {
   const { slug } = await params
-  const { tab: tabParam = 'prestataires' } = await searchParams
-  const tab = tabParam === 'globale' ? 'globale' : 'prestataires'
   const supabase = await createSupabaseServerClient()
 
   const { data: wedding } = await supabase
@@ -248,11 +243,6 @@ export default async function BudgetPage({
     supabase.from('wedding_contacts').select('id, name, role, telephone, email').eq('wedding_id', wedding.id).order('name'),
   ])
 
-  const TABS = [
-    { key: 'prestataires', label: 'Prestataires & devis' },
-    { key: 'globale',      label: 'Vue globale' },
-  ]
-
   return (
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
@@ -261,58 +251,27 @@ export default async function BudgetPage({
              style={{ fontWeight: 300 }}>
             ← Retour aux préparatifs
           </a>
-          <div className="flex items-center justify-between">
-            <div>
-              <p style={{ fontWeight: 300, fontSize: '0.68rem', letterSpacing: '0.2em' }}
-                 className="text-stone-400 uppercase mb-1">Budget</p>
-              <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.4rem' }}
-                  className="text-[#2d3228] leading-none">{wedding.name}</h1>
-            </div>
+          <div>
+            <p style={{ fontWeight: 300, fontSize: '0.68rem', letterSpacing: '0.2em' }}
+               className="text-stone-400 uppercase mb-1">Budget</p>
+            <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.4rem' }}
+                className="text-[#2d3228] leading-none">{wedding.name}</h1>
           </div>
         </div>
 
-        {/* Tab nav */}
-        <div className="flex border-b-2 border-stone-200 mb-7 gap-1">
-          {TABS.map(t => (
-            <a key={t.key} href={`?tab=${t.key}`}
-               className={`px-5 py-2.5 text-sm rounded-t-lg border-b-2 -mb-0.5 transition-all ${
-                 tab === t.key
-                   ? 'bg-white border-[#4a5240] text-[#2d3228] shadow-sm'
-                   : 'border-transparent text-stone-400 hover:text-stone-600 hover:bg-white/60'
-               }`}
-               style={{ fontWeight: tab === t.key ? 500 : 300 }}>
-              {t.label}
-            </a>
-          ))}
-        </div>
-
-        {tab === 'prestataires' && (
-          <BudgetBoard
-            slug={slug}
-            weddingId={wedding.id}
-            budgetTotal={wedding.budget_total ?? 0}
-            budgetCurrency={wedding.budget_currency ?? 'EUR'}
-            categories={categories ?? []}
-            items={items ?? []}
-            quotes={quotes ?? []}
-            files={files ?? []}
-            currencies={CURRENCIES}
-            contacts={contacts ?? []}
-            actions={{ setBudgetTotal, addCategory, deleteCategory, addItem, updateItem, deleteItem, updateItemStatus, addQuote, updateQuote, deleteQuote, retainQuote, refuseQuote, initDefaultCategories, saveBudgetFileMeta, deleteBudgetFile }}
-          />
-        )}
-
-        {tab === 'globale' && (
-          <BudgetGlobalView
-            slug={slug}
-            budgetTotal={wedding.budget_total ?? 0}
-            budgetCurrency={wedding.budget_currency ?? 'EUR'}
-            categories={categories ?? []}
-            items={items ?? []}
-            quotes={quotes ?? []}
-            updateCategoryAllocated={updateCategoryAllocated}
-          />
-        )}
+        <BudgetBoard
+          slug={slug}
+          weddingId={wedding.id}
+          budgetTotal={wedding.budget_total ?? 0}
+          budgetCurrency={wedding.budget_currency ?? 'EUR'}
+          categories={categories ?? []}
+          items={items ?? []}
+          quotes={quotes ?? []}
+          files={files ?? []}
+          currencies={CURRENCIES}
+          contacts={contacts ?? []}
+          actions={{ setBudgetTotal, addCategory, deleteCategory, addItem, updateItem, deleteItem, updateItemStatus, addQuote, updateQuote, deleteQuote, retainQuote, refuseQuote, initDefaultCategories, saveBudgetFileMeta, deleteBudgetFile, updateCategoryAllocated }}
+        />
       </div>
     </div>
   )

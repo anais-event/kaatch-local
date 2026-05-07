@@ -16,7 +16,8 @@ type Props = {
   slug: string
   weddingId: string
   items: InspiItem[]
-  inspirationsVisible: boolean
+  visibleCats: string[]
+  toggleCatVisibility: (fd: FormData) => Promise<void>
   addItem: (fd: FormData) => Promise<void>
   deleteItem: (fd: FormData) => Promise<void>
   updateItem: (fd: FormData) => Promise<void>
@@ -204,12 +205,23 @@ function ItemCard({ item, slug, deleteItem, updateItem }: {
   )
 }
 
-export default function InspirationsClient({ slug, weddingId, items, inspirationsVisible, addItem, deleteItem, updateItem }: Props) {
+export default function InspirationsClient({ slug, weddingId, items, visibleCats, toggleCatVisibility, addItem, deleteItem, updateItem }: Props) {
   const [activeTab, setActiveTab] = useState('menu')
   const [adding, setAdding] = useState(false)
+  const [, startTransition] = useTransition()
 
   const cat = CATS.find(c => c.key === activeTab)!
   const catItems = items.filter(i => i.category === activeTab)
+  const isVisible = visibleCats.includes(activeTab)
+
+  function handleToggleVisibility() {
+    const fd = new FormData()
+    fd.set('slug', slug)
+    fd.set('wedding_id', weddingId)
+    fd.set('cat', activeTab)
+    fd.set('visible', String(isVisible))
+    startTransition(() => toggleCatVisibility(fd))
+  }
 
   return (
     <div style={{ fontFamily: 'var(--font-lato)' }}>
@@ -224,9 +236,12 @@ export default function InspirationsClient({ slug, weddingId, items, inspiration
             }`}
             style={{ fontWeight: activeTab === c.key ? 600 : 300, fontSize: '0.92rem', background: activeTab === c.key ? 'white' : 'transparent' }}>
             {c.icon} {c.label}
+            {visibleCats.includes(c.key) && (
+              <span style={{ fontSize: '0.55rem', marginLeft: 5, color: '#4a5240' }} title="Visible invités">●</span>
+            )}
             {items.filter(i => i.category === c.key).length > 0 && (
               <span style={{
-                fontSize: '0.62rem', marginLeft: 6, background: activeTab === c.key ? '#4a5240' : '#e7e5e4',
+                fontSize: '0.62rem', marginLeft: 4, background: activeTab === c.key ? '#4a5240' : '#e7e5e4',
                 color: activeTab === c.key ? 'white' : '#a8a29e', borderRadius: 999, padding: '1px 6px',
               }}>
                 {items.filter(i => i.category === c.key).length}
@@ -236,16 +251,26 @@ export default function InspirationsClient({ slug, weddingId, items, inspiration
         ))}
       </div>
 
-      {/* Add button */}
-      {!adding && (
-        <div className="mb-5">
+      {/* Add button + visibility toggle */}
+      <div className="flex items-center justify-between mb-5 gap-3">
+        {!adding ? (
           <button onClick={() => setAdding(true)}
             className="flex items-center gap-2 px-5 py-2.5 bg-[#4a5240] text-white rounded-xl text-sm hover:bg-[#2d3228] transition cursor-pointer"
             style={{ fontWeight: 300 }}>
             + Ajouter {cat.icon} {cat.label}
           </button>
-        </div>
-      )}
+        ) : <div />}
+        <button onClick={handleToggleVisibility}
+          className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs border transition cursor-pointer shrink-0 ${
+            isVisible
+              ? 'bg-[#4a5240]/10 text-[#4a5240] border-[#4a5240]/30 hover:bg-[#4a5240]/20'
+              : 'bg-white text-stone-400 border-stone-200 hover:border-stone-300 hover:text-stone-600'
+          }`}
+          style={{ fontWeight: 300 }}>
+          <span>{isVisible ? '👁' : '🙈'}</span>
+          <span>{isVisible ? 'Visible invités' : 'Masqué'}</span>
+        </button>
+      </div>
 
       {adding && (
         <div className="mb-5">

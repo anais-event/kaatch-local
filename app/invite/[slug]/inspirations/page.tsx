@@ -1,4 +1,3 @@
-import { cookies } from 'next/headers'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 
 const GUEST_CATS = [
@@ -83,7 +82,7 @@ export default async function GuestInspirationsPage({
 
   const { data: wedding } = await supabase
     .from('weddings')
-    .select('id, name, inspirations_visible')
+    .select('id, name, inspirations_visible_cats')
     .eq('slug', slug)
     .single()
 
@@ -97,7 +96,9 @@ export default async function GuestInspirationsPage({
     )
   }
 
-  if (!wedding.inspirations_visible) {
+  const visibleCats: string[] = wedding.inspirations_visible_cats ?? []
+
+  if (visibleCats.length === 0) {
     return (
       <div className="min-h-screen bg-[#f5f0e8] flex items-center justify-center p-6">
         <div className="bg-white rounded-2xl border border-stone-100 p-10 max-w-sm w-full text-center shadow-sm">
@@ -117,16 +118,14 @@ export default async function GuestInspirationsPage({
     .from('inspiration_items')
     .select('*')
     .eq('wedding_id', wedding.id)
+    .in('category', visibleCats)
     .order('created_at', { ascending: false })
 
   const allItems = items ?? []
-  const activeTab = GUEST_CATS.find(c => c.key === tab)?.key ?? 'tenue'
-  const cat = GUEST_CATS.find(c => c.key === activeTab)!
+  const defaultTab = GUEST_CATS.find(c => visibleCats.includes(c.key))?.key ?? visibleCats[0]
+  const activeTab = (tab && visibleCats.includes(tab)) ? tab : defaultTab
+  const cat = GUEST_CATS.find(c => c.key === activeTab) ?? GUEST_CATS[0]
   const catItems = allItems.filter(i => i.category === activeTab)
-
-  const cookieStore = await cookies()
-  const guestCookie = cookieStore.get(`guest_${slug}`)
-  const guest = guestCookie ? JSON.parse(guestCookie.value) : { firstName: '' }
 
   return (
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
@@ -138,33 +137,36 @@ export default async function GuestInspirationsPage({
               className="text-[#2d3228] leading-none">{wedding.name}</h1>
         </div>
 
-        {/* Tabs */}
-        <div className="flex border-b-2 border-stone-200 mb-6 gap-1 overflow-x-auto">
-          {GUEST_CATS.map(c => {
-            const count = allItems.filter(i => i.category === c.key).length
-            if (count === 0) return null
-            return (
-              <a key={c.key}
-                 href={`/invite/${slug}/inspirations?tab=${c.key}`}
-                 className={`px-5 py-3 text-sm rounded-t-lg border-b-2 -mb-0.5 transition-all whitespace-nowrap cursor-pointer ${
-                   activeTab === c.key
-                     ? 'bg-white border-[#4a5240] text-[#2d3228] shadow-sm'
-                     : 'border-transparent text-stone-400 hover:text-stone-600 hover:bg-white/60'
-                 }`}
-                 style={{ fontWeight: activeTab === c.key ? 600 : 300, fontSize: '0.92rem' }}>
-                {c.icon} {c.label}
-                <span style={{
-                  fontSize: '0.62rem', marginLeft: 6,
-                  background: activeTab === c.key ? '#4a5240' : '#e7e5e4',
-                  color: activeTab === c.key ? 'white' : '#a8a29e',
-                  borderRadius: 999, padding: '1px 6px',
-                }}>
-                  {count}
-                </span>
-              </a>
-            )
-          })}
-        </div>
+        {/* Tabs — only visible cats */}
+        {visibleCats.length > 1 && (
+          <div className="flex border-b-2 border-stone-200 mb-6 gap-1 overflow-x-auto">
+            {GUEST_CATS.filter(c => visibleCats.includes(c.key)).map(c => {
+              const count = allItems.filter(i => i.category === c.key).length
+              return (
+                <a key={c.key}
+                   href={`/invite/${slug}/inspirations?tab=${c.key}`}
+                   className={`px-5 py-3 text-sm rounded-t-lg border-b-2 -mb-0.5 transition-all whitespace-nowrap cursor-pointer ${
+                     activeTab === c.key
+                       ? 'bg-white border-[#4a5240] text-[#2d3228] shadow-sm'
+                       : 'border-transparent text-stone-400 hover:text-stone-600 hover:bg-white/60'
+                   }`}
+                   style={{ fontWeight: activeTab === c.key ? 600 : 300, fontSize: '0.92rem' }}>
+                  {c.icon} {c.label}
+                  {count > 0 && (
+                    <span style={{
+                      fontSize: '0.62rem', marginLeft: 6,
+                      background: activeTab === c.key ? '#4a5240' : '#e7e5e4',
+                      color: activeTab === c.key ? 'white' : '#a8a29e',
+                      borderRadius: 999, padding: '1px 6px',
+                    }}>
+                      {count}
+                    </span>
+                  )}
+                </a>
+              )
+            })}
+          </div>
+        )}
 
         {catItems.length === 0 ? (
           <div className="text-center py-16 bg-white rounded-2xl border border-stone-100">

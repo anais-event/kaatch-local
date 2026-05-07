@@ -38,7 +38,7 @@ export default async function TablesRecapPage({ params }: { params: Promise<{ sl
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: 'Georgia, serif' }}>
       {/* Barre d'action (masquée à l'impression) */}
-      <div className="print:hidden bg-[#f5f0e8] border-b border-stone-200 px-6 py-3 flex items-center justify-between">
+      <div className="print:hidden bg-white border-b border-stone-100 px-6 py-3 flex items-center justify-between">
         <a href={`/mariage/${slug}/tables`}
            className="text-sm text-stone-500 hover:text-[#4a5240] transition"
            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
@@ -55,7 +55,7 @@ export default async function TablesRecapPage({ params }: { params: Promise<{ sl
           <p className="text-xs tracking-[0.3em] uppercase text-stone-400 mb-2" style={{ fontWeight: 300 }}>
             Plan de table
           </p>
-          <h1 className="text-4xl font-light italic text-[#2d3228] mb-2">
+          <h1 className="text-4xl text-[#2d3228] mb-2" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400, fontStyle: 'italic' }}>
             Mariage de {wedding.name}
           </h1>
           {dateFormatted && (
@@ -188,7 +188,7 @@ export default async function TablesRecapPage({ params }: { params: Promise<{ sl
 
         {/* Pied de page */}
         <div className="mt-12 pt-6 border-t border-stone-100 text-center">
-          <p className="text-xs text-stone-300" style={{ fontWeight: 300 }}>
+          <p className="text-[10px] text-stone-200" style={{ fontWeight: 300 }}>
             Généré par Kaatch · {new Date().toLocaleDateString('fr-FR')}
           </p>
         </div>

@@ -46,7 +46,7 @@ export default function GuestPdfExport({ guests, weddingName, weddingDate }: Pro
     try {
       const html2canvas = (await import('html2canvas')).default
       const { jsPDF } = await import('jspdf')
-      const canvas = await html2canvas(synthRef.current, { scale: 2, useCORS: true, backgroundColor: '#f5f0e8', logging: false })
+      const canvas = await html2canvas(synthRef.current, { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false })
       const imgData = canvas.toDataURL('image/png')
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
       const W = pdf.internal.pageSize.getWidth()
@@ -67,27 +67,34 @@ export default function GuestPdfExport({ guests, weddingName, weddingDate }: Pro
       const MARGIN = 15
       const COL = W - MARGIN * 2
 
-      // Header band
-      pdf.setFillColor(74, 82, 64)
-      pdf.rect(0, 0, W, 24, 'F')
-      pdf.setFont('helvetica', 'bold')
-      pdf.setFontSize(14)
-      pdf.setTextColor(255, 255, 255)
-      pdf.text(weddingName, MARGIN, 13)
-      pdf.setFont('helvetica', 'normal')
-      pdf.setFontSize(8.5)
-      if (fmtDate) pdf.text(fmtDate, MARGIN, 19.5)
+      // Header — elegant minimal
+      let y = 18
+      pdf.setTextColor(44, 50, 40)
+      pdf.setFont('helvetica', 'italic')
+      pdf.setFontSize(18)
+      pdf.text(weddingName, MARGIN, y)
+      y += 5
+      if (fmtDate) {
+        pdf.setFont('helvetica', 'normal')
+        pdf.setFontSize(8)
+        pdf.setTextColor(168, 162, 158)
+        pdf.text(fmtDate, MARGIN, y)
+        y += 5
+      }
+      pdf.setLineWidth(0.3)
+      pdf.setDrawColor(210, 210, 200)
+      pdf.line(MARGIN, y, W - MARGIN, y)
+      y += 7
 
       // Subtitle
-      let y = 33
       pdf.setTextColor(44, 50, 40)
       pdf.setFont('helvetica', 'bold')
-      pdf.setFontSize(10)
+      pdf.setFontSize(9)
       pdf.text('Liste des invites', MARGIN, y)
       pdf.setFont('helvetica', 'normal')
-      pdf.setFontSize(8)
+      pdf.setFontSize(7.5)
       pdf.setTextColor(120, 113, 108)
-      y += 6
+      y += 5
       pdf.text(`${guests.length} invite${guests.length > 1 ? 's' : ''} · ${confirmed} confirme${confirmed > 1 ? 's' : ''} · ${pending} en attente`, MARGIN, y)
 
       // Column headers
@@ -165,18 +172,18 @@ export default function GuestPdfExport({ guests, weddingName, weddingDate }: Pro
 
       {/* Synthèse render target — off-screen, A4 width 794px */}
       <div aria-hidden style={{ position: 'fixed', left: '-9999px', top: 0, zIndex: -1 }}>
-        <div ref={synthRef} style={{ width: 794, backgroundColor: '#f5f0e8', fontFamily: 'Lato, sans-serif', padding: '40px 48px', boxSizing: 'border-box' }}>
+        <div ref={synthRef} style={{ width: 794, backgroundColor: '#ffffff', fontFamily: 'Lato, sans-serif', padding: '40px 48px', boxSizing: 'border-box' }}>
 
-          {/* Header card */}
-          <div style={{ backgroundColor: '#4a5240', borderRadius: 14, padding: '28px 32px', marginBottom: 24 }}>
-            <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: 10, fontWeight: 300, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 8 }}>
+          {/* Header — minimal elegant */}
+          <div style={{ borderTop: '4px solid #4a5240', paddingTop: 24, marginBottom: 28 }}>
+            <p style={{ fontSize: 10, fontWeight: 300, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#a8a29e', marginBottom: 10 }}>
               Synthèse invités — Document traiteur
             </p>
-            <p style={{ color: 'white', fontSize: 26, fontWeight: 700, lineHeight: 1.1, marginBottom: fmtDate ? 8 : 0 }}>
+            <p style={{ fontSize: 30, fontWeight: 400, fontStyle: 'italic', color: '#2d3228', lineHeight: 1.1, marginBottom: fmtDate ? 6 : 0 }}>
               {weddingName}
             </p>
             {fmtDate && (
-              <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13, fontWeight: 300 }}>{fmtDate}</p>
+              <p style={{ fontSize: 12, fontWeight: 300, color: '#a8a29e', letterSpacing: '0.05em' }}>{fmtDate}</p>
             )}
           </div>
 
@@ -242,7 +249,7 @@ export default function GuestPdfExport({ guests, weddingName, weddingDate }: Pro
             )}
           </div>
 
-          <p style={{ fontSize: 9, fontWeight: 300, color: '#d6d3d1', textAlign: 'right', marginTop: 20 }}>
+          <p style={{ fontSize: 8, fontWeight: 300, color: '#e7e5e4', textAlign: 'right', marginTop: 20 }}>
             Généré avec Kaatch · {new Date().toLocaleDateString('fr-FR')}
           </p>
         </div>

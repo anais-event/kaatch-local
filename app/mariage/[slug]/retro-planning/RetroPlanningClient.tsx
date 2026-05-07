@@ -379,7 +379,7 @@ export default function RetroPlanningClient({
                       className="flex-1 flex items-center gap-4 px-5 py-4 text-left cursor-pointer">
                       <div className="flex-1 min-w-0">
                         <p
-                          style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.1rem', lineHeight: 1.2, letterSpacing: '-0.01em' }}
+                          style={{ fontFamily: 'var(--font-lato)', fontWeight: 500, fontSize: '0.88rem', lineHeight: 1.2, letterSpacing: '0.01em' }}
                           className={allDone ? 'text-stone-300' : 'text-[#2d3228]'}>
                           {period.label}
                         </p>
@@ -573,7 +573,7 @@ export default function RetroPlanningClient({
         <div className="space-y-8">
           {withDeadline.length === 0 && noDeadline.length === 0 ? (
             <div className="bg-white rounded-2xl border border-stone-100 p-10 text-center">
-              <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontWeight: 300, fontSize: '1.5rem' }} className="text-stone-300 mb-2">
+              <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '1rem' }} className="text-stone-300 mb-2">
                 Aucune deadline définie
               </p>
               <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-400">
@@ -589,9 +589,9 @@ export default function RetroPlanningClient({
                     {/* Month separator */}
                     <div className="flex items-center gap-3 mb-3">
                       <p
-                        style={{ fontFamily: 'var(--font-cormorant)', fontWeight: hasOverdue ? 600 : 500, fontStyle: 'italic', fontSize: '1.1rem', letterSpacing: '0.01em' }}
+                        style={{ fontFamily: 'var(--font-lato)', fontWeight: hasOverdue ? 600 : 500, fontSize: '0.8rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}
                         className={hasOverdue ? 'text-red-400' : 'text-[#4a5240]'}>
-                        {hasOverdue && <span style={{ fontStyle: 'normal', fontSize: '0.85rem' }}>⚠ </span>}{monthLabel(month)}
+                        {hasOverdue && <span className="mr-1">⚠</span>}{monthLabel(month)}
                       </p>
                       <div className="flex-1 h-px bg-stone-100" />
                     </div>
@@ -636,7 +636,7 @@ export default function RetroPlanningClient({
               {noDeadline.length > 0 && (
                 <div>
                   <div className="flex items-center gap-3 mb-3">
-                    <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400, fontStyle: 'italic', fontSize: '1rem' }} className="text-stone-300">
+                    <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.8rem', letterSpacing: '0.08em', textTransform: 'uppercase' }} className="text-stone-300">
                       Sans date
                     </p>
                     <div className="flex-1 h-px bg-stone-100" />

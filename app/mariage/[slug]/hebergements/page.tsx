@@ -69,16 +69,22 @@ export default async function HebergementsPage({ params }: { params: Promise<{ s
       <div className="max-w-2xl mx-auto">
 
         <div className="mb-6">
-          <a href={`/mariage/${slug}`} className="text-sm text-[#4a5240] hover:underline"
-             style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
-            ← Retour au mariage
+          <a href={`/mariage/${slug}`} className="text-sm text-[#4a5240] hover:underline mb-4 block"
+             style={{ fontWeight: 300 }}>
+            ← Retour aux préparatifs
           </a>
+          <p style={{ fontWeight: 300, fontSize: '0.68rem', letterSpacing: '0.2em' }}
+             className="text-stone-400 uppercase mb-1">Hébergements</p>
+          <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.4rem' }}
+              className="text-[#2d3228] leading-none">
+            {wedding.name}
+          </h1>
         </div>
 
-        <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.4rem' }}
+        <h2 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.1rem' }}
             className="text-[#2d3228] mb-4">
           Hébergements
-        </h1>
+        </h2>
         <PageIntro
           what="Partagez vos coups de cœur — hôtels, gîtes, airbnb… — pour que vos invités puissent se loger facilement à proximité."
           how="Ajoutez chaque hébergement avec son lien de réservation et votre note personnelle."

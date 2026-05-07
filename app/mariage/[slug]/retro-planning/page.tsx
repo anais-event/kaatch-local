@@ -6,7 +6,7 @@ export default async function RetroPlanningPage({ params }: { params: Promise<{ 
   const { slug } = await params
   const supabase = await createSupabaseServerClient()
 
-  const { data: wedding } = await supabase.from('weddings').select('id').eq('slug', slug).single()
+  const { data: wedding } = await supabase.from('weddings').select('id, name').eq('slug', slug).single()
   if (!wedding) return <div className="p-8">Mariage introuvable</div>
 
   const [{ data: doneRows }, { data: customRows }] = await Promise.all([
@@ -31,6 +31,18 @@ export default async function RetroPlanningPage({ params }: { params: Promise<{ 
 
   return (
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
+      <div className="max-w-3xl mx-auto px-6 pt-8">
+        <div className="mb-6">
+          <a href={`/mariage/${slug}`} className="text-sm text-[#4a5240] hover:underline mb-4 block"
+             style={{ fontWeight: 300 }}>
+            ← Retour aux préparatifs
+          </a>
+          <p style={{ fontWeight: 300, fontSize: '0.68rem', letterSpacing: '0.2em' }}
+             className="text-stone-400 uppercase mb-1">Rétro-planning</p>
+          <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.4rem' }}
+              className="text-[#2d3228] leading-none">{wedding.name}</h1>
+        </div>
+      </div>
       <RetroPlanningClient
         weddingId={wedding.id}
         initialPeriods={initialPeriods}
@@ -45,4 +57,5 @@ export default async function RetroPlanningPage({ params }: { params: Promise<{ 
       />
     </div>
   )
+
 }

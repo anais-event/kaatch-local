@@ -12,6 +12,7 @@ type Task = {
 }
 
 type Props = {
+  slug: string
   tasks: Task[]
   addTask: (formData: FormData) => Promise<void>
   toggleTask: (formData: FormData) => Promise<void>
@@ -37,7 +38,7 @@ const MOMENT_COLORS: Record<string, string> = {
   autre: '#9a9a9a',
 }
 
-export default function ChecklistClient({ tasks, addTask, toggleTask, deleteTask, updateTask }: Props) {
+export default function ChecklistClient({ slug, tasks, addTask, toggleTask, deleteTask, updateTask }: Props) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [addingTo, setAddingTo] = useState<string | null>(null)
@@ -60,8 +61,14 @@ export default function ChecklistClient({ tasks, addTask, toggleTask, deleteTask
 
       {/* Header */}
       <div className="mb-6">
+        <a href={`/mariage/${slug}`} className="text-sm text-[#4a5240] hover:underline mb-4 block"
+           style={{ fontWeight: 300 }}>
+          ← Retour aux préparatifs
+        </a>
+        <p style={{ fontWeight: 300, fontSize: '0.68rem', letterSpacing: '0.2em' }}
+           className="text-stone-400 uppercase mb-1">Checklist Jour J</p>
         <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.4rem' }}
-            className="text-[#2d3228] mb-1">Checklist Jour J</h1>
+            className="text-[#2d3228] leading-none mb-1">Checklist Jour J</h1>
         <p style={{ fontWeight: 300, fontSize: '0.85rem' }} className="text-stone-400">
           Organisez les tâches par moment et assignez-les à vos témoins, prestataires ou proches.
         </p>

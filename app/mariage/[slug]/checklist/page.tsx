@@ -61,6 +61,7 @@ export default async function ChecklistPage({ params }: { params: Promise<{ slug
 
   return (
     <ChecklistClient
+      slug={slug}
       tasks={tasks ?? []}
       addTask={addTask}
       toggleTask={toggleTask}

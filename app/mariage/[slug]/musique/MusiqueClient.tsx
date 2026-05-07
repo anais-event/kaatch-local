@@ -184,20 +184,22 @@ export default function MusiqueClient({ slug, songs, playlistLinks, addSong, del
   return (
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <a href={`/mariage/${slug}`} className="text-sm text-[#4a5240] hover:underline mb-6 block" style={{ fontWeight: 300 }}>
-          ← Retour
-        </a>
+        <div className="mb-6">
+          <a href={`/mariage/${slug}`} className="text-sm text-[#4a5240] hover:underline mb-4 block" style={{ fontWeight: 300 }}>
+            ← Retour aux préparatifs
+          </a>
+          <p style={{ fontWeight: 300, fontSize: '0.68rem', letterSpacing: '0.2em' }}
+             className="text-stone-400 uppercase mb-1">Musique</p>
+          <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.4rem' }}
+              className="text-[#2d3228] leading-none">Musique</h1>
+        </div>
 
-        {/* Header */}
+        {/* Header actions */}
         <div className="flex items-start justify-between mb-6">
-          <div>
-            <h1 style={{ fontWeight: 600, fontSize: '1.4rem', letterSpacing: '-0.02em', lineHeight: 1 }}
-                className="text-[#2d3228]">Musique</h1>
-            <p className="text-stone-400 mt-0.5" style={{ fontWeight: 300, fontSize: '0.75rem' }}>
-              {realSongs.length} morceau{realSongs.length !== 1 ? 'x' : ''}
-              {suggestions.length > 0 && ` · ${suggestions.length} suggestion${suggestions.length > 1 ? 's' : ''} en attente`}
-            </p>
-          </div>
+          <p className="text-stone-400" style={{ fontWeight: 300, fontSize: '0.75rem' }}>
+            {realSongs.length} morceau{realSongs.length !== 1 ? 'x' : ''}
+            {suggestions.length > 0 && ` · ${suggestions.length} suggestion${suggestions.length > 1 ? 's' : ''} en attente`}
+          </p>
           <div className="flex gap-2">
             {realSongs.length > 0 && (
               <button

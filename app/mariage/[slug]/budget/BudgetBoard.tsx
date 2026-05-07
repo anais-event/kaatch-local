@@ -78,6 +78,7 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
   )
   const [editingCatAlloc, setEditingCatAlloc] = useState<string | null>(null)
   const [catAllocValue, setCatAllocValue] = useState('')
+  const [collapsedCats, setCollapsedCats] = useState<Set<string>>(new Set())
   const [, startTransition] = useTransition()
 
   const filteredItems = useMemo(() => {
@@ -125,6 +126,18 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
       fd.set('allocated', String(val))
       await actions.updateCategoryAllocated(fd)
     })
+  }
+
+  function toggleCat(catId: string) {
+    setCollapsedCats(prev => { const s = new Set(prev); s.has(catId) ? s.delete(catId) : s.add(catId); return s })
+  }
+
+  function collapseAll() {
+    setCollapsedCats(new Set(categories.map(c => c.id)))
+  }
+
+  function expandAll() {
+    setCollapsedCats(new Set())
   }
 
   function findContact(vendorName: string | null) {
@@ -207,12 +220,29 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
             style={{ fontWeight: 300 }} />
           {search && <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-300 hover:text-stone-500 cursor-pointer text-xs">✕</button>}
         </div>
-        {!addingCat && categories.length > 0 && (
-          <button onClick={() => setAddingCat(true)}
-            className="flex items-center gap-1.5 px-4 py-2.5 bg-white border border-stone-200 rounded-xl text-xs text-stone-500 hover:border-[#4a5240] hover:text-[#4a5240] transition cursor-pointer shrink-0"
-            style={{ fontWeight: 300 }}>
-            + Catégorie
-          </button>
+        {categories.length > 0 && (
+          <div className="flex gap-2 shrink-0">
+            {collapsedCats.size === categories.length ? (
+              <button onClick={expandAll}
+                className="flex items-center gap-1.5 px-3 py-2.5 bg-white border border-stone-200 rounded-xl text-xs text-stone-500 hover:border-[#4a5240] hover:text-[#4a5240] transition cursor-pointer"
+                style={{ fontWeight: 300 }}>
+                ↕ Tout développer
+              </button>
+            ) : (
+              <button onClick={collapseAll}
+                className="flex items-center gap-1.5 px-3 py-2.5 bg-white border border-stone-200 rounded-xl text-xs text-stone-500 hover:border-[#4a5240] hover:text-[#4a5240] transition cursor-pointer"
+                style={{ fontWeight: 300 }}>
+                ↕ Tout réduire
+              </button>
+            )}
+            {!addingCat && (
+              <button onClick={() => setAddingCat(true)}
+                className="flex items-center gap-1.5 px-4 py-2.5 bg-white border border-stone-200 rounded-xl text-xs text-stone-500 hover:border-[#4a5240] hover:text-[#4a5240] transition cursor-pointer"
+                style={{ fontWeight: 300 }}>
+                + Catégorie
+              </button>
+            )}
+          </div>
         )}
       </div>
 
@@ -280,13 +310,15 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
                 const catPaid    = catItems.reduce((s, i) => s + getEffective(i).paid, 0)
                 const alloc      = catAllocations[cat.id] ?? 0
                 const overBudget = alloc > 0 && catEngaged > alloc
+                const isCollapsed = collapsedCats.has(cat.id)
 
                 return (
                   <Fragment key={cat.id}>
                     {/* ── Category header row ── */}
-                    <tr className="border-b border-stone-100" style={{ background: cat.color + '08' }}>
+                    <tr className="border-b border-stone-100 cursor-pointer select-none" style={{ background: cat.color + '0d' }} onClick={() => toggleCat(cat.id)}>
                       <td className="px-4 py-2.5" colSpan={2}>
                         <div className="flex items-center gap-2">
+                          <span className="text-[10px] text-stone-400 transition-transform" style={{ display: 'inline-block', transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)' }}>▾</span>
                           <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: cat.color }} />
                           <span style={{ fontWeight: 500, fontSize: '0.82rem', color: '#2d3228' }}>{cat.icon} {cat.name}</span>
                           <span style={{ fontWeight: 300, fontSize: '0.7rem', color: '#a8a29e' }}>{catItems.length} poste{catItems.length !== 1 ? 's' : ''}</span>
@@ -332,7 +364,7 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
                         )}
                       </td>
                       <td className="px-4 py-2.5 text-right">
-                        <button onClick={async () => { if (!confirm(`Supprimer "${cat.name}" ?`)) return; await call('deleteCategory', { id: cat.id }) }}
+                        <button onClick={async e => { e.stopPropagation(); if (!confirm(`Supprimer "${cat.name}" ?`)) return; await call('deleteCategory', { id: cat.id }) }}
                           className="text-[10px] text-stone-200 hover:text-red-400 transition cursor-pointer" style={{ fontWeight: 300 }}>
                           Supprimer
                         </button>
@@ -340,7 +372,7 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
                     </tr>
 
                     {/* ── Item rows ── */}
-                    {catItems.map(item => {
+                    {!isCollapsed && catItems.map(item => {
                       const eff = getEffective(item)
                       const st  = getStatus(item.status)
                       const iQuotes = quotes.filter(q => q.item_id === item.id)
@@ -589,7 +621,7 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
                     })}
 
                     {/* ── Add item row ── */}
-                    <tr className="border-b border-stone-100">
+                    {!isCollapsed && <tr className="border-b border-stone-100">
                       <td colSpan={7} className="px-8 py-2.5">
                         {addingItemFor === cat.id ? (
                           <form onSubmit={async e => { e.preventDefault(); const fd = new FormData(e.currentTarget); fd.set('slug', slug); fd.set('category_id', cat.id); await actions.addItem(fd); setAddingItemFor(null) }}
@@ -611,7 +643,7 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
                           </button>
                         )}
                       </td>
-                    </tr>
+                    </tr>}
                   </Fragment>
                 )
               })}

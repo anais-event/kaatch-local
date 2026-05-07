@@ -88,7 +88,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
         {(dateFormatted || wedding.location) && (
           <div className="absolute inset-0 flex items-end justify-center pb-6 pointer-events-none">
             <div className="border border-white/30 backdrop-blur-sm bg-black/20 rounded-lg px-4 py-2.5 text-center text-white max-w-xs mx-4">
-              <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 'clamp(1rem, 3vw, 1.4rem)', lineHeight: 1.1 }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 'clamp(1rem, 3vw, 1.4rem)', lineHeight: 1.1, color: 'white' }}>
                 {wedding.name}
               </h2>
               {dateFormatted && (

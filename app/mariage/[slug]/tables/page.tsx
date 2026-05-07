@@ -92,8 +92,8 @@ export default async function TablesPage({
   const visibleGuests = (guests ?? []).filter(g => g.rsvp_status !== 'decline')
 
   const TABS = [
-    { key: 'brouillon' as Tab, label: 'Brouillon' },
-    { key: 'salle'     as Tab, label: 'Vue salle' },
+    { key: 'brouillon' as Tab, label: 'Organisation' },
+    { key: 'salle'     as Tab, label: 'Disposition' },
   ]
 
   return (

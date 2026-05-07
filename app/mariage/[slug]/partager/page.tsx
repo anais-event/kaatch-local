@@ -78,14 +78,14 @@ export default async function PartagerPage({ params }: { params: Promise<{ slug:
               <span className="text-lg">✨</span>
               <div className="flex-1 min-w-0">
                 <p style={{ fontWeight: 400, fontSize: '0.85rem' }} className="text-[#2d3228]">Inspirations & moodboard</p>
-                <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">Menu, déco, tenues — aperçu & export</p>
+                <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">Déco, tenues, ambiance — consulter votre moodboard</p>
               </div>
               <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition shrink-0">
                 Ouvrir →
               </span>
             </a>
 
-            <a href={`/mariage/${slug}/invitations`}
+            <a href={`/mariage/${slug}/guests?tab=invitations`}
                className="flex items-center gap-3 px-4 py-3 bg-[#f5f0e8] rounded-xl hover:bg-[#ede8df] transition group cursor-pointer">
               <span className="text-lg">💌</span>
               <div className="flex-1 min-w-0">
@@ -100,8 +100,8 @@ export default async function PartagerPage({ params }: { params: Promise<{ slug:
             <div className="flex items-center gap-3 px-4 py-3 bg-[#f5f0e8]/50 rounded-xl opacity-50">
               <span className="text-lg">🍽️</span>
               <div className="flex-1 min-w-0">
-                <p style={{ fontWeight: 400, fontSize: '0.85rem' }} className="text-[#2d3228]">Menu de table</p>
-                <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">Bientôt disponible</p>
+                <p style={{ fontWeight: 400, fontSize: '0.85rem' }} className="text-[#2d3228]">Menu & Brunch</p>
+                <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">Carte de table à imprimer — bientôt disponible</p>
               </div>
               <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-300 shrink-0">
                 Bientôt →

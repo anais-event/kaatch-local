@@ -60,7 +60,7 @@ export default function BottomNav({ slug }: { slug: string }) {
   ]
 
   return (
-    <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#f5f0e8]/95 backdrop-blur border-t border-stone-200">
+    <nav className="sm:hidden print:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#f5f0e8]/95 backdrop-blur border-t border-stone-200">
       <div className="flex items-end justify-around px-2 h-16">
         {tabs.map(tab => {
           const active = isActive(tab.href)

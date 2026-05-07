@@ -44,6 +44,8 @@ export default function InvitationsTab({ guests, slug, baseUrl, wedding, wedding
 
   const withToken = guests.filter(g => g.invite_token)
   const sentCount = guests.filter(g => g.invite_sent_at).length
+  // "À envoyer" = pas encore envoyé ET pas encore de RSVP (ceux qui ont déjà répondu n'ont pas besoin du lien)
+  const toSendCount = guests.filter(g => g.invite_token && !g.invite_sent_at && g.rsvp_status === 'en_attente').length
   const noTokenCount = guests.filter(g => !g.invite_token).length
 
   const filtered = withToken.filter(g => {
@@ -59,7 +61,7 @@ export default function InvitationsTab({ guests, slug, baseUrl, wedding, wedding
       <div className="grid grid-cols-3 gap-3">
         {[
           { label: 'Envoyés', value: sentCount, color: 'text-emerald-600' },
-          { label: 'À envoyer', value: withToken.length - sentCount, color: 'text-amber-500' },
+          { label: 'À envoyer', value: toSendCount, color: 'text-amber-500' },
           { label: 'Sans lien', value: noTokenCount, color: 'text-stone-400' },
         ].map(s => (
           <div key={s.label} className="bg-white rounded-xl border border-stone-100 p-3 text-center">
@@ -79,7 +81,7 @@ export default function InvitationsTab({ guests, slug, baseUrl, wedding, wedding
       <div className="flex gap-1.5">
         {([
           { key: 'all',     label: `Tous (${withToken.length})` },
-          { key: 'notsent', label: `À envoyer (${withToken.length - sentCount})` },
+          { key: 'notsent', label: `À envoyer (${toSendCount})` },
           { key: 'sent',    label: `Envoyés (${sentCount})` },
         ] as const).map(f => (
           <button key={f.key} onClick={() => setFilter(f.key)}
@@ -129,6 +131,10 @@ export default function InvitationsTab({ guests, slug, baseUrl, wedding, wedding
                     {g.invite_sent_at ? (
                       <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-emerald-500 mt-0.5">
                         Envoyé {new Date(g.invite_sent_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                      </p>
+                    ) : g.rsvp_status !== 'en_attente' ? (
+                      <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-[#4a5240]/60 mt-0.5">
+                        RSVP reçu sans faire-part numérique
                       </p>
                     ) : (
                       <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-300 mt-0.5">

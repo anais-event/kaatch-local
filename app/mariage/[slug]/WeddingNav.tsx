@@ -123,7 +123,7 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
   return (
     <>
       {/* ─── DESKTOP SIDEBAR ─── */}
-      <aside className="sidebar-panel hidden md:flex flex-col fixed left-0 top-0 h-full w-56 bg-white border-r border-stone-100 z-50">
+      <aside className="sidebar-panel hidden md:flex print:hidden flex-col fixed left-0 top-0 h-full w-56 bg-white border-r border-stone-100 z-50">
 
         {/* Logo */}
         <div className="px-5 py-5 border-b border-stone-100 flex items-start justify-between">
@@ -272,7 +272,7 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
       )}
 
       {/* ─── MOBILE TOP BAR ─── */}
-      <nav className={`md:hidden fixed top-0 left-0 right-0 z-50 bg-[#f5f0e8]/95 backdrop-blur border-b border-stone-200 shadow-sm transition-transform duration-300 ${navHidden ? '-translate-y-full' : ''}`}>
+      <nav className={`md:hidden print:hidden fixed top-0 left-0 right-0 z-50 bg-[#f5f0e8]/95 backdrop-blur border-b border-stone-200 shadow-sm transition-transform duration-300 ${navHidden ? '-translate-y-full' : ''}`}>
         <div className="flex items-center justify-between px-4 h-12">
           <a href={`/mariage/${slug}`} className="flex items-center gap-2">
             <img src="/logo.png" alt="Kaatch" className="w-6 h-6 object-contain" />

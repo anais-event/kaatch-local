@@ -412,7 +412,15 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
                                   <button type="button" onClick={() => setEditingItem(null)} className="text-stone-400 text-xs cursor-pointer">✕</button>
                                 </form>
                               ) : (
-                                <span style={{ fontWeight: 400, fontSize: '0.85rem', color: '#44403c' }}>{item.label}</span>
+                                <div>
+                                  <span style={{ fontWeight: 400, fontSize: '0.85rem', color: '#44403c' }}>{item.label}</span>
+                                  {eff.amount > 0 && (
+                                    <div className="mt-1.5 w-24 h-1 bg-stone-100 rounded-full overflow-hidden">
+                                      <div className="h-full bg-emerald-400 rounded-full transition-all duration-300"
+                                        style={{ width: `${Math.min(100, Math.round((eff.paid / eff.amount) * 100))}%` }} />
+                                    </div>
+                                  )}
+                                </div>
                               )}
                             </td>
 

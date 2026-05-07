@@ -83,6 +83,9 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
   const [editAmountValue, setEditAmountValue] = useState('')
   const [editingItemPaid, setEditingItemPaid] = useState<string | null>(null)
   const [editPaidValue, setEditPaidValue] = useState('')
+  // Local overrides for instant recalculation without server round-trip
+  const [amountOverrides, setAmountOverrides] = useState<Record<string, number>>({})
+  const [paidOverrides, setPaidOverrides] = useState<Record<string, number>>({})
   const [, startTransition] = useTransition()
 
   const filteredItems = useMemo(() => {
@@ -97,9 +100,13 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
   function getEffective(item: Item) {
     const iQ = quotes.filter(q => q.item_id === item.id)
     const retained = iQ.find(q => q.status === 'retenu')
-    if (retained) return { amount: retained.amount, paid: retained.paid_amount, currency: retained.currency, vendor: retained.vendor_name }
+    if (retained) {
+      const paid = paidOverrides[retained.id] ?? retained.paid_amount
+      return { amount: retained.amount, paid, currency: retained.currency, vendor: retained.vendor_name }
+    }
     if (iQ.length > 0) return { amount: iQ[0].amount, paid: iQ[0].paid_amount, currency: iQ[0].currency, vendor: iQ[0].vendor_name }
-    return { amount: item.estimated_amount, paid: 0, currency: budgetCurrency, vendor: null }
+    const amount = amountOverrides[item.id] ?? item.estimated_amount
+    return { amount, paid: 0, currency: budgetCurrency, vendor: null }
   }
 
   async function call(action: string, data: Record<string, string>) {
@@ -426,40 +433,72 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
                               )}
                             </td>
 
-                            {/* Montant — click to edit estimated when no retained quote */}
-                            <td className="px-4 py-3 text-right" onClick={e => { e.stopPropagation(); if (editingItemAmount !== item.id) { setEditingItemAmount(item.id); setEditAmountValue(String(item.estimated_amount || '')) } }}>
+                            {/* Montant — click to edit estimated (instant recalc via amountOverrides) */}
+                            <td className="px-4 py-3 text-right" onClick={e => { e.stopPropagation(); if (editingItemAmount !== item.id) { setEditingItemAmount(item.id); setEditAmountValue(String(amountOverrides[item.id] ?? item.estimated_amount || '')) } }}>
                               {editingItemAmount === item.id ? (
                                 <form className="flex items-center justify-end gap-1" onClick={e => e.stopPropagation()}
-                                  onSubmit={async e => { e.preventDefault(); const fd = new FormData(); fd.set('slug', slug); fd.set('id', item.id); fd.set('label', item.label); fd.set('estimated', editAmountValue); await actions.updateItem(fd); setEditingItemAmount(null) }}>
-                                  <input type="number" value={editAmountValue} onChange={e => setEditAmountValue(e.target.value)}
+                                  onSubmit={e => { e.preventDefault(); setEditingItemAmount(null) }}>
+                                  <input type="number" value={editAmountValue}
+                                    onChange={e => {
+                                      setEditAmountValue(e.target.value)
+                                      setAmountOverrides(prev => ({ ...prev, [item.id]: parseFloat(e.target.value) || 0 }))
+                                    }}
                                     min={0} autoFocus
-                                    onBlur={async () => { const fd = new FormData(); fd.set('slug', slug); fd.set('id', item.id); fd.set('label', item.label); fd.set('estimated', editAmountValue); await actions.updateItem(fd); setEditingItemAmount(null) }}
+                                    onBlur={() => {
+                                      setEditingItemAmount(null)
+                                      startTransition(async () => {
+                                        const fd = new FormData()
+                                        fd.set('slug', slug); fd.set('id', item.id); fd.set('label', item.label)
+                                        fd.set('estimated', editAmountValue)
+                                        await actions.updateItem(fd)
+                                      })
+                                    }}
                                     onKeyDown={e => { if (e.key === 'Escape') setEditingItemAmount(null) }}
                                     className="w-24 text-right border border-[#4a5240]/40 rounded px-2 py-0.5 text-sm focus:outline-none focus:border-[#4a5240] bg-white text-stone-700" style={{ fontWeight: 400 }} />
                                 </form>
                               ) : (
                                 <span title="Cliquer pour modifier" className="cursor-text group inline-flex items-center gap-1 hover:text-[#4a5240] transition" style={{ fontWeight: 500, fontSize: '0.9rem', color: retained ? '#44403c' : '#6b7280' }}>
-                                  {eff.amount > 0 ? fmt(eff.amount, eff.currency) : <span style={{ color: '#d6d3d1' }}>+ ajouter</span>}
+                                  {eff.amount > 0 ? fmt(eff.amount, eff.currency) : <span style={{ color: '#d6d3d1' }}>+ montant</span>}
                                   {!retained && <span className="opacity-0 group-hover:opacity-100 text-[10px] text-stone-300 transition">✎</span>}
                                 </span>
                               )}
                             </td>
 
-                            {/* Payé — click to edit paid_amount on retained quote */}
-                            <td className="px-4 py-3 text-right" onClick={e => { e.stopPropagation(); if (retained && editingItemPaid !== item.id) { setEditingItemPaid(item.id); setEditPaidValue(String(retained.paid_amount || '')) } }}>
+                            {/* Payé — click to edit (instant recalc via paidOverrides) */}
+                            <td className="px-4 py-3 text-right" onClick={e => { e.stopPropagation(); if (retained && editingItemPaid !== item.id) { setEditingItemPaid(item.id); setEditPaidValue(String(paidOverrides[retained.id] ?? retained.paid_amount || '')) } }}>
                               {editingItemPaid === item.id && retained ? (
                                 <form className="flex items-center justify-end gap-1" onClick={e => e.stopPropagation()}
-                                  onSubmit={async e => { e.preventDefault(); const fd = new FormData(); fd.set('slug', slug); fd.set('id', retained.id); fd.set('vendor_name', retained.vendor_name ?? ''); fd.set('amount', String(retained.amount)); fd.set('paid_amount', editPaidValue); fd.set('currency', retained.currency); fd.set('notes', retained.notes ?? ''); fd.set('due_date', retained.due_date ?? ''); await actions.updateQuote(fd); setEditingItemPaid(null) }}>
-                                  <input type="number" value={editPaidValue} onChange={e => setEditPaidValue(e.target.value)}
+                                  onSubmit={e => { e.preventDefault(); setEditingItemPaid(null) }}>
+                                  <input type="number" value={editPaidValue}
+                                    onChange={e => {
+                                      setEditPaidValue(e.target.value)
+                                      setPaidOverrides(prev => ({ ...prev, [retained.id]: parseFloat(e.target.value) || 0 }))
+                                    }}
                                     min={0} autoFocus
-                                    onBlur={async () => { const fd = new FormData(); fd.set('slug', slug); fd.set('id', retained.id); fd.set('vendor_name', retained.vendor_name ?? ''); fd.set('amount', String(retained.amount)); fd.set('paid_amount', editPaidValue); fd.set('currency', retained.currency); fd.set('notes', retained.notes ?? ''); fd.set('due_date', retained.due_date ?? ''); await actions.updateQuote(fd); setEditingItemPaid(null) }}
+                                    onBlur={() => {
+                                      setEditingItemPaid(null)
+                                      startTransition(async () => {
+                                        const fd = new FormData()
+                                        fd.set('slug', slug); fd.set('id', retained.id)
+                                        fd.set('vendor_name', retained.vendor_name ?? '')
+                                        fd.set('amount', String(retained.amount))
+                                        fd.set('paid_amount', editPaidValue)
+                                        fd.set('currency', retained.currency)
+                                        fd.set('notes', retained.notes ?? '')
+                                        fd.set('due_date', retained.due_date ?? '')
+                                        await actions.updateQuote(fd)
+                                      })
+                                    }}
                                     onKeyDown={e => { if (e.key === 'Escape') setEditingItemPaid(null) }}
                                     className="w-24 text-right border border-emerald-400/40 rounded px-2 py-0.5 text-sm focus:outline-none focus:border-emerald-500 bg-white text-stone-700" style={{ fontWeight: 400 }} />
                                 </form>
                               ) : (
-                                <span title={retained ? "Cliquer pour modifier" : "Ajoutez un devis retenu pour saisir le montant payé"} className={retained ? 'cursor-text group inline-flex items-center gap-1 hover:text-emerald-600 transition' : ''} style={{ fontWeight: 400, fontSize: '0.9rem', color: '#16a34a' }}>
-                                  {eff.paid > 0 ? fmt(eff.paid, eff.currency) : <span style={{ color: '#d6d3d1' }}>—</span>}
-                                  {retained && eff.paid > 0 && <span className="opacity-0 group-hover:opacity-100 text-[10px] text-stone-300 transition">✎</span>}
+                                <span
+                                  title={retained ? 'Cliquer pour modifier' : 'Retenez un devis pour saisir le payé'}
+                                  className={retained ? 'cursor-text group inline-flex items-center gap-1 hover:text-emerald-600 transition' : ''}
+                                  style={{ fontWeight: 400, fontSize: '0.9rem', color: '#16a34a' }}>
+                                  {eff.paid > 0 ? fmt(eff.paid, eff.currency) : <span style={{ color: retained ? '#d6d3d1' : '#e5e7eb', fontSize: '0.8rem' }}>{retained ? '+ payé' : '—'}</span>}
+                                  {retained && <span className="opacity-0 group-hover:opacity-100 text-[10px] text-stone-300 transition">✎</span>}
                                 </span>
                               )}
                             </td>

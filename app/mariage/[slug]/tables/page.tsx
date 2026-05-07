@@ -98,21 +98,18 @@ export default async function TablesPage({
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-8">
-      <a href={`/mariage/${slug}`} className="text-sm text-[#4a5240] hover:underline mb-4 block"
-         style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
-        ← Retour aux préparatifs
-      </a>
-
-      <div className="flex items-center justify-between mb-2">
-        <div>
-          <h1 style={{ fontWeight: 600, fontSize: '1.4rem', letterSpacing: '-0.02em', lineHeight: 1, fontFamily: 'var(--font-lato)' }}
-              className="text-[#2d3228]">
-            Plan de table
-          </h1>
-          <p style={{ fontWeight: 300, fontSize: '0.75rem', fontFamily: 'var(--font-lato)' }} className="text-stone-400 mt-0.5">
-            {visibleGuests.filter(g => g.table_id).length} placés · {visibleGuests.filter(g => !g.table_id).length} à placer
-          </p>
-        </div>
+      <div className="mb-6">
+        <a href={`/mariage/${slug}`} className="text-sm text-[#4a5240] hover:underline mb-4 block"
+           style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
+          ← Retour aux préparatifs
+        </a>
+        <p style={{ fontWeight: 300, fontSize: '0.68rem', letterSpacing: '0.2em', fontFamily: 'var(--font-lato)' }}
+           className="text-stone-400 uppercase mb-1">Plan de table</p>
+        <h1 style={{ fontWeight: 600, fontSize: '1.4rem', fontFamily: 'var(--font-lato)' }}
+            className="text-[#2d3228] leading-none">{wedding.name}</h1>
+        <p style={{ fontWeight: 300, fontSize: '0.75rem', fontFamily: 'var(--font-lato)' }} className="text-stone-400 mt-1">
+          {visibleGuests.filter(g => g.table_id).length} placés · {visibleGuests.filter(g => !g.table_id).length} à placer
+        </p>
       </div>
 
       <div className="flex border-b-2 border-stone-200 mb-6 gap-1">

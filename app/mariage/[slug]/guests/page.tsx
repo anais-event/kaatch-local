@@ -167,28 +167,27 @@ export default async function GuestsPage({
     <div className="min-h-screen bg-[#f5f0e8] p-4 md:p-8" style={{ fontFamily: 'var(--font-lato)' }}>
       <div className="max-w-3xl mx-auto">
 
-        <div className="mb-4">
-          <a href={`/mariage/${slug}`} className="text-sm text-[#4a5240] hover:underline" style={{ fontWeight: 300 }}>
-            ← Retour au dashboard
+        {/* Standard header */}
+        <div className="mb-6">
+          <a href={`/mariage/${slug}`} className="text-sm text-[#4a5240] hover:underline mb-4 block" style={{ fontWeight: 300 }}>
+            ← Retour aux préparatifs
           </a>
-        </div>
-
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 style={{ fontWeight: 600, fontSize: '1.4rem', letterSpacing: '-0.02em', lineHeight: 1 }}
-                className="text-[#2d3228]">
-              Invités
-            </h1>
-            {total > 0 && (
-              <p style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-stone-400 mt-0.5">
-                {confirmed} confirmé{confirmed > 1 ? 's' : ''} · {pending} en attente · {declined} décliné{declined > 1 ? 's' : ''}
-              </p>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p style={{ fontWeight: 300, fontSize: '0.68rem', letterSpacing: '0.2em' }}
+                 className="text-stone-400 uppercase mb-1">Invités</p>
+              <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.4rem' }}
+                  className="text-[#2d3228] leading-none">{wedding.name}</h1>
+              {total > 0 && (
+                <p style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-stone-400 mt-1">
+                  {confirmed} confirmé{confirmed > 1 ? 's' : ''} · {pending} en attente · {declined} décliné{declined > 1 ? 's' : ''}
+                </p>
+              )}
+            </div>
+            {tab === 'liste' && total > 0 && (
+              <ExportGuestsButton guests={guestList} weddingName={wedding.name} />
             )}
           </div>
-          {tab === 'liste' && total > 0 && (
-            <ExportGuestsButton guests={guestList} weddingName={wedding.name} />
-          )}
         </div>
 
         {/* Tab navigation */}

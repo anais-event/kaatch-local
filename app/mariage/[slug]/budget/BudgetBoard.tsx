@@ -434,7 +434,7 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
                             </td>
 
                             {/* Montant — click to edit estimated (instant recalc via amountOverrides) */}
-                            <td className="px-4 py-3 text-right" onClick={e => { e.stopPropagation(); if (editingItemAmount !== item.id) { setEditingItemAmount(item.id); setEditAmountValue(String(amountOverrides[item.id] ?? item.estimated_amount || '')) } }}>
+                            <td className="px-4 py-3 text-right" onClick={e => { e.stopPropagation(); if (editingItemAmount !== item.id) { setEditingItemAmount(item.id); setEditAmountValue(String((amountOverrides[item.id] ?? item.estimated_amount) || '')) } }}>
                               {editingItemAmount === item.id ? (
                                 <form className="flex items-center justify-end gap-1" onClick={e => e.stopPropagation()}
                                   onSubmit={e => { e.preventDefault(); setEditingItemAmount(null) }}>
@@ -465,7 +465,7 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
                             </td>
 
                             {/* Payé — click to edit (instant recalc via paidOverrides) */}
-                            <td className="px-4 py-3 text-right" onClick={e => { e.stopPropagation(); if (retained && editingItemPaid !== item.id) { setEditingItemPaid(item.id); setEditPaidValue(String(paidOverrides[retained.id] ?? retained.paid_amount || '')) } }}>
+                            <td className="px-4 py-3 text-right" onClick={e => { e.stopPropagation(); if (retained && editingItemPaid !== item.id) { setEditingItemPaid(item.id); setEditPaidValue(String((paidOverrides[retained.id] ?? retained.paid_amount) || '')) } }}>
                               {editingItemPaid === item.id && retained ? (
                                 <form className="flex items-center justify-end gap-1" onClick={e => e.stopPropagation()}
                                   onSubmit={e => { e.preventDefault(); setEditingItemPaid(null) }}>

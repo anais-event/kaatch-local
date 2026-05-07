@@ -125,20 +125,19 @@ async function downloadFairePartPng(
   })
   const qrImg = new Image()
   await new Promise<void>(r => { qrImg.onload = () => r(); qrImg.src = qrDataUrl })
-  ctx.drawImage(qrImg, rx - 55, 820, 110, 110) // outside canvas height — adjust below
 
-  // MERCI text above QR
+  // Label above QR
   ctx.fillStyle = 'rgba(255,255,255,0.55)'; ctx.font = '300 11px Arial, sans-serif'
   ctx.letterSpacing = '0.1em'
-  ctx.fillText('VOTRE ESPACE PERSONNEL', rx, 812)
+  ctx.fillText('VOTRE ESPACE PERSONNEL', rx, 790)
   ctx.letterSpacing = '0'
 
-  // Actually place QR at y=828 (canvas is 900px)
-  ctx.drawImage(qrImg, rx - 50, 828, 100, 100)
+  // QR code — centré, fits within canvas (H=900)
+  ctx.drawImage(qrImg, rx - 50, 800, 100, 100)
 
   // Hearts
   ctx.fillStyle = 'rgba(201,169,110,0.5)'; ctx.font = '13px sans-serif'
-  ;[-65, 65].forEach(dx => ctx.fillText('♡', rx + dx, 875))
+  ;[-65, 65].forEach(dx => ctx.fillText('♡', rx + dx, 888))
 
   const a = document.createElement('a')
   a.href = canvas.toDataURL('image/png')

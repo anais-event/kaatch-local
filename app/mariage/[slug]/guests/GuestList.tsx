@@ -24,6 +24,7 @@ type Guest = {
   relation: string | null
   rsvp_status: RsvpStatus
   gender: 'M' | 'F' | null
+  guest_type: string | null
   table_id: string | null
   guest_message: string | null
   invite_token: string | null
@@ -159,9 +160,13 @@ export default function GuestList({ guests: initialGuests, tables, slug, baseUrl
                         <span className="text-stone-400 ml-1.5" style={{ fontSize: '0.75rem', fontWeight: 300 }}>« {guest.nickname} »</span>
                       )}
                     </p>
-                    {(guest.relation || table) && (
+                    {(guest.relation || table || (guest.guest_type && guest.guest_type !== 'adulte')) && (
                       <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 truncate mt-0.5">
-                        {[guest.relation, table ? `Table ${table.name}` : null].filter(Boolean).join(' · ')}
+                        {[
+                          guest.relation,
+                          table ? `Table ${table.name}` : null,
+                          guest.guest_type === 'enfant' ? '🧒 Enfant' : guest.guest_type === 'animal' ? '🐾 Animal' : null,
+                        ].filter(Boolean).join(' · ')}
                       </p>
                     )}
                   </div>

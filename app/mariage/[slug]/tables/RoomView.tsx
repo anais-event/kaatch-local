@@ -8,6 +8,7 @@ type Table = {
   capacity: number
   pos_x: number | null
   pos_y: number | null
+  shape: 'round' | 'rect' | null
 }
 
 type Guest = {
@@ -86,6 +87,13 @@ export default function RoomView({ tables, guests, weddingId, roomObjects: initi
     return result
   })
 
+  // --- Table shapes ---
+  const [shapes, setShapes] = useState<Record<string, 'round' | 'rect'>>(() => {
+    const result: Record<string, 'round' | 'rect'> = {}
+    tables.forEach(t => { result[t.id] = t.shape ?? 'round' })
+    return result
+  })
+
   // --- Room objects ---
   const [objects, setObjects] = useState<RoomObject[]>(initialObjects)
 
@@ -125,6 +133,15 @@ export default function RoomView({ tables, guests, weddingId, roomObjects: initi
       })
       setSaving(false)
     }, 600)
+  }, [])
+
+  const saveShape = useCallback((id: string, shape: 'round' | 'rect') => {
+    setShapes(prev => ({ ...prev, [id]: shape }))
+    fetch('/api/table-position', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tableId: id, shape }),
+    })
   }, [])
 
   const saveObjPos = useCallback((id: string, x: number, y: number) => {
@@ -516,9 +533,10 @@ export default function RoomView({ tables, guests, weddingId, roomObjects: initi
                 )
               })}
 
-              {/* ─── Tables (circles) ─── */}
+              {/* ─── Tables (round or rect) ─── */}
               {tables.map(table => {
                 const pos = positions[table.id] ?? { x: W / 2, y: H / 2 }
+                const shape = shapes[table.id] ?? 'round'
                 const tableGuests = guests.filter(g => g.table_id === table.id)
                 const pct = table.capacity > 0 ? tableGuests.length / table.capacity : 0
                 const isFull = tableGuests.length >= table.capacity
@@ -530,6 +548,10 @@ export default function RoomView({ tables, guests, weddingId, roomObjects: initi
                 const textColor = isSel ? 'white' : '#2d3228'
                 const countColor = isSel ? 'rgba(255,255,255,0.7)' : '#a8a29e'
 
+                // Rect dims
+                const RW = R * 2.2
+                const RH = R * 1.4
+
                 return (
                   <g key={table.id}
                     style={{ cursor: isDraggingThis ? 'grabbing' : 'grab' }}
@@ -537,22 +559,34 @@ export default function RoomView({ tables, guests, weddingId, roomObjects: initi
                     onTouchStart={e => startDragTable(e, table.id)}
                     onClick={e => { e.stopPropagation(); if (!isDraggingThis) { setSelectedTable(table.id); setSelectedObj(null) } }}>
 
-                    <circle cx={pos.x + 2} cy={pos.y + 3} r={R} fill="rgba(0,0,0,0.06)" />
-                    <circle cx={pos.x} cy={pos.y} r={R}
-                      fill={fillColor} stroke={strokeColor}
-                      strokeWidth={isSel ? 2 : 1.5} />
-
-                    {pct > 0 && pct < 1 && (
-                      <circle cx={pos.x} cy={pos.y} r={R - 4}
-                        fill="none" stroke="#4a5240" strokeWidth="3" strokeOpacity="0.25"
-                        strokeDasharray={`${pct * 2 * Math.PI * (R - 4)} ${2 * Math.PI * (R - 4)}`}
-                        strokeDashoffset={Math.PI * (R - 4) / 2}
-                        strokeLinecap="round"
-                        transform={`rotate(-90 ${pos.x} ${pos.y})`} />
-                    )}
-                    {isFull && (
-                      <circle cx={pos.x} cy={pos.y} r={R - 4}
-                        fill="none" stroke="#4a5240" strokeWidth="3" strokeOpacity="0.3" />
+                    {shape === 'round' ? (
+                      <>
+                        <circle cx={pos.x + 2} cy={pos.y + 3} r={R} fill="rgba(0,0,0,0.06)" />
+                        <circle cx={pos.x} cy={pos.y} r={R}
+                          fill={fillColor} stroke={strokeColor} strokeWidth={isSel ? 2 : 1.5} />
+                        {pct > 0 && pct < 1 && (
+                          <circle cx={pos.x} cy={pos.y} r={R - 4}
+                            fill="none" stroke="#4a5240" strokeWidth="3" strokeOpacity="0.25"
+                            strokeDasharray={`${pct * 2 * Math.PI * (R - 4)} ${2 * Math.PI * (R - 4)}`}
+                            strokeDashoffset={Math.PI * (R - 4) / 2}
+                            strokeLinecap="round"
+                            transform={`rotate(-90 ${pos.x} ${pos.y})`} />
+                        )}
+                        {isFull && (
+                          <circle cx={pos.x} cy={pos.y} r={R - 4}
+                            fill="none" stroke="#4a5240" strokeWidth="3" strokeOpacity="0.3" />
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <rect x={pos.x - RW / 2 + 2} y={pos.y - RH / 2 + 3} width={RW} height={RH} rx="8" fill="rgba(0,0,0,0.06)" />
+                        <rect x={pos.x - RW / 2} y={pos.y - RH / 2} width={RW} height={RH} rx="8"
+                          fill={fillColor} stroke={strokeColor} strokeWidth={isSel ? 2 : 1.5} />
+                        {pct > 0 && (
+                          <rect x={pos.x - RW / 2 + 4} y={pos.y + RH / 2 - 7} width={(RW - 8) * pct} height="4" rx="2"
+                            fill="#4a5240" fillOpacity={isFull ? 0.3 : 0.2} />
+                        )}
+                      </>
                     )}
 
                     <text x={pos.x} y={pos.y - 5} textAnchor="middle" dominantBaseline="middle"
@@ -594,6 +628,22 @@ export default function RoomView({ tables, guests, weddingId, roomObjects: initi
                   </p>
                 </div>
                 <button onClick={() => setSelectedTable(null)} className="text-stone-300 hover:text-stone-500 cursor-pointer text-lg leading-none">×</button>
+              </div>
+              {/* Shape toggle */}
+              <div className="px-4 py-2.5 border-b border-stone-50 flex items-center gap-2">
+                <span style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-400 mr-1">Forme</span>
+                {(['round', 'rect'] as const).map(s => {
+                  const active = (shapes[selTable.id] ?? 'round') === s
+                  return (
+                    <button key={s} onClick={() => saveShape(selTable.id, s)}
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs transition cursor-pointer ${
+                        active ? 'bg-[#4a5240] text-white' : 'bg-stone-50 text-stone-500 hover:bg-stone-100'
+                      }`}
+                      style={{ fontWeight: 300 }}>
+                      {s === 'round' ? '⬤ Ronde' : '▬ Rectangle'}
+                    </button>
+                  )
+                })}
               </div>
               <div className="px-4 py-2">
                 {selTableGuests.length === 0 ? (

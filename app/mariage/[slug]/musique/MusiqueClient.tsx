@@ -163,35 +163,96 @@ export default function MusiqueClient({ slug, songs, playlistLinks, addSong, del
     startTransition(() => deletePlaylistLink(fd))
   }
 
-  function buildDJExport() {
-    const csvRows: string[][] = [
-      ['Moment', 'N°', 'Titre', 'Artiste', 'Lien', 'Notes DJ'],
-    ]
-    MOMENTS.forEach(m => {
-      const ms = sortedSongs.filter(s => s.moment === m.key)
-      let idx = 0
-      ms.forEach(s => {
-        if (s.notes === REPERE_SENTINEL) {
-          csvRows.push([m.label, '---', s.title, '', '', '--- repère ---'])
-        } else {
-          idx++
-          csvRows.push([
-            m.label,
-            String(idx),
-            s.title,
-            s.artist ?? '',
-            s.song_url ?? '',
-            s.notes !== REPERE_SENTINEL ? (s.notes ?? '') : '',
-          ])
-        }
-      })
-    })
-    if (playlistLinks.length > 0) {
-      csvRows.push([])
-      csvRows.push(['PLAYLISTS DE RÉFÉRENCE', '', '', '', '', ''])
-      playlistLinks.forEach(pl => csvRows.push(['', '', pl.name, '', pl.url, '']))
+  function buildDJExportHTML() {
+    function platformBadge(url: string) {
+      if (!url) return ''
+      const p = getPlatformIcon(url)
+      return `<a href="${url}" target="_blank" style="display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:500;text-decoration:none;border:1px solid ${p.color}33;color:${p.color};background:${p.color}11">${p.icon} ${p.label} ↗</a>`
     }
-    return csvRows.map(row => row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',')).join('\n')
+
+    const momentSections = MOMENTS.map(m => {
+      const ms = sortedSongs.filter(s => s.moment === m.key)
+      if (!ms.length) return ''
+      let idx = 0
+      const rows = ms.map(s => {
+        if (s.notes === REPERE_SENTINEL) {
+          return `<tr><td colspan="5" style="padding:10px 12px;background:#f5f0e8;font-size:12px;color:#78716c;letter-spacing:.08em;border-top:1px solid #e7e5e4">📍 ${s.title}</td></tr>`
+        }
+        idx++
+        return `<tr style="border-top:1px solid #f5f0e8">
+          <td style="padding:10px 12px;color:#a8a29e;font-size:12px;width:32px">${idx}</td>
+          <td style="padding:10px 12px;font-weight:500;font-size:14px;color:#1c1917">${s.title}</td>
+          <td style="padding:10px 12px;font-size:13px;color:#78716c">${s.artist ?? ''}</td>
+          <td style="padding:10px 12px">${s.song_url ? platformBadge(s.song_url) : ''}</td>
+          <td style="padding:10px 12px;font-size:12px;color:#a8a29e;font-style:italic">${s.notes && s.notes !== REPERE_SENTINEL ? s.notes : ''}</td>
+        </tr>`
+      }).join('')
+      return `
+        <div style="margin-bottom:32px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <span style="font-size:20px">${m.icon}</span>
+            <h2 style="margin:0;font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#4a5240">${m.label}</h2>
+            <span style="font-size:12px;color:#a8a29e">${ms.filter(s => s.notes !== REPERE_SENTINEL).length} morceaux</span>
+          </div>
+          <table style="width:100%;border-collapse:collapse;background:white;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+            <thead>
+              <tr style="background:#f9f7f4">
+                <th style="padding:8px 12px;text-align:left;font-size:10px;color:#a8a29e;font-weight:600;letter-spacing:.08em">#</th>
+                <th style="padding:8px 12px;text-align:left;font-size:10px;color:#a8a29e;font-weight:600;letter-spacing:.08em">TITRE</th>
+                <th style="padding:8px 12px;text-align:left;font-size:10px;color:#a8a29e;font-weight:600;letter-spacing:.08em">ARTISTE</th>
+                <th style="padding:8px 12px;text-align:left;font-size:10px;color:#a8a29e;font-weight:600;letter-spacing:.08em">LIEN</th>
+                <th style="padding:8px 12px;text-align:left;font-size:10px;color:#a8a29e;font-weight:600;letter-spacing:.08em">NOTES DJ</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>`
+    }).join('')
+
+    const playlistsSection = playlistLinks.length > 0 ? `
+      <div style="margin-bottom:32px">
+        <h2 style="font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#4a5240;margin-bottom:12px">🎧 Playlists de référence</h2>
+        <div style="background:white;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);overflow:hidden">
+          ${playlistLinks.map(pl => `
+            <div style="padding:12px 16px;border-top:1px solid #f5f0e8;display:flex;align-items:center;gap:12px">
+              <span style="font-weight:500;font-size:14px;color:#1c1917;flex:1">${pl.name}</span>
+              ${platformBadge(pl.url)}
+            </div>`).join('')}
+        </div>
+      </div>` : ''
+
+    const today = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+    return `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Playlist DJ — Kaatch</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f0e8; color: #1c1917; padding: 32px 24px; }
+  @media print {
+    body { background: white; padding: 20px; }
+    .no-print { display: none !important; }
+    a { color: inherit; }
+  }
+</style>
+</head>
+<body>
+  <div style="max-width:860px;margin:0 auto">
+    <div class="no-print" style="margin-bottom:24px;display:flex;justify-content:flex-end">
+      <button onclick="window.print()" style="background:#4a5240;color:white;border:none;padding:10px 20px;border-radius:10px;font-size:13px;cursor:pointer;font-weight:500">🖨 Imprimer / Enregistrer en PDF</button>
+    </div>
+    <div style="margin-bottom:32px;padding-bottom:24px;border-bottom:2px solid #e7e5e4">
+      <p style="font-size:11px;color:#a8a29e;letter-spacing:.15em;text-transform:uppercase;margin-bottom:4px">Playlist mariage</p>
+      <h1 style="font-size:28px;font-weight:700;color:#2d3228;margin-bottom:4px">${realSongs.length} morceaux</h1>
+      <p style="font-size:12px;color:#a8a29e">Généré le ${today} via Kaatch</p>
+    </div>
+    ${playlistsSection}
+    ${momentSections}
+  </div>
+</body>
+</html>`
   }
 
   let songRowIdx = 0
@@ -219,14 +280,14 @@ export default function MusiqueClient({ slug, songs, playlistLinks, addSong, del
             {realSongs.length > 0 && (
               <button
                 onClick={() => {
-                  const csv = buildDJExport()
-                  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' })
+                  const html = buildDJExportHTML()
+                  const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
                   const url = URL.createObjectURL(blob)
-                  const a = document.createElement('a'); a.href = url; a.download = 'playlist-mariage.csv'; a.click()
+                  window.open(url, '_blank')
                 }}
                 className="text-xs border border-[#4a5240] text-[#4a5240] px-3 py-1.5 rounded-lg hover:bg-[#4a5240] hover:text-white transition cursor-pointer"
                 style={{ fontWeight: 300 }}>
-                ↓ Export DJ (.csv)
+                ↗ Fiche DJ
               </button>
             )}
             {activeTab === 'songs' && (

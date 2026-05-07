@@ -226,15 +226,15 @@ export default function InspirationsClient({ slug, weddingId, items, visibleCats
   return (
     <div style={{ fontFamily: 'var(--font-lato)' }}>
       {/* Category tabs */}
-      <div className="flex border-b-2 border-stone-200 mb-6 gap-1 overflow-x-auto">
+      <div className="flex flex-wrap border-b-2 border-stone-200 mb-6 gap-1">
         {CATS.map(c => (
           <button key={c.key} onClick={() => { setActiveTab(c.key); setAdding(false) }}
-            className={`px-5 py-3 text-sm rounded-t-lg border-b-2 -mb-0.5 transition-all whitespace-nowrap cursor-pointer ${
+            className={`px-4 py-2.5 text-sm rounded-t-lg border-b-2 -mb-0.5 transition-all cursor-pointer ${
               activeTab === c.key
                 ? 'bg-white border-[#4a5240] text-[#2d3228] shadow-sm'
                 : 'border-transparent text-stone-400 hover:text-stone-600 hover:bg-white/60'
             }`}
-            style={{ fontWeight: activeTab === c.key ? 600 : 300, fontSize: '0.92rem', background: activeTab === c.key ? 'white' : 'transparent' }}>
+            style={{ fontWeight: activeTab === c.key ? 600 : 300, fontSize: '0.88rem', background: activeTab === c.key ? 'white' : 'transparent' }}>
             {c.icon} {c.label}
             {visibleCats.includes(c.key) && (
               <span style={{ fontSize: '0.55rem', marginLeft: 5, color: '#4a5240' }} title="Visible invités">●</span>

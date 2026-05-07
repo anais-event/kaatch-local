@@ -94,6 +94,12 @@ export default function AddGuestForm({ weddingId, slug, addGuest, guestCount, pa
             <option value="enfant">Enfant</option>
             <option value="animal">Animal</option>
           </select>
+          {/* Régime / attention */}
+          <input name="dietary_notes" type="text"
+            placeholder="Régime alimentaire, allergie, attention particulière… (optionnel)"
+            className="col-span-2 border border-stone-200 rounded-xl px-3 py-2 bg-white outline-none focus:border-[#4a5240] transition text-stone-700 text-sm"
+            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }} />
+
           {/* Moments d'invitation */}
           <div className="col-span-2 border border-stone-200 rounded-xl px-3 py-2.5 bg-white">
             <p className="text-xs text-stone-400 mb-2" style={{ fontWeight: 300 }}>Invité à…</p>

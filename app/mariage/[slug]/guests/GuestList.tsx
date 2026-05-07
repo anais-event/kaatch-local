@@ -29,6 +29,7 @@ type Guest = {
   invite_token: string | null
   invite_sent_at: string | null
   invited_parts: string[] | null
+  dietary_notes: string | null
 }
 
 type Table = { id: string; name: string }
@@ -60,13 +61,6 @@ const RSVP_CONFIG: Record<RsvpStatus, { label: string; next: RsvpStatus; bg: str
   decline:    { label: 'Décliné',    next: 'en_attente', bg: 'bg-red-50',      text: 'text-red-400',     dot: 'bg-red-300' },
 }
 
-type FilterTab = 'tous' | RsvpStatus
-const TABS: { key: FilterTab; label: string }[] = [
-  { key: 'tous',       label: 'Tous' },
-  { key: 'en_attente', label: 'En attente' },
-  { key: 'confirme',   label: 'Confirmés' },
-  { key: 'decline',    label: 'Déclinés' },
-]
 
 function Avatar({ name, gender }: { name: string; gender: 'M' | 'F' | null }) {
   const initials = name.slice(0, 1).toUpperCase()
@@ -86,7 +80,6 @@ function Avatar({ name, gender }: { name: string; gender: 'M' | 'F' | null }) {
 export default function GuestList({ guests: initialGuests, tables, slug, baseUrl, wedding, setRsvp, deleteGuest, updateGuest, paid = true, weddingId }: Props) {
   const [guests, setGuests] = useState(initialGuests)
   const [search, setSearch] = useState('')
-  const [filter, setFilter] = useState<FilterTab>('tous')
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
@@ -108,7 +101,6 @@ export default function GuestList({ guests: initialGuests, tables, slug, baseUrl
 
   const filtered = guests
     .filter(g => {
-      if (filter !== 'tous' && g.rsvp_status !== filter) return false
       if (!search) return true
       const q = search.toLowerCase()
       return (
@@ -120,56 +112,17 @@ export default function GuestList({ guests: initialGuests, tables, slug, baseUrl
     })
     .sort((a, b) => a.first_name.localeCompare(b.first_name))
 
-  const counts: Record<FilterTab, number> = {
-    tous:       guests.length,
-    en_attente: guests.filter(g => g.rsvp_status === 'en_attente').length,
-    confirme:   guests.filter(g => g.rsvp_status === 'confirme').length,
-    decline:    guests.filter(g => g.rsvp_status === 'decline').length,
-  }
-
   return (
     <div>
-      {/* Filtres + recherche */}
-      <div className="space-y-3 mb-5">
-        {/* Tabs filtre */}
-        <div className="flex gap-0 border-b border-stone-100">
-          {TABS.map(tab => (
-            <button key={tab.key} onClick={() => setFilter(tab.key)}
-              className="flex items-center gap-1.5 px-4 py-2.5 border-b-2 -mb-px transition cursor-pointer"
-              style={{
-                fontWeight: filter === tab.key ? 500 : 300,
-                fontSize: '0.8rem',
-                borderBottomColor: filter === tab.key ? '#4a5240' : 'transparent',
-                color: filter === tab.key ? '#2d3228' : '#a8a29e',
-                background: 'transparent',
-              }}>
-              {tab.label}
-              {counts[tab.key] > 0 && (
-                <span style={{
-                  fontSize: '0.65rem',
-                  background: filter === tab.key ? '#4a5240' : '#e7e5e4',
-                  color: filter === tab.key ? 'white' : '#a8a29e',
-                  borderRadius: '999px',
-                  padding: '0 5px',
-                  lineHeight: '1.5',
-                }}>
-                  {counts[tab.key]}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
-
-        {/* Recherche */}
-        <div className="relative">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}
-               className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-300 pointer-events-none">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-          </svg>
-          <input type="text" placeholder="Rechercher un invité…" value={search} onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2.5 border border-stone-100 rounded-xl text-sm outline-none focus:border-[#4a5240]/40 transition bg-white text-stone-700"
-            style={{ fontWeight: 300 }} />
-        </div>
+      {/* Recherche */}
+      <div className="relative mb-4">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}
+             className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-300 pointer-events-none">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+        </svg>
+        <input type="text" placeholder="Rechercher un invité…" value={search} onChange={e => setSearch(e.target.value)}
+          className="w-full pl-9 pr-3 py-2.5 border border-stone-100 rounded-xl text-sm outline-none focus:border-[#4a5240]/40 transition bg-white text-stone-700"
+          style={{ fontWeight: 300 }} />
       </div>
 
       {/* Liste */}
@@ -289,6 +242,14 @@ export default function GuestList({ guests: initialGuests, tables, slug, baseUrl
                       </div>
                     )}
 
+                    {/* Régime / attention particulière */}
+                    {guest.dietary_notes && (
+                      <div className="mb-3 bg-orange-50/60 border border-orange-100 rounded-xl px-3 py-2 flex items-start gap-2">
+                        <span className="text-orange-400 text-sm leading-none mt-0.5">⚠</span>
+                        <p className="text-xs text-orange-700" style={{ fontWeight: 300 }}>{guest.dietary_notes}</p>
+                      </div>
+                    )}
+
                     {/* Message invité */}
                     {guest.guest_message && (
                       <div className="mb-3 bg-amber-50/60 rounded-xl px-3 py-2">
@@ -374,6 +335,13 @@ export default function GuestList({ guests: initialGuests, tables, slug, baseUrl
                         ))}
                       </div>
                     </div>
+
+                    {/* Régime / attention */}
+                    <input name="dietary_notes" type="text"
+                      defaultValue={guest.dietary_notes ?? ''}
+                      placeholder="Régime alimentaire, allergie, attention particulière… (optionnel)"
+                      className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#4a5240]/50 bg-white text-stone-700"
+                      style={{ fontWeight: 300 }} />
 
                     <div className="flex gap-2 pt-1">
                       <button type="submit" disabled={isPending}

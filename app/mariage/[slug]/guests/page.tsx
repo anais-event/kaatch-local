@@ -33,6 +33,7 @@ async function addGuest(formData: FormData) {
     relation: (formData.get('relation') as string) || null,
     guest_type: (formData.get('guest_type') as string) || 'adulte',
     invited_parts: parts.length > 0 ? parts : ['ceremonie', 'vin_honneur', 'reception'],
+    dietary_notes: (formData.get('dietary_notes') as string) || null,
   })
   revalidatePath(`/mariage/${slug}/guests`)
 }
@@ -71,6 +72,7 @@ async function updateGuest(formData: FormData) {
     relation: (formData.get('relation') as string) || null,
     gender: (formData.get('gender') as string) || null,
     invited_parts: parts.length > 0 ? parts : ['ceremonie', 'vin_honneur', 'reception'],
+    dietary_notes: (formData.get('dietary_notes') as string) || null,
   }).eq('id', id)
   revalidatePath(`/mariage/${slug}/guests`)
 }
@@ -189,16 +191,16 @@ export default async function GuestsPage({
         </div>
 
         {/* Tab navigation */}
-        <div className="flex border-b border-stone-100 mb-7">
+        <div className="flex border-b-2 border-stone-200 mb-7 gap-1">
           {TABS.map(t => (
             <a key={t.key}
                href={`?tab=${t.key}`}
-               className={`px-4 py-2.5 text-sm transition-all border-b-2 -mb-px ${
+               className={`px-6 py-3 text-sm rounded-t-lg border-b-2 -mb-0.5 transition-all ${
                  tab === t.key
-                   ? 'border-[#4a5240] text-[#2d3228]'
-                   : 'border-transparent text-stone-400 hover:text-stone-500'
+                   ? 'bg-white border-[#4a5240] text-[#2d3228] shadow-sm'
+                   : 'border-transparent text-stone-400 hover:text-stone-600 hover:bg-white/60'
                }`}
-               style={{ fontWeight: tab === t.key ? 500 : 300, fontSize: '0.82rem' }}>
+               style={{ fontWeight: tab === t.key ? 600 : 300, fontSize: '0.92rem' }}>
               {t.label}
             </a>
           ))}
@@ -365,7 +367,7 @@ export default async function GuestsPage({
                       { label: 'Enfants', value: enfants },
                     ].map(s => (
                       <div key={s.label}>
-                        <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '2rem', lineHeight: 1 }}
+                        <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '2rem', lineHeight: 1 }}
                            className="text-[#2d3228]">
                           {s.value}
                         </p>
@@ -409,6 +411,41 @@ export default async function GuestsPage({
                 </div>
               </div>
             )}
+
+            {/* Régimes & attentions particulières */}
+            {total > 0 && (() => {
+              const withDietary = guestList.filter(g => (g as { dietary_notes?: string | null }).dietary_notes)
+              return (
+                <div className="bg-white rounded-2xl border border-stone-100 p-5">
+                  <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
+                     className="text-stone-400 uppercase mb-4">
+                    Régimes & attentions particulières
+                  </p>
+                  {withDietary.length === 0 ? (
+                    <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-300">
+                      Aucune attention particulière renseignée.
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      {withDietary.map(g => {
+                        const name = [g.first_name, g.last_name].filter(Boolean).join(' ')
+                        return (
+                          <div key={g.id} className="flex items-start gap-3 bg-orange-50/50 border border-orange-100 rounded-xl px-3 py-2.5">
+                            <span className="text-orange-400 text-xs leading-none mt-0.5 shrink-0">⚠</span>
+                            <div>
+                              <p style={{ fontWeight: 500, fontSize: '0.82rem' }} className="text-stone-700">{name}</p>
+                              <p style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-orange-700">
+                                {(g as { dietary_notes?: string | null }).dietary_notes}
+                              </p>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )
+            })()}
 
             {/* Export */}
             {total > 0 && (

@@ -6,6 +6,7 @@ import GuestListSection from './GuestListSection'
 import ImportGuests from './ImportGuests'
 import AddGuestForm from './AddGuestForm'
 import ExportGuestsButton from './ExportGuestsButton'
+import GuestPdfExport from './GuestPdfExport'
 import InvitationsTab from './InvitationsTab'
 import PublipostagePanel from './PublipostagePanel'
 import { isPaid, FREE_GUEST_LIMIT } from '@/lib/plan'
@@ -451,10 +452,20 @@ export default async function GuestsPage({
             {total > 0 && (
               <div className="bg-white rounded-2xl border border-stone-100 p-5">
                 <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
-                   className="text-stone-400 uppercase mb-3">
+                   className="text-stone-400 uppercase mb-4">
                   Export
                 </p>
-                <ExportGuestsButton guests={guestList} weddingName={wedding.name} />
+                <div className="space-y-3">
+                  <GuestPdfExport
+                    guests={guestList}
+                    weddingName={wedding.name}
+                    weddingDate={wedding.date ?? null}
+                  />
+                  <div className="pt-1 border-t border-stone-50">
+                    <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-2">Excel / CSV</p>
+                    <ExportGuestsButton guests={guestList} weddingName={wedding.name} />
+                  </div>
+                </div>
               </div>
             )}
 

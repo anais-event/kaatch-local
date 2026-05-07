@@ -115,16 +115,16 @@ export default async function TablesPage({
         </div>
       </div>
 
-      <div className="flex border-b border-stone-100 mb-6">
+      <div className="flex border-b-2 border-stone-200 mb-6 gap-1">
         {TABS.map(t => (
           <a key={t.key}
              href={`?tab=${t.key}`}
-             className={`px-4 py-2.5 text-sm transition-all border-b-2 -mb-px ${
+             className={`px-6 py-3 text-sm rounded-t-lg border-b-2 -mb-0.5 transition-all ${
                tab === t.key
-                 ? 'border-[#4a5240] text-[#2d3228]'
-                 : 'border-transparent text-stone-400 hover:text-stone-500'
+                 ? 'bg-white border-[#4a5240] text-[#2d3228] shadow-sm'
+                 : 'border-transparent text-stone-400 hover:text-stone-600 hover:bg-white/60'
              }`}
-             style={{ fontWeight: tab === t.key ? 500 : 300, fontSize: '0.82rem', fontFamily: 'var(--font-lato)' }}>
+             style={{ fontWeight: tab === t.key ? 600 : 300, fontSize: '0.92rem', fontFamily: 'var(--font-lato)' }}>
             {t.label}
           </a>
         ))}

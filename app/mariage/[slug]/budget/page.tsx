@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import BudgetBoard from './BudgetBoard'
+import BudgetGlobalView from './BudgetGlobalView'
 
 export const DEFAULT_CATEGORIES = [
   { name: 'Lieu & réception', icon: '🏛️', color: '#8b7355' },
@@ -217,12 +218,22 @@ async function initDefaultCategories(formData: FormData) {
   revalidatePath(`/mariage/${slug}/budget`)
 }
 
+const BUDGET_TABS = [
+  { key: 'devis',    label: 'Devis & prestataires' },
+  { key: 'synthese', label: 'Synthèse' },
+]
+type BudgetTab = 'devis' | 'synthese'
+
 export default async function BudgetPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ tab?: string }>
 }) {
   const { slug } = await params
+  const { tab: tabParam = 'devis' } = await searchParams
+  const tab: BudgetTab = tabParam === 'synthese' ? 'synthese' : 'devis'
   const supabase = await createSupabaseServerClient()
 
   const { data: wedding } = await supabase
@@ -259,19 +270,48 @@ export default async function BudgetPage({
           </div>
         </div>
 
-        <BudgetBoard
-          slug={slug}
-          weddingId={wedding.id}
-          budgetTotal={wedding.budget_total ?? 0}
-          budgetCurrency={wedding.budget_currency ?? 'EUR'}
-          categories={categories ?? []}
-          items={items ?? []}
-          quotes={quotes ?? []}
-          files={files ?? []}
-          currencies={CURRENCIES}
-          contacts={contacts ?? []}
-          actions={{ setBudgetTotal, addCategory, deleteCategory, addItem, updateItem, deleteItem, updateItemStatus, addQuote, updateQuote, deleteQuote, retainQuote, refuseQuote, initDefaultCategories, saveBudgetFileMeta, deleteBudgetFile, updateCategoryAllocated }}
-        />
+        {/* Tabs */}
+        <div className="flex border-b-2 border-stone-200 mb-7 gap-1">
+          {BUDGET_TABS.map(t => (
+            <a key={t.key} href={`?tab=${t.key}`}
+               className={`px-6 py-3 text-sm rounded-t-lg border-b-2 -mb-0.5 transition-all ${
+                 tab === t.key
+                   ? 'bg-white border-[#4a5240] text-[#2d3228] shadow-sm'
+                   : 'border-transparent text-stone-400 hover:text-stone-600 hover:bg-white/60'
+               }`}
+               style={{ fontWeight: tab === t.key ? 600 : 300, fontSize: '0.92rem' }}>
+              {t.label}
+            </a>
+          ))}
+        </div>
+
+        {tab === 'devis' && (
+          <BudgetBoard
+            slug={slug}
+            weddingId={wedding.id}
+            budgetTotal={wedding.budget_total ?? 0}
+            budgetCurrency={wedding.budget_currency ?? 'EUR'}
+            categories={categories ?? []}
+            items={items ?? []}
+            quotes={quotes ?? []}
+            files={files ?? []}
+            currencies={CURRENCIES}
+            contacts={contacts ?? []}
+            actions={{ setBudgetTotal, addCategory, deleteCategory, addItem, updateItem, deleteItem, updateItemStatus, addQuote, updateQuote, deleteQuote, retainQuote, refuseQuote, initDefaultCategories, saveBudgetFileMeta, deleteBudgetFile, updateCategoryAllocated }}
+          />
+        )}
+
+        {tab === 'synthese' && (
+          <BudgetGlobalView
+            slug={slug}
+            budgetTotal={wedding.budget_total ?? 0}
+            budgetCurrency={wedding.budget_currency ?? 'EUR'}
+            categories={categories ?? []}
+            items={items ?? []}
+            quotes={quotes ?? []}
+            updateCategoryAllocated={updateCategoryAllocated}
+          />
+        )}
       </div>
     </div>
   )

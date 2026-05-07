@@ -50,7 +50,7 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
         { label: 'Invités', sub: 'Liste, RSVP & faire-part', href: `/mariage/${slug}/guests` },
         { label: 'Plan de table', sub: 'Placement & récap', href: `/mariage/${slug}/tables` },
         { label: 'Budget', sub: 'Suivi des dépenses', href: `/mariage/${slug}/budget` },
-        { label: 'Prestataires', sub: 'Contacts & contrats', href: `/mariage/${slug}/prestataires` },
+        { label: 'Inspirations', sub: 'Idées, moodboard & liens', href: `/mariage/${slug}/inspirations` },
         { label: 'Mot des mariés', sub: 'Message & règles', href: `/mariage/${slug}/regles` },
         { label: 'Rétro-planning', sub: 'Checklist avant le mariage', href: `/mariage/${slug}/retro-planning` },
       ],

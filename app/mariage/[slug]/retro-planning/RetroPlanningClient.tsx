@@ -74,6 +74,56 @@ function CheckCircle({ checked, onChange, saving, color }: {
   )
 }
 
+function AssigneeChip({ value, onChange, color }: {
+  value: string | null
+  onChange: (v: string) => void
+  color: string
+}) {
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState(value ?? '')
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  function commit() {
+    onChange(draft.trim())
+    setEditing(false)
+  }
+
+  if (editing) {
+    return (
+      <input
+        ref={inputRef}
+        value={draft}
+        onChange={e => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={e => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') setEditing(false) }}
+        placeholder="Prénom ou rôle…"
+        autoFocus
+        className="border rounded px-2 py-0.5 outline-none"
+        style={{
+          fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.68rem',
+          borderColor: `${color}40`, color, width: 120,
+        }}
+      />
+    )
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => { setDraft(value ?? ''); setEditing(true) }}
+      className="flex items-center gap-1 px-2 py-0.5 rounded cursor-pointer select-none whitespace-nowrap transition-colors"
+      style={{
+        fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.68rem',
+        background: value ? `${color}10` : 'transparent',
+        color: value ? color : '#c7c3c0',
+        border: `1px solid ${value ? `${color}25` : '#e7e5e4'}`,
+      }}
+    >
+      {value ? `👤 ${value}` : '+ qui ?'}
+    </button>
+  )
+}
+
 function DeadlineChip({ value, onChange, color, overdueable = true }: {
   value: string | null
   onChange: (v: string) => void
@@ -177,7 +227,7 @@ export default function RetroPlanningClient({
     setSaving(null)
   }
 
-  async function savePredefinedMeta(periodId: string, taskKey: string, patch: { deadline?: string; assigned_to?: string }) {
+  async function savePredefinedMeta(periodId: string, taskKey: string, patch: { deadline?: string; assigned_to?: string | null }) {
     setPeriodsState(prev => prev.map(p =>
       p.id === periodId ? { ...p, tasks: p.tasks.map(t => t.key === taskKey ? { ...t, ...patch } : t) } : p
     ))
@@ -436,7 +486,12 @@ export default function RetroPlanningClient({
                               )}
                             </div>
                             {!task.done && (
-                              <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity pt-0.5">
+                              <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity pt-0.5 flex items-center gap-1.5">
+                                <AssigneeChip
+                                  value={task.assigned_to}
+                                  color={color}
+                                  onChange={v => savePredefinedMeta(period.id, task.key, { assigned_to: v || null })}
+                                />
                                 <DeadlineChip
                                   value={task.deadline}
                                   color={color}

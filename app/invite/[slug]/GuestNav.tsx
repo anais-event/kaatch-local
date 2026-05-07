@@ -30,6 +30,7 @@ export default function GuestNav({ slug, isPreview }: { slug: string; isPreview?
     { label: 'Programme',    href: `/invite/${slug}/programme`,      emoji: '📋' },
     { label: 'Musique',      href: `/invite/${slug}/musique`,        emoji: '🎵' },
     { label: 'Photos',       href: `/invite/${slug}/photos`,         emoji: '📸', badge: badges.photos },
+    { label: 'Inspirations', href: `/invite/${slug}/inspirations`,   emoji: '✨' },
     { label: 'Surprises',    href: `/invite/${slug}/surprises`,      emoji: '🎉' },
     { label: "Livre d'Or",   href: `/invite/${slug}/livre-dor`,      emoji: '📖' },
     { label: 'Hébergements', href: `/invite/${slug}/hebergements`,   emoji: '🏡' },

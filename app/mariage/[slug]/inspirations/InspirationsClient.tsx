@@ -16,6 +16,7 @@ type Props = {
   slug: string
   weddingId: string
   items: InspiItem[]
+  inspirationsVisible: boolean
   addItem: (fd: FormData) => Promise<void>
   deleteItem: (fd: FormData) => Promise<void>
   updateItem: (fd: FormData) => Promise<void>
@@ -203,7 +204,7 @@ function ItemCard({ item, slug, deleteItem, updateItem }: {
   )
 }
 
-export default function InspirationsClient({ slug, weddingId, items, addItem, deleteItem, updateItem }: Props) {
+export default function InspirationsClient({ slug, weddingId, items, inspirationsVisible, addItem, deleteItem, updateItem }: Props) {
   const [activeTab, setActiveTab] = useState('menu')
   const [adding, setAdding] = useState(false)
 

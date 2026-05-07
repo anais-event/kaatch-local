@@ -163,21 +163,36 @@ export default function MusiqueClient({ slug, songs, playlistLinks, addSong, del
     startTransition(() => deletePlaylistLink(fd))
   }
 
-  const playlistHeader = playlistLinks.length > 0
-    ? `PLAYLISTS DES MARIÉS\n${playlistLinks.map(pl => `${pl.name}: ${pl.url}`).join('\n')}\n\n`
-    : ''
-
-  const exportText = playlistHeader + MOMENTS.map(m => {
-    const ms = sortedSongs.filter(s => s.moment === m.key)
-    if (!ms.length) return null
-    let songIdx = 0
-    const lines = ms.map(s => {
-      if (s.notes === REPERE_SENTINEL) return `\n--- ${s.title} ---`
-      songIdx++
-      return `${songIdx}. ${s.title}${s.artist ? ` — ${s.artist}` : ''}${s.song_url ? ` [${s.song_url}]` : ''}${s.notes ? `\n   → ${s.notes}` : ''}`
+  function buildDJExport() {
+    const csvRows: string[][] = [
+      ['Moment', 'N°', 'Titre', 'Artiste', 'Lien', 'Notes DJ'],
+    ]
+    MOMENTS.forEach(m => {
+      const ms = sortedSongs.filter(s => s.moment === m.key)
+      let idx = 0
+      ms.forEach(s => {
+        if (s.notes === REPERE_SENTINEL) {
+          csvRows.push([m.label, '---', s.title, '', '', '--- repère ---'])
+        } else {
+          idx++
+          csvRows.push([
+            m.label,
+            String(idx),
+            s.title,
+            s.artist ?? '',
+            s.song_url ?? '',
+            s.notes !== REPERE_SENTINEL ? (s.notes ?? '') : '',
+          ])
+        }
+      })
     })
-    return `${m.label.toUpperCase()}\n${lines.join('\n')}`
-  }).filter(Boolean).join('\n\n')
+    if (playlistLinks.length > 0) {
+      csvRows.push([])
+      csvRows.push(['PLAYLISTS DE RÉFÉRENCE', '', '', '', '', ''])
+      playlistLinks.forEach(pl => csvRows.push(['', '', pl.name, '', pl.url, '']))
+    }
+    return csvRows.map(row => row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',')).join('\n')
+  }
 
   let songRowIdx = 0
 
@@ -204,13 +219,14 @@ export default function MusiqueClient({ slug, songs, playlistLinks, addSong, del
             {realSongs.length > 0 && (
               <button
                 onClick={() => {
-                  const blob = new Blob([exportText], { type: 'text/plain' })
+                  const csv = buildDJExport()
+                  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' })
                   const url = URL.createObjectURL(blob)
-                  const a = document.createElement('a'); a.href = url; a.download = 'playlist-mariage.txt'; a.click()
+                  const a = document.createElement('a'); a.href = url; a.download = 'playlist-mariage.csv'; a.click()
                 }}
                 className="text-xs border border-[#4a5240] text-[#4a5240] px-3 py-1.5 rounded-lg hover:bg-[#4a5240] hover:text-white transition cursor-pointer"
                 style={{ fontWeight: 300 }}>
-                ↓ Export DJ
+                ↓ Export DJ (.csv)
               </button>
             )}
             {activeTab === 'songs' && (

@@ -22,6 +22,7 @@ type WeddingPreview = {
   location: string | null
   coverImageUrl: string | null
   coupleMessage: string | null
+  fairePartTheme?: string | null
 }
 
 type Props = {
@@ -157,6 +158,7 @@ export default function InvitationsTab({ guests, slug, baseUrl, wedding, wedding
                     guestId={g.id}
                     paid={paid}
                     weddingId={weddingId}
+                    theme={wedding.fairePartTheme}
                   />
                 </li>
               )

@@ -159,6 +159,7 @@ export default async function GuestsPage({
     location: wedding.location,
     coverImageUrl: wedding.cover_image_url,
     coupleMessage: wedding.couple_message,
+    fairePartTheme: wedding.faire_part_theme ?? 'classique',
   }
 
   const paid = isPaid(wedding.plan)
@@ -353,8 +354,9 @@ export default async function GuestsPage({
 
             {/* Type invités */}
             {total > 0 && (() => {
-              const adultes = guestList.filter(g => (g as { guest_type?: string }).guest_type !== 'enfant').length
+              const adultes = guestList.filter(g => (g as { guest_type?: string }).guest_type !== 'enfant' && (g as { guest_type?: string }).guest_type !== 'animal').length
               const enfants = guestList.filter(g => (g as { guest_type?: string }).guest_type === 'enfant').length
+              const animaux = guestList.filter(g => (g as { guest_type?: string }).guest_type === 'animal').length
               return (
                 <div className="bg-white rounded-2xl border border-stone-100 p-5">
                   <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
@@ -365,6 +367,7 @@ export default async function GuestsPage({
                     {[
                       { label: 'Adultes', value: adultes },
                       { label: 'Enfants', value: enfants },
+                      ...(animaux > 0 ? [{ label: 'Animaux', value: animaux }] : []),
                     ].map(s => (
                       <div key={s.label}>
                         <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '2rem', lineHeight: 1 }}

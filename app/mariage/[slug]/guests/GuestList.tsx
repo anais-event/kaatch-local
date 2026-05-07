@@ -41,6 +41,7 @@ type WeddingPreview = {
   location: string | null
   coverImageUrl: string | null
   coupleMessage: string | null
+  fairePartTheme?: string | null
 }
 
 type Props = {
@@ -185,7 +186,8 @@ export default function GuestList({ guests: initialGuests, tables, slug, baseUrl
                   {link && (
                     <div onClick={e => e.stopPropagation()} className="shrink-0">
                       <CopyLinkButton url={link} guestName={fullName} gender={guest.gender}
-                        slug={slug} wedding={wedding} guestId={guest.id} paid={paid} weddingId={resolvedWeddingId} />
+                        slug={slug} wedding={wedding} guestId={guest.id} paid={paid} weddingId={resolvedWeddingId}
+                        theme={wedding.fairePartTheme} />
                     </div>
                   )}
 

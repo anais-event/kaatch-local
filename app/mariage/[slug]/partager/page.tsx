@@ -31,30 +31,88 @@ export default async function PartagerPage({ params }: { params: Promise<{ slug:
     : null
 
   return (
-    <div className="min-h-screen bg-[#f5f0e8] p-4 md:p-8">
-      <div className="max-w-lg mx-auto">
+    <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
 
+        {/* Standard header */}
         <div className="mb-6">
-          <a href={`/mariage/${slug}`} className="text-sm text-[#4a5240] hover:underline"
-             style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
-            ← Retour au mariage
+          <a href={`/mariage/${slug}`} className="text-sm text-[#4a5240] hover:underline mb-4 block"
+             style={{ fontWeight: 300 }}>
+            ← Retour aux préparatifs
           </a>
+          <p style={{ fontWeight: 300, fontSize: '0.68rem', letterSpacing: '0.2em' }}
+             className="text-stone-400 uppercase mb-1">Boîte à outils</p>
+          <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.4rem' }}
+              className="text-[#2d3228] leading-none">{wedding.name}</h1>
         </div>
 
-        <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.4rem' }}
-            className="text-[#2d3228] mb-1">
-          Partager avec tes invités
-        </h1>
-        <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem' }}
-           className="text-stone-400 mb-6">
-          Tes invités accèdent aux photos, au programme et à la messagerie — sans créer de compte.
-        </p>
+        {/* ─── Section : PDF & impressions ─── */}
+        <div className="bg-white rounded-2xl border border-stone-100 p-5 mb-4">
+          <p style={{ fontWeight: 500, fontSize: '0.88rem' }} className="text-[#2d3228] mb-1">
+            📄 Impressions & PDF
+          </p>
+          <p style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-400 mb-4">
+            Tous vos documents prêts à imprimer ou télécharger.
+          </p>
+          <div className="space-y-2.5">
 
-        {/* Code de partage */}
+            <a href={`/mariage/${slug}/guests?tab=synthese`}
+               className="flex items-center gap-3 px-4 py-3 bg-[#f5f0e8] rounded-xl hover:bg-[#ede8df] transition group cursor-pointer">
+              <span className="text-lg">👥</span>
+              <div className="flex-1 min-w-0">
+                <p style={{ fontWeight: 400, fontSize: '0.85rem' }} className="text-[#2d3228]">Liste invités & synthèse traiteur</p>
+                <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">PDF avec RSVP, régimes, statistiques</p>
+              </div>
+              <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition shrink-0">
+                Ouvrir →
+              </span>
+            </a>
+
+            <a href={`/mariage/${slug}/programme/recap`} target="_blank"
+               className="flex items-center gap-3 px-4 py-3 bg-[#f5f0e8] rounded-xl hover:bg-[#ede8df] transition group cursor-pointer">
+              <span className="text-lg">📋</span>
+              <div className="flex-1 min-w-0">
+                <p style={{ fontWeight: 400, fontSize: '0.85rem' }} className="text-[#2d3228]">Programme de la journée</p>
+                <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">À imprimer pour les prestataires & témoins</p>
+              </div>
+              <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition shrink-0">
+                Imprimer →
+              </span>
+            </a>
+
+            <a href={`/mariage/${slug}/tables/recap`} target="_blank"
+               className="flex items-center gap-3 px-4 py-3 bg-[#f5f0e8] rounded-xl hover:bg-[#ede8df] transition group cursor-pointer">
+              <span className="text-lg">🪑</span>
+              <div className="flex-1 min-w-0">
+                <p style={{ fontWeight: 400, fontSize: '0.85rem' }} className="text-[#2d3228]">Plan de table</p>
+                <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">Récap des tables à transmettre au traiteur</p>
+              </div>
+              <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition shrink-0">
+                Imprimer →
+              </span>
+            </a>
+
+            <a href={`/mariage/${slug}/inspirations`}
+               className="flex items-center gap-3 px-4 py-3 bg-[#f5f0e8] rounded-xl hover:bg-[#ede8df] transition group cursor-pointer">
+              <span className="text-lg">✨</span>
+              <div className="flex-1 min-w-0">
+                <p style={{ fontWeight: 400, fontSize: '0.85rem' }} className="text-[#2d3228]">Inspirations & moodboard</p>
+                <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">Menu, déco, tenues — aperçu & export</p>
+              </div>
+              <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-300 group-hover:text-[#4a5240] transition shrink-0">
+                Ouvrir →
+              </span>
+            </a>
+          </div>
+        </div>
+
+        {/* ─── Section : accès invités ─── */}
         <div className="bg-white rounded-2xl p-5 mb-4 border border-stone-100">
-          <p style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.1rem' }}
-             className="text-[#4a5240] mb-3">
-            Code de partage
+          <p style={{ fontWeight: 500, fontSize: '0.88rem' }} className="text-[#2d3228] mb-1">
+            🔑 Accès invités
+          </p>
+          <p style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-400 mb-4">
+            Vos invités accèdent aux photos, au programme et à la messagerie sans créer de compte.
           </p>
           <form action={saveShareCode} className="flex gap-2">
             <input type="hidden" name="slug" value={slug} />
@@ -64,47 +122,39 @@ export default async function PartagerPage({ params }: { params: Promise<{ slug:
               required
               maxLength={30}
               className="flex-1 border border-stone-200 rounded-xl px-3 py-2 bg-white outline-none focus:border-[#4a5240] transition text-stone-700 text-sm"
-              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, letterSpacing: '0.05em', textTransform: 'uppercase' }} />
+              style={{ fontWeight: 300, letterSpacing: '0.05em', textTransform: 'uppercase' }} />
             <button type="submit"
               className="bg-[#4a5240] text-white px-4 py-2 rounded-xl hover:bg-[#2d3228] transition text-sm cursor-pointer"
-              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
+              style={{ fontWeight: 300 }}>
               Enregistrer
             </button>
           </form>
-          <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.72rem' }}
-             className="text-stone-400 mt-1.5">
-            Choisis un code simple à retenir — tes invités le saisiront pour accéder à l'espace.
+          <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400 mt-1.5">
+            Code simple à retenir — vos invités le saisissent sur kaatch.fr
           </p>
         </div>
 
         {shareUrl ? (
           <>
-            {/* Lien + partage */}
+            {/* Lien */}
             <div className="bg-white rounded-2xl p-5 mb-4 border border-stone-100">
-              <p style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.1rem' }}
-                 className="text-[#4a5240] mb-3">
-                Lien à partager avec les invités
+              <p style={{ fontWeight: 500, fontSize: '0.88rem' }} className="text-[#2d3228] mb-3">
+                🔗 Lien de partage
               </p>
-
-              {/* URL display */}
               <div className="bg-[#f5f0e8] rounded-xl px-3 py-2.5 mb-3 flex items-center justify-between gap-2">
-                <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.8rem' }}
-                   className="text-[#4a5240] break-all">
+                <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-[#4a5240] break-all">
                   {shareUrl}
                 </p>
               </div>
-
               <CopyButton url={shareUrl} weddingName={wedding.name} />
             </div>
 
             {/* QR Code */}
             <div className="bg-white rounded-2xl p-5 border border-stone-100 text-center">
-              <p style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.1rem' }}
-                 className="text-[#4a5240] mb-1">
-                QR Code
+              <p style={{ fontWeight: 500, fontSize: '0.88rem' }} className="text-[#2d3228] mb-1">
+                📱 QR Code
               </p>
-              <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.78rem' }}
-                 className="text-stone-400 mb-5">
+              <p style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-400 mb-5">
                 À imprimer et déposer sur les tables le jour J
               </p>
               <QRCodeDisplay url={shareUrl} weddingName={wedding.name} weddingDate={wedding.date} />
@@ -112,9 +162,8 @@ export default async function PartagerPage({ params }: { params: Promise<{ slug:
           </>
         ) : (
           <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5 text-center">
-            <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem' }}
-               className="text-amber-700">
-              Enregistre d'abord un code de partage pour générer ton lien.
+            <p style={{ fontWeight: 300, fontSize: '0.85rem' }} className="text-amber-700">
+              Enregistrez d'abord un code de partage pour générer votre lien et QR code.
             </p>
           </div>
         )}

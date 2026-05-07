@@ -79,6 +79,10 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
   const [editingCatAlloc, setEditingCatAlloc] = useState<string | null>(null)
   const [catAllocValue, setCatAllocValue] = useState('')
   const [collapsedCats, setCollapsedCats] = useState<Set<string>>(new Set())
+  const [editingItemAmount, setEditingItemAmount] = useState<string | null>(null)
+  const [editAmountValue, setEditAmountValue] = useState('')
+  const [editingItemPaid, setEditingItemPaid] = useState<string | null>(null)
+  const [editPaidValue, setEditPaidValue] = useState('')
   const [, startTransition] = useTransition()
 
   const filteredItems = useMemo(() => {
@@ -422,18 +426,42 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
                               )}
                             </td>
 
-                            {/* Montant */}
-                            <td className="px-4 py-3 text-right">
-                              {eff.amount > 0
-                                ? <span style={{ fontWeight: 500, fontSize: '0.9rem', color: '#44403c' }}>{fmt(eff.amount, eff.currency)}</span>
-                                : <span style={{ color: '#d6d3d1' }}>—</span>}
+                            {/* Montant — click to edit estimated when no retained quote */}
+                            <td className="px-4 py-3 text-right" onClick={e => { e.stopPropagation(); if (editingItemAmount !== item.id) { setEditingItemAmount(item.id); setEditAmountValue(String(item.estimated_amount || '')) } }}>
+                              {editingItemAmount === item.id ? (
+                                <form className="flex items-center justify-end gap-1" onClick={e => e.stopPropagation()}
+                                  onSubmit={async e => { e.preventDefault(); const fd = new FormData(); fd.set('slug', slug); fd.set('id', item.id); fd.set('label', item.label); fd.set('estimated', editAmountValue); await actions.updateItem(fd); setEditingItemAmount(null) }}>
+                                  <input type="number" value={editAmountValue} onChange={e => setEditAmountValue(e.target.value)}
+                                    min={0} autoFocus
+                                    onBlur={async () => { const fd = new FormData(); fd.set('slug', slug); fd.set('id', item.id); fd.set('label', item.label); fd.set('estimated', editAmountValue); await actions.updateItem(fd); setEditingItemAmount(null) }}
+                                    onKeyDown={e => { if (e.key === 'Escape') setEditingItemAmount(null) }}
+                                    className="w-24 text-right border border-[#4a5240]/40 rounded px-2 py-0.5 text-sm focus:outline-none focus:border-[#4a5240] bg-white text-stone-700" style={{ fontWeight: 400 }} />
+                                </form>
+                              ) : (
+                                <span title="Cliquer pour modifier" className="cursor-text group inline-flex items-center gap-1 hover:text-[#4a5240] transition" style={{ fontWeight: 500, fontSize: '0.9rem', color: retained ? '#44403c' : '#6b7280' }}>
+                                  {eff.amount > 0 ? fmt(eff.amount, eff.currency) : <span style={{ color: '#d6d3d1' }}>+ ajouter</span>}
+                                  {!retained && <span className="opacity-0 group-hover:opacity-100 text-[10px] text-stone-300 transition">✎</span>}
+                                </span>
+                              )}
                             </td>
 
-                            {/* Payé */}
-                            <td className="px-4 py-3 text-right">
-                              {eff.paid > 0
-                                ? <span style={{ fontWeight: 400, fontSize: '0.9rem', color: '#16a34a' }}>{fmt(eff.paid, eff.currency)}</span>
-                                : <span style={{ color: '#d6d3d1' }}>—</span>}
+                            {/* Payé — click to edit paid_amount on retained quote */}
+                            <td className="px-4 py-3 text-right" onClick={e => { e.stopPropagation(); if (retained && editingItemPaid !== item.id) { setEditingItemPaid(item.id); setEditPaidValue(String(retained.paid_amount || '')) } }}>
+                              {editingItemPaid === item.id && retained ? (
+                                <form className="flex items-center justify-end gap-1" onClick={e => e.stopPropagation()}
+                                  onSubmit={async e => { e.preventDefault(); const fd = new FormData(); fd.set('slug', slug); fd.set('id', retained.id); fd.set('vendor_name', retained.vendor_name ?? ''); fd.set('amount', String(retained.amount)); fd.set('paid_amount', editPaidValue); fd.set('currency', retained.currency); fd.set('notes', retained.notes ?? ''); fd.set('due_date', retained.due_date ?? ''); await actions.updateQuote(fd); setEditingItemPaid(null) }}>
+                                  <input type="number" value={editPaidValue} onChange={e => setEditPaidValue(e.target.value)}
+                                    min={0} autoFocus
+                                    onBlur={async () => { const fd = new FormData(); fd.set('slug', slug); fd.set('id', retained.id); fd.set('vendor_name', retained.vendor_name ?? ''); fd.set('amount', String(retained.amount)); fd.set('paid_amount', editPaidValue); fd.set('currency', retained.currency); fd.set('notes', retained.notes ?? ''); fd.set('due_date', retained.due_date ?? ''); await actions.updateQuote(fd); setEditingItemPaid(null) }}
+                                    onKeyDown={e => { if (e.key === 'Escape') setEditingItemPaid(null) }}
+                                    className="w-24 text-right border border-emerald-400/40 rounded px-2 py-0.5 text-sm focus:outline-none focus:border-emerald-500 bg-white text-stone-700" style={{ fontWeight: 400 }} />
+                                </form>
+                              ) : (
+                                <span title={retained ? "Cliquer pour modifier" : "Ajoutez un devis retenu pour saisir le montant payé"} className={retained ? 'cursor-text group inline-flex items-center gap-1 hover:text-emerald-600 transition' : ''} style={{ fontWeight: 400, fontSize: '0.9rem', color: '#16a34a' }}>
+                                  {eff.paid > 0 ? fmt(eff.paid, eff.currency) : <span style={{ color: '#d6d3d1' }}>—</span>}
+                                  {retained && eff.paid > 0 && <span className="opacity-0 group-hover:opacity-100 text-[10px] text-stone-300 transition">✎</span>}
+                                </span>
+                              )}
                             </td>
 
                             {/* Reste */}

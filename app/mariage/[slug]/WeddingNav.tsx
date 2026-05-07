@@ -63,7 +63,7 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
         { label: 'Jeux & animations', sub: 'Idées pour la fête', href: `/mariage/${slug}/jeux` },
         { label: 'Musique', sub: 'Playlist & suggestions', href: `/mariage/${slug}/musique` },
         { label: 'Hébergements', sub: 'Options aux alentours', href: `/mariage/${slug}/hebergements` },
-        { label: 'QR Code', sub: 'Accès rapide jour J', href: `/mariage/${slug}/partager` },
+        { label: 'Boîte à outils', sub: 'QR code, PDF & impressions', href: `/mariage/${slug}/partager` },
       ],
     },
     { label: '📸 Photos', href: `/mariage/${slug}/photos` },

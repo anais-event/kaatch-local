@@ -222,6 +222,27 @@ export default function MusiqueClient({ slug, songs, playlistLinks, addSong, del
       </div>` : ''
 
     const today = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+
+    // Plain text for sharing
+    const textLines: string[] = [`Playlist mariage — ${realSongs.length} morceaux\n`]
+    MOMENTS.forEach(m => {
+      const ms = sortedSongs.filter(s => s.moment === m.key)
+      if (!ms.length) return
+      textLines.push(`${m.icon} ${m.label.toUpperCase()}`)
+      let idx = 0
+      ms.forEach(s => {
+        if (s.notes === REPERE_SENTINEL) { textLines.push(`  --- ${s.title} ---`); return }
+        idx++
+        let line = `  ${idx}. ${s.title}${s.artist ? ` — ${s.artist}` : ''}`
+        if (s.song_url) line += `\n     ${s.song_url}`
+        textLines.push(line)
+      })
+      textLines.push('')
+    })
+    const shareText = encodeURIComponent(textLines.join('\n'))
+    const mailtoHref = `mailto:?subject=${encodeURIComponent('Playlist mariage')}&body=${shareText}`
+    const waHref = `https://wa.me/?text=${shareText}`
+
     return `<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -240,8 +261,10 @@ export default function MusiqueClient({ slug, songs, playlistLinks, addSong, del
 </head>
 <body>
   <div style="max-width:860px;margin:0 auto">
-    <div class="no-print" style="margin-bottom:24px;display:flex;justify-content:flex-end">
-      <button onclick="window.print()" style="background:#4a5240;color:white;border:none;padding:10px 20px;border-radius:10px;font-size:13px;cursor:pointer;font-weight:500">🖨 Imprimer / Enregistrer en PDF</button>
+    <div class="no-print" style="margin-bottom:24px;display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end">
+      <a href="${waHref}" style="display:inline-flex;align-items:center;gap:6px;background:#25D366;color:white;padding:9px 16px;border-radius:10px;font-size:13px;font-weight:500;text-decoration:none">💬 WhatsApp</a>
+      <a href="${mailtoHref}" style="display:inline-flex;align-items:center;gap:6px;background:#4a5240;color:white;padding:9px 16px;border-radius:10px;font-size:13px;font-weight:500;text-decoration:none">📧 Email</a>
+      <button onclick="window.print()" style="display:inline-flex;align-items:center;gap:6px;background:white;color:#4a5240;border:1px solid #d6d3d1;padding:9px 16px;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer">🖨 Imprimer / PDF</button>
     </div>
     <div style="margin-bottom:32px;padding-bottom:24px;border-bottom:2px solid #e7e5e4">
       <p style="font-size:11px;color:#a8a29e;letter-spacing:.15em;text-transform:uppercase;margin-bottom:4px">Playlist mariage</p>

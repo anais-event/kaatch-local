@@ -45,28 +45,38 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
   const sections: NavSection[] = [
     { label: '🏠 Accueil', href: `/mariage/${slug}` },
     {
-      label: 'Préparatifs',
+      label: '🗓️ Organisation',
       items: [
-        { label: 'Invités', sub: 'Liste, RSVP & faire-part', href: `/mariage/${slug}/guests` },
-        { label: 'Plan de table', sub: 'Placement & récap', href: `/mariage/${slug}/tables` },
-        { label: 'Budget', sub: 'Suivi des dépenses', href: `/mariage/${slug}/budget` },
-        { label: 'Inspirations', sub: 'Idées, moodboard & liens', href: `/mariage/${slug}/inspirations` },
         { label: 'Rétro-planning', sub: 'Checklist avant le mariage', href: `/mariage/${slug}/retro-planning` },
-      ],
-    },
-    {
-      label: 'Jour J',
-      items: [
+        { label: 'Budget', sub: 'Suivi des dépenses', href: `/mariage/${slug}/budget` },
         { label: 'Checklist Jour J', sub: 'Qui fait quoi', href: `/mariage/${slug}/checklist` },
-        { label: 'Programme', sub: 'Déroulé de la journée', href: `/mariage/${slug}/programme` },
-        { label: 'Jeux & animations', sub: 'Idées pour la fête', href: `/mariage/${slug}/jeux` },
-        { label: 'Musique', sub: 'Playlist & suggestions', href: `/mariage/${slug}/musique` },
-        { label: 'Hébergements', sub: 'Options aux alentours', href: `/mariage/${slug}/hebergements` },
         { label: 'Boîte à outils', sub: 'QR code, PDF & impressions', href: `/mariage/${slug}/partager` },
       ],
     },
-    { label: '📸 Photos', href: `/mariage/${slug}/photos` },
-    { label: '📖 Livre d\'Or', href: `/mariage/${slug}/livre-dor` },
+    {
+      label: '💌 Invités',
+      items: [
+        { label: 'Invités & RSVP', sub: 'Liste, RSVP & faire-part', href: `/mariage/${slug}/guests` },
+        { label: 'Plan de table', sub: 'Placement & récap', href: `/mariage/${slug}/tables` },
+        { label: 'Hébergements', sub: 'Options aux alentours', href: `/mariage/${slug}/hebergements` },
+      ],
+    },
+    {
+      label: '✨ Le Grand Jour',
+      items: [
+        { label: 'Programme', sub: 'Déroulé de la journée', href: `/mariage/${slug}/programme` },
+        { label: 'Musique', sub: 'Playlist & suggestions', href: `/mariage/${slug}/musique` },
+        { label: 'Jeux & animations', sub: 'Idées pour la fête', href: `/mariage/${slug}/jeux` },
+        { label: 'Inspirations', sub: 'Moodboard & tenues', href: `/mariage/${slug}/inspirations` },
+      ],
+    },
+    {
+      label: '📸 Souvenirs',
+      items: [
+        { label: 'Photos', sub: 'Galerie partagée', href: `/mariage/${slug}/photos` },
+        { label: "Livre d'Or", sub: 'Messages des invités', href: `/mariage/${slug}/livre-dor` },
+      ],
+    },
     { label: '💬 Messagerie', href: `/mariage/${slug}/messagerie` },
   ]
 

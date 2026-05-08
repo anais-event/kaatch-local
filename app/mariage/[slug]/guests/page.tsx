@@ -9,6 +9,7 @@ import ExportGuestsButton from './ExportGuestsButton'
 import GuestPdfExport from './GuestPdfExport'
 import InvitationsTab from './InvitationsTab'
 import PublipostagePanel from './PublipostagePanel'
+import SyntheseParMoment from './SyntheseParMoment'
 import { isPaid, FREE_GUEST_LIMIT } from '@/lib/plan'
 
 async function addGuest(formData: FormData) {
@@ -74,6 +75,22 @@ async function updateGuest(formData: FormData) {
     gender: (formData.get('gender') as string) || null,
     invited_parts: parts.length > 0 ? parts : ['ceremonie', 'vin_honneur', 'reception'],
     dietary_notes: (formData.get('dietary_notes') as string) || null,
+  }).eq('id', id)
+  revalidatePath(`/mariage/${slug}/guests`)
+}
+
+async function toggleGuestPart(formData: FormData) {
+  'use server'
+  const supabase = await createSupabaseServerClient()
+  const id = formData.get('id') as string
+  const slug = formData.get('slug') as string
+  const part = formData.get('part') as string
+  const current = (formData.get('current') as string).split(',').filter(Boolean)
+  const next = current.includes(part)
+    ? current.filter(p => p !== part)
+    : [...current, part]
+  await supabase.from('guests').update({
+    invited_parts: next.length > 0 ? next : ['ceremonie', 'vin_honneur', 'reception'],
   }).eq('id', id)
   revalidatePath(`/mariage/${slug}/guests`)
 }
@@ -241,6 +258,7 @@ export default async function GuestsPage({
               setRsvp={setRsvp}
               deleteGuest={deleteGuest}
               updateGuest={updateGuest}
+              toggleGuestPart={toggleGuestPart}
               paid={paid}
               weddingId={wedding.id}
             />
@@ -360,37 +378,9 @@ export default async function GuestsPage({
               )
             })()}
 
-            {/* Parts invitées */}
+            {/* Parts invitées — cliquable pour voir la liste */}
             {total > 0 && (
-              <div className="bg-white rounded-2xl border border-stone-100 p-5">
-                <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
-                   className="text-stone-400 uppercase mb-4">
-                  Par moment
-                </p>
-                <div className="space-y-2">
-                  {(['ceremonie', 'vin_honneur', 'reception'] as const).map(part => {
-                    const count = guestList.filter(g => {
-                      const parts = (g as { invited_parts?: string[] }).invited_parts
-                      return !parts || parts.includes(part)
-                    }).length
-                    return (
-                      <div key={part} className="flex items-center gap-3">
-                        <span style={{ fontWeight: 300, fontSize: '0.78rem', width: '8rem', flexShrink: 0 }}
-                              className="text-stone-500">
-                          {PARTS_LABELS[part]}
-                        </span>
-                        <div className="flex-1 h-1.5 bg-stone-100 rounded-full overflow-hidden">
-                          <div className="h-full bg-[#4a5240] rounded-full"
-                               style={{ width: `${total > 0 ? (count / total) * 100 : 0}%` }} />
-                        </div>
-                        <span style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-stone-400 tabular-nums w-6 text-right">
-                          {count}
-                        </span>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
+              <SyntheseParMoment guests={guestList} total={total} partsLabels={PARTS_LABELS} />
             )}
 
             {/* Régimes & attentions particulières */}

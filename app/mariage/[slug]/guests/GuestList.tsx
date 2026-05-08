@@ -53,6 +53,7 @@ type Props = {
   setRsvp: (fd: FormData) => Promise<void>
   deleteGuest: (fd: FormData) => Promise<void>
   updateGuest: (fd: FormData) => Promise<void>
+  toggleGuestPart: (fd: FormData) => Promise<void>
   paid?: boolean
   weddingId?: string
 }
@@ -88,13 +89,29 @@ const FILTER_TABS: { key: RsvpFilter; label: string; dot?: string }[] = [
   { key: 'decline',    label: 'Déclinés',   dot: 'bg-red-300' },
 ]
 
-export default function GuestList({ guests: initialGuests, tables, slug, baseUrl, wedding, setRsvp, deleteGuest, updateGuest, paid = true, weddingId }: Props) {
+export default function GuestList({ guests: initialGuests, tables, slug, baseUrl, wedding, setRsvp, deleteGuest, updateGuest, toggleGuestPart, paid = true, weddingId }: Props) {
   const [guests, setGuests] = useState(initialGuests)
   const [search, setSearch] = useState('')
   const [rsvpFilter, setRsvpFilter] = useState<RsvpFilter>('tous')
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+
+  function handleTogglePart(guestId: string, part: string, currentParts: string[]) {
+    const next = currentParts.includes(part)
+      ? currentParts.filter(p => p !== part)
+      : [...currentParts, part]
+    const resolved = next.length > 0 ? next : ALL_PARTS
+    setGuests(prev => prev.map(g => g.id === guestId ? { ...g, invited_parts: resolved } : g))
+    startTransition(async () => {
+      const fd = new FormData()
+      fd.set('id', guestId)
+      fd.set('slug', slug)
+      fd.set('part', part)
+      fd.set('current', currentParts.join(','))
+      await toggleGuestPart(fd)
+    })
+  }
 
   const resolvedWeddingId = weddingId ?? guests[0]?.wedding_id ?? ''
 
@@ -271,19 +288,25 @@ export default function GuestList({ guests: initialGuests, tables, slug, baseUrl
                       </div>
                     )}
 
-                    {/* Moments — toujours affichés */}
+                    {/* Moments — badges cliquables pour toggle */}
                     <div className="flex flex-wrap gap-1.5 mb-3">
-                      {(guest.invited_parts ?? ALL_PARTS).map(p => (
-                        <span key={p}
-                          className={`text-xs px-2.5 py-0.5 rounded-full ${
-                            isInvitedAll
-                              ? 'bg-stone-100 text-stone-400'
-                              : 'bg-[#4a5240]/10 text-[#4a5240]'
-                          }`}
-                          style={{ fontWeight: 300 }}>
-                          {PARTS_LABELS[p] ?? p}
-                        </span>
-                      ))}
+                      {ALL_PARTS.map(p => {
+                        const parts = guest.invited_parts ?? ALL_PARTS
+                        const active = parts.includes(p)
+                        return (
+                          <button key={p}
+                            onClick={() => handleTogglePart(guest.id, p, parts)}
+                            title={active ? `Retirer ${PARTS_LABELS[p]}` : `Ajouter ${PARTS_LABELS[p]}`}
+                            className={`text-xs px-2.5 py-0.5 rounded-full transition cursor-pointer border ${
+                              active
+                                ? 'bg-[#4a5240]/10 text-[#4a5240] border-[#4a5240]/20 hover:bg-red-50 hover:text-red-400 hover:border-red-200'
+                                : 'bg-white text-stone-300 border-stone-200 hover:bg-[#4a5240]/10 hover:text-[#4a5240] hover:border-[#4a5240]/20'
+                            }`}
+                            style={{ fontWeight: 300 }}>
+                            {active ? '' : '+ '}{PARTS_LABELS[p] ?? p}
+                          </button>
+                        )
+                      })}
                     </div>
 
                     {/* Régime / attention particulière */}

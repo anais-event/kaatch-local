@@ -30,32 +30,33 @@ export async function GET(req: NextRequest) {
   if (!wedding) return NextResponse.json([], { status: 403 })
 
   const wid = wedding.id
-  const like = `%${q}%`
+  const orLike = `*${q}*`   // wildcard for .or() PostgREST filter strings
+  const pctLike = `%${q}%`  // wildcard for .ilike() SDK method
 
   const [
     guests, songs, inspirations, steps, budgetItems, budgetQuotes,
     contacts, accommodations, vendors, guestbook,
   ] = await Promise.all([
     supabase.from('guests').select('id,first_name,last_name,email,rsvp_status')
-      .eq('wedding_id', wid).or(`first_name.ilike.${like},last_name.ilike.${like},email.ilike.${like}`).limit(MAX),
+      .eq('wedding_id', wid).or(`first_name.ilike.${orLike},last_name.ilike.${orLike},email.ilike.${orLike}`).limit(MAX),
     supabase.from('playlist_songs').select('id,title,artist,moment')
-      .eq('wedding_id', wid).or(`title.ilike.${like},artist.ilike.${like}`).limit(MAX),
+      .eq('wedding_id', wid).or(`title.ilike.${orLike},artist.ilike.${orLike}`).limit(MAX),
     supabase.from('inspiration_items').select('id,title,category')
-      .eq('wedding_id', wid).ilike('title', like).limit(MAX),
+      .eq('wedding_id', wid).ilike('title', pctLike).limit(MAX),
     supabase.from('program_steps').select('id,title,time')
-      .eq('wedding_id', wid).ilike('title', like).limit(MAX),
+      .eq('wedding_id', wid).ilike('title', pctLike).limit(MAX),
     supabase.from('budget_items').select('id,label')
-      .eq('wedding_id', wid).ilike('label', like).limit(MAX),
+      .eq('wedding_id', wid).ilike('label', pctLike).limit(MAX),
     supabase.from('budget_quotes').select('id,vendor_name,notes')
-      .eq('wedding_id', wid).ilike('vendor_name', like).limit(MAX),
+      .eq('wedding_id', wid).ilike('vendor_name', pctLike).limit(MAX),
     supabase.from('wedding_contacts').select('id,name,role')
-      .eq('wedding_id', wid).or(`name.ilike.${like},role.ilike.${like}`).limit(MAX),
+      .eq('wedding_id', wid).or(`name.ilike.${orLike},role.ilike.${orLike}`).limit(MAX),
     supabase.from('accommodations').select('id,name,address')
-      .eq('wedding_id', wid).ilike('name', like).limit(MAX),
+      .eq('wedding_id', wid).ilike('name', pctLike).limit(MAX),
     supabase.from('vendors').select('id,name,category')
-      .eq('wedding_id', wid).or(`name.ilike.${like},category.ilike.${like}`).limit(MAX),
+      .eq('wedding_id', wid).or(`name.ilike.${orLike},category.ilike.${orLike}`).limit(MAX),
     supabase.from('guestbook_entries').select('id,author_name,content')
-      .eq('wedding_id', wid).or(`author_name.ilike.${like},content.ilike.${like}`).limit(MAX),
+      .eq('wedding_id', wid).or(`author_name.ilike.${orLike},content.ilike.${orLike}`).limit(MAX),
   ])
 
   const MOMENT_LABELS: Record<string, string> = { ceremonie: 'Cérémonie', cocktail: 'Cocktail', diner: 'Dîner', soiree: 'Soirée' }

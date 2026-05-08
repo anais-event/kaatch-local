@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation'
 import { useState, useRef, useEffect } from 'react'
 import { logoutMaried } from './logout-action'
 import { createClient } from '@supabase/supabase-js'
+import SearchModal from './SearchModal'
 
 type NavItem = { label: string; href: string; sub?: string; target?: string }
 type NavSection = { label: string; href?: string; items?: NavItem[] }
@@ -156,6 +157,11 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
           </button>
         </div>
 
+        {/* Search */}
+        <div className="px-3 py-2 border-b border-stone-100">
+          <SearchModal slug={slug} />
+        </div>
+
         {/* Nav items */}
         <nav className="flex-1 overflow-y-auto py-3 px-2">
           {sections.map(section => {
@@ -290,6 +296,7 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
           </a>
           <div className="flex items-center gap-2">
             {unread > 0 && <span className="w-2 h-2 rounded-full bg-red-400" />}
+            <SearchModal slug={slug} />
             <button onClick={() => setMobileOpen(o => !o)}
               className="p-1.5 rounded-md text-stone-500 hover:text-[#4a5240] transition cursor-pointer"
               aria-label="Menu">

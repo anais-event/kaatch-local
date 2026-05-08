@@ -101,11 +101,10 @@ async function generateTokens(formData: FormData) {
   revalidatePath(`/mariage/${slug}/guests`)
 }
 
-type Tab = 'liste' | 'invitations' | 'synthese'
+type Tab = 'liste' | 'synthese'
 const TABS: { key: Tab; label: string }[] = [
-  { key: 'liste',        label: 'Liste' },
-  { key: 'invitations',  label: 'Faire-part' },
-  { key: 'synthese',     label: 'Synthèse' },
+  { key: 'liste',    label: 'Invités & RSVP' },
+  { key: 'synthese', label: 'Synthèse' },
 ]
 
 const PARTS_LABELS: Record<string, string> = {
@@ -123,7 +122,7 @@ export default async function GuestsPage({
 }) {
   const { slug } = await params
   const { tab: tabParam = 'liste' } = await searchParams
-  const tab: Tab = (['liste', 'invitations', 'synthese'] as const).includes(tabParam as Tab)
+  const tab: Tab = (['liste', 'synthese'] as const).includes(tabParam as Tab)
     ? (tabParam as Tab)
     : 'liste'
 
@@ -179,11 +178,9 @@ export default async function GuestsPage({
                  className="text-stone-400 uppercase mb-1">Invités</p>
               <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.4rem' }}
                   className="text-[#2d3228] leading-none">{wedding.name}</h1>
-              {total > 0 && (
-                <p style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-stone-400 mt-1">
-                  {confirmed} confirmé{confirmed > 1 ? 's' : ''} · {pending} en attente · {declined} décliné{declined > 1 ? 's' : ''}
-                </p>
-              )}
+              <p style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-stone-400 mt-1">
+                {total} invité{total > 1 ? 's' : ''}
+              </p>
             </div>
             {tab === 'liste' && total > 0 && (
               <ExportGuestsButton guests={guestList} weddingName={wedding.name} />
@@ -207,9 +204,26 @@ export default async function GuestsPage({
           ))}
         </div>
 
-        {/* ── TAB LISTE ── */}
+        {/* ── TAB INVITÉS & RSVP ── */}
         {tab === 'liste' && (
           <>
+            {/* Banner : invités sans lien faire-part */}
+            {withoutToken.length > 0 && (
+              <div className="flex items-center justify-between bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 flex-wrap gap-2 mb-4">
+                <p className="text-xs text-amber-700" style={{ fontWeight: 300 }}>
+                  💌 {withoutToken.length} invité{withoutToken.length > 1 ? 's' : ''} sans lien personnel — générez-les pour envoyer les faire-parts.
+                </p>
+                <form action={generateTokens}>
+                  <input type="hidden" name="slug" value={slug} />
+                  <button type="submit"
+                    className="bg-[#4a5240] text-white px-4 py-1.5 rounded-xl text-xs hover:bg-[#2d3228] transition cursor-pointer whitespace-nowrap"
+                    style={{ fontWeight: 300 }}>
+                    Générer les liens ({withoutToken.length})
+                  </button>
+                </form>
+              </div>
+            )}
+
             <AddGuestForm
               weddingId={wedding.id}
               slug={slug}
@@ -237,31 +251,14 @@ export default async function GuestsPage({
           </>
         )}
 
-        {/* ── TAB INVITATIONS ── */}
-        {tab === 'invitations' && (
-          <div className="space-y-6">
-            {withoutToken.length > 0 && (
-              <div className="flex items-center justify-between bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 flex-wrap gap-2">
-                <p className="text-xs text-amber-700" style={{ fontWeight: 300 }}>
-                  {withoutToken.length} invité{withoutToken.length > 1 ? 's' : ''} sans lien personnel — générez-les pour pouvoir envoyer les faire-parts.
-                </p>
-                <form action={generateTokens}>
-                  <input type="hidden" name="slug" value={slug} />
-                  <button type="submit"
-                    className="bg-[#4a5240] text-white px-4 py-1.5 rounded-xl text-xs hover:bg-[#2d3228] transition cursor-pointer whitespace-nowrap"
-                    style={{ fontWeight: 300 }}>
-                    Générer les liens ({withoutToken.length})
-                  </button>
-                </form>
-              </div>
-            )}
+        {/* ── TAB SYNTHÈSE ── */}
+        {tab === 'synthese' && (
+          <div className="space-y-5">
 
-            {/* Theme picker */}
+            {/* Thème faire-part */}
             <div className="bg-white rounded-2xl border border-stone-100 p-5">
               <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
-                 className="text-stone-400 uppercase mb-4">
-                Thème du faire-part
-              </p>
+                 className="text-stone-400 uppercase mb-4">Thème du faire-part</p>
               <div className="flex gap-4">
                 {([
                   { key: 'classique',  label: 'Classique',  night: '#0b1209', bg: '#4a5639', accent: '#c9a96e' },
@@ -273,27 +270,24 @@ export default async function GuestsPage({
                     <form key={th.key} action={updateFairePartTheme}>
                       <input type="hidden" name="slug" value={slug} />
                       <input type="hidden" name="theme" value={th.key} />
-                      <button type="submit" className="flex flex-col items-center gap-2 cursor-pointer group" style={{ background: 'transparent', border: 'none', padding: 0 }}>
+                      <button type="submit" className="flex flex-col items-center gap-2 cursor-pointer" style={{ background: 'transparent', border: 'none', padding: 0 }}>
                         <div style={{
-                          width: 64, height: 88, borderRadius: 4, background: th.night,
+                          width: 56, height: 76, borderRadius: 4, background: th.night,
                           border: `2px solid ${active ? '#4a5240' : 'transparent'}`,
-                          overflow: 'hidden', position: 'relative', transition: 'border-color 0.2s',
+                          overflow: 'hidden', position: 'relative',
                           boxShadow: active ? '0 0 0 1px #4a5240' : '0 1px 4px rgba(0,0,0,0.12)',
                         }}>
                           <div style={{
                             position: 'absolute', top: '15%', bottom: '15%', left: '12%', right: '12%',
-                            background: th.bg, borderRadius: 2, border: `1px solid ${th.accent}44`,
-                            display: 'flex', flexDirection: 'column', alignItems: 'center',
-                            justifyContent: 'center', gap: 3,
+                            background: th.bg, borderRadius: 2,
+                            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3,
                           }}>
                             <div style={{ width: 20, height: 0.8, background: th.accent, opacity: 0.8 }} />
                             <div style={{ width: 8, height: 8, borderRadius: '50%', border: `1px solid ${th.accent}`, opacity: 0.7 }} />
                             <div style={{ width: 14, height: 0.8, background: th.accent, opacity: 0.5 }} />
                           </div>
                         </div>
-                        <p style={{ fontWeight: active ? 500 : 300, fontSize: '0.7rem' }} className={active ? 'text-[#4a5240]' : 'text-stone-500'}>
-                          {th.label}
-                        </p>
+                        <p style={{ fontWeight: active ? 500 : 300, fontSize: '0.7rem' }} className={active ? 'text-[#4a5240]' : 'text-stone-500'}>{th.label}</p>
                       </button>
                     </form>
                   )
@@ -301,28 +295,12 @@ export default async function GuestsPage({
               </div>
             </div>
 
-            <InvitationsTab
-              guests={guestList}
-              slug={slug}
-              baseUrl={baseUrl}
-              wedding={weddingPreview}
-              weddingId={wedding.id}
-              paid={paid}
-            />
-
-            <div>
+            {/* Envoi groupé */}
+            <div className="bg-white rounded-2xl border border-stone-100 p-5">
               <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
-                 className="text-stone-400 uppercase mb-3">
-                Envoi groupé
-              </p>
+                 className="text-stone-400 uppercase mb-3">Envoi groupé</p>
               <PublipostagePanel guests={guestList} weddingId={wedding.id} slug={slug} />
             </div>
-          </div>
-        )}
-
-        {/* ── TAB SYNTHÈSE ── */}
-        {tab === 'synthese' && (
-          <div className="space-y-5">
 
             {/* RSVP */}
             <div className="bg-white rounded-2xl border border-stone-100 p-5">

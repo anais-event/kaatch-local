@@ -79,9 +79,19 @@ function Avatar({ name, gender }: { name: string; gender: 'M' | 'F' | null }) {
   )
 }
 
+type RsvpFilter = 'tous' | 'confirme' | 'en_attente' | 'decline'
+
+const FILTER_TABS: { key: RsvpFilter; label: string; dot?: string }[] = [
+  { key: 'tous',       label: 'Tous' },
+  { key: 'confirme',   label: 'Confirmés',  dot: 'bg-emerald-400' },
+  { key: 'en_attente', label: 'En attente', dot: 'bg-stone-300' },
+  { key: 'decline',    label: 'Déclinés',   dot: 'bg-red-300' },
+]
+
 export default function GuestList({ guests: initialGuests, tables, slug, baseUrl, wedding, setRsvp, deleteGuest, updateGuest, paid = true, weddingId }: Props) {
   const [guests, setGuests] = useState(initialGuests)
   const [search, setSearch] = useState('')
+  const [rsvpFilter, setRsvpFilter] = useState<RsvpFilter>('tous')
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
@@ -103,6 +113,7 @@ export default function GuestList({ guests: initialGuests, tables, slug, baseUrl
 
   const filtered = guests
     .filter(g => {
+      if (rsvpFilter !== 'tous' && g.rsvp_status !== rsvpFilter) return false
       if (!search) return true
       const q = search.toLowerCase()
       return (
@@ -114,8 +125,32 @@ export default function GuestList({ guests: initialGuests, tables, slug, baseUrl
     })
     .sort((a, b) => a.first_name.localeCompare(b.first_name))
 
+  const counts: Record<RsvpFilter, number> = {
+    tous:       guests.length,
+    confirme:   guests.filter(g => g.rsvp_status === 'confirme').length,
+    en_attente: guests.filter(g => g.rsvp_status === 'en_attente').length,
+    decline:    guests.filter(g => g.rsvp_status === 'decline').length,
+  }
+
   return (
     <div>
+      {/* Filtres RSVP */}
+      <div className="flex gap-1 mb-4 bg-stone-100/60 p-1 rounded-xl w-fit">
+        {FILTER_TABS.map(f => (
+          <button key={f.key} onClick={() => setRsvpFilter(f.key)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition cursor-pointer ${
+              rsvpFilter === f.key ? 'bg-white shadow-sm text-stone-800' : 'text-stone-400 hover:text-stone-600'
+            }`}
+            style={{ fontWeight: rsvpFilter === f.key ? 500 : 300 }}>
+            {f.dot && <span className={`w-1.5 h-1.5 rounded-full ${f.dot}`} />}
+            {f.label}
+            <span className={`text-[10px] ${rsvpFilter === f.key ? 'text-stone-400' : 'text-stone-300'}`}>
+              {counts[f.key]}
+            </span>
+          </button>
+        ))}
+      </div>
+
       {/* Recherche */}
       <div className="relative mb-4">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}
@@ -236,18 +271,20 @@ export default function GuestList({ guests: initialGuests, tables, slug, baseUrl
                       </div>
                     )}
 
-                    {/* Moments — seulement si pas tous invités */}
-                    {!isInvitedAll && guest.invited_parts && (
-                      <div className="flex flex-wrap gap-1.5 mb-3">
-                        {guest.invited_parts.map(p => (
-                          <span key={p}
-                            className="text-xs bg-[#f5f0e8] text-[#4a5240] px-2.5 py-0.5 rounded-full"
-                            style={{ fontWeight: 300 }}>
-                            {PARTS_LABELS[p] ?? p}
-                          </span>
-                        ))}
-                      </div>
-                    )}
+                    {/* Moments — toujours affichés */}
+                    <div className="flex flex-wrap gap-1.5 mb-3">
+                      {(guest.invited_parts ?? ALL_PARTS).map(p => (
+                        <span key={p}
+                          className={`text-xs px-2.5 py-0.5 rounded-full ${
+                            isInvitedAll
+                              ? 'bg-stone-100 text-stone-400'
+                              : 'bg-[#4a5240]/10 text-[#4a5240]'
+                          }`}
+                          style={{ fontWeight: 300 }}>
+                          {PARTS_LABELS[p] ?? p}
+                        </span>
+                      ))}
+                    </div>
 
                     {/* Régime / attention particulière */}
                     {guest.dietary_notes && (

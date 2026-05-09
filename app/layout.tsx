@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Outfit, Cormorant_Garamond, Lato } from "next/font/google";
 import "./globals.css";
 import CookieBanner from './_components/CookieBanner'
+import { Analytics } from '@vercel/analytics/next';
 
 const outfit = Outfit({
   variable: "--font-display",
@@ -58,6 +59,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         {children}
         <CookieBanner />
+        <Analytics />
       </body>
     </html>
   );

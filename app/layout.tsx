@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Outfit, Cormorant_Garamond, Lato } from "next/font/google";
 import "./globals.css";
 import CookieBanner from './_components/CookieBanner'
+import { Analytics } from '@vercel/analytics/next';
 
 const outfit = Outfit({
   variable: "--font-display",
@@ -15,7 +16,6 @@ const lato = Lato({
   weight: ["300", "400", "700"],
 });
 
-// Conservé uniquement pour le faire-part (carte d'invitation visuelle)
 const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
   subsets: ["latin"],
@@ -58,6 +58,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         {children}
         <CookieBanner />
+        <Analytics />
       </body>
     </html>
   );

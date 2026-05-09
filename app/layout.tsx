@@ -3,6 +3,7 @@ import { Outfit, Cormorant_Garamond, Lato } from "next/font/google";
 import "./globals.css";
 import CookieBanner from './_components/CookieBanner'
 import { Analytics } from '@vercel/analytics/next';
+import { GoogleAnalytics } from '@next/third-parties/google';
 
 const outfit = Outfit({
   variable: "--font-display",
@@ -60,6 +61,7 @@ export default function RootLayout({
         <CookieBanner />
         <Analytics />
       </body>
+      <GoogleAnalytics gaId="G-JZGV5T58NL" />
     </html>
   );
 }

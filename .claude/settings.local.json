@@ -85,7 +85,16 @@
       "Bash(git ls-tree *)",
       "Bash(git rm *)",
       "Bash(python3 -c ' *)",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(powershell -Command \"\\(Select-String -Path 'app/invite/[slug]/page.tsx' -Pattern 'font-cormorant'\\).Count\")",
+      "mcp__0d7b524b-94b4-4f6d-bec0-5dec41aeafda__get_advisors",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\anais\\\\Desktop\\\\kaatch\\\\app\\\\wedding\" -Recurse -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object FullName)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\anais\\\\Desktop\\\\kaatch\\\\app\" -Recurse -Directory)",
+      "Bash(Get-ChildItem \"C:\\\\Users\\\\anais\\\\Desktop\\\\kaatch\\\\app\\\\mariage\\\\[slug]\" -Directory)",
+      "Bash(Select-Object Name)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\anais\\\\Desktop\\\\kaatch\\\\app\\\\mariage\" -Recurse -Filter \"*.tsx\")",
+      "Bash(grep -E \"\\\\.\\(sql|ts|js\\)$\")"
     ]
   }
 }

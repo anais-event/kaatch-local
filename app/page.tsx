@@ -2,6 +2,7 @@ import Image from 'next/image'
 import ContactForm from './_components/ContactForm'
 import PublicNav from './_components/PublicNav'
 import ForumEmbed from './_components/ForumEmbed'
+import ScrollReveal from './_components/ScrollReveal'
 
 const DISPLAY = 'var(--font-display)'
 const SHADOW = '0 4px 24px rgba(44,59,46,0.08), 0 1px 4px rgba(44,59,46,0.04)'
@@ -96,8 +97,8 @@ export default function Home() {
       <PublicNav />
 
       {/* ── HERO ── */}
-      <section className="pt-16 min-h-screen grid md:grid-cols-2">
-        <div className="flex flex-col justify-center px-10 md:px-20 py-24 max-w-xl mx-auto md:mx-0 md:ml-auto">
+      <section className="pt-16 md:min-h-screen grid md:grid-cols-2">
+        <div className="flex flex-col justify-center px-6 md:px-20 py-16 md:py-24 max-w-xl mx-auto md:mx-0 md:ml-auto">
           <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-7" style={{ fontWeight: 500 }}>
             La solution qui vous simplifie la vie
           </p>
@@ -152,12 +153,15 @@ export default function Home() {
       </section>
 
       {/* ── POURQUOI KAATCH ── */}
-      <section className="py-28 px-10 bg-white border-t border-stone-100">
+      <section className="py-16 md:py-28 px-6 md:px-10 bg-white border-t border-stone-100">
         <div className="max-w-5xl mx-auto">
+          <ScrollReveal>
           <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-5" style={{ fontWeight: 500 }}>
             Pourquoi &quot;Kaatch&quot; ?
           </p>
+          </ScrollReveal>
           <div className="grid md:grid-cols-2 gap-16 items-center">
+            <ScrollReveal delay={100}>
             <div>
               <h2 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(2rem, 4vw, 3rem)', lineHeight: 1.05, letterSpacing: '-0.03em' }}
                   className="text-[#2C3B2E] mb-6">
@@ -183,6 +187,8 @@ export default function Home() {
                 avec tous vos invités, chaque détail, chaque souvenir — sans rien oublier.
               </p>
             </div>
+            </ScrollReveal>
+            <ScrollReveal delay={200}>
             <div className="flex flex-col gap-5">
               <div className="bg-[#f5f0e8] rounded-2xl p-7" style={{ boxShadow: SHADOW }}>
                 <p style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1.4rem', letterSpacing: '-0.01em' }}
@@ -199,6 +205,7 @@ export default function Home() {
                 </p>
               </div>
             </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
@@ -207,7 +214,7 @@ export default function Home() {
       <ForumEmbed />
 
       {/* ── 1 MARIAGE, 2 ACCÈS ── */}
-      <section id="comment-ca-marche" className="py-28 px-10 bg-[#f5f0e8] border-t border-stone-100">
+      <section id="comment-ca-marche" className="py-16 md:py-28 px-6 md:px-10 bg-[#f5f0e8] border-t border-stone-100">
         <div className="max-w-5xl mx-auto">
           <div className="mb-16">
             <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-4" style={{ fontWeight: 500 }}>1 mariage · 2 accès</p>
@@ -221,7 +228,7 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
-            {/* Backstage — mariés */}
+            <ScrollReveal delay={0}>
             <div className="bg-white rounded-[28px] overflow-hidden" style={{ boxShadow: SHADOW }}>
               <div className="h-56 overflow-hidden">
                 <img
@@ -252,8 +259,10 @@ export default function Home() {
                 </div>
               </div>
             </div>
+            </ScrollReveal>
 
             {/* Scène — invités */}
+            <ScrollReveal delay={150}>
             <div className="rounded-[28px] overflow-hidden" style={{ background: '#2C3B2E', boxShadow: '0 8px 40px rgba(44,59,46,0.25), 0 2px 8px rgba(44,59,46,0.12)' }}>
               <div className="h-56 overflow-hidden relative">
                 <img
@@ -292,12 +301,13 @@ export default function Home() {
                 </p>
               </div>
             </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
 
       {/* ── L'ALBUM ── */}
-      <section className="py-28 px-10 bg-white border-t border-stone-100">
+      <section className="py-16 md:py-28 px-6 md:px-10 bg-white border-t border-stone-100">
         <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-16 items-center">
           <div className="rounded-2xl overflow-hidden" style={{ boxShadow: SHADOW, height: 400 }}>
             <img
@@ -328,7 +338,7 @@ export default function Home() {
       </section>
 
       {/* ── OFFRES ── */}
-      <section id="offres" className="py-28 px-10 bg-white border-t border-stone-100">
+      <section id="offres" className="py-16 md:py-28 px-6 md:px-10 bg-white border-t border-stone-100">
         <div className="max-w-5xl mx-auto">
           <div className="mb-14">
             <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-4" style={{ fontWeight: 500 }}>Offres</p>
@@ -444,7 +454,7 @@ export default function Home() {
       <FAQ />
 
       {/* ── CTA FINAL ── */}
-      <section className="py-32 px-10">
+      <section className="py-20 md:py-32 px-6 md:px-10">
         <div className="max-w-2xl mx-auto text-center">
           <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-5" style={{ fontWeight: 500 }}>Pensé avec amour</p>
           <h2 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(2rem, 4vw, 3rem)', lineHeight: 1.1, letterSpacing: '-0.02em' }}
@@ -467,7 +477,7 @@ export default function Home() {
       </section>
 
       {/* ── CONTACT ── */}
-      <section className="py-24 px-10 bg-[#f5f0e8] border-t border-stone-200">
+      <section className="py-16 md:py-24 px-6 md:px-10 bg-[#f5f0e8] border-t border-stone-200">
         <div className="max-w-xl mx-auto text-center">
           <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-4" style={{ fontWeight: 500 }}>Contact</p>
           <h2 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(1.5rem, 3vw, 2rem)', lineHeight: 1.15, letterSpacing: '-0.02em' }}
@@ -484,7 +494,7 @@ export default function Home() {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="border-t border-stone-200 py-12 px-10 bg-[#f5f0e8]">
+      <footer className="border-t border-stone-200 py-12 px-6 md:px-10 bg-[#f5f0e8]">
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col sm:flex-row items-start justify-between gap-8 mb-8">
             <div className="max-w-xs">

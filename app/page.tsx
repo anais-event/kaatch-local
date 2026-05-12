@@ -3,6 +3,7 @@ import ContactForm from './_components/ContactForm'
 import PublicNav from './_components/PublicNav'
 import ForumEmbed from './_components/ForumEmbed'
 import ScrollReveal from './_components/ScrollReveal'
+import FeatureTicker from './_components/FeatureTicker'
 
 const DISPLAY = 'var(--font-display)'
 const SHADOW = '0 4px 24px rgba(44,59,46,0.08), 0 1px 4px rgba(44,59,46,0.04)'
@@ -97,7 +98,7 @@ export default function Home() {
       <PublicNav />
 
       {/* ── HERO ── */}
-      <section className="pt-16 md:min-h-screen grid md:grid-cols-2">
+      <section className="hero-gradient pt-16 md:min-h-screen grid md:grid-cols-2">
         <div className="flex flex-col justify-center px-6 md:px-20 py-16 md:py-24 max-w-xl mx-auto md:mx-0 md:ml-auto">
           <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-7" style={{ fontWeight: 500 }}>
             La solution qui vous simplifie la vie
@@ -151,6 +152,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* ── TICKER ── */}
+      <FeatureTicker />
 
       {/* ── POURQUOI KAATCH ── */}
       <section className="py-16 md:py-28 px-6 md:px-10 bg-white border-t border-stone-100">
@@ -338,8 +342,25 @@ export default function Home() {
       </section>
 
       {/* ── OFFRES ── */}
-      <section id="offres" className="py-16 md:py-28 px-6 md:px-10 bg-white border-t border-stone-100">
-        <div className="max-w-5xl mx-auto">
+      <section id="offres" className="relative py-16 md:py-28 px-6 md:px-10 bg-white border-t border-stone-100 overflow-hidden">
+        {/* Decorative number */}
+        <div
+          className="absolute right-0 top-1/2 -translate-y-1/2 select-none pointer-events-none hidden md:block"
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontWeight: 800,
+            fontSize: 'clamp(200px, 22vw, 320px)',
+            lineHeight: 1,
+            color: 'transparent',
+            WebkitTextStroke: '1.5px rgba(44,59,46,0.06)',
+            letterSpacing: '-0.05em',
+            userSelect: 'none',
+          }}
+          aria-hidden="true"
+        >
+          45€
+        </div>
+        <div className="max-w-5xl mx-auto relative">
           <div className="mb-14">
             <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-4" style={{ fontWeight: 500 }}>Offres</p>
             <h2 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(1.7rem, 3vw, 2.5rem)', lineHeight: 1.15, letterSpacing: '-0.02em' }}

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Outfit, Cormorant_Garamond, Lato } from "next/font/google";
+import { Outfit, Cormorant_Garamond, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import CookieBanner from './_components/CookieBanner'
 import { Analytics } from '@vercel/analytics/next';
@@ -11,10 +11,10 @@ const outfit = Outfit({
   weight: ["300", "400", "500", "600", "700"],
 });
 
-const lato = Lato({
+const jakarta = Plus_Jakarta_Sans({
   variable: "--font-body",
   subsets: ["latin"],
-  weight: ["300", "400", "700"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 const cormorant = Cormorant_Garamond({
@@ -54,7 +54,7 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${outfit.variable} ${lato.variable} ${cormorant.variable} h-full antialiased`}
+      className={`${outfit.variable} ${jakarta.variable} ${cormorant.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         {children}

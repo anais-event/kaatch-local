@@ -25,7 +25,7 @@ export default async function ImpressionsPage({
   // Récupération des invités avec leur numéro de table
   const { data: guests } = await supabase
     .from('guests')
-    .select('id, first_name, last_name')
+    .select('id, first_name, last_name, guest_type, rsvp_status, table_guests(table_id, tables(name))')
     .eq('wedding_id', wedding.id)
     .order('last_name')
 

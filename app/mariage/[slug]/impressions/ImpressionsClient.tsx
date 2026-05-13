@@ -31,6 +31,9 @@ type Guest = {
   id: string
   first_name: string
   last_name: string
+  guest_type?: string | null
+  rsvp_status?: string | null
+  table_guests?: { table_id: string; tables?: { name: string }[] | null }[]
 }
 
 type Wedding = {
@@ -63,7 +66,11 @@ type ShippingForm = {
   phone: string
 }
 
-type Step = 'landing' | 'ambiance' | 'personnalisation' | 'contenu' | 'collection' | 'commander'
+type Step = 'landing' | 'ambiance' | 'personnalisation' | 'contenu' | 'selection' | 'collection' | 'commander'
+
+type ProduitCol = 'fairepart' | 'menu_adulte' | 'menu_enfant' | 'marque_place' | 'programme' | 'plan_table'
+
+type GuestSelection = Record<string, Record<ProduitCol, boolean>> // guestId → produit → checked
 
 type MenuSection = { titre: string; plats: string }
 type EtapeProgramme = { heure: string; titre: string }
@@ -374,6 +381,24 @@ export default function ImpressionsClient({
   })
   const [selectedTypo, setSelectedTypo] = useState<string>('a')
   const [palette, setPalette] = useState<string[]>([])
+  // Initialisation sélection : adultes/ados pré-cochés pour tout, enfants décochés menu adulte
+  const initSelection = (): GuestSelection => {
+    const sel: GuestSelection = {}
+    guests.forEach(g => {
+      const isEnfant = g.guest_type === 'enfant'
+      const hasTable = (g.table_guests?.length ?? 0) > 0
+      sel[g.id] = {
+        fairepart: !isEnfant, // 1 par foyer géré à l'affichage
+        menu_adulte: !isEnfant,
+        menu_enfant: isEnfant,
+        marque_place: hasTable,
+        programme: true,
+        plan_table: false, // 1 seul plan de table, pas par invité
+      }
+    })
+    return sel
+  }
+  const [selection, setSelection] = useState<GuestSelection>(initSelection)
   const [showOrder, setShowOrder] = useState(false)
   const [quantities, setQuantities] = useState<Quantities>({
     fairesParts: Math.max(guests.length, 10),
@@ -473,6 +498,20 @@ export default function ImpressionsClient({
         />
       )}
 
+      {/* ─── SÉLECTION INVITÉS ─── */}
+      {step === 'selection' && ambianceWithPalette && (
+        <SelectionStep
+          ambiance={ambianceWithPalette}
+          guests={guests}
+          selection={selection}
+          setSelection={setSelection}
+          weddingSlug={wedding.slug}
+          weddingId={''}
+          onBack={() => setStep('contenu')}
+          onNext={() => setStep('collection')}
+        />
+      )}
+
       {/* ─── CONTENU ─── */}
       {step === 'contenu' && ambianceWithPalette && (
         <ContenuStep
@@ -480,7 +519,7 @@ export default function ImpressionsClient({
           contenu={contenu}
           setContenu={setContenu}
           onBack={() => setStep('personnalisation')}
-          onNext={() => setStep('collection')}
+          onNext={() => setStep('selection')}
         />
       )}
 
@@ -874,6 +913,237 @@ function PersonnalisationStep({ ambiance, ambianceWithPalette, palette, setPalet
 }
 
 // ─── Step : Collection Preview ────────────────────────────────────────────────
+
+// ─── Step : Sélection invités ────────────────────────────────────────────────
+
+const COLS: { id: ProduitCol; label: string; icon: string; prixUnitaire: number; parFoyer?: boolean }[] = [
+  { id: 'fairepart',    label: 'Faire-part',     icon: '💌', prixUnitaire: 2.50, parFoyer: true },
+  { id: 'menu_adulte',  label: 'Menu adulte',    icon: '🍽️', prixUnitaire: 1.20 },
+  { id: 'menu_enfant',  label: 'Menu enfant',    icon: '🧒', prixUnitaire: 0.90 },
+  { id: 'marque_place', label: 'Marque-place',   icon: '🎴', prixUnitaire: 0.40 },
+  { id: 'programme',    label: 'Programme',      icon: '📋', prixUnitaire: 1.00 },
+  { id: 'plan_table',   label: 'Plan de table',  icon: '🗺️', prixUnitaire: 8.00 },
+]
+
+function SelectionStep({ ambiance, guests, selection, setSelection, weddingSlug, weddingId, onBack, onNext }: {
+  ambiance: Ambiance
+  guests: Guest[]
+  selection: GuestSelection
+  setSelection: (s: GuestSelection) => void
+  weddingSlug: string
+  weddingId: string
+  onBack: () => void
+  onNext: () => void
+}) {
+  const [filter, setFilter] = useState<'tous' | 'adultes' | 'enfants'>('tous')
+  const [addingToBudget, setAddingToBudget] = useState(false)
+  const [budgetDone, setBudgetDone] = useState(false)
+
+  // Groupes foyers pour faire-parts (même nom de famille)
+  const foyers = Object.entries(
+    guests.reduce<Record<string, Guest[]>>((acc, g) => {
+      const key = (g.last_name || g.id).toLowerCase()
+      if (!acc[key]) acc[key] = []
+      acc[key].push(g)
+      return acc
+    }, {})
+  )
+
+  const filteredGuests = guests.filter(g => {
+    if (filter === 'adultes') return g.guest_type !== 'enfant'
+    if (filter === 'enfants') return g.guest_type === 'enfant'
+    return true
+  })
+
+  function toggle(guestId: string, col: ProduitCol) {
+    setSelection({ ...selection, [guestId]: { ...selection[guestId], [col]: !selection[guestId]?.[col] } })
+  }
+
+  function toggleAll(col: ProduitCol) {
+    const filtered = filteredGuests.map(g => g.id)
+    const allChecked = filtered.every(id => selection[id]?.[col])
+    const next = { ...selection }
+    filtered.forEach(id => { next[id] = { ...next[id], [col]: !allChecked } })
+    setSelection(next)
+  }
+
+  // Comptages
+  function countCol(col: ProduitCol): number {
+    if (col === 'fairepart') {
+      // 1 par foyer dont au moins 1 invité coché
+      return foyers.filter(([, members]) => members.some(m => selection[m.id]?.fairepart)).length
+    }
+    if (col === 'plan_table') return Object.values(selection).some(s => s.plan_table) ? 1 : 0
+    return Object.values(selection).filter(s => s[col]).length
+  }
+
+  function totalEstime(): number {
+    return COLS.reduce((sum, col) => sum + countCol(col.id) * col.prixUnitaire, 0)
+  }
+
+  async function addToBudget() {
+    setAddingToBudget(true)
+    try {
+      await fetch('/api/studio/add-to-budget', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ weddingSlug, montant: totalEstime(), detail: COLS.map(c => `${c.icon} ${c.label}: ${countCol(c.id)} × ${c.prixUnitaire}€`).filter((_, i) => countCol(COLS[i].id) > 0).join(', ') }),
+      })
+      setBudgetDone(true)
+    } catch { /* silencieux */ }
+    setAddingToBudget(false)
+  }
+
+  return (
+    <div className="max-w-5xl mx-auto px-4 py-10">
+      <button onClick={onBack} className="flex items-center gap-1.5 text-stone-400 text-sm mb-8 hover:text-[#4a5240] transition cursor-pointer" style={{ fontWeight: 300 }}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+        </svg>
+        Retour au contenu
+      </button>
+
+      <h2 className="text-[#2d3228] mb-2" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400, fontSize: '1.8rem' }}>
+        Sélectionnez vos invités par produit
+      </h2>
+      <p className="text-stone-400 text-sm mb-6" style={{ fontWeight: 300 }}>
+        Cochez qui reçoit quoi. Les faire-parts sont comptés par foyer (même nom de famille = 1 envoi).
+      </p>
+
+      {/* Filtres */}
+      <div className="flex gap-2 mb-4">
+        {([['tous', 'Tous'], ['adultes', 'Adultes & ados'], ['enfants', 'Enfants']] as const).map(([val, label]) => (
+          <button key={val} onClick={() => setFilter(val)}
+            className="px-3 py-1.5 rounded-lg text-xs transition cursor-pointer"
+            style={{ backgroundColor: filter === val ? ambiance.accent : '#fff', color: filter === val ? '#fff' : '#78716c', border: `1px solid ${filter === val ? ambiance.accent : '#e7e5e4'}`, fontWeight: 300 }}>
+            {label}
+          </button>
+        ))}
+        <span className="ml-auto text-xs text-stone-400 self-center" style={{ fontWeight: 300 }}>
+          {filteredGuests.length} invité{filteredGuests.length > 1 ? 's' : ''}
+        </span>
+      </div>
+
+      {/* Tableau */}
+      <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden mb-6">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr style={{ backgroundColor: ambiance.accent + '10' }}>
+                <th className="text-left px-4 py-3 text-[#2d3228]" style={{ fontWeight: 500, fontFamily: 'var(--font-lato)', minWidth: 160 }}>
+                  Invité
+                </th>
+                <th className="px-3 py-2 text-center text-stone-400 text-xs" style={{ fontWeight: 300 }}>Table</th>
+                {COLS.map(col => (
+                  <th key={col.id} className="px-3 py-2 text-center" style={{ minWidth: 80 }}>
+                    <button onClick={() => toggleAll(col.id)} className="flex flex-col items-center gap-1 cursor-pointer hover:opacity-70 transition w-full" title="Tout sélectionner / désélectionner">
+                      <span className="text-base">{col.icon}</span>
+                      <span className="text-[10px] text-stone-500 leading-tight" style={{ fontWeight: 300 }}>{col.label}</span>
+                      <span className="text-[10px] font-mono" style={{ color: ambiance.accent }}>{countCol(col.id)}</span>
+                    </button>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filteredGuests.map((g, i) => {
+                const tableName = (g.table_guests?.[0]?.tables as {name:string}[]|null)?.[0]?.name ?? null
+                const isEnfant = g.guest_type === 'enfant'
+                return (
+                  <tr key={g.id} className={`border-t border-stone-50 ${i % 2 === 0 ? '' : 'bg-stone-50/40'}`}>
+                    <td className="px-4 py-2.5">
+                      <div className="flex items-center gap-2">
+                        {isEnfant && <span className="text-xs">🧒</span>}
+                        <span className="text-[#2d3228] text-sm" style={{ fontWeight: 300 }}>
+                          {g.first_name} {g.last_name}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-3 py-2.5 text-center">
+                      {tableName
+                        ? <span className="text-xs px-2 py-0.5 rounded-full bg-stone-100 text-stone-500" style={{ fontWeight: 300 }}>{tableName}</span>
+                        : <span className="text-xs text-stone-300">—</span>
+                      }
+                    </td>
+                    {COLS.map(col => (
+                      <td key={col.id} className="px-3 py-2.5 text-center">
+                        <input
+                          type="checkbox"
+                          checked={!!selection[g.id]?.[col.id]}
+                          onChange={() => toggle(g.id, col.id)}
+                          className="w-4 h-4 rounded cursor-pointer"
+                          style={{ accentColor: ambiance.accent }}
+                        />
+                      </td>
+                    ))}
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Totaux + estimation */}
+      <div className="bg-white rounded-2xl border border-stone-100 p-5 mb-6">
+        <h3 className="text-[#4a5240] mb-3" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1rem' }}>
+          Récapitulatif de votre commande
+        </h3>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+          {COLS.filter(col => countCol(col.id) > 0).map(col => (
+            <div key={col.id} className="flex items-center justify-between p-3 rounded-xl bg-stone-50">
+              <div>
+                <p className="text-xs text-[#2d3228]" style={{ fontWeight: 400 }}>{col.icon} {col.label}</p>
+                <p className="text-xs text-stone-400 mt-0.5" style={{ fontWeight: 300 }}>{col.prixUnitaire.toFixed(2).replace('.', ',')}€ / unité</p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-[#2d3228]" style={{ fontWeight: 400 }}>× {countCol(col.id)}</p>
+                <p className="text-xs" style={{ color: ambiance.accent, fontWeight: 400 }}>{(countCol(col.id) * col.prixUnitaire).toFixed(0)}€</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="flex items-center justify-between pt-3 border-t border-stone-100">
+          <p className="text-sm text-[#2d3228]" style={{ fontWeight: 400 }}>Estimation totale (hors livraison)</p>
+          <p className="text-lg" style={{ color: ambiance.accent, fontWeight: 600, fontFamily: 'var(--font-cormorant)' }}>
+            {totalEstime().toFixed(0)}€
+          </p>
+        </div>
+        <p className="text-xs text-stone-400 mt-1" style={{ fontWeight: 300 }}>
+          Prix indicatifs — papier standard. Le prix final est calculé au checkout selon le papier choisi.
+        </p>
+      </div>
+
+      {/* Budget */}
+      <div className="flex items-center gap-3 mb-6">
+        <button
+          onClick={addToBudget}
+          disabled={addingToBudget || budgetDone}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm transition cursor-pointer disabled:opacity-50"
+          style={{ borderColor: budgetDone ? '#4a5240' : '#e7e5e4', color: budgetDone ? '#4a5240' : '#78716c', fontWeight: 300 }}
+        >
+          {budgetDone ? '✓ Ajouté au budget' : addingToBudget ? 'Ajout...' : '+ Ajouter au budget'}
+        </button>
+        <p className="text-xs text-stone-400" style={{ fontWeight: 300 }}>
+          Crée une ligne &ldquo;Papeterie&rdquo; de {totalEstime().toFixed(0)}€ dans votre budget
+        </p>
+      </div>
+
+      <div className="flex justify-between items-center">
+        <button onClick={onBack} className="text-stone-400 text-sm hover:text-stone-600 transition cursor-pointer" style={{ fontWeight: 300 }}>
+          ← Retour
+        </button>
+        <button
+          onClick={onNext}
+          className="px-8 py-3 rounded-xl text-white text-sm transition-all hover:shadow-md cursor-pointer"
+          style={{ backgroundColor: ambiance.accent, fontWeight: 300 }}
+        >
+          Voir ma collection →
+        </button>
+      </div>
+    </div>
+  )
+}
 
 // ─── Step : Contenu ──────────────────────────────────────────────────────────
 

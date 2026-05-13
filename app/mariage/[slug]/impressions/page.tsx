@@ -16,7 +16,7 @@ export default async function ImpressionsPage({
   // Récupération du mariage avec vérification d'accès
   const { data: wedding } = await supabase
     .from('weddings')
-    .select('id, slug, name, date, location, bride_name, groom_name, user_id, co_owner_email')
+    .select('id, slug, name, date, location, user_id, co_owner_email')
     .eq('slug', slug)
     .single()
 
@@ -41,8 +41,8 @@ export default async function ImpressionsPage({
         name: wedding.name ?? '',
         date: wedding.date ?? null,
         location: wedding.location ?? null,
-        bride_name: wedding.bride_name ?? null,
-        groom_name: wedding.groom_name ?? null,
+        bride_name: null,
+        groom_name: null,
       }}
       guests={guests ?? []}
       userEmail={user.email ?? ''}

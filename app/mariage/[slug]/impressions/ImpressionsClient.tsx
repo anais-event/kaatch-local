@@ -165,29 +165,29 @@ const AMBIANCES: Ambiance[] = [
 
 const TYPO_PAIRS: Record<string, TypoPair[]> = {
   campagne: [
-    { id: 'a', display: 'Playfair Display', body: 'Raleway', label: 'Poétique & aéré' },
-    { id: 'b', display: 'Lora', body: 'Source Sans', label: 'Chaleureux & lisible' },
-    { id: 'c', display: 'Merriweather', body: 'Open Sans', label: 'Naturel & fort' },
+    { id: 'a', display: 'Cormorant', body: 'Lato', label: 'Poétique & aéré' },
+    { id: 'b', display: 'Cormorant italic', body: 'Lato', label: 'Chaleureux & doux' },
+    { id: 'c', display: 'Cormorant SC', body: 'Lato', label: 'Naturel & structuré' },
   ],
   editorial: [
-    { id: 'a', display: 'Cormorant Garamond', body: 'Montserrat', label: 'Raffiné & moderne' },
-    { id: 'b', display: 'Libre Baskerville', body: 'Jost', label: 'Classique & net' },
-    { id: 'c', display: 'DM Serif Display', body: 'Inter', label: 'Éditorial pur' },
+    { id: 'a', display: 'Cormorant', body: 'Lato', label: 'Raffiné & moderne' },
+    { id: 'b', display: 'Cormorant italic', body: 'Lato', label: 'Éditorial & élancé' },
+    { id: 'c', display: 'Cormorant SC', body: 'Lato', label: 'Architectural & net' },
   ],
   italien: [
-    { id: 'a', display: 'Libre Baskerville', body: 'Lato', label: 'Solaire & festif' },
-    { id: 'b', display: 'Playfair Display', body: 'Poppins', label: 'Méditerranéen & gai' },
-    { id: 'c', display: 'Crimson Text', body: 'Nunito', label: 'Chaleureux & doux' },
+    { id: 'a', display: 'Cormorant italic', body: 'Lato', label: 'Solaire & festif' },
+    { id: 'b', display: 'Cormorant', body: 'Lato', label: 'Méditerranéen & gai' },
+    { id: 'c', display: 'Cormorant SC', body: 'Lato', label: 'Chaleureux & posé' },
   ],
   romance: [
-    { id: 'a', display: 'Bodoni Moda', body: 'Nunito', label: 'Romantique & géométrique' },
-    { id: 'b', display: 'Cormorant Garamond', body: 'Raleway', label: 'Délicat & aérien' },
-    { id: 'c', display: 'Playfair Display', body: 'Quicksand', label: 'Doux & contemporain' },
+    { id: 'a', display: 'Cormorant italic', body: 'Lato', label: 'Romantique & délicat' },
+    { id: 'b', display: 'Cormorant', body: 'Lato', label: 'Doux & contemporain' },
+    { id: 'c', display: 'Cormorant SC', body: 'Lato', label: 'Géométrique & précis' },
   ],
   chateau: [
-    { id: 'a', display: 'IM Fell English', body: 'Jost', label: 'Majestueux & net' },
-    { id: 'b', display: 'Cormorant SC', body: 'Montserrat', label: 'Gravé & précis' },
-    { id: 'c', display: 'Libre Baskerville', body: 'Source Sans', label: 'Intemporel & fort' },
+    { id: 'a', display: 'Cormorant SC', body: 'Lato', label: 'Majestueux & gravé' },
+    { id: 'b', display: 'Cormorant italic', body: 'Lato', label: 'Élégant & intemporel' },
+    { id: 'c', display: 'Cormorant', body: 'Lato', label: 'Grand style & net' },
   ],
 }
 
@@ -772,11 +772,11 @@ function PersonnalisationStep({ ambiance, ambianceWithPalette, palette, setPalet
                     </svg>
                   )}
                 </div>
-                <p className="text-[#2d3228] text-lg leading-tight" style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}>
-                  {pair.display}
+                <p className="text-[#2d3228] text-lg leading-tight" style={{ fontFamily: 'var(--font-cormorant)', fontStyle: pair.id === 'b' ? 'italic' : 'normal', fontVariant: pair.display.includes('SC') ? 'small-caps' : 'normal' }}>
+                  {pair.label}
                 </p>
-                <p className="text-stone-400 text-xs mt-1" style={{ fontWeight: 300 }}>
-                  Corps : {pair.body}
+                <p className="text-stone-400 text-xs mt-1" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
+                  Cormorant + Lato
                 </p>
               </button>
             ))}

@@ -52,7 +52,7 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
         { label: 'Budget', sub: 'Suivi des dépenses', href: `/mariage/${slug}/budget` },
         { label: 'Checklist Jour J', sub: 'Qui fait quoi', href: `/mariage/${slug}/checklist` },
         { label: 'Boîte à outils', sub: 'QR code, PDF & impressions', href: `/mariage/${slug}/partager` },
-        { label: 'Papeterie', sub: 'Menus, marque-places, faire-parts', href: `/mariage/${slug}/impressions` },
+        { label: 'Studio créatif', sub: 'Papeterie & univers visuel', href: `/mariage/${slug}/impressions` },
       ],
     },
     {

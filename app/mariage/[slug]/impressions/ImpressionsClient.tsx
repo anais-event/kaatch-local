@@ -31,7 +31,6 @@ type Guest = {
   id: string
   first_name: string
   last_name: string
-  table_number: number | null
 }
 
 type Wedding = {
@@ -44,9 +43,12 @@ type Wedding = {
 }
 
 type Quantities = {
+  fairesParts: number
   menus: number
   marquePlaces: number
-  fairesParts: number
+  numerosTable: number
+  programme: number
+  planTable: number
 }
 
 type ShippingForm = {
@@ -192,9 +194,12 @@ const TYPO_PAIRS: Record<string, TypoPair[]> = {
 }
 
 const PRODUITS = [
-  { key: 'menus' as keyof Quantities, label: 'Menus', icon: '🍽️', desc: 'Format A5, papier 300g', price: '~1,20€ / unité', min: 10 },
-  { key: 'marquePlaces' as keyof Quantities, label: 'Marque-places', icon: '🎴', desc: 'Prénom + table auto', price: '~0,40€ / unité', min: 1 },
-  { key: 'fairesParts' as keyof Quantities, label: 'Faire-parts', icon: '💌', desc: 'Format A5, enveloppe incluse', price: '~2,50€ / unité', min: 10 },
+  { key: 'fairesParts' as keyof Quantities, label: 'Faire-parts', icon: '💌', desc: 'Format A5, 1 par foyer, enveloppe incluse', price: '~2,50€ / unité', min: 10 },
+  { key: 'menus' as keyof Quantities, label: 'Menus', icon: '🍽️', desc: 'Format A5, recto-verso, papier 300g', price: '~1,20€ / unité', min: 10 },
+  { key: 'marquePlaces' as keyof Quantities, label: 'Marque-places', icon: '🎴', desc: 'Prénom + numéro de table, format carte', price: '~0,40€ / unité', min: 1 },
+  { key: 'numerosTable' as keyof Quantities, label: 'Numéros de table', icon: '🔢', desc: 'Format A5 ou chevalet, 1 par table', price: '~1,00€ / unité', min: 1 },
+  { key: 'programme' as keyof Quantities, label: 'Programme', icon: '📋', desc: 'Déroulé de la journée, format A5', price: '~1,00€ / unité', min: 10 },
+  { key: 'planTable' as keyof Quantities, label: 'Plan de table', icon: '🗺️', desc: 'Affiche A2 ou A1, tous les invités', price: '~8,00€ / unité', min: 1 },
 ]
 
 // ─── SVG Previews légers ──────────────────────────────────────────────────────
@@ -326,9 +331,12 @@ export default function ImpressionsClient({
   const [palette, setPalette] = useState<string[]>([])
   const [showOrder, setShowOrder] = useState(false)
   const [quantities, setQuantities] = useState<Quantities>({
+    fairesParts: Math.max(guests.length, 10),
     menus: Math.max(guests.length, 10),
     marquePlaces: guests.length,
-    fairesParts: Math.max(guests.length, 10),
+    numerosTable: 0,
+    programme: Math.max(guests.length, 10),
+    planTable: 1,
   })
   const [shipping, setShipping] = useState<ShippingForm>({
     firstName: '', lastName: '', addressLine1: '', addressLine2: '',
@@ -477,7 +485,7 @@ function LandingStep({ onStart, wedding, guests }: {
       {/* Titre émotionnel */}
       <h1
         className="text-center text-[#2d3228] mb-4 leading-tight"
-        style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontWeight: 400, fontSize: 'clamp(2rem, 5vw, 3rem)' }}
+        style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400, fontSize: 'clamp(2rem, 5vw, 3rem)' }}
       >
         Créez l&apos;univers visuel<br />de votre mariage
       </h1>
@@ -912,8 +920,8 @@ function CollectionStep({ ambiance, wedding, guests, onBack, onCommander }: {
 
         <div className="grid grid-cols-3 gap-3 mb-5">
           {[
-            { label: 'Faire-parts', qty: guests.length, price: `${(guests.length * 2.5).toFixed(0)}€` },
-            { label: 'Menus', qty: guests.length, price: `${(guests.length * 1.2).toFixed(0)}€` },
+            { label: 'Faire-parts', qty: Math.max(guests.length, 10), price: `${(Math.max(guests.length,10) * 2.5).toFixed(0)}€` },
+            { label: 'Menus', qty: Math.max(guests.length, 10), price: `${(Math.max(guests.length,10) * 1.2).toFixed(0)}€` },
             { label: 'Marque-places', qty: guests.length, price: `${(guests.length * 0.4).toFixed(0)}€` },
           ].map(item => (
             <div key={item.label} className="text-center p-3 rounded-xl bg-stone-50">

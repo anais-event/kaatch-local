@@ -63,7 +63,19 @@ type ShippingForm = {
   phone: string
 }
 
-type Step = 'landing' | 'ambiance' | 'personnalisation' | 'collection' | 'commander'
+type Step = 'landing' | 'ambiance' | 'personnalisation' | 'contenu' | 'collection' | 'commander'
+
+type MenuSection = { titre: string; plats: string }
+type EtapeProgramme = { heure: string; titre: string }
+
+type ContenuDoc = {
+  fairepart: { message: string; nomMaries: string }
+  menu: { sections: MenuSection[] }
+  programme: { etapes: EtapeProgramme[] }
+  marquePlaces: { format: 'prenom_nom' | 'prenom' | 'prenom_NOM' }
+  numerosTable: { prefixe: string }
+  planTable: { titre: string }
+}
 
 // ─── Ambiances ────────────────────────────────────────────────────────────────
 
@@ -204,12 +216,13 @@ const PRODUITS = [
 
 // ─── SVG Previews légers ──────────────────────────────────────────────────────
 
-function PreviewFairepart({ ambiance, wedding, fontDisplay }: {
+function PreviewFairepart({ ambiance, wedding, fontDisplay, contenu }: {
   ambiance: Ambiance
   wedding: Wedding
   fontDisplay: string
+  contenu?: ContenuDoc
 }) {
-  const nomMaries = wedding.name || [wedding.bride_name, wedding.groom_name].filter(Boolean).join(' & ') || 'Sophie & Marc'
+  const nomMaries = contenu?.fairepart.nomMaries || wedding.name || 'Sophie & Marc'
   const date = wedding.date
     ? new Date(wedding.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
     : '14 juin 2025'
@@ -285,11 +298,16 @@ function PreviewMarquePlace({ ambiance, name = 'Sophie Martin' }: {
   )
 }
 
-function PreviewMenu({ ambiance, wedding }: {
+function PreviewMenu({ ambiance, wedding, contenu }: {
   ambiance: Ambiance
   wedding: Wedding
+  contenu?: ContenuDoc
 }) {
-  const nomMaries = wedding.name || 'Sophie & Marc'
+  const nomMaries = contenu?.fairepart.nomMaries || wedding.name || 'Sophie & Marc'
+  const sections = contenu?.menu.sections ?? [
+    { titre: 'Amuse-bouche', plats: '' }, { titre: 'Entrée', plats: '' },
+    { titre: 'Plat principal', plats: '' }, { titre: 'Dessert', plats: '' }, { titre: 'Mignardises', plats: '' },
+  ]
   const [c1, c2, c3, c4] = ambiance.palette.map(p => p.hex)
   return (
     <svg viewBox="0 0 200 280" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
@@ -298,14 +316,14 @@ function PreviewMenu({ ambiance, wedding }: {
       <text x="100" y="42" textAnchor="middle" fill={ambiance.accent} fontSize="7" fontFamily="Georgia, serif" letterSpacing="3" opacity="0.7">
         MENU
       </text>
-      <text x="100" y="72" textAnchor="middle" fill={c4} fontSize="14" fontFamily="Georgia, serif" fontStyle="italic">
+      <text x="100" y="72" textAnchor="middle" fill={c4} fontSize="14" fontFamily="Georgia, serif">
         {nomMaries}
       </text>
       <line x1="40" y1="85" x2="160" y2="85" stroke={ambiance.accent} strokeWidth="0.5" opacity="0.3" />
-      {['Amuse-bouche', 'Entrée', 'Plat principal', 'Dessert', 'Mignardises'].map((item, i) => (
-        <g key={item}>
+      {sections.slice(0, 5).map((s, i) => (
+        <g key={i}>
           <text x="100" y={115 + i * 30} textAnchor="middle" fill={c3} fontSize="9" fontFamily="Georgia, serif" opacity="0.7">
-            {item}
+            {s.titre}
           </text>
           {i < 4 && <line x1="70" y1={125 + i * 30} x2="130" y2={125 + i * 30} stroke={c3} strokeWidth="0.3" opacity="0.2" />}
         </g>
@@ -327,6 +345,33 @@ export default function ImpressionsClient({
 }) {
   const [step, setStep] = useState<Step>('landing')
   const [selectedAmbiance, setSelectedAmbiance] = useState<Ambiance | null>(null)
+  const nomMariesDefault = wedding.name || [wedding.bride_name, wedding.groom_name].filter(Boolean).join(' & ') || ''
+  const [contenu, setContenu] = useState<ContenuDoc>({
+    fairepart: {
+      message: 'Nous avons la joie de vous convier à la célébration de notre mariage et serions heureux de partager ce moment unique avec vous.',
+      nomMaries: nomMariesDefault,
+    },
+    menu: {
+      sections: [
+        { titre: 'Amuse-bouche', plats: 'Velouté de butternut, toast aux herbes' },
+        { titre: 'Entrée', plats: 'Tartare de saumon, avocat et citron vert' },
+        { titre: 'Plat principal', plats: 'Filet de bœuf, jus corsé, légumes de saison' },
+        { titre: 'Fromages', plats: 'Sélection de fromages affinés' },
+        { titre: 'Dessert', plats: 'Pièce montée et mignardises' },
+      ],
+    },
+    programme: {
+      etapes: [
+        { heure: '14h00', titre: 'Cérémonie' },
+        { heure: '16h00', titre: 'Vin d\'honneur' },
+        { heure: '19h30', titre: 'Dîner' },
+        { heure: '22h00', titre: 'Soirée & ouverture du bal' },
+      ],
+    },
+    marquePlaces: { format: 'prenom_nom' },
+    numerosTable: { prefixe: 'Table' },
+    planTable: { titre: 'Plan de table' },
+  })
   const [selectedTypo, setSelectedTypo] = useState<string>('a')
   const [palette, setPalette] = useState<string[]>([])
   const [showOrder, setShowOrder] = useState(false)
@@ -424,6 +469,17 @@ export default function ImpressionsClient({
           setSelectedTypo={setSelectedTypo}
           wedding={wedding}
           onBack={() => setStep('ambiance')}
+          onNext={() => setStep('contenu')}
+        />
+      )}
+
+      {/* ─── CONTENU ─── */}
+      {step === 'contenu' && ambianceWithPalette && (
+        <ContenuStep
+          ambiance={ambianceWithPalette}
+          contenu={contenu}
+          setContenu={setContenu}
+          onBack={() => setStep('personnalisation')}
           onNext={() => setStep('collection')}
         />
       )}
@@ -434,7 +490,8 @@ export default function ImpressionsClient({
           ambiance={ambianceWithPalette}
           wedding={wedding}
           guests={guests}
-          onBack={() => setStep('personnalisation')}
+          contenu={contenu}
+          onBack={() => setStep('contenu')}
           onCommander={() => { setShowOrder(true); setOrderStep('products') }}
         />
       )}
@@ -818,10 +875,272 @@ function PersonnalisationStep({ ambiance, ambianceWithPalette, palette, setPalet
 
 // ─── Step : Collection Preview ────────────────────────────────────────────────
 
-function CollectionStep({ ambiance, wedding, guests, onBack, onCommander }: {
+// ─── Step : Contenu ──────────────────────────────────────────────────────────
+
+function ContenuStep({ ambiance, contenu, setContenu, onBack, onNext }: {
+  ambiance: Ambiance
+  contenu: ContenuDoc
+  setContenu: (c: ContenuDoc) => void
+  onBack: () => void
+  onNext: () => void
+}) {
+  const [activeDoc, setActiveDoc] = useState<'fairepart' | 'menu' | 'programme' | 'marquePlaces' | 'numerosTable' | 'planTable'>('fairepart')
+
+  const docs = [
+    { id: 'fairepart' as const, icon: '💌', label: 'Faire-part' },
+    { id: 'menu' as const, icon: '🍽️', label: 'Menu' },
+    { id: 'programme' as const, icon: '📋', label: 'Programme' },
+    { id: 'marquePlaces' as const, icon: '🎴', label: 'Marque-places' },
+    { id: 'numerosTable' as const, icon: '🔢', label: 'Numéros de table' },
+    { id: 'planTable' as const, icon: '🗺️', label: 'Plan de table' },
+  ]
+
+  function updateFairepart(field: keyof ContenuDoc['fairepart'], val: string) {
+    setContenu({ ...contenu, fairepart: { ...contenu.fairepart, [field]: val } })
+  }
+  function updateMenuSection(i: number, field: keyof MenuSection, val: string) {
+    const sections = contenu.menu.sections.map((s, idx) => idx === i ? { ...s, [field]: val } : s)
+    setContenu({ ...contenu, menu: { sections } })
+  }
+  function addMenuSection() {
+    setContenu({ ...contenu, menu: { sections: [...contenu.menu.sections, { titre: 'Nouvelle section', plats: '' }] } })
+  }
+  function removeMenuSection(i: number) {
+    setContenu({ ...contenu, menu: { sections: contenu.menu.sections.filter((_, idx) => idx !== i) } })
+  }
+  function updateEtape(i: number, field: keyof EtapeProgramme, val: string) {
+    const etapes = contenu.programme.etapes.map((e, idx) => idx === i ? { ...e, [field]: val } : e)
+    setContenu({ ...contenu, programme: { etapes } })
+  }
+  function addEtape() {
+    setContenu({ ...contenu, programme: { etapes: [...contenu.programme.etapes, { heure: '', titre: '' }] } })
+  }
+  function removeEtape(i: number) {
+    setContenu({ ...contenu, programme: { etapes: contenu.programme.etapes.filter((_, idx) => idx !== i) } })
+  }
+
+  return (
+    <div className="max-w-3xl mx-auto px-4 py-10">
+      <button onClick={onBack} className="flex items-center gap-1.5 text-stone-400 text-sm mb-8 hover:text-[#4a5240] transition cursor-pointer" style={{ fontWeight: 300 }}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+        </svg>
+        Retour au style
+      </button>
+
+      <h2 className="text-[#2d3228] mb-2" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400, fontSize: '1.8rem' }}>
+        Personnalisez votre contenu
+      </h2>
+      <p className="text-stone-400 text-sm mb-6" style={{ fontWeight: 300 }}>
+        Modifiez les textes de chaque élément de votre collection.
+      </p>
+
+      {/* Onglets docs */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        {docs.map(doc => (
+          <button
+            key={doc.id}
+            onClick={() => setActiveDoc(doc.id)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm transition cursor-pointer"
+            style={{
+              backgroundColor: activeDoc === doc.id ? ambiance.accent : '#fff',
+              color: activeDoc === doc.id ? '#fff' : '#78716c',
+              border: `1px solid ${activeDoc === doc.id ? ambiance.accent : '#e7e5e4'}`,
+              fontWeight: 300,
+            }}
+          >
+            {doc.icon} {doc.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="bg-white rounded-2xl border border-stone-100 p-6">
+
+        {/* ─ Faire-part ─ */}
+        {activeDoc === 'fairepart' && (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs text-stone-500 mb-1" style={{ fontWeight: 300 }}>Noms des mariés</label>
+              <input
+                className="w-full px-3 py-2.5 rounded-xl border border-stone-200 bg-stone-50 text-sm text-[#2d3228] focus:outline-none focus:border-[#4a5240] transition"
+                value={contenu.fairepart.nomMaries}
+                onChange={e => updateFairepart('nomMaries', e.target.value)}
+                style={{ fontWeight: 300 }}
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-stone-500 mb-1" style={{ fontWeight: 300 }}>Message d&apos;invitation</label>
+              <textarea
+                rows={4}
+                className="w-full px-3 py-2.5 rounded-xl border border-stone-200 bg-stone-50 text-sm text-[#2d3228] focus:outline-none focus:border-[#4a5240] transition resize-none"
+                value={contenu.fairepart.message}
+                onChange={e => updateFairepart('message', e.target.value)}
+                style={{ fontWeight: 300 }}
+              />
+              <p className="text-xs text-stone-300 mt-1" style={{ fontWeight: 300 }}>{contenu.fairepart.message.length} caractères</p>
+            </div>
+          </div>
+        )}
+
+        {/* ─ Menu ─ */}
+        {activeDoc === 'menu' && (
+          <div className="space-y-3">
+            <p className="text-xs text-stone-400 mb-2" style={{ fontWeight: 300 }}>Chaque section = un service du repas</p>
+            {contenu.menu.sections.map((section, i) => (
+              <div key={i} className="bg-stone-50 rounded-xl p-4 space-y-2">
+                <div className="flex items-center gap-2">
+                  <input
+                    className="flex-1 px-3 py-2 rounded-lg border border-stone-200 bg-white text-sm text-[#2d3228] focus:outline-none focus:border-[#4a5240] transition"
+                    placeholder="Nom du service (ex: Entrée)"
+                    value={section.titre}
+                    onChange={e => updateMenuSection(i, 'titre', e.target.value)}
+                    style={{ fontWeight: 400 }}
+                  />
+                  <button onClick={() => removeMenuSection(i)} className="text-stone-300 hover:text-red-400 transition cursor-pointer text-lg leading-none">×</button>
+                </div>
+                <input
+                  className="w-full px-3 py-2 rounded-lg border border-stone-200 bg-white text-sm text-stone-500 focus:outline-none focus:border-[#4a5240] transition"
+                  placeholder="Description du plat..."
+                  value={section.plats}
+                  onChange={e => updateMenuSection(i, 'plats', e.target.value)}
+                  style={{ fontWeight: 300 }}
+                />
+              </div>
+            ))}
+            <button
+              onClick={addMenuSection}
+              className="w-full py-2.5 rounded-xl border border-dashed border-stone-300 text-stone-400 text-sm hover:border-[#4a5240] hover:text-[#4a5240] transition cursor-pointer"
+              style={{ fontWeight: 300 }}
+            >
+              + Ajouter un service
+            </button>
+          </div>
+        )}
+
+        {/* ─ Programme ─ */}
+        {activeDoc === 'programme' && (
+          <div className="space-y-3">
+            <p className="text-xs text-stone-400 mb-2" style={{ fontWeight: 300 }}>Déroulé de la journée</p>
+            {contenu.programme.etapes.map((etape, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <input
+                  className="w-20 px-3 py-2.5 rounded-xl border border-stone-200 bg-stone-50 text-sm text-[#2d3228] focus:outline-none focus:border-[#4a5240] transition text-center"
+                  placeholder="14h00"
+                  value={etape.heure}
+                  onChange={e => updateEtape(i, 'heure', e.target.value)}
+                  style={{ fontWeight: 300 }}
+                />
+                <input
+                  className="flex-1 px-3 py-2.5 rounded-xl border border-stone-200 bg-stone-50 text-sm text-[#2d3228] focus:outline-none focus:border-[#4a5240] transition"
+                  placeholder="Nom de l'étape"
+                  value={etape.titre}
+                  onChange={e => updateEtape(i, 'titre', e.target.value)}
+                  style={{ fontWeight: 300 }}
+                />
+                <button onClick={() => removeEtape(i)} className="text-stone-300 hover:text-red-400 transition cursor-pointer text-lg leading-none shrink-0">×</button>
+              </div>
+            ))}
+            <button
+              onClick={addEtape}
+              className="w-full py-2.5 rounded-xl border border-dashed border-stone-300 text-stone-400 text-sm hover:border-[#4a5240] hover:text-[#4a5240] transition cursor-pointer"
+              style={{ fontWeight: 300 }}
+            >
+              + Ajouter une étape
+            </button>
+          </div>
+        )}
+
+        {/* ─ Marque-places ─ */}
+        {activeDoc === 'marquePlaces' && (
+          <div className="space-y-3">
+            <p className="text-xs text-stone-400 mb-4" style={{ fontWeight: 300 }}>Format du nom affiché sur chaque marque-place</p>
+            {([
+              { id: 'prenom_nom', label: 'Prénom Nom', example: 'Sophie Martin' },
+              { id: 'prenom', label: 'Prénom seul', example: 'Sophie' },
+              { id: 'prenom_NOM', label: 'Prénom NOM (majuscules)', example: 'Sophie MARTIN' },
+            ] as const).map(opt => (
+              <button
+                key={opt.id}
+                onClick={() => setContenu({ ...contenu, marquePlaces: { format: opt.id } })}
+                className="w-full flex items-center justify-between p-4 rounded-xl border transition cursor-pointer text-left"
+                style={{
+                  borderColor: contenu.marquePlaces.format === opt.id ? ambiance.accent : '#e7e5e4',
+                  backgroundColor: contenu.marquePlaces.format === opt.id ? ambiance.accent + '08' : 'transparent',
+                }}
+              >
+                <div>
+                  <p className="text-sm text-[#2d3228]" style={{ fontWeight: 400 }}>{opt.label}</p>
+                  <p className="text-xs text-stone-400 mt-0.5" style={{ fontWeight: 300 }}>Exemple : {opt.example}</p>
+                </div>
+                {contenu.marquePlaces.format === opt.id && (
+                  <svg viewBox="0 0 24 24" fill="none" stroke={ambiance.accent} strokeWidth={2.5} className="w-4 h-4 shrink-0">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* ─ Numéros de table ─ */}
+        {activeDoc === 'numerosTable' && (
+          <div className="space-y-4">
+            <p className="text-xs text-stone-400 mb-2" style={{ fontWeight: 300 }}>Format affiché sur chaque numéro de table</p>
+            <div>
+              <label className="block text-xs text-stone-500 mb-1" style={{ fontWeight: 300 }}>Préfixe (optionnel)</label>
+              <input
+                className="w-full px-3 py-2.5 rounded-xl border border-stone-200 bg-stone-50 text-sm text-[#2d3228] focus:outline-none focus:border-[#4a5240] transition"
+                placeholder="Table"
+                value={contenu.numerosTable.prefixe}
+                onChange={e => setContenu({ ...contenu, numerosTable: { prefixe: e.target.value } })}
+                style={{ fontWeight: 300 }}
+              />
+              <p className="text-xs text-stone-300 mt-1" style={{ fontWeight: 300 }}>
+                Résultat : &ldquo;{contenu.numerosTable.prefixe} 3&rdquo; ou &ldquo;{contenu.numerosTable.prefixe} Marguerite&rdquo;
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* ─ Plan de table ─ */}
+        {activeDoc === 'planTable' && (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs text-stone-500 mb-1" style={{ fontWeight: 300 }}>Titre de l&apos;affiche</label>
+              <input
+                className="w-full px-3 py-2.5 rounded-xl border border-stone-200 bg-stone-50 text-sm text-[#2d3228] focus:outline-none focus:border-[#4a5240] transition"
+                value={contenu.planTable.titre}
+                onChange={e => setContenu({ ...contenu, planTable: { titre: e.target.value } })}
+                style={{ fontWeight: 300 }}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="flex justify-between items-center mt-6">
+        <button onClick={onBack} className="text-stone-400 text-sm hover:text-stone-600 transition cursor-pointer" style={{ fontWeight: 300 }}>
+          ← Retour
+        </button>
+        <button
+          onClick={onNext}
+          className="px-8 py-3 rounded-xl text-white text-sm transition-all hover:shadow-md cursor-pointer"
+          style={{ backgroundColor: ambiance.accent, fontWeight: 300 }}
+        >
+          Voir ma collection →
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ─── Step : Collection ────────────────────────────────────────────────────────
+
+function CollectionStep({ ambiance, wedding, guests, contenu, onBack, onCommander }: {
   ambiance: Ambiance
   wedding: Wedding
   guests: Guest[]
+  contenu: ContenuDoc
   onBack: () => void
   onCommander: () => void
 }) {
@@ -853,7 +1172,7 @@ function CollectionStep({ ambiance, wedding, guests, onBack, onCommander }: {
         <div className="bg-white rounded-2xl border border-stone-100 p-4">
           <p className="text-xs text-stone-400 mb-3 text-center" style={{ fontWeight: 300 }}>💌 Faire-part</p>
           <div className="h-64">
-            <PreviewFairepart ambiance={ambiance} wedding={wedding} fontDisplay={ambiance.fontDisplay} />
+            <PreviewFairepart ambiance={ambiance} wedding={wedding} fontDisplay={ambiance.fontDisplay} contenu={contenu} />
           </div>
           <p className="text-xs text-center mt-3 text-stone-400" style={{ fontWeight: 300 }}>
             1 par foyer · {guests.length} invités
@@ -879,7 +1198,7 @@ function CollectionStep({ ambiance, wedding, guests, onBack, onCommander }: {
         <div className="bg-white rounded-2xl border border-stone-100 p-4">
           <p className="text-xs text-stone-400 mb-3 text-center" style={{ fontWeight: 300 }}>🍽️ Menu</p>
           <div className="h-64">
-            <PreviewMenu ambiance={ambiance} wedding={wedding} />
+            <PreviewMenu ambiance={ambiance} wedding={wedding} contenu={contenu} />
           </div>
           <p className="text-xs text-center mt-3 text-stone-400" style={{ fontWeight: 300 }}>
             Format A5 · papier 300g

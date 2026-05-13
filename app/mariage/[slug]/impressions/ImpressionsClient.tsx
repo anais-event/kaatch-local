@@ -571,7 +571,7 @@ function AmbianceStep({ onSelect, onBack }: {
 
       <h2
         className="text-[#2d3228] mb-2 leading-tight"
-        style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontWeight: 400, fontSize: '1.8rem' }}
+        style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400, fontSize: '1.8rem' }}
       >
         Quelle ambiance voulez-vous faire ressentir ?
       </h2>
@@ -839,7 +839,7 @@ function CollectionStep({ ambiance, wedding, guests, onBack, onCommander }: {
       {/* Header */}
       <h2
         className="text-[#2d3228] mb-2"
-        style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontWeight: 400, fontSize: '1.8rem' }}
+        style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400, fontSize: '1.8rem' }}
       >
         Votre collection prend vie ✨
       </h2>
@@ -1099,12 +1099,28 @@ function OrderModal({ ambiance, wedding, guests, quantities, setQuantities, ship
                 <p className="text-xs font-medium mb-3" style={{ color: ambiance.accent, fontFamily: 'var(--font-cormorant)', fontSize: '0.9rem' }}>
                   Votre commande
                 </p>
-                {PRODUITS.filter(p => quantities[p.key] > 0).map(product => (
-                  <div key={product.key} className="flex justify-between items-center py-1.5 border-b border-stone-200/40 last:border-0">
-                    <span className="text-sm text-stone-600" style={{ fontWeight: 300 }}>{product.icon} {product.label}</span>
-                    <span className="text-sm text-[#2d3228]" style={{ fontWeight: 400 }}>× {quantities[product.key]}</span>
-                  </div>
-                ))}
+                {PRODUITS.filter(p => quantities[p.key] > 0).map(product => {
+                  const unitPrice = parseFloat(product.price.replace('~','').replace('€','').replace(',','.'))
+                  const lineTotal = (unitPrice * quantities[product.key]).toFixed(0)
+                  return (
+                    <div key={product.key} className="flex justify-between items-center py-1.5 border-b border-stone-200/40 last:border-0">
+                      <span className="text-sm text-stone-600" style={{ fontWeight: 300 }}>{product.icon} {product.label} × {quantities[product.key]}</span>
+                      <span className="text-sm text-[#2d3228]" style={{ fontWeight: 400 }}>~{lineTotal}€</span>
+                    </div>
+                  )
+                })}
+                {(() => {
+                  const total = PRODUITS.filter(p => quantities[p.key] > 0).reduce((sum, p) => {
+                    const u = parseFloat(p.price.replace('~','').replace('€','').replace(',','.'))
+                    return sum + u * quantities[p.key]
+                  }, 0)
+                  return (
+                    <div className="flex justify-between items-center pt-2 mt-1">
+                      <span className="text-sm text-[#2d3228]" style={{ fontWeight: 500 }}>Estimation totale</span>
+                      <span className="text-sm" style={{ color: ambiance.accent, fontWeight: 600 }}>~{total.toFixed(0)}€</span>
+                    </div>
+                  )
+                })()}
               </div>
               <div className="bg-stone-50 rounded-xl p-4 text-xs text-stone-500" style={{ fontWeight: 300 }}>
                 <p className="font-medium text-stone-600 mb-1">Livraison à</p>

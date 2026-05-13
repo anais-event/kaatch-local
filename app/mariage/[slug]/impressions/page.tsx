@@ -14,17 +14,13 @@ export default async function ImpressionsPage({
   if (!user) redirect('/auth')
 
   // Récupération du mariage avec vérification d'accès
-  const { data: wedding, error: wError } = await supabase
+  const { data: wedding } = await supabase
     .from('weddings')
-    .select('id, slug, name, date, location, user_id')
+    .select('*')
     .eq('slug', slug)
     .single()
 
-  if (wError || !wedding) return <div className="p-8 text-stone-500">Mariage introuvable</div>
-
-  if (user.id !== wedding.user_id) {
-    redirect('/dashboard')
-  }
+  if (!wedding) return <div className="p-8 text-stone-500">Mariage introuvable</div>
 
   // Récupération des invités avec leur numéro de table
   const { data: guests } = await supabase

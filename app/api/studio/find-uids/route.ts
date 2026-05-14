@@ -50,14 +50,24 @@ export async function GET() {
   const catData = await catRes.json()
   const allUids = (catData.data ?? []).map((c: { catalogUid: string; title: string }) => `${c.catalogUid} — ${c.title}`)
 
-  // Fetch products from promising catalogs
-  const interestingCats = ['posters']
+  // Search A2 in multiple catalogs
+  const interestingCats = ['cards', 'cards-eu', 'posters', 'flat-posters', 'large-format']
   const catProducts: Record<string, unknown> = {}
   for (const cat of interestingCats) {
-    const r = await fetch(`${GELATO_API_BASE}/catalogs/${cat}/products?limit=50`, { headers: { 'X-API-KEY': apiKey } })
+    const r = await fetch(`${GELATO_API_BASE}/catalogs/${cat}/products?limit=100`, { headers: { 'X-API-KEY': apiKey } })
     if (r.ok) {
       const d = await r.json()
-      catProducts[cat] = (d.products ?? d.data ?? []).slice(0, 5).map((p: { productUid?: string; uid?: string; title?: string; name?: string }) => ({ uid: p.productUid ?? p.uid, title: p.title ?? p.name }))
+      const all = (d.products ?? d.data ?? []) as { productUid?: string; uid?: string; title?: string; name?: string }[]
+      // Filter to A2 only
+      const a2 = all.filter(p => {
+        const uid = p.productUid ?? p.uid ?? ''
+        return uid.includes('a2') || uid.includes('A2') || (p.title ?? p.name ?? '').toLowerCase().includes('a2')
+      })
+      catProducts[cat] = {
+        total: all.length,
+        a2Results: a2.map(p => ({ uid: p.productUid ?? p.uid, title: p.title ?? p.name })),
+        sample5: all.slice(0, 3).map(p => ({ uid: p.productUid ?? p.uid, title: p.title ?? p.name })),
+      }
     } else {
       catProducts[cat] = { status: r.status }
     }

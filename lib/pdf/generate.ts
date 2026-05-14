@@ -48,7 +48,8 @@ export function extractUniversSettings(moduleUnivers: unknown): UniversSettings 
 
 export async function generateFairePartBuffer(univers: UniversSettings, wedding: WeddingInfo): Promise<Buffer> {
   registerFonts()
-  return renderToBuffer(createElement(FairePartPDF, { univers, wedding }))
+  return renderToBuffer(createElement(FairePartPDF, { univers, wedding }) as any)
+
 }
 
 export async function generateMarquePlaceBuffer(univers: UniversSettings, guest: GuestInfo): Promise<Buffer> {

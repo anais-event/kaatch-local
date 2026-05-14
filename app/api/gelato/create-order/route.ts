@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
     supabase.from('weddings').select('id, name, date, location').eq('id', weddingId).eq('user_id', user.id).single(),
     supabase.from('studio_progress').select('module_collection, module_univers').eq('wedding_id', weddingId).single(),
     supabase.from('guests').select('id, first_name, last_name').eq('wedding_id', weddingId),
-    supabase.from('seating_tables').select('id, name'),
+    supabase.from('seating_tables').select('id, name').eq('wedding_id', weddingId),
   ])
 
   if (!wedding) return NextResponse.json({ error: 'Mariage introuvable' }, { status: 404 })

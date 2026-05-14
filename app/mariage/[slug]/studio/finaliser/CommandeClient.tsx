@@ -44,6 +44,7 @@ export default function CommandeClient({ weddingId, weddingSlug, totalQty, print
     try {
       const res = await fetch('/api/gelato/create-order', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ weddingId, weddingSlug, shipping: form }),
       })

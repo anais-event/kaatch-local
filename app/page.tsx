@@ -471,6 +471,116 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── STUDIO CRÉATIF ── */}
+      <section id="studio" className="py-16 md:py-28 px-6 md:px-10 bg-[#f5f0e8] border-t border-stone-100 overflow-hidden">
+        <div className="max-w-5xl mx-auto">
+
+          {/* Header */}
+          <ScrollReveal>
+          <div className="mb-14 md:mb-20">
+            <p className="text-xs tracking-[0.25em] uppercase text-[#4a5240] mb-4" style={{ fontWeight: 500 }}>Studio Créatif</p>
+            <h2 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(2rem, 4vw, 3rem)', lineHeight: 1.08, letterSpacing: '-0.02em' }}
+                className="text-[#2C3B2E] mb-5 max-w-2xl">
+              La papeterie de votre mariage,{' '}
+              <span style={{ color: '#4a5240', fontStyle: 'italic' }}>créée automatiquement.</span>
+            </h2>
+            <p className="text-stone-600 max-w-xl" style={{ fontSize: '1.05rem', lineHeight: 1.85 }}>
+              Choisissez une ambiance, on génère vos faire-parts, menus, marque-places et plan de table.
+              Imprimés et livrés. Vous n&apos;avez rien d&apos;autre à faire.
+            </p>
+          </div>
+          </ScrollReveal>
+
+          {/* 3 étapes */}
+          <ScrollReveal delay={100}>
+          <div className="grid md:grid-cols-3 gap-5 mb-16 md:mb-20">
+            {[
+              { n: '01', title: 'Choisissez votre ambiance', desc: "Bohème, classique, champêtre, art déco… 5 univers graphiques créés par nos designers." },
+              { n: '02', title: 'On génère tout', desc: "Faire-part, menu, marque-place, plan de table — générés automatiquement depuis votre liste d'invités." },
+              { n: '03', title: 'Imprimé et livré chez vous', desc: "Impression professionnelle, papier premium, livraison en 5–7 jours ouvrés." },
+            ].map(step => (
+              <div key={step.n} className="bg-white rounded-2xl p-7 border border-stone-100" style={{ boxShadow: SHADOW }}>
+                <p style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '2.2rem', letterSpacing: '-0.04em', color: 'rgba(74,82,64,0.15)' }}
+                   className="mb-3 leading-none">{step.n}</p>
+                <p style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1.05rem', letterSpacing: '-0.01em' }}
+                   className="text-[#2C3B2E] mb-2">{step.title}</p>
+                <p className="text-stone-500 text-sm" style={{ lineHeight: 1.7, fontWeight: 300 }}>{step.desc}</p>
+              </div>
+            ))}
+          </div>
+          </ScrollReveal>
+
+          {/* Ambiances carousel */}
+          <ScrollReveal delay={150}>
+          <div className="mb-6">
+            <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-5" style={{ fontWeight: 500 }}>5 ambiances disponibles</p>
+          </div>
+          <div className="flex overflow-x-auto gap-4 pb-4 -mx-2 px-2 snap-x snap-mandatory">
+            {[
+              { name: 'Bohème', tag: 'Nature & liberté', color: '#e8e0d4', text: '#5c4f3a', accent: '#a8936a' },
+              { name: 'Classique', tag: 'Élégance intemporelle', color: '#e8eae5', text: '#2d3228', accent: '#4a5240' },
+              { name: 'Champêtre', tag: 'Douceur & fleurs', color: '#eee8e0', text: '#4a3728', accent: '#8b6e5c' },
+              { name: 'Art Déco', tag: 'Glamour des années 20', color: '#1e1a14', text: '#e8d9b8', accent: '#c8a84b' },
+              { name: 'Minimaliste', tag: 'Épuré & moderne', color: '#f0eeec', text: '#1c1c1c', accent: '#888888' },
+            ].map(a => (
+              <div key={a.name} className="shrink-0 snap-start rounded-2xl p-7 flex flex-col justify-between"
+                   style={{ background: a.color, width: 200, height: 260, boxShadow: SHADOW }}>
+                <div>
+                  <p style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '1.35rem', letterSpacing: '-0.02em', color: a.text }}>{a.name}</p>
+                  <p style={{ fontSize: '0.72rem', color: a.text, opacity: 0.6, fontWeight: 300, marginTop: 4 }}>{a.tag}</p>
+                </div>
+                <div style={{ width: 32, height: 3, background: a.accent, borderRadius: 2 }} />
+              </div>
+            ))}
+          </div>
+          </ScrollReveal>
+
+          {/* Produits */}
+          <ScrollReveal delay={200}>
+          <div className="mt-14 grid md:grid-cols-3 gap-5 mb-14">
+            {[
+              { icon: '💌', name: 'Faire-part', desc: 'Animé + PDF haute résolution prêt à imprimer. Lien partageable ou impression papier.' },
+              { icon: '🍽️', name: 'Menu & programme', desc: 'Format A5 personnalisé avec le déroulé de votre journée et le menu du repas.' },
+              { icon: '🪧', name: 'Marque-places & tables', desc: "Un par invité, générés automatiquement depuis votre liste. Plus de Canva, plus d'Excel." },
+            ].map(p => (
+              <div key={p.name} className="bg-white rounded-2xl p-6 border border-stone-100" style={{ boxShadow: SHADOW }}>
+                <span className="text-2xl block mb-3">{p.icon}</span>
+                <p style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1rem', letterSpacing: '-0.01em' }}
+                   className="text-[#2C3B2E] mb-2">{p.name}</p>
+                <p className="text-stone-500 text-sm" style={{ lineHeight: 1.7, fontWeight: 300 }}>{p.desc}</p>
+              </div>
+            ))}
+          </div>
+          </ScrollReveal>
+
+          {/* CTA */}
+          <ScrollReveal delay={250}>
+          <div className="rounded-[28px] overflow-hidden"
+               style={{ background: 'linear-gradient(135deg, #4a5240 0%, #2d3228 100%)', boxShadow: '0 8px 40px rgba(44,59,46,0.25)' }}>
+            <div className="p-10 md:p-14 flex flex-col md:flex-row items-center justify-between gap-8">
+              <div>
+                <p className="text-white/60 text-xs tracking-[0.2em] uppercase mb-3" style={{ fontWeight: 500 }}>Prix de lancement</p>
+                <p style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', letterSpacing: '-0.02em', lineHeight: 1.1 }}
+                   className="text-white mb-3">
+                  À partir de 45€{' '}
+                  <span style={{ fontWeight: 300, fontSize: '1.1rem', opacity: 0.7 }}>pour votre collection.</span>
+                </p>
+                <p className="text-white/65 text-sm" style={{ fontWeight: 300, lineHeight: 1.7 }}>
+                  Impression professionnelle incluse · Livraison 5–7 jours · Papier premium 300g/m²
+                </p>
+              </div>
+              <a href="/auth"
+                 className="shrink-0 bg-white text-[#2C3B2E] px-8 py-4 rounded-2xl hover:bg-[#f5f0e8] transition text-sm text-center whitespace-nowrap"
+                 style={{ fontWeight: 600, minWidth: 200 }}>
+                Créer ma papeterie →
+              </a>
+            </div>
+          </div>
+          </ScrollReveal>
+
+        </div>
+      </section>
+
       {/* ── FAQ ── */}
       <FAQ />
 
@@ -528,7 +638,8 @@ export default function Home() {
             </div>
             <div className="flex items-center gap-5 flex-wrap">
               {[
-                { label: "Comment ça marche", href: '#comment' },
+                { label: "Comment ça marche", href: '#comment-ca-marche' },
+                { label: 'Studio Créatif', href: '#studio' },
                 { label: 'Offres', href: '#offres' },
                 { label: 'Inspirations', href: '/inspirations' },
                 { label: 'Espace invités', href: '/rejoindre' },

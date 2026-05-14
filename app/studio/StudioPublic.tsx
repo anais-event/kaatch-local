@@ -184,6 +184,20 @@ export default function StudioPublic() {
   const [fullscreen, setFullscreen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [activeStep, setActiveStep] = useState(0)
+  const [livePrices, setLivePrices] = useState<Record<string, number | null>>({})
+
+  useEffect(() => {
+    fetch('/api/studio/prices?qty=50')
+      .then(r => r.json())
+      .then(data => {
+        const prices: Record<string, number | null> = {}
+        for (const [id, v] of Object.entries(data.products ?? {})) {
+          prices[id] = (v as { unitPrice: number | null }).unitPrice
+        }
+        setLivePrices(prices)
+      })
+      .catch(() => {})
+  }, [])
 
   const scrollRef = useRef<HTMLDivElement>(null)
   const step0Ref = useRef<HTMLDivElement>(null)
@@ -193,7 +207,8 @@ export default function StudioPublic() {
 
   const a = AMBIANCES.find(x => x.id === ambiance) ?? AMBIANCES[1]
   const selectedProducts = PRODUCTS.filter(p => (quantities[p.id] ?? 0) > 0)
-  const total = PRODUCTS.reduce((sum, p) => sum + (quantities[p.id] ?? 0) * p.price, 0)
+  const priceOf = (p: Product) => livePrices[p.id] ?? p.price
+  const total = PRODUCTS.reduce((sum, p) => sum + (quantities[p.id] ?? 0) * priceOf(p), 0)
   const hasPerso = selectedProducts.some(p => p.needs_perso)
   const previewProduct = hoveredProduct ?? (selectedProducts.length === 1 ? selectedProducts[0].id : null)
 
@@ -368,7 +383,7 @@ export default function StudioPublic() {
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginLeft: 12, flexShrink: 0 }}>
                       <p style={{ fontFamily: DISPLAY, fontWeight: 600, fontSize: '0.82rem', color: active ? a.accent : '#c8c2ba', minWidth: 56, textAlign: 'right' }}>
-                        {qty > 0 ? `${(qty * p.price).toFixed(0)} €` : `${p.price.toFixed(2)} €`}
+                        {qty > 0 ? `${(qty * priceOf(p)).toFixed(0)} €` : `${priceOf(p).toFixed(2)} €`}
                       </p>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                         <button
@@ -430,7 +445,7 @@ export default function StudioPublic() {
                         <p style={{ fontFamily: BODY, fontWeight: 500, fontSize: '0.85rem', color: '#2d3228' }}>{p.icon} {p.name}</p>
                         <p style={{ fontFamily: BODY, fontWeight: 300, fontSize: '0.7rem', color: '#a8a29e', marginTop: 1 }}>× {quantities[p.id]} · {p.detail}</p>
                       </div>
-                      <p style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '0.92rem', color: '#2d3228' }}>{((quantities[p.id] ?? 0) * p.price).toFixed(2)} €</p>
+                      <p style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '0.92rem', color: '#2d3228' }}>{((quantities[p.id] ?? 0) * priceOf(p)).toFixed(2)} €</p>
                     </div>
                   ))}
                 </div>

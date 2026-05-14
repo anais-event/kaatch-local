@@ -26,9 +26,41 @@ function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
+function Callout({ type, children }: { type?: string; children: React.ReactNode }) {
+  const styles: Record<string, { bg: string; border: string; color: string }> = {
+    tip:     { bg: '#eef1ec', border: GREEN,      color: GREEN },
+    info:    { bg: '#eef6fb', border: '#3b82f6',  color: '#1e40af' },
+    warning: { bg: '#fefce8', border: '#eab308',  color: '#854d0e' },
+  }
+  const s = styles[type || 'tip'] || styles.tip
+  return (
+    <div style={{
+      background: s.bg,
+      borderLeft: `4px solid ${s.border}`,
+      borderRadius: '0 1rem 1rem 0',
+      padding: '1.25rem 1.5rem',
+      margin: '2rem 0',
+      color: s.color,
+      fontSize: '0.9rem',
+      lineHeight: 1.8,
+      fontWeight: 400,
+    }}>
+      {children}
+    </div>
+  )
+}
+
 const mdxComponents = {
+  h1: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+    <h1 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(1.4rem, 3vw, 2rem)', lineHeight: 1.2, letterSpacing: '-0.02em', color: GREEN, marginTop: '2.5rem', marginBottom: '1rem' }}
+        {...props} />
+  ),
   h2: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
     <h2 style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1.15rem', color: GREEN, marginTop: '2.5rem', marginBottom: '0.75rem', letterSpacing: '-0.01em' }}
+        {...props} />
+  ),
+  h3: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+    <h3 style={{ fontFamily: DISPLAY, fontWeight: 600, fontSize: '1rem', color: GREEN, marginTop: '1.75rem', marginBottom: '0.5rem' }}
         {...props} />
   ),
   p: (props: React.HTMLAttributes<HTMLParagraphElement>) => (
@@ -45,6 +77,9 @@ const mdxComponents = {
       <span {...props} />
     </li>
   ),
+  hr: () => (
+    <hr style={{ borderColor: '#e7e5e4', margin: '2rem 0' }} />
+  ),
   blockquote: ({ children }: React.HTMLAttributes<HTMLQuoteElement>) => (
     <div style={{ background: '#eef1ec', borderLeft: `4px solid ${GREEN}`, borderRadius: '0 1rem 1rem 0', padding: '1.25rem 1.5rem', margin: '2rem 0' }}>
       <div style={{ fontSize: '0.9rem', lineHeight: 1.8, fontWeight: 400, color: GREEN }}>
@@ -55,19 +90,33 @@ const mdxComponents = {
   strong: (props: React.HTMLAttributes<HTMLElement>) => (
     <strong style={{ fontWeight: 600, color: '#44403c' }} {...props} />
   ),
-  CTA: () => (
+  a: ({ href, children, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+    <a href={href} style={{ color: GREEN, textDecoration: 'underline', fontWeight: 400 }}
+       target={href?.startsWith('http') ? '_blank' : undefined}
+       rel={href?.startsWith('http') ? 'noopener noreferrer' : undefined}
+       {...props}>
+      {children}
+    </a>
+  ),
+  Callout,
+  CTA: ({ title, description, buttonText, buttonLink }: {
+    title?: string
+    description?: string
+    buttonText?: string
+    buttonLink?: string
+  }) => (
     <div className="mt-16 rounded-2xl bg-white p-8 border border-stone-100 text-center"
          style={{ boxShadow: '0 2px 16px rgba(44,59,46,0.06)' }}>
       <p style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1.1rem', color: GREEN, marginBottom: 8 }}>
-        Envie de tout gérer au même endroit ?
+        {title ?? 'Envie de tout gérer au même endroit ?'}
       </p>
       <p className="text-stone-500 text-sm mb-6" style={{ fontWeight: 300 }}>
-        Kaatch vous aide à organiser votre mariage de A à Z — invités, plan de table, budget, photos.
+        {description ?? 'Kaatch vous aide à organiser votre mariage de A à Z — invités, plan de table, budget, photos.'}
       </p>
-      <Link href="/auth"
+      <Link href={buttonLink ?? '/auth'}
             className="inline-block text-white px-8 py-3.5 rounded-xl hover:opacity-90 transition text-sm"
             style={{ background: GREEN, fontWeight: 500 }}>
-        Créer mon espace gratuitement →
+        {buttonText ?? 'Créer mon espace gratuitement →'}
       </Link>
     </div>
   ),

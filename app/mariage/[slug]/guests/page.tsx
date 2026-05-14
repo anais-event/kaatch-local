@@ -11,6 +11,7 @@ import InvitationsTab from './InvitationsTab'
 import PublipostagePanel from './PublipostagePanel'
 import SyntheseParMoment from './SyntheseParMoment'
 import { isPaid, FREE_GUEST_LIMIT } from '@/lib/plan'
+import StudioBanner from '../StudioBanner'
 
 async function addGuest(formData: FormData) {
   'use server'
@@ -441,6 +442,10 @@ export default async function GuestsPage({
 
           </div>
         )}
+
+        <div className="mt-6">
+          <StudioBanner slug={slug} context="guests" />
+        </div>
 
       </div>
     </div>

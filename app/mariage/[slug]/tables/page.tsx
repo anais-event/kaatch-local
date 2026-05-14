@@ -3,6 +3,7 @@ import { revalidatePath } from 'next/cache'
 import TablesClient from './TablesClient'
 import RoomView from './RoomView'
 import PageIntro from '../PageIntro'
+import StudioBanner from '../StudioBanner'
 
 async function createTable(formData: FormData) {
   'use server'
@@ -161,6 +162,10 @@ export default async function TablesPage({
           roomObjects={roomObjects ?? []}
         />
       )}
+
+      <div className="mt-6 pb-8">
+        <StudioBanner slug={slug} context="tables" />
+      </div>
     </div>
   )
 }

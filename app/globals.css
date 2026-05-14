@@ -104,3 +104,27 @@ html.sidebar-collapsed .sidebar-panel {
     margin-left: 0 !important;
   }
 }
+
+/* ── Prose articles ── */
+.prose p {
+  text-align: justify;
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.9rem;
+}
+.prose thead {
+  background-color: var(--color-forest);
+  color: #fff;
+}
+.prose th, .prose td {
+  padding: 0.65rem 1rem;
+  border: 1px solid rgba(44,59,46,0.15);
+  text-align: left;
+}
+.prose tbody tr:nth-child(even) {
+  background-color: rgba(44,59,46,0.04);
+}

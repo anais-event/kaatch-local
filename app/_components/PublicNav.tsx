@@ -66,22 +66,24 @@ export default function PublicNav({ active }: { active?: string }) {
           >
             <button
               onClick={() => setDropOpen(o => !o)}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg transition hover:bg-stone-100"
+              className="flex flex-col items-center px-3 py-1.5 rounded-lg transition hover:bg-stone-100"
               aria-expanded={dropOpen}
             >
-              <span className="text-sm leading-tight" style={{ fontFamily: BODY, fontWeight: 300, color: '#78716c' }}>
-                Découvrir
-              </span>
-              <span className="text-[10px] leading-tight text-stone-400 -mt-0.5" style={{ fontFamily: BODY, fontWeight: 300 }}>
-                Kaatch
-              </span>
-              <svg
+              <span className="flex items-center gap-1">
+                <span className="text-sm leading-tight" style={{ fontFamily: BODY, fontWeight: 600, color: '#44403c' }}>
+                  Découvrir
+                </span>
+                <svg
                 width="10" height="10" viewBox="0 0 10 10" fill="none"
                 className={`transition-transform duration-200 ${dropOpen ? 'rotate-180' : ''}`}
                 style={{ color: '#a8a29e' }}
               >
                 <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
+              </span>
+              <span className="text-[10px] leading-tight text-stone-400" style={{ fontFamily: BODY, fontWeight: 300 }}>
+                Kaatch
+              </span>
             </button>
 
             {dropOpen && (
@@ -125,7 +127,7 @@ export default function PublicNav({ active }: { active?: string }) {
               href={l.href}
               className={`flex flex-col items-center px-3 py-1.5 rounded-lg transition hover:bg-stone-100 ${active === l.href.slice(1) ? 'bg-stone-100' : ''}`}
             >
-              <span className="text-sm leading-tight" style={{ fontFamily: BODY, fontWeight: 300, color: '#78716c' }}>
+              <span className="text-sm leading-tight" style={{ fontFamily: BODY, fontWeight: 600, color: '#44403c' }}>
                 {l.label}
               </span>
               {l.sub && (

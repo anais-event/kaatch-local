@@ -94,7 +94,26 @@
       "Bash(Get-ChildItem \"C:\\\\Users\\\\anais\\\\Desktop\\\\kaatch\\\\app\\\\mariage\\\\[slug]\" -Directory)",
       "Bash(Select-Object Name)",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\anais\\\\Desktop\\\\kaatch\\\\app\\\\mariage\" -Recurse -Filter \"*.tsx\")",
-      "Bash(grep -E \"\\\\.\\(sql|ts|js\\)$\")"
+      "Bash(grep -E \"\\\\.\\(sql|ts|js\\)$\")",
+      "mcp__Claude_in_Chrome__javascript_tool",
+      "mcp__Claude_in_Chrome__resize_window",
+      "Bash(mkdir -p \"C:\\\\Users\\\\anais\\\\Desktop\\\\kaatch\\\\app\\\\fonctionnalites\\\\[feature]\")",
+      "Bash(mkdir -p \"C:/Users/anais/Desktop/kaatch/app/mariage/[slug]/studio\")",
+      "Bash(mkdir -p \"C:/Users/anais/Desktop/kaatch/app/mariage/[slug]/studio/collection\")",
+      "Bash(mkdir -p \"C:/Users/anais/Desktop/kaatch/app/mariage/[slug]/studio/univers\")",
+      "Bash(mkdir -p \"C:/Users/anais/Desktop/kaatch/app/mariage/[slug]/studio/reception\")",
+      "Bash(curl -sL \"https://fonts.gstatic.com/s/cormorantgaramond/v22/co3bmX5slCNuHLi8bLeY9MK7whWMhyjYqXtK.ttf\" -o \"CormorantGaramond-Regular.ttf\")",
+      "Bash(curl -sL \"https://fonts.gstatic.com/s/cormorantgaramond/v22/co3YmX5slCNuHLi8bLeY9MK7whWMhyjYqXtC5_hF.ttf\" -o \"CormorantGaramond-Italic.ttf\")",
+      "Bash(curl -sL \"https://fonts.gstatic.com/s/lato/v24/S6uyw4BMUTPHjx4wXiWtFCc.ttf\" -o \"Lato-Regular.ttf\")",
+      "Bash(curl -sL \"https://fonts.gstatic.com/s/lato/v24/S6u9w4BMUTPHh7USSwiPGQ.ttf\" -o \"Lato-Light.ttf\")",
+      "Bash(curl -sL \"https://fonts.gstatic.com/s/playfairdisplay/v37/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvXDXbtXK-F2qC0usEw.ttf\" -o \"PlayfairDisplay-Regular.ttf\")",
+      "Bash(curl -sA \"Mozilla/5.0\" \"https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;1,400&display=swap\")",
+      "Bash(curl -sA \"Mozilla/5.0 \\(X11; Linux x86_64\\)\" \"https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;1,400&family=Lato:wght@300;400&family=Playfair+Display:wght@400&display=swap\")",
+      "Bash(curl -sL \"https://fonts.gstatic.com/s/cormorantgaramond/v21/co3smX5slCNuHLi8bLeY9MK7whWMhyjYrGFEsdtdc62E6zd58jDOjw.ttf\" -o \"CormorantGaramond-Regular.ttf\")",
+      "Bash(curl -sL \"https://fonts.gstatic.com/s/cormorantgaramond/v21/co3umX5slCNuHLi8bLeY9MK7whWMhyjypVO7abI26QOD_v86GnM.ttf\" -o \"CormorantGaramond-Italic.ttf\")",
+      "Bash(curl -sL \"https://fonts.gstatic.com/s/lato/v25/S6u9w4BMUTPHh7USew8.ttf\" -o \"Lato-Light.ttf\")",
+      "Bash(curl -sL \"https://fonts.gstatic.com/s/lato/v25/S6uyw4BMUTPHvxk.ttf\" -o \"Lato-Regular.ttf\")",
+      "Bash(curl -sL \"https://fonts.gstatic.com/s/playfairdisplay/v40/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvUDQ.ttf\" -o \"PlayfairDisplay-Regular.ttf\")"
     ]
   }
 }

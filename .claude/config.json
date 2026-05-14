@@ -1,0 +1,9 @@
+{
+  "skills": [
+    ".claude/skills/frontend-design.md",
+    ".claude/skills/pdf.md",
+    ".claude/skills/xlsx.md",
+    ".claude/skills/docx.md",
+    ".claude/skills/canvas.md"
+  ]
+}

@@ -1,200 +1,161 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { extractUniversSettings, generateFairePartBuffer, generateMarquePlaceBuffer, generateMenuBuffer } from '@/lib/pdf/generate'
 
-// ─────────────────────────────────────────────────────────────────────────────
-// CONFIGURATION GELATO
-// Après avoir créé vos templates dans Gelato Studio (https://dashboard.gelato.com),
-// renseignez les templateIds ci-dessous et ajoutez GELATO_API_KEY dans .env.local
-// ─────────────────────────────────────────────────────────────────────────────
 const GELATO_API_BASE = 'https://order.gelato.com/api/v4'
 
-// Templates à créer dans Gelato Studio > Product Creator > Personalized Products
-// Variables disponibles : {{nom_maries}}, {{date_mariage}}, {{lieu_mariage}},
-//                         {{prenom_invite}}, {{nom_invite}}, {{numero_table}}
-const DESIGN_TEMPLATES: Record<string, {
-  menu?: string
-  marquePlaces?: string
-  fairesParts?: string
-}> = {
-  classique: {
-    menu:        'GELATO_TEMPLATE_ID_CLASSIQUE_MENU',       // À remplir
-    marquePlaces: 'GELATO_TEMPLATE_ID_CLASSIQUE_MARQUE',    // À remplir
-    fairesParts:  'GELATO_TEMPLATE_ID_CLASSIQUE_FAIRE_PART',// À remplir
-  },
-  botanique: {
-    menu:        'GELATO_TEMPLATE_ID_BOTANIQUE_MENU',
-    marquePlaces: 'GELATO_TEMPLATE_ID_BOTANIQUE_MARQUE',
-    fairesParts:  'GELATO_TEMPLATE_ID_BOTANIQUE_FAIRE_PART',
-  },
-  minimaliste: {
-    menu:        'GELATO_TEMPLATE_ID_MINIMALISTE_MENU',
-    marquePlaces: 'GELATO_TEMPLATE_ID_MINIMALISTE_MARQUE',
-    fairesParts:  'GELATO_TEMPLATE_ID_MINIMALISTE_FAIRE_PART',
-  },
+// Gelato product UIDs — https://dashboard.gelato.com/docs/
+const PRODUCT_UIDS: Record<string, string> = {
+  faire_part:    'cards_pf_a5_pt_350-gsm-coated-silk_4-0_ver',
+  save_the_date: 'cards_pf_a5_pt_350-gsm-coated-silk_4-0_ver',
+  menu:          'cards_pf_a5_pt_350-gsm-coated-silk_4-0_ver',
+  marque_place:  'tent-cards_pf_a6_pt_300-gsm-coated-silk_4-0_hor',
+  programme:     'booklets_pf_a5_pt_130-gsm-silk_4-4_ver',
+  plan_table:    'poster_pf_a2_pt_200-gsm-silk_4-0_ver',
 }
 
-type ShippingAddress = {
-  firstName: string
-  lastName: string
-  addressLine1: string
-  addressLine2?: string
-  city: string
-  postCode: string
-  country: string
-  email: string
-  phone?: string
+async function uploadPDFToSupabase(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  buffer: Buffer,
+  path: string
+): Promise<string> {
+  const { error } = await supabase.storage
+    .from('wedding-pdfs')
+    .upload(path, buffer, { contentType: 'application/pdf', upsert: true })
+
+  if (error) throw new Error(`Upload PDF failed: ${error.message}`)
+
+  const { data } = supabase.storage.from('wedding-pdfs').getPublicUrl(path)
+  return data.publicUrl
 }
 
 export async function POST(req: NextRequest) {
   const apiKey = process.env.GELATO_API_KEY
   if (!apiKey) {
-    return NextResponse.json({ error: 'GELATO_API_KEY manquante dans les variables d\'environnement' }, { status: 500 })
+    return NextResponse.json({ error: 'GELATO_API_KEY manquante' }, { status: 500 })
   }
 
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
-  }
+  if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
 
   const body = await req.json()
-  const {
-    weddingSlug,
-    designId,
-    quantities,    // { menus: number, marquePlaces: number, fairesParts: number }
-    shipping,      // ShippingAddress
-    selectedGuests, // string[] — IDs invités pour marque-places (optionnel)
-  } = body as {
+  const { weddingId, weddingSlug, shipping } = body as {
+    weddingId: string
     weddingSlug: string
-    designId: string
-    quantities: { menus: number; marquePlaces: number; fairesParts: number }
-    shipping: ShippingAddress
-    selectedGuests?: string[]
-  }
-
-  // ── Récupération du mariage ──────────────────────────────────────────────
-  const { data: wedding, error: wError } = await supabase
-    .from('weddings')
-    .select('id, name, date, location, bride_name, groom_name')
-    .eq('slug', weddingSlug)
-    .eq('user_id', user.id)
-    .single()
-
-  if (wError || !wedding) {
-    return NextResponse.json({ error: 'Mariage introuvable' }, { status: 404 })
-  }
-
-  // ── Récupération des invités (pour marque-places) ────────────────────────
-  let guests: { id: string; first_name: string; last_name: string; table_number: number | null }[] = []
-  if (quantities.marquePlaces > 0) {
-    const query = supabase
-      .from('guests')
-      .select('id, first_name, last_name, table_number')
-      .eq('wedding_id', wedding.id)
-
-    if (selectedGuests && selectedGuests.length > 0) {
-      query.in('id', selectedGuests)
+    shipping: {
+      firstName: string; lastName: string
+      addressLine1: string; addressLine2?: string
+      city: string; postCode: string; country: string
+      email: string; phone?: string
     }
-
-    const { data: gData } = await query.order('last_name')
-    guests = gData ?? []
   }
 
-  const templates = DESIGN_TEMPLATES[designId]
-  if (!templates) {
-    return NextResponse.json({ error: 'Design inconnu' }, { status: 400 })
-  }
+  // ── Fetch data ───────────────────────────────────────────────────────────────
+  const [
+    { data: wedding },
+    { data: studioRow },
+    { data: guests },
+    { data: tables },
+  ] = await Promise.all([
+    supabase.from('weddings').select('id, name, date, location').eq('id', weddingId).eq('user_id', user.id).single(),
+    supabase.from('studio_progress').select('module_collection, module_univers').eq('wedding_id', weddingId).single(),
+    supabase.from('guests').select('id, first_name, last_name').eq('wedding_id', weddingId),
+    supabase.from('seating_tables').select('id, name'),
+  ])
 
-  // Formatage de la date du mariage
-  const dateFormatted = wedding.date
-    ? new Date(wedding.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
-    : 'Date à confirmer'
+  if (!wedding) return NextResponse.json({ error: 'Mariage introuvable' }, { status: 404 })
 
-  const nomMaries = wedding.name || `${wedding.bride_name ?? ''} & ${wedding.groom_name ?? ''}`.trim()
+  const univers  = extractUniversSettings(studioRow?.module_univers)
+  const coll     = (studioRow?.module_collection ?? {}) as Record<string, { checked: boolean; printQty?: number; qty: number; download?: boolean }>
+  const weddingInfo = { name: wedding.name ?? '', date: wedding.date ?? null, location: wedding.location ?? null }
 
-  // ── Construction des items Gelato ────────────────────────────────────────
+  // Table name lookup
+  const tableMap = new Map((tables ?? []).map(t => [t.id, t.name]))
+
+  // Guest+table lookup via table_guests
+  const { data: assignments } = await supabase.from('table_guests').select('guest_id, table_id').eq('table_id', (tables ?? []).map(t => t.id) as unknown as string)
+  const guestTableMap = new Map((assignments ?? []).map(a => [a.guest_id, tableMap.get(a.table_id) ?? null]))
+
+  const ts = Date.now()
+  const prefix = `${weddingId}/${ts}`
   const items: object[] = []
-  let itemIndex = 1
+  let idx = 1
 
-  // — Menus —
-  if (quantities.menus > 0 && templates.menu) {
-    items.push({
-      itemReferenceId: `item-menu-${itemIndex++}`,
-      templateId: templates.menu,
-      quantity: quantities.menus,
-      personalization: {
-        variables: [
-          { name: 'nom_maries',    value: nomMaries },
-          { name: 'date_mariage',  value: dateFormatted },
-          { name: 'lieu_mariage',  value: wedding.location ?? '' },
-        ],
-      },
-    })
-  }
-
-  // — Marque-places : un item par invité avec son nom et sa table —
-  if (quantities.marquePlaces > 0 && templates.marquePlaces) {
-    if (guests.length > 0) {
-      // Mode VDP : un item par invité
-      for (const guest of guests) {
-        const fullName = [guest.first_name, guest.last_name]
-          .filter(v => v && v !== 'null')
-          .join(' ')
-        items.push({
-          itemReferenceId: `item-mp-${itemIndex++}`,
-          templateId: templates.marquePlaces,
-          quantity: 1,
-          personalization: {
-            variables: [
-              { name: 'prenom_invite', value: guest.first_name ?? '' },
-              { name: 'nom_invite',    value: guest.last_name ?? '' },
-              { name: 'nom_complet',   value: fullName },
-              { name: 'numero_table',  value: String(guest.table_number ?? '') },
-              { name: 'nom_maries',    value: nomMaries },
-              { name: 'date_mariage',  value: dateFormatted },
-            ],
-          },
-        })
-      }
-    } else {
-      // Fallback : quantité fixe sans personnalisation par invité
+  // ── Faire-part ───────────────────────────────────────────────────────────────
+  if (coll.faire_part?.checked && !coll.faire_part?.download) {
+    const qty = coll.faire_part.printQty ?? coll.faire_part.qty ?? 0
+    if (qty > 0) {
+      const buf = await generateFairePartBuffer(univers, weddingInfo)
+      const url = await uploadPDFToSupabase(supabase, buf, `${prefix}/faire-part.pdf`)
       items.push({
-        itemReferenceId: `item-mp-${itemIndex++}`,
-        templateId: templates.marquePlaces,
-        quantity: quantities.marquePlaces,
-        personalization: {
-          variables: [
-            { name: 'nom_maries',   value: nomMaries },
-            { name: 'date_mariage', value: dateFormatted },
-          ],
-        },
+        itemReferenceId: `fp-${idx++}`,
+        productUid: PRODUCT_UIDS.faire_part,
+        files: [{ type: 'default', url }],
+        quantity: qty,
       })
     }
   }
 
-  // — Faire-parts —
-  if (quantities.fairesParts > 0 && templates.fairesParts) {
-    items.push({
-      itemReferenceId: `item-fp-${itemIndex++}`,
-      templateId: templates.fairesParts,
-      quantity: quantities.fairesParts,
-      personalization: {
-        variables: [
-          { name: 'nom_maries',   value: nomMaries },
-          { name: 'date_mariage', value: dateFormatted },
-          { name: 'lieu_mariage', value: wedding.location ?? '' },
-        ],
-      },
-    })
+  // ── Save the date ─────────────────────────────────────────────────────────────
+  if (coll.save_the_date?.checked && !coll.save_the_date?.download) {
+    const qty = coll.save_the_date.printQty ?? coll.save_the_date.qty ?? 0
+    if (qty > 0) {
+      const buf = await generateFairePartBuffer(univers, { ...weddingInfo, name: `Save the date · ${weddingInfo.name}` })
+      const url = await uploadPDFToSupabase(supabase, buf, `${prefix}/save-the-date.pdf`)
+      items.push({
+        itemReferenceId: `std-${idx++}`,
+        productUid: PRODUCT_UIDS.save_the_date,
+        files: [{ type: 'default', url }],
+        quantity: qty,
+      })
+    }
+  }
+
+  // ── Menu ──────────────────────────────────────────────────────────────────────
+  if (coll.menu?.checked && !coll.menu?.download) {
+    const qty = coll.menu.printQty ?? coll.menu.qty ?? 0
+    if (qty > 0) {
+      const buf = await generateMenuBuffer(univers, weddingInfo)
+      const url = await uploadPDFToSupabase(supabase, buf, `${prefix}/menu.pdf`)
+      items.push({
+        itemReferenceId: `menu-${idx++}`,
+        productUid: PRODUCT_UIDS.menu,
+        files: [{ type: 'default', url }],
+        quantity: qty,
+      })
+    }
+  }
+
+  // ── Marque-places : 1 PDF par invité ──────────────────────────────────────────
+  if (coll.marque_place?.checked && !coll.marque_place?.download) {
+    const guestList = (guests ?? []).map(g => ({
+      id: g.id,
+      firstName: g.first_name ?? '',
+      lastName:  g.last_name ?? '',
+      tableName: guestTableMap.get(g.id) ?? null,
+    }))
+
+    for (const guest of guestList) {
+      const buf = await generateMarquePlaceBuffer(univers, guest)
+      const name = `${guest.firstName}-${guest.lastName}`.replace(/\s+/g, '-').toLowerCase()
+      const url  = await uploadPDFToSupabase(supabase, buf, `${prefix}/mp-${name}-${guest.id}.pdf`)
+      items.push({
+        itemReferenceId: `mp-${idx++}`,
+        productUid: PRODUCT_UIDS.marque_place,
+        files: [{ type: 'default', url }],
+        quantity: 1,
+      })
+    }
   }
 
   if (items.length === 0) {
-    return NextResponse.json({ error: 'Aucun produit sélectionné' }, { status: 400 })
+    return NextResponse.json({ error: 'Aucun produit à commander (vérifiez votre sélection)' }, { status: 400 })
   }
 
-  // ── Payload Gelato v4 ────────────────────────────────────────────────────
+  // ── Gelato order ─────────────────────────────────────────────────────────────
   const orderPayload = {
-    orderReferenceId: `kaatch-${wedding.id}-${Date.now()}`,
+    orderReferenceId: `kaatch-${weddingId}-${ts}`,
     customerReferenceId: user.id,
     currency: 'EUR',
     items,
@@ -212,32 +173,18 @@ export async function POST(req: NextRequest) {
     },
   }
 
-  // ── Envoi à Gelato ───────────────────────────────────────────────────────
   const response = await fetch(`${GELATO_API_BASE}/orders`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-API-KEY': apiKey,
-    },
+    headers: { 'Content-Type': 'application/json', 'X-API-KEY': apiKey },
     body: JSON.stringify(orderPayload),
   })
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}))
-    console.error('Erreur Gelato:', response.status, errorData)
-    return NextResponse.json(
-      { error: 'Erreur lors de la création de la commande Gelato', details: errorData },
-      { status: response.status }
-    )
+    const err = await response.json().catch(() => ({}))
+    console.error('Gelato error:', response.status, err)
+    return NextResponse.json({ error: 'Erreur Gelato', details: err }, { status: response.status })
   }
 
-  const orderData = await response.json()
-
-  // orderData.checkoutUrl : URL de paiement Gelato
-  // orderData.id : identifiant commande Gelato
-  return NextResponse.json({
-    success: true,
-    orderId: orderData.id,
-    checkoutUrl: orderData.checkoutUrl,
-  })
+  const order = await response.json()
+  return NextResponse.json({ success: true, orderId: order.id, checkoutUrl: order.checkoutUrl })
 }

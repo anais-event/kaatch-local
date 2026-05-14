@@ -164,30 +164,47 @@ export default function DestinatairesClient({
   const grandTotal = Object.values(totals).reduce((a, b) => a + b, 0)
 
   // ── Drag & drop ─────────────────────────────────────────────────────────────
-  const dragId   = useRef<string | null>(null)
-  const dragOver = useRef<string | null>(null)
+  const dragId    = useRef<string | null>(null)
+  const dropId    = useRef<string | null>(null)
   const [dragging, setDragging] = useState<string | null>(null)
+  const [dropTarget, setDropTarget] = useState<string | null>(null)
 
-  function onDragStart(guestId: string) {
+  function onDragStart(e: React.DragEvent, guestId: string) {
     dragId.current = guestId
     setDragging(guestId)
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/plain', guestId)
   }
-  function onDragEnter(guestId: string) {
-    dragOver.current = guestId
+
+  function onDragOver(e: React.DragEvent, guestId: string) {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+    if (dropId.current !== guestId) {
+      dropId.current = guestId
+      setDropTarget(guestId)
+    }
   }
-  function onDragEnd() {
-    setDragging(null)
-    if (!dragId.current || !dragOver.current || dragId.current === dragOver.current) return
+
+  function onDrop(e: React.DragEvent, targetId: string) {
+    e.preventDefault()
+    const sourceId = dragId.current
+    if (!sourceId || sourceId === targetId) return
     setGuestOrder(prev => {
       const next = [...prev]
-      const from = next.indexOf(dragId.current!)
-      const to   = next.indexOf(dragOver.current!)
+      const from = next.indexOf(sourceId)
+      const to   = next.indexOf(targetId)
+      if (from === -1 || to === -1) return prev
       next.splice(from, 1)
-      next.splice(to, 0, dragId.current!)
+      next.splice(to, 0, sourceId)
       return next
     })
+  }
+
+  function onDragEnd() {
     dragId.current = null
-    dragOver.current = null
+    dropId.current = null
+    setDragging(null)
+    setDropTarget(null)
   }
 
   return (
@@ -296,18 +313,20 @@ export default function DestinatairesClient({
                 {/* Membres */}
                 {members.map((guest, gi) => {
                   const guestKey = `guest:${guest.id}`
-                  const isDragged = dragging === guest.id
+                  const isDragged  = dragging === guest.id
+                  const isDropOver = dropTarget === guest.id && dragging !== guest.id
                   return (
                     <div
                       key={guest.id}
                       draggable
-                      onDragStart={() => onDragStart(guest.id)}
-                      onDragEnter={() => onDragEnter(guest.id)}
+                      onDragStart={e => onDragStart(e, guest.id)}
+                      onDragOver={e => onDragOver(e, guest.id)}
+                      onDrop={e => onDrop(e, guest.id)}
                       onDragEnd={onDragEnd}
-                      onDragOver={e => e.preventDefault()}
-                      className={`flex items-center transition-all duration-150
-                        ${isDragged ? 'opacity-40 bg-stone-50' : 'hover:bg-stone-50/40'}
-                        ${gi < members.length - 1 ? 'border-b border-stone-50' : ''}`}
+                      className={`flex items-center transition-all duration-100
+                        ${isDragged  ? 'opacity-30 bg-stone-50' : ''}
+                        ${isDropOver ? 'border-t-2 border-[#4a5240] bg-[#4a5240]/5' : 'hover:bg-stone-50/40'}
+                        ${!isDragged && !isDropOver && gi < members.length - 1 ? 'border-b border-stone-50' : ''}`}
                     >
                       {/* Poignée drag */}
                       <div className="w-8 flex-shrink-0 flex items-center justify-center cursor-grab active:cursor-grabbing">

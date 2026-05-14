@@ -41,7 +41,7 @@ export default async function ReceptionPage({ params }: { params: Promise<{ slug
         guests: (assignments ?? [])
           .filter(a => a.table_id === t.id)
           .map(a => {
-            const g = a.guests as { first_name: string; last_name: string } | null
+            const g = a.guests as unknown as { first_name: string; last_name: string } | null
             return g ? [g.first_name, g.last_name].filter(v => v && v !== 'null').join(' ') : ''
           })
           .filter(Boolean),

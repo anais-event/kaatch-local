@@ -11,20 +11,16 @@ type Guest = {
   rsvp_status?: string | null
 }
 
-type Product = {
-  key: string
-  label: string
-  short: string
-}
+type Product = { key: string; label: string }
 
 type Selection = Record<string, Record<string, boolean>>
 
 const PRODUCTS: Product[] = [
-  { key: 'save_the_date', label: 'Save the date', short: 'STD' },
-  { key: 'faire_part', label: 'Faire-part', short: 'FP' },
-  { key: 'menu', label: 'Menu', short: 'Menu' },
-  { key: 'marque_place', label: 'Marque-place', short: 'M.P.' },
-  { key: 'programme', label: 'Programme', short: 'Prog.' },
+  { key: 'save_the_date', label: 'Save the date' },
+  { key: 'faire_part',    label: 'Faire-part' },
+  { key: 'menu',          label: 'Menu' },
+  { key: 'marque_place',  label: 'Marque-place' },
+  { key: 'programme',     label: 'Programme' },
 ]
 
 function cleanName(n: string | null | undefined) {
@@ -42,29 +38,17 @@ function groupByFoyer(guests: Guest[]): { foyer: string; members: Guest[] }[] {
   return Array.from(map.entries()).map(([foyer, members]) => ({ foyer, members }))
 }
 
-function CheckCircle({
-  checked,
-  onChange,
-  disabled,
-}: {
-  checked: boolean
-  onChange: () => void
-  disabled?: boolean
-}) {
+function CheckCircle({ checked, onChange }: { checked: boolean; onChange: () => void }) {
   return (
     <button
       type="button"
       onClick={onChange}
-      disabled={disabled}
-      className={`w-6 h-6 rounded-full border flex items-center justify-center transition-all duration-150 flex-shrink-0
-        ${checked
-          ? 'bg-[#4a5240] border-[#4a5240]'
-          : 'border-stone-300 hover:border-[#4a5240]/50 bg-white'
-        } ${disabled ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'}`}
+      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 cursor-pointer
+        ${checked ? 'bg-[#4a5240] border-[#4a5240]' : 'border-stone-300 hover:border-[#4a5240]/60 bg-white'}`}
     >
       {checked && (
-        <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3">
-          <path d="M2 6l2.5 2.5L10 3.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <svg viewBox="0 0 10 10" fill="none" className="w-2.5 h-2.5">
+          <path d="M1.5 5l2.5 2.5L8.5 2.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       )}
     </button>
@@ -82,7 +66,6 @@ export default function DestinatairesClient({
 }) {
   const router = useRouter()
   const storageKey = `studio_dest_${slug}`
-
   const foyers = useMemo(() => groupByFoyer(guests), [guests])
 
   const [selection, setSelection] = useState<Selection>(() => {
@@ -92,225 +75,190 @@ export default function DestinatairesClient({
         if (saved) return JSON.parse(saved)
       } catch {}
     }
-    // Défaut : tout coché sauf save_the_date (1 par foyer)
     const init: Selection = {}
     for (const g of guests) {
-      init[g.id] = {
-        save_the_date: false,
-        faire_part: false,
-        menu: true,
-        marque_place: true,
-        programme: true,
-      }
+      init[g.id] = { save_the_date: false, faire_part: false, menu: true, marque_place: true, programme: true }
     }
     return init
   })
 
-  // Sauvegarder dans localStorage avec debounce
   useEffect(() => {
-    const t = setTimeout(() => {
-      localStorage.setItem(storageKey, JSON.stringify(selection))
-    }, 800)
+    const t = setTimeout(() => localStorage.setItem(storageKey, JSON.stringify(selection)), 800)
     return () => clearTimeout(t)
   }, [selection, storageKey])
 
   function toggle(guestId: string, product: string) {
-    setSelection(prev => ({
-      ...prev,
-      [guestId]: {
-        ...prev[guestId],
-        [product]: !prev[guestId]?.[product],
-      },
-    }))
+    setSelection(prev => ({ ...prev, [guestId]: { ...prev[guestId], [product]: !prev[guestId]?.[product] } }))
   }
 
-  function toggleFoyer(members: Guest[], product: string) {
-    const allChecked = members.every(m => selection[m.id]?.[product])
+  // Sélection foyer entière : 1 clic = bascule tous les produits de tous les membres
+  function toggleFoyerAll(members: Guest[]) {
+    const allFullyChecked = members.every(m => PRODUCTS.every(p => selection[m.id]?.[p.key]))
     setSelection(prev => {
       const next = { ...prev }
       for (const m of members) {
-        next[m.id] = { ...next[m.id], [product]: !allChecked }
+        next[m.id] = Object.fromEntries(PRODUCTS.map(p => [p.key, !allFullyChecked]))
       }
       return next
     })
   }
 
-  function toggleAll(product: string) {
+  // Sélection colonne entière
+  function toggleCol(product: string) {
     const allChecked = guests.every(g => selection[g.id]?.[product])
     setSelection(prev => {
       const next = { ...prev }
-      for (const g of guests) {
-        next[g.id] = { ...next[g.id], [product]: !allChecked }
-      }
+      for (const g of guests) next[g.id] = { ...next[g.id], [product]: !allChecked }
       return next
     })
   }
 
-  // Totaux par produit
   const totals = useMemo(() => {
     const t: Record<string, number> = {}
-    for (const p of PRODUCTS) {
-      t[p.key] = guests.filter(g => selection[g.id]?.[p.key]).length
-    }
+    for (const p of PRODUCTS) t[p.key] = guests.filter(g => selection[g.id]?.[p.key]).length
     return t
   }, [selection, guests])
 
   const grandTotal = Object.values(totals).reduce((a, b) => a + b, 0)
 
   return (
-    <div className="min-h-screen bg-[#f5f0e8]">
-      <div className="max-w-5xl mx-auto px-0 sm:px-4 py-10 pb-40">
+    <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
 
-        {/* En-tête */}
-        <div className="px-4 sm:px-0 mb-8">
-          <a
-            href={`/mariage/${slug}/studio`}
-            className="inline-flex items-center gap-1.5 text-xs text-stone-400 hover:text-stone-600 transition-colors mb-6"
-            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, letterSpacing: '0.05em' }}
-          >
-            <svg viewBox="0 0 16 16" fill="none" className="w-3 h-3">
-              <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            Studio créatif
-          </a>
+      {/* En-tête */}
+      <div className="max-w-5xl mx-auto px-4 py-8 pb-4">
+        <a href={`/mariage/${slug}/studio`}
+          className="inline-flex items-center gap-1 text-stone-400 hover:text-stone-600 transition-colors mb-5"
+          style={{ fontWeight: 300, fontSize: '0.75rem' }}>
+          <svg viewBox="0 0 16 16" fill="none" className="w-3 h-3">
+            <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          Studio créatif
+        </a>
+        <p style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.2em' }} className="text-stone-400 uppercase mb-1">02 · Vos destinataires</p>
+        <h1 style={{ fontWeight: 600, fontSize: '1.3rem', lineHeight: 1.2 }} className="text-[#2d3228] mb-1">Personnalisez vos envois</h1>
+        <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-500">
+          Cliquez sur <strong style={{ fontWeight: 500 }}>Famille [Nom]</strong> pour sélectionner tout le foyer. Cliquez sur un en-tête de colonne pour tout sélectionner.
+        </p>
+      </div>
 
-          <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-2"
-            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
-            02 · Vos destinataires
-          </p>
-          <h1 style={{
-            fontFamily: 'var(--font-cormorant)',
-            fontSize: 'clamp(1.7rem, 4vw, 2.4rem)',
-            fontWeight: 400,
-            fontStyle: 'italic',
-            color: '#2d3228',
-            lineHeight: 1.1,
-          }}>
-            Personnalisez vos envois
-          </h1>
-          <p className="text-stone-500 text-sm mt-2 leading-relaxed"
-            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
-            Cochez les créations à attribuer à chaque invité. Cliquez sur un nom de famille pour sélectionner tout le foyer.
-          </p>
-        </div>
+      {/* Tableau */}
+      <div className="max-w-5xl mx-auto px-0 sm:px-4 pb-40">
+        <div className="bg-white border-y border-stone-100 sm:rounded-xl sm:border sm:shadow-sm overflow-hidden">
 
-        {/* Tableau */}
-        <div className="bg-white border-y border-stone-100 sm:rounded-2xl sm:border sm:shadow-sm overflow-hidden">
-
-          {/* Header colonnes — sticky */}
+          {/* Header colonnes sticky */}
           <div className="sticky top-0 z-10 bg-white border-b border-stone-100">
-            <div className="flex items-stretch">
-              {/* Colonne invité */}
-              <div className="flex-1 min-w-[160px] px-4 py-3 flex items-end">
-                <span className="text-[10px] tracking-[0.15em] uppercase text-stone-400"
-                  style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
+            <div className="flex items-end min-w-0">
+              <div className="flex-1 min-w-[140px] px-4 py-3">
+                <span style={{ fontWeight: 300, fontSize: '0.62rem', letterSpacing: '0.15em' }} className="text-stone-400 uppercase">
                   Invité
                 </span>
               </div>
-
-              {/* Colonnes produits */}
-              {PRODUCTS.map(p => (
-                <div key={p.key} className="w-[72px] sm:w-20 flex flex-col items-center justify-end px-1 py-3 gap-2">
+              {PRODUCTS.map(p => {
+                const allChecked = guests.every(g => selection[g.id]?.[p.key])
+                return (
                   <button
-                    onClick={() => toggleAll(p.key)}
-                    className="group flex flex-col items-center gap-1.5"
+                    key={p.key}
+                    onClick={() => toggleCol(p.key)}
+                    className="group flex flex-col items-center gap-1.5 px-2 py-3 flex-shrink-0"
+                    style={{ width: 'clamp(68px, 14vw, 100px)' }}
                     title={`Tout sélectionner : ${p.label}`}
                   >
-                    <span
-                      className="text-[9px] sm:text-[10px] tracking-wide text-center text-stone-400 group-hover:text-[#4a5240] transition-colors leading-tight"
-                      style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}
-                    >
-                      {p.short}
+                    <span style={{ fontWeight: 300, fontSize: '0.62rem', letterSpacing: '0.04em' }}
+                      className="text-stone-400 group-hover:text-[#4a5240] transition-colors text-center leading-tight block">
+                      {p.label}
                     </span>
-                    <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all
-                      ${guests.every(g => selection[g.id]?.[p.key])
-                        ? 'bg-[#4a5240] border-[#4a5240]'
-                        : 'border-stone-200 group-hover:border-[#4a5240]/40'}`}
-                    >
-                      {guests.every(g => selection[g.id]?.[p.key]) && (
+                    <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all
+                      ${allChecked ? 'bg-[#4a5240] border-[#4a5240]' : 'border-stone-200 group-hover:border-[#4a5240]/50'}`}>
+                      {allChecked && (
                         <svg viewBox="0 0 10 10" fill="none" className="w-2.5 h-2.5">
                           <path d="M1.5 5l2.5 2.5L8.5 2.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                       )}
                     </div>
                   </button>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
 
-          {/* Corps — foyers et membres */}
-          {foyers.map(({ foyer, members }, fi) => (
-            <div key={foyer} className={fi > 0 ? 'border-t border-stone-50' : ''}>
+          {/* Foyers et membres */}
+          {foyers.map(({ foyer, members }, fi) => {
+            const allFullyChecked = members.every(m => PRODUCTS.every(p => selection[m.id]?.[p.key]))
+            const someChecked = members.some(m => PRODUCTS.some(p => selection[m.id]?.[p.key]))
 
-              {/* Ligne foyer */}
-              <div className="flex items-center bg-[#f5f0e8]/50">
+            return (
+              <div key={foyer} className={fi > 0 ? 'border-t border-stone-100' : ''}>
+
+                {/* Ligne foyer — clic = bascule tout */}
                 <button
-                  onClick={() => PRODUCTS.forEach(p => toggleFoyer(members, p.key))}
-                  className="flex-1 min-w-[160px] px-4 py-2 text-left flex items-center gap-2 group"
+                  onClick={() => toggleFoyerAll(members)}
+                  className="w-full flex items-center bg-stone-50/80 hover:bg-stone-50 transition-colors"
                 >
-                  <span className="text-[10px] tracking-[0.12em] uppercase text-stone-500 group-hover:text-[#4a5240] transition-colors"
-                    style={{ fontFamily: 'var(--font-lato)', fontWeight: 400 }}>
-                    Foyer {foyer}
-                  </span>
-                  {members.length > 1 && (
-                    <span className="text-[9px] text-stone-300" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
-                      {members.length} pers.
+                  <div className="flex-1 min-w-[140px] px-4 py-2 flex items-center gap-2">
+                    <div className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all
+                      ${allFullyChecked
+                        ? 'bg-[#4a5240] border-[#4a5240]'
+                        : someChecked
+                          ? 'border-[#4a5240]/50 bg-[#4a5240]/10'
+                          : 'border-stone-300'}`}>
+                      {allFullyChecked && (
+                        <svg viewBox="0 0 10 10" fill="none" className="w-2.5 h-2.5">
+                          <path d="M1.5 5l2.5 2.5L8.5 2.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      )}
+                      {!allFullyChecked && someChecked && (
+                        <div className="w-1.5 h-0.5 bg-[#4a5240] rounded-full" />
+                      )}
+                    </div>
+                    <span style={{ fontWeight: 500, fontSize: '0.75rem' }} className="text-stone-600">
+                      Famille {foyer}
                     </span>
-                  )}
+                    {members.length > 1 && (
+                      <span style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-400">
+                        {members.length} personnes
+                      </span>
+                    )}
+                  </div>
+                  {/* Indicateurs visuels par colonne */}
+                  {PRODUCTS.map(p => {
+                    const colChecked = members.filter(m => selection[m.id]?.[p.key]).length
+                    return (
+                      <div key={p.key} className="flex items-center justify-center flex-shrink-0 py-2"
+                        style={{ width: 'clamp(68px, 14vw, 100px)' }}>
+                        {colChecked > 0 && (
+                          <span style={{ fontWeight: 300, fontSize: '0.62rem' }} className="text-[#4a5240]">
+                            {colChecked}/{members.length}
+                          </span>
+                        )}
+                      </div>
+                    )
+                  })}
                 </button>
 
-                {/* Checkboxes foyer par colonne */}
-                {PRODUCTS.map(p => {
-                  const allChecked = members.every(m => selection[m.id]?.[p.key])
-                  const someChecked = members.some(m => selection[m.id]?.[p.key])
-                  return (
-                    <div key={p.key} className="w-[72px] sm:w-20 flex items-center justify-center px-1 py-2">
-                      <button
-                        onClick={() => toggleFoyer(members, p.key)}
-                        className={`w-4 h-4 rounded border transition-all
-                          ${allChecked
-                            ? 'bg-[#4a5240]/20 border-[#4a5240]/30'
-                            : someChecked
-                              ? 'border-[#4a5240]/20 bg-[#4a5240]/5'
-                              : 'border-stone-200'}`}
-                        title={`Tout le foyer : ${p.label}`}
-                      />
-                    </div>
-                  )
-                })}
-              </div>
-
-              {/* Lignes membres */}
-              {members.map((guest, gi) => {
-                const firstName = cleanName(guest.first_name)
-                const lastName = cleanName(guest.last_name)
-                return (
+                {/* Membres */}
+                {members.map((guest, gi) => (
                   <div
                     key={guest.id}
-                    className={`flex items-center hover:bg-stone-50/50 transition-colors
+                    className={`flex items-center hover:bg-stone-50/40 transition-colors
                       ${gi < members.length - 1 ? 'border-b border-stone-50' : ''}`}
                   >
-                    {/* Nom */}
-                    <div className="flex-1 min-w-[160px] px-4 py-3 flex items-center gap-2">
-                      <span
-                        className="text-sm text-stone-700 leading-tight"
-                        style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}
-                      >
-                        {firstName}
-                        {lastName && <span className="text-stone-400"> {lastName}</span>}
+                    <div className="flex-1 min-w-[140px] px-4 py-2.5 flex items-center gap-2 pl-10">
+                      <span style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-700">
+                        {cleanName(guest.first_name)}
+                        {cleanName(guest.last_name) && (
+                          <span className="text-stone-400"> {cleanName(guest.last_name)}</span>
+                        )}
                       </span>
                       {guest.guest_type === 'enfant' && (
-                        <span className="text-[9px] text-stone-300 border border-stone-200 rounded-full px-1.5 py-0.5"
-                          style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
+                        <span style={{ fontWeight: 300, fontSize: '0.6rem' }}
+                          className="text-stone-300 border border-stone-200 rounded-full px-1.5 py-0.5">
                           enfant
                         </span>
                       )}
                     </div>
-
-                    {/* Checkboxes */}
                     {PRODUCTS.map(p => (
-                      <div key={p.key} className="w-[72px] sm:w-20 flex items-center justify-center px-1">
+                      <div key={p.key} className="flex items-center justify-center flex-shrink-0"
+                        style={{ width: 'clamp(68px, 14vw, 100px)' }}>
                         <CheckCircle
                           checked={!!selection[guest.id]?.[p.key]}
                           onChange={() => toggle(guest.id, p.key)}
@@ -318,25 +266,22 @@ export default function DestinatairesClient({
                       </div>
                     ))}
                   </div>
-                )
-              })}
-            </div>
-          ))}
+                ))}
+              </div>
+            )
+          })}
 
-          {/* Ligne totaux */}
-          <div className="flex items-center border-t border-stone-200 bg-[#f5f0e8]/30">
-            <div className="flex-1 min-w-[160px] px-4 py-3">
-              <span className="text-[10px] tracking-[0.15em] uppercase text-stone-400"
-                style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
+          {/* Totaux */}
+          <div className="flex items-center border-t border-stone-200 bg-stone-50">
+            <div className="flex-1 min-w-[140px] px-4 py-3">
+              <span style={{ fontWeight: 400, fontSize: '0.72rem', letterSpacing: '0.1em' }} className="text-stone-500 uppercase">
                 Total
               </span>
             </div>
             {PRODUCTS.map(p => (
-              <div key={p.key} className="w-[72px] sm:w-20 flex items-center justify-center px-1 py-3">
-                <span
-                  className="text-sm text-[#4a5240] font-medium"
-                  style={{ fontFamily: 'var(--font-cormorant)', fontSize: '1rem' }}
-                >
+              <div key={p.key} className="flex items-center justify-center flex-shrink-0 py-3"
+                style={{ width: 'clamp(68px, 14vw, 100px)' }}>
+                <span style={{ fontWeight: 600, fontSize: '0.95rem' }} className="text-[#4a5240]">
                   {totals[p.key]}
                 </span>
               </div>
@@ -344,96 +289,65 @@ export default function DestinatairesClient({
           </div>
         </div>
 
-        {/* Récapitulatif prix */}
-        <div className="px-4 sm:px-0 mt-6">
-          <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-stone-50">
-              <h3
-                className="text-stone-700"
-                style={{ fontFamily: 'var(--font-cormorant)', fontSize: '1.1rem', fontWeight: 500 }}
-              >
-                Récapitulatif de votre collection
-              </h3>
+        {/* Récap */}
+        <div className="px-4 sm:px-0 mt-4">
+          <div className="bg-white rounded-xl border border-stone-100 shadow-sm overflow-hidden">
+            <div className="px-5 py-3 border-b border-stone-50">
+              <p style={{ fontWeight: 600, fontSize: '0.88rem' }} className="text-[#2d3228]">
+                Récapitulatif
+              </p>
             </div>
-            <div className="px-6 py-4 flex flex-col gap-2.5">
-              {PRODUCTS.map(p => (
-                totals[p.key] > 0 && (
-                  <div key={p.key} className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span
-                        className="text-sm text-stone-600"
-                        style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}
-                      >
-                        {totals[p.key]} × {p.label}
-                      </span>
-                    </div>
-                    <span
-                      className="text-sm text-stone-400"
-                      style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}
-                    >
-                      — €
-                    </span>
-                  </div>
-                )
+            <div className="px-5 py-4 flex flex-col gap-2">
+              {PRODUCTS.filter(p => totals[p.key] > 0).map(p => (
+                <div key={p.key} className="flex items-center justify-between">
+                  <span style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-600">
+                    {totals[p.key]} × {p.label}
+                  </span>
+                  <span style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-400">— €</span>
+                </div>
               ))}
-
               {grandTotal === 0 && (
-                <p className="text-stone-300 text-sm text-center py-2"
-                  style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
-                  Aucune sélection pour l'instant
+                <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-300 text-center py-1">
+                  Aucune sélection
                 </p>
               )}
             </div>
-
             {grandTotal > 0 && (
-              <div className="px-6 py-4 border-t border-stone-50 flex items-center justify-between bg-[#f5f0e8]/30">
-                <span
-                  className="text-xs tracking-[0.15em] uppercase text-stone-400"
-                  style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}
-                >
+              <div className="px-5 py-3 border-t border-stone-50 flex justify-between bg-stone-50/50">
+                <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">
                   {grandTotal} créations sélectionnées
                 </span>
-                <span
-                  className="text-stone-700"
-                  style={{ fontFamily: 'var(--font-cormorant)', fontSize: '1rem' }}
-                >
+                <span style={{ fontWeight: 500, fontSize: '0.8rem' }} className="text-stone-500">
                   Total à définir
                 </span>
               </div>
             )}
           </div>
         </div>
-
       </div>
 
-      {/* Barre bas fixe */}
+      {/* Barre bas */}
       <div className="fixed bottom-0 left-0 right-0 md:left-56 z-40 bg-white/95 backdrop-blur border-t border-stone-100">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
           <button
             onClick={() => router.push(`/mariage/${slug}/studio`)}
-            className="flex items-center gap-2 text-sm text-stone-400 hover:text-stone-600 transition-colors"
-            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}
-          >
-            <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
+            style={{ fontWeight: 300, fontSize: '0.82rem' }}
+            className="flex items-center gap-1.5 text-stone-400 hover:text-stone-600 transition-colors">
+            <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
               <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             Retour au studio
           </button>
-
           <div className="flex items-center gap-3">
-            <span className="text-xs text-stone-300 hidden sm:block"
-              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
+            <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-300 hidden sm:block">
               Sauvegardé automatiquement
             </span>
             <button
               onClick={() => router.push(`/mariage/${slug}/studio`)}
               disabled={grandTotal === 0}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm transition-all duration-200
-                ${grandTotal > 0
-                  ? 'bg-[#4a5240] text-white hover:bg-[#2d3228] shadow-sm'
-                  : 'bg-stone-100 text-stone-300 cursor-not-allowed'}`}
-              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, letterSpacing: '0.04em' }}
-            >
+              style={{ fontWeight: 400, fontSize: '0.8rem', letterSpacing: '0.03em' }}
+              className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm transition-all
+                ${grandTotal > 0 ? 'bg-[#4a5240] text-white hover:bg-[#2d3228]' : 'bg-stone-100 text-stone-300 cursor-not-allowed'}`}>
               Valider mes envois
               <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
                 <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />

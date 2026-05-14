@@ -16,12 +16,14 @@ type Item = {
 type CollectionState = Record<string, { checked: boolean; qty: number }>
 
 export default function CollectionClient({
-  slug, weddingName, guestCount, foyerCount, tableCount, programmeCount,
+  slug, weddingName, guestCount, foyerCount, tableCount, savedData, onSave,
 }: {
-  slug: string; weddingName: string; guestCount: number; foyerCount: number; tableCount: number; programmeCount: number
+  slug: string; weddingName: string; guestCount: number; foyerCount: number; tableCount: number
+  savedData: unknown; onSave: (data: unknown, progress: number) => Promise<void>
 }) {
   const router = useRouter()
   const storageKey = `studio_coll_${slug}`
+  const [saving, setSaving] = useState(false)
 
   const ITEMS: Item[] = [
     { key: 'save_the_date', label: 'Save the date',  icon: '📅', desc: '1 par foyer — annonce en avant-première',  defaultQty: foyerCount,  qtyLabel: 'foyers', fixed: false },
@@ -34,6 +36,8 @@ export default function CollectionClient({
   ]
 
   const [state, setState] = useState<CollectionState>(() => {
+    // Supabase data prioritaire sur localStorage
+    if (savedData && typeof savedData === 'object') return savedData as CollectionState
     if (typeof window !== 'undefined') {
       try {
         const saved = localStorage.getItem(storageKey)
@@ -184,14 +188,19 @@ export default function CollectionClient({
             Retour
           </button>
           <div className="flex items-center gap-3">
-            <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-300 hidden sm:block">Sauvegardé auto.</span>
             <button
-              onClick={() => router.push(`/mariage/${slug}/studio`)}
-              disabled={selected.length === 0}
+              onClick={async () => {
+                if (selected.length === 0) return
+                setSaving(true)
+                const progress = selected.length >= 3 ? 100 : Math.round((selected.length / 7) * 100)
+                await onSave(state, progress)
+                router.push(`/mariage/${slug}/studio`)
+              }}
+              disabled={selected.length === 0 || saving}
               style={{ fontWeight: 400, fontSize: '0.8rem', letterSpacing: '0.03em' }}
               className={`flex items-center gap-2 px-5 py-2 rounded-lg transition-all
-                ${selected.length > 0 ? 'bg-[#4a5240] text-white hover:bg-[#2d3228]' : 'bg-stone-100 text-stone-300 cursor-not-allowed'}`}>
-              Valider ma sélection →
+                ${selected.length > 0 && !saving ? 'bg-[#4a5240] text-white hover:bg-[#2d3228]' : 'bg-stone-100 text-stone-300 cursor-not-allowed'}`}>
+              {saving ? 'Sauvegarde…' : 'Valider ma sélection →'}
             </button>
           </div>
         </div>

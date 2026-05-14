@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import DestinatairesClient from './DestinatairesClient'
+import { saveStudioModule } from '../studio-actions'
 
 export default async function DestinatairesPage({
   params,
@@ -14,25 +15,30 @@ export default async function DestinatairesPage({
   if (!user) redirect('/auth')
 
   const { data: wedding } = await supabase
-    .from('weddings')
-    .select('id, slug, name')
-    .eq('slug', slug)
-    .single()
-
+    .from('weddings').select('id, slug, name').eq('slug', slug).single()
   if (!wedding) return <div className="p-8 text-stone-500">Mariage introuvable</div>
 
-  const { data: guests } = await supabase
-    .from('guests')
-    .select('id, first_name, last_name, guest_type, rsvp_status')
-    .eq('wedding_id', wedding.id)
-    .order('last_name')
-    .order('first_name')
+  const [
+    { data: guests },
+    { data: studioData },
+  ] = await Promise.all([
+    supabase.from('guests').select('id, first_name, last_name, guest_type, rsvp_status')
+      .eq('wedding_id', wedding.id).order('last_name').order('first_name'),
+    supabase.from('studio_progress').select('module_destinataires').eq('wedding_id', wedding.id).single(),
+  ])
+
+  async function onSave(data: unknown, progress: number) {
+    'use server'
+    await saveStudioModule(wedding.id, slug, 'destinataires', data, progress)
+  }
 
   return (
     <DestinatairesClient
       slug={slug}
       weddingName={wedding.name ?? ''}
       guests={guests ?? []}
+      savedData={studioData?.module_destinataires ?? null}
+      onSave={onSave}
     />
   )
 }

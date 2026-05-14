@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import ReceptionClient from './ReceptionClient'
+import { saveStudioModule } from '../studio-actions'
 
 export default async function ReceptionPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -16,18 +17,24 @@ export default async function ReceptionPage({ params }: { params: Promise<{ slug
   const [
     { data: steps },
     { data: tables },
+    { data: studioData },
   ] = await Promise.all([
     supabase.from('programme_steps').select('id, title, time, description').eq('wedding_id', wedding.id).order('position'),
     supabase.from('seating_tables').select('id, name, capacity').eq('wedding_id', wedding.id).order('name'),
+    supabase.from('studio_progress').select('module_reception').eq('wedding_id', wedding.id).single(),
   ])
 
-  // Invités par table
   const tableIds = (tables ?? []).map(t => t.id)
   const { data: assignments } = tableIds.length > 0
     ? await supabase.from('table_guests')
         .select('table_id, guests(first_name, last_name)')
         .in('table_id', tableIds)
     : { data: [] }
+
+  async function onSave(data: unknown, progress: number) {
+    'use server'
+    await saveStudioModule(wedding.id, slug, 'reception', data, progress)
+  }
 
   return (
     <ReceptionClient
@@ -46,6 +53,8 @@ export default async function ReceptionPage({ params }: { params: Promise<{ slug
           })
           .filter(Boolean),
       }))}
+      savedData={studioData?.module_reception ?? null}
+      onSave={onSave}
     />
   )
 }

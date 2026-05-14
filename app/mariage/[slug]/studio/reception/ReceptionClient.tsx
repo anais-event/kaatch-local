@@ -14,7 +14,7 @@ type ReceptionState = {
 
 export default function ReceptionClient({
   slug, weddingName, weddingDate, weddingLocation,
-  programmeSteps, tables,
+  programmeSteps, tables, savedData, onSave,
 }: {
   slug: string
   weddingName: string
@@ -22,13 +22,17 @@ export default function ReceptionClient({
   weddingLocation: string | null
   programmeSteps: ProgrammeStep[]
   tables: Table[]
+  savedData: unknown
+  onSave: (data: unknown, progress: number) => Promise<void>
 }) {
   const router = useRouter()
   const storageKey = `studio_recep_${slug}`
+  const [saving, setSaving] = useState(false)
 
   const totalGuests = tables.reduce((acc, t) => acc + t.guests.length, 0)
 
   const [state, setState] = useState<ReceptionState>(() => {
+    if (savedData && typeof savedData === 'object') return savedData as ReceptionState
     if (typeof window !== 'undefined') {
       try {
         const saved = localStorage.getItem(storageKey)
@@ -222,12 +226,17 @@ export default function ReceptionClient({
           <div className="flex items-center gap-3">
             <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-300 hidden sm:block">Sauvegardé auto.</span>
             <button
-              onClick={() => router.push(`/mariage/${slug}/studio`)}
-              disabled={!anySelected}
+              onClick={async () => {
+                if (!anySelected || saving) return
+                setSaving(true)
+                await onSave(state, 100)
+                router.push(`/mariage/${slug}/studio`)
+              }}
+              disabled={!anySelected || saving}
               style={{ fontWeight: 400, fontSize: '0.8rem', letterSpacing: '0.03em' }}
               className={`flex items-center gap-2 px-5 py-2 rounded-lg transition-all
-                ${anySelected ? 'bg-[#4a5240] text-white hover:bg-[#2d3228]' : 'bg-stone-100 text-stone-300 cursor-not-allowed'}`}>
-              Finaliser ma collection →
+                ${anySelected && !saving ? 'bg-[#4a5240] text-white hover:bg-[#2d3228]' : 'bg-stone-100 text-stone-300 cursor-not-allowed'}`}>
+              {saving ? 'Sauvegarde…' : 'Finaliser ma collection →'}
             </button>
           </div>
         </div>

@@ -104,11 +104,18 @@ const TYPO_OPTIONS = [
   { label: 'Romantique & aéré',      display: 'IM Fell English',     body: 'Raleway' },
 ]
 
-export default function UniversClient({ slug, weddingName }: { slug: string; weddingName: string }) {
+export default function UniversClient({
+  slug, weddingName, savedData, onSave,
+}: {
+  slug: string; weddingName: string
+  savedData: unknown; onSave: (data: unknown, progress: number) => Promise<void>
+}) {
   const router = useRouter()
   const storageKey = `studio_univers_${slug}`
+  const [saving, setSaving] = useState(false)
 
   const [state, setState] = useState<UniversState>(() => {
+    if (savedData && typeof savedData === 'object') return savedData as UniversState
     if (typeof window !== 'undefined') {
       try {
         const saved = localStorage.getItem(storageKey)
@@ -331,14 +338,23 @@ export default function UniversClient({ slug, weddingName }: { slug: string; wed
           <div className="flex items-center gap-3">
             <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-300 hidden sm:block">Sauvegardé auto.</span>
             <button
-              onClick={() => step !== 'typo' ? setStep(step === 'ambiance' ? 'palette' : 'typo') : router.push(`/mariage/${slug}/studio`)}
-              disabled={!isComplete && step === 'ambiance'}
+              onClick={async () => {
+                if (step !== 'typo') {
+                  setStep(step === 'ambiance' ? 'palette' : 'typo')
+                } else {
+                  if (!isComplete || saving) return
+                  setSaving(true)
+                  await onSave(state, 100)
+                  router.push(`/mariage/${slug}/studio`)
+                }
+              }}
+              disabled={(!isComplete && step === 'ambiance') || saving}
               style={{ fontWeight: 400, fontSize: '0.8rem', letterSpacing: '0.03em' }}
               className={`flex items-center gap-2 px-5 py-2 rounded-lg transition-all
-                ${isComplete || step !== 'ambiance'
+                ${(isComplete || step !== 'ambiance') && !saving
                   ? 'bg-[#4a5240] text-white hover:bg-[#2d3228]'
                   : 'bg-stone-100 text-stone-300 cursor-not-allowed'}`}>
-              {step === 'typo' ? 'Valider mon univers →' : 'Continuer →'}
+              {saving ? 'Sauvegarde…' : step === 'typo' ? 'Valider mon univers →' : 'Continuer →'}
             </button>
           </div>
         </div>

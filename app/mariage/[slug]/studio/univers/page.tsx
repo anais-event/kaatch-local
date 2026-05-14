@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import UniversClient from './UniversClient'
+import { saveStudioModule } from '../studio-actions'
 
 export default async function UniversPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -13,5 +14,20 @@ export default async function UniversPage({ params }: { params: Promise<{ slug: 
     .from('weddings').select('id, name').eq('slug', slug).single()
   if (!wedding) return <div className="p-8 text-stone-500">Mariage introuvable</div>
 
-  return <UniversClient slug={slug} weddingName={wedding.name ?? ''} />
+  const { data: studioData } = await supabase
+    .from('studio_progress').select('module_univers').eq('wedding_id', wedding.id).single()
+
+  async function onSave(data: unknown, progress: number) {
+    'use server'
+    await saveStudioModule(wedding.id, slug, 'univers', data, progress)
+  }
+
+  return (
+    <UniversClient
+      slug={slug}
+      weddingName={wedding.name ?? ''}
+      savedData={studioData?.module_univers ?? null}
+      onSave={onSave}
+    />
+  )
 }

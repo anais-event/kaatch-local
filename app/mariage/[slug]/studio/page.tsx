@@ -21,22 +21,21 @@ export default async function StudioPage({
 
   if (!wedding) return <div className="p-8 text-stone-500">Mariage introuvable</div>
 
-  const { count: guestCount } = await supabase
-    .from('guests')
-    .select('id', { count: 'exact', head: true })
-    .eq('wedding_id', wedding.id)
+  const [
+    { count: guestCount },
+    { count: tableCount },
+    { data: studioData },
+  ] = await Promise.all([
+    supabase.from('guests').select('id', { count: 'exact', head: true }).eq('wedding_id', wedding.id),
+    supabase.from('seating_tables').select('id', { count: 'exact', head: true }).eq('wedding_id', wedding.id),
+    supabase.from('studio_progress').select('*').eq('wedding_id', wedding.id).single(),
+  ])
 
-  const { count: tableCount } = await supabase
-    .from('tables')
-    .select('id', { count: 'exact', head: true })
-    .eq('wedding_id', wedding.id)
-
-  // Progression par module (à implémenter avec studio_progress plus tard)
   const progress = {
-    collection: 0,
-    destinataires: 0,
-    univers: 0,
-    reception: 0,
+    collection:    studioData?.progress_collection    ?? 0,
+    destinataires: studioData?.progress_destinataires ?? 0,
+    univers:       studioData?.progress_univers        ?? 0,
+    reception:     studioData?.progress_reception      ?? 0,
   }
 
   return (

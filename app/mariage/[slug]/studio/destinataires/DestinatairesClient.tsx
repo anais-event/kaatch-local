@@ -59,14 +59,15 @@ function CheckCircle({ checked, onChange }: { checked: boolean; onChange: () => 
 }
 
 export default function DestinatairesClient({
-  slug,
-  weddingName,
-  guests,
+  slug, weddingName, guests, savedData, onSave,
 }: {
   slug: string
   weddingName: string
   guests: Guest[]
+  savedData: unknown
+  onSave: (data: unknown, progress: number) => Promise<void>
 }) {
+  const [saving, setSaving] = useState(false)
   const router = useRouter()
   const storageKey = `studio_dest_${slug}`
   const orderKey  = `studio_dest_order_${slug}`
@@ -96,6 +97,7 @@ export default function DestinatairesClient({
 
   // Sélection : clés `foyer:X` pour lignes foyer, `guest:X` pour membres individuels
   const [selection, setSelection] = useState<Selection>(() => {
+    if (savedData && typeof savedData === 'object') return savedData as Selection
     if (typeof window !== 'undefined') {
       try {
         const saved = localStorage.getItem(storageKey)
@@ -433,15 +435,22 @@ export default function DestinatairesClient({
             <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-300 hidden sm:block">
               Sauvegardé automatiquement
             </span>
-            <button onClick={() => router.push(`/mariage/${slug}/studio`)}
-              disabled={grandTotal === 0}
+            <button
+              onClick={async () => {
+                if (grandTotal === 0 || saving) return
+                setSaving(true)
+                const progress = grandTotal > 0 ? 100 : 0
+                await onSave({ selection, guestOrder }, progress)
+                router.push(`/mariage/${slug}/studio`)
+              }}
+              disabled={grandTotal === 0 || saving}
               style={{ fontWeight: 400, fontSize: '0.8rem', letterSpacing: '0.03em' }}
               className={`flex items-center gap-2 px-5 py-2 rounded-lg transition-all
-                ${grandTotal > 0 ? 'bg-[#4a5240] text-white hover:bg-[#2d3228]' : 'bg-stone-100 text-stone-300 cursor-not-allowed'}`}>
-              Valider mes envois
-              <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
+                ${grandTotal > 0 && !saving ? 'bg-[#4a5240] text-white hover:bg-[#2d3228]' : 'bg-stone-100 text-stone-300 cursor-not-allowed'}`}>
+              {saving ? 'Sauvegarde…' : 'Valider mes envois'}
+              {!saving && <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
                 <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+              </svg>}
             </button>
           </div>
         </div>

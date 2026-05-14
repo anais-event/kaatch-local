@@ -19,7 +19,7 @@ const features = [
 ]
 
 const navLinks = [
-  { label: 'Studio',       sub: 'Créatif',  href: '/#studio' },
+  { label: 'Studio',       sub: 'Créatif',  href: '/studio' },
   { label: 'Calculette',   sub: 'Budget',   href: '/calculette' },
   { label: 'Inspirations', sub: 'Le Blog',  href: '/inspirations' },
   { label: 'Entre nous',   sub: 'Le Forum', href: '/entre-nous' },

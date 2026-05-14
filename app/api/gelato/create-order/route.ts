@@ -74,7 +74,10 @@ export async function POST(req: NextRequest) {
   const tableMap = new Map((tables ?? []).map(t => [t.id, t.name]))
 
   // Guest+table lookup via table_guests
-  const { data: assignments } = await supabase.from('table_guests').select('guest_id, table_id').eq('table_id', (tables ?? []).map(t => t.id) as unknown as string)
+  const tableIds = (tables ?? []).map(t => t.id)
+  const { data: assignments } = tableIds.length
+    ? await supabase.from('table_guests').select('guest_id, table_id').in('table_id', tableIds)
+    : { data: [] }
   const guestTableMap = new Map((assignments ?? []).map(a => [a.guest_id, tableMap.get(a.table_id) ?? null]))
 
   const ts = Date.now()

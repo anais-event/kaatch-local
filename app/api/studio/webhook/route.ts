@@ -13,7 +13,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://kaatch.fr'
 export async function POST(req: NextRequest) {
   const body = await req.text()
   const sig = req.headers.get('stripe-signature')
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+  const webhookSecret = process.env.STRIPE_STUDIO_WEBHOOK_SECRET
 
   if (!webhookSecret || !sig) {
     return NextResponse.json({ error: 'Missing webhook secret or signature' }, { status: 400 })

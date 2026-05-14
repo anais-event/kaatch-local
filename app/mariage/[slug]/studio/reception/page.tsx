@@ -31,9 +31,11 @@ export default async function ReceptionPage({ params }: { params: Promise<{ slug
         .in('table_id', tableIds)
     : { data: [] }
 
+  const weddingId = wedding.id
+
   async function onSave(data: unknown, progress: number) {
     'use server'
-    await saveStudioModule(wedding.id, slug, 'reception', data, progress)
+    await saveStudioModule(weddingId, slug, 'reception', data, progress)
   }
 
   return (

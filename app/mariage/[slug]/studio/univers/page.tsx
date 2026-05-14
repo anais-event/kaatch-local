@@ -17,9 +17,11 @@ export default async function UniversPage({ params }: { params: Promise<{ slug: 
   const { data: studioData } = await supabase
     .from('studio_progress').select('module_univers').eq('wedding_id', wedding.id).single()
 
+  const weddingId = wedding.id
+
   async function onSave(data: unknown, progress: number) {
     'use server'
-    await saveStudioModule(wedding.id, slug, 'univers', data, progress)
+    await saveStudioModule(weddingId, slug, 'univers', data, progress)
   }
 
   return (

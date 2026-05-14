@@ -27,10 +27,11 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
   ])
 
   const foyerCount = new Set((guestNames ?? []).map(g => g.last_name || 'solo')).size
+  const weddingId = wedding.id
 
   async function onSave(data: unknown, progress: number) {
     'use server'
-    await saveStudioModule(wedding.id, slug, 'collection', data, progress)
+    await saveStudioModule(weddingId, slug, 'collection', data, progress)
   }
 
   return (

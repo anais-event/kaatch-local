@@ -13,15 +13,12 @@ const PRODUCT_UIDS: Record<string, { uid: string; packOf?: number }> = {
   enveloppe:     { uid: 'blank-envelopes_pf_c5_pt_120-g-env' },
 }
 
-// EUR/USD rate fallback (Gelato returns USD for some products)
-const USD_TO_EUR = 0.92
-
 type GelatoPriceEntry = { quantity: number; price: number; currency: string }
 
 async function fetchPrices(uid: string, apiKey: string): Promise<GelatoPriceEntry[] | null> {
   try {
     const res = await fetch(
-      `${GELATO_API_BASE}/products/${uid}/prices?country=FR`,
+      `${GELATO_API_BASE}/products/${uid}/prices?country=FR&currency=EUR`,
       { headers: { 'X-API-KEY': apiKey }, next: { revalidate: 3600 } }
     )
     if (!res.ok) return null
@@ -43,10 +40,7 @@ function pickUnitPrice(prices: GelatoPriceEntry[], qty: number, packOf = 1): num
   // bracket.price = total price for that quantity of packs
   // unit price per piece = total / (bracket.quantity * packOf)
   const totalPieces = bracket.quantity * packOf
-  const rawUnit = bracket.price / totalPieces
-  // Convert USD → EUR if needed
-  const currency = bracket.currency?.toUpperCase()
-  return currency === 'USD' ? rawUnit * USD_TO_EUR : rawUnit
+  return bracket.price / totalPieces
 }
 
 export async function GET(req: NextRequest) {

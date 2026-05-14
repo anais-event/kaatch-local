@@ -51,10 +51,10 @@ export async function GET() {
   const allUids = (catData.data ?? []).map((c: { catalogUid: string; title: string }) => `${c.catalogUid} — ${c.title}`)
 
   // Fetch products from promising catalogs
-  const interestingCats = ['pack-of-cards-folded', 'pack-of-cards-folded-envelopes', 'letterheads', 'hanging-posters', 'poster-hangers', 'framed-posters', 'multipage-brochures', 'flyers']
+  const interestingCats = ['posters']
   const catProducts: Record<string, unknown> = {}
   for (const cat of interestingCats) {
-    const r = await fetch(`${GELATO_API_BASE}/catalogs/${cat}/products?limit=5`, { headers: { 'X-API-KEY': apiKey } })
+    const r = await fetch(`${GELATO_API_BASE}/catalogs/${cat}/products?limit=50`, { headers: { 'X-API-KEY': apiKey } })
     if (r.ok) {
       const d = await r.json()
       catProducts[cat] = (d.products ?? d.data ?? []).slice(0, 5).map((p: { productUid?: string; uid?: string; title?: string; name?: string }) => ({ uid: p.productUid ?? p.uid, title: p.title ?? p.name }))

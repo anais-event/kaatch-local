@@ -33,15 +33,19 @@ export async function GET() {
   const apiKey = process.env.GELATO_API_KEY
   if (!apiKey) return NextResponse.json({ error: 'no key' }, { status: 500 })
 
-  // Test 1: prices endpoint with country
+  // Test fine-art A2 UIDs (hor confirmed, test ver)
+  const a2Candidates = [
+    'fine_arts_poster_geo_simplified_product_12-0_hor_a2_200-gsm-80lb-enhanced-uncoated',
+    'fine_arts_poster_geo_simplified_product_12-0_ver_a2_200-gsm-80lb-enhanced-uncoated',
+  ]
   const priceTests = await Promise.all(
-    CANDIDATES.slice(0, 4).map(async uid => {
+    a2Candidates.map(async uid => {
       const r1 = await fetch(`${GELATO_API_BASE}/products/${uid}/prices?country=FR`, { headers: { 'X-API-KEY': apiKey } })
-      const r2 = await fetch(`${GELATO_API_BASE}/products/${uid}`, { headers: { 'X-API-KEY': apiKey } })
-      const r3 = await fetch(`${GELATO_API_BASE}/products/${uid}/prices?country=FR&currency=EUR`, { headers: { 'X-API-KEY': apiKey } })
       const body1 = await r1.text()
-      const body2 = await r2.text()
-      return { uid, prices_status: r1.status, product_status: r2.status, prices_eur_status: r3.status, body_prices: body1.slice(0, 200), body_product: body2.slice(0, 200) }
+      const parsed = r1.ok ? JSON.parse(body1) : null
+      // Get first 3 price entries
+      const prices = parsed?.prices?.slice(0, 5) ?? parsed?.slice(0, 5) ?? null
+      return { uid, status: r1.status, prices }
     })
   )
 

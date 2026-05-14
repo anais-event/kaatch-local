@@ -33,17 +33,21 @@ export async function GET() {
   const apiKey = process.env.GELATO_API_KEY
   if (!apiKey) return NextResponse.json({ error: 'no key' }, { status: 500 })
 
-  const results = await Promise.all(
-    CANDIDATES.map(async uid => {
-      const res = await fetch(
-        `${GELATO_API_BASE}/products/${uid}/prices?country=FR`,
-        { headers: { 'X-API-KEY': apiKey } }
-      )
-      return { uid, status: res.status, ok: res.ok }
+  // Test 1: prices endpoint with country
+  const priceTests = await Promise.all(
+    CANDIDATES.slice(0, 4).map(async uid => {
+      const r1 = await fetch(`${GELATO_API_BASE}/products/${uid}/prices?country=FR`, { headers: { 'X-API-KEY': apiKey } })
+      const r2 = await fetch(`${GELATO_API_BASE}/products/${uid}`, { headers: { 'X-API-KEY': apiKey } })
+      const r3 = await fetch(`${GELATO_API_BASE}/products/${uid}/prices?country=FR&currency=EUR`, { headers: { 'X-API-KEY': apiKey } })
+      const body1 = await r1.text()
+      const body2 = await r2.text()
+      return { uid, prices_status: r1.status, product_status: r2.status, prices_eur_status: r3.status, body_prices: body1.slice(0, 200), body_product: body2.slice(0, 200) }
     })
   )
 
-  const working = results.filter(r => r.ok)
-  const broken = results.filter(r => !r.ok)
-  return NextResponse.json({ working, broken })
+  // Test 2: catalog listing for folded-cards and posters
+  const catFolded = await fetch(`${GELATO_API_BASE}/catalogs`, { headers: { 'X-API-KEY': apiKey } })
+  const catBody = await catFolded.text()
+
+  return NextResponse.json({ priceTests, catalogs: catBody.slice(0, 1000) })
 }

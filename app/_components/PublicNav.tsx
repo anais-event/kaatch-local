@@ -19,7 +19,8 @@ const features = [
 ]
 
 const navLinks = [
-  { label: 'Offres',       sub: null,       href: '/#offres' },
+  { label: 'Studio',       sub: 'Créatif',  href: '/#studio' },
+  { label: 'Calculette',   sub: 'Budget',   href: '/calculette' },
   { label: 'Inspirations', sub: 'Le Blog',  href: '/inspirations' },
   { label: 'Entre nous',   sub: 'Le Forum', href: '/entre-nous' },
 ]
@@ -68,8 +69,11 @@ export default function PublicNav({ active }: { active?: string }) {
               className="flex items-center gap-1 px-3 py-1.5 rounded-lg transition hover:bg-stone-100"
               aria-expanded={dropOpen}
             >
-              <span className="text-sm" style={{ fontFamily: BODY, fontWeight: 300, color: '#78716c' }}>
-                Fonctionnalités
+              <span className="text-sm leading-tight" style={{ fontFamily: BODY, fontWeight: 300, color: '#78716c' }}>
+                Découvrir
+              </span>
+              <span className="text-[10px] leading-tight text-stone-400 -mt-0.5" style={{ fontFamily: BODY, fontWeight: 300 }}>
+                Kaatch
               </span>
               <svg
                 width="10" height="10" viewBox="0 0 10 10" fill="none"
@@ -183,7 +187,7 @@ export default function PublicNav({ active }: { active?: string }) {
               onClick={() => setMobileFeatsOpen(o => !o)}
               className="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-stone-100 transition"
             >
-              <span style={{ fontFamily: BODY, fontWeight: 400, fontSize: '0.95rem', color: GREEN }}>Fonctionnalités</span>
+              <span style={{ fontFamily: BODY, fontWeight: 400, fontSize: '0.95rem', color: GREEN }}>Découvrir Kaatch</span>
               <svg
                 width="12" height="12" viewBox="0 0 12 12" fill="none"
                 className={`transition-transform duration-200 ${mobileFeatsOpen ? 'rotate-180' : ''}`}

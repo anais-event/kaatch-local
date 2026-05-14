@@ -537,11 +537,14 @@ export default function Home() {
 
           {/* Produits */}
           <ScrollReveal delay={200}>
-          <div className="mt-14 grid md:grid-cols-3 gap-5 mb-14">
+          <div className="mt-14 grid grid-cols-2 md:grid-cols-3 gap-4 mb-14">
             {[
-              { icon: '💌', name: 'Faire-part', desc: 'Animé + PDF haute résolution prêt à imprimer. Lien partageable ou impression papier.' },
-              { icon: '🍽️', name: 'Menu & programme', desc: 'Format A5 personnalisé avec le déroulé de votre journée et le menu du repas.' },
-              { icon: '🪧', name: 'Marque-places & tables', desc: "Un par invité, générés automatiquement depuis votre liste. Plus de Canva, plus d'Excel." },
+              { icon: '💌', name: 'Faire-part',      desc: 'Animé + PDF haute résolution. Lien partageable ou impression papier.' },
+              { icon: '🍽️', name: 'Menu',             desc: 'Format A5, généré depuis votre programme et vos choix de repas.' },
+              { icon: '📋', name: 'Programme jour J', desc: 'Le déroulé complet, mis en page automatiquement depuis votre planning.' },
+              { icon: '🪧', name: 'Marque-places',    desc: "Un par invité, générés en masse depuis votre liste. Zéro saisie manuelle." },
+              { icon: '🗺️', name: 'Plan de table',    desc: 'Toutes vos tables et vos invités, mis en page proprement.' },
+              { icon: '🔢', name: 'Numéros de table', desc: "Chevalet A5 avec le numéro de chaque table. Imprimé, prêt à poser." },
             ].map(p => (
               <div key={p.name} className="bg-white rounded-2xl p-6 border border-stone-100" style={{ boxShadow: SHADOW }}>
                 <span className="text-2xl block mb-3">{p.icon}</span>
@@ -562,8 +565,8 @@ export default function Home() {
                 <p className="text-white/60 text-xs tracking-[0.2em] uppercase mb-3" style={{ fontWeight: 500 }}>Prix de lancement</p>
                 <p style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', letterSpacing: '-0.02em', lineHeight: 1.1 }}
                    className="text-white mb-3">
-                  À partir de 45€{' '}
-                  <span style={{ fontWeight: 300, fontSize: '1.1rem', opacity: 0.7 }}>pour votre collection.</span>
+                  Votre collection de papeterie,{' '}
+                  <span style={{ fontWeight: 300, fontSize: '1.1rem', opacity: 0.8 }}>au prix d&apos;un menu.</span>
                 </p>
                 <p className="text-white/65 text-sm" style={{ fontWeight: 300, lineHeight: 1.7 }}>
                   Impression professionnelle incluse · Livraison 5–7 jours · Papier premium 300g/m²

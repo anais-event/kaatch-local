@@ -13,7 +13,7 @@ type ReceptionState = {
 }
 
 export default function ReceptionClient({
-  slug, weddingName, weddingDate, weddingLocation,
+  slug, weddingDate, weddingLocation,
   programmeSteps, tables, savedData, onSave,
 }: {
   slug: string
@@ -40,8 +40,8 @@ export default function ReceptionClient({
       } catch {}
     }
     return {
-      programme: { enabled: programmeSteps.length > 0, qty: Math.max(totalGuests, 1) },
-      planTable: { enabled: tables.length > 0, qty: 1 },
+      programme:    { enabled: programmeSteps.length > 0, qty: Math.max(totalGuests, 1) },
+      planTable:    { enabled: tables.length > 0, qty: 1 },
       numerosTable: { enabled: tables.length > 0, qty: tables.length || 1 },
     }
   })
@@ -51,203 +51,258 @@ export default function ReceptionClient({
     return () => clearTimeout(t)
   }, [state, storageKey])
 
-  function toggle(key: keyof ReceptionState, field: string, val: boolean | number) {
-    setState(prev => ({ ...prev, [key]: { ...prev[key], [field]: val } }))
+  function setEnabled(key: keyof ReceptionState, val: boolean) {
+    setState(prev => ({ ...prev, [key]: { ...prev[key], enabled: val } }))
   }
-
-  const dateStr = weddingDate
-    ? new Date(weddingDate).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
-    : null
+  function setQty(key: keyof ReceptionState, val: number) {
+    setState(prev => ({ ...prev, [key]: { ...prev[key], qty: Math.max(1, val) } }))
+  }
 
   const anySelected = state.programme.enabled || state.planTable.enabled || state.numerosTable.enabled
 
+  const items = [
+    {
+      key: 'programme' as const,
+      icon: '📋',
+      title: 'Programme de cérémonie',
+      format: 'A5 · 4 pages',
+      hint: programmeSteps.length > 0
+        ? `${programmeSteps.length} étapes configurées`
+        : null,
+      warning: programmeSteps.length === 0
+        ? { text: 'Programme non configuré', href: `/mariage/${slug}/programme`, cta: 'Créer le programme →' }
+        : null,
+      defaultQty: Math.max(totalGuests, 1),
+      qtyLabel: 'exemplaires',
+      preview: programmeSteps.length > 0
+        ? programmeSteps.slice(0, 3).map(s => (s.time ? `${s.time} · ` : '') + s.title)
+        : null,
+    },
+    {
+      key: 'planTable' as const,
+      icon: '🗺️',
+      title: 'Plan de table',
+      format: 'A2 · portrait · affiche',
+      hint: tables.length > 0
+        ? `${tables.length} tables · ${totalGuests} invités placés`
+        : null,
+      warning: tables.length === 0
+        ? { text: 'Plan de table non configuré', href: `/mariage/${slug}/tables`, cta: 'Créer le plan de table →' }
+        : null,
+      defaultQty: 1,
+      qtyLabel: 'affiche(s)',
+      preview: tables.length > 0
+        ? tables.slice(0, 4).map(t => `${t.name} (${t.guests.length})`)
+        : null,
+    },
+    {
+      key: 'numerosTable' as const,
+      icon: '🔢',
+      title: 'Numéros de table',
+      format: 'A5 · chevalet',
+      hint: tables.length > 0
+        ? `${tables.length} numéros à imprimer`
+        : null,
+      warning: tables.length === 0
+        ? { text: 'Aucune table configurée', href: `/mariage/${slug}/tables`, cta: 'Créer le plan de table →' }
+        : null,
+      defaultQty: tables.length || 1,
+      qtyLabel: 'numéros',
+      preview: tables.length > 0
+        ? tables.map(t => t.name)
+        : null,
+    },
+  ]
+
   return (
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
-      <div className="max-w-2xl mx-auto px-4 py-8 pb-36 space-y-5">
+      <div className="max-w-2xl mx-auto px-4 py-8 pb-36">
 
-        {/* En-tête */}
-        <div>
-          <a href={`/mariage/${slug}/studio`}
-            className="inline-flex items-center gap-1 text-stone-400 hover:text-stone-600 transition-colors mb-5"
-            style={{ fontWeight: 300, fontSize: '0.75rem' }}>
-            <svg viewBox="0 0 16 16" fill="none" className="w-3 h-3">
-              <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            Studio créatif
-          </a>
-          <p style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.2em' }} className="text-stone-400 uppercase mb-1">04 · Éléments de réception</p>
-          <h1 style={{ fontWeight: 600, fontSize: '1.3rem' }} className="text-[#2d3228] mb-1">Complétez votre collection</h1>
-          <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-500">
-            Les pièces du jour J — pré-remplies depuis votre programme et plan de table.
-          </p>
+        {/* En-tête minimal */}
+        <a href={`/mariage/${slug}/studio`}
+          className="inline-flex items-center gap-1 text-stone-400 hover:text-stone-600 transition-colors mb-5"
+          style={{ fontWeight: 300, fontSize: '0.75rem' }}>
+          <svg viewBox="0 0 16 16" fill="none" className="w-3 h-3">
+            <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          Studio créatif
+        </a>
+        <p style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.2em' }} className="text-stone-400 uppercase mb-1">04 · Éléments de réception</p>
+        <h1 style={{ fontWeight: 600, fontSize: '1.3rem' }} className="text-[#2d3228] mb-5">
+          Pièces du jour J
+        </h1>
+
+        <div className="flex flex-col gap-3">
+          {items.map(item => {
+            const s = state[item.key]
+            return (
+              <div
+                key={item.key}
+                className="bg-white rounded-xl border overflow-hidden transition-all duration-200"
+                style={{ borderColor: s.enabled ? 'rgba(74,82,64,0.3)' : '#e7e5e4' }}
+              >
+                {/* ── Ligne principale ── */}
+                <div className="flex items-center gap-4 px-4 py-4">
+                  {/* Icône produit */}
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-lg"
+                    style={{ background: s.enabled ? '#f0e9d8' : '#f5f5f4' }}
+                  >
+                    {item.icon}
+                  </div>
+
+                  {/* Info produit */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span style={{ fontWeight: 600, fontSize: '0.9rem' }} className="text-[#2d3228]">
+                        {item.title}
+                      </span>
+                      {item.hint && (
+                        <span
+                          className="rounded-full px-2 py-0.5"
+                          style={{
+                            background: s.enabled ? 'rgba(74,82,64,0.1)' : '#f5f5f4',
+                            color: s.enabled ? '#4a5240' : '#a8a29e',
+                            fontWeight: 300,
+                            fontSize: '0.62rem',
+                          }}
+                        >
+                          {item.hint}
+                        </span>
+                      )}
+                    </div>
+                    <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400 mt-0.5">
+                      {item.format}
+                    </p>
+                  </div>
+
+                  {/* Toggle inclure/exclure */}
+                  <button
+                    onClick={() => setEnabled(item.key, !s.enabled)}
+                    className={`relative flex-shrink-0 rounded-full transition-all duration-200`}
+                    style={{
+                      width: 44, height: 24,
+                      background: s.enabled ? '#4a5240' : '#d6d3d1',
+                    }}
+                    aria-label={s.enabled ? 'Exclure' : 'Inclure'}
+                  >
+                    <span
+                      className="absolute rounded-full bg-white shadow-sm transition-all duration-200"
+                      style={{
+                        width: 18, height: 18,
+                        top: 3,
+                        left: s.enabled ? 23 : 3,
+                      }}
+                    />
+                  </button>
+                </div>
+
+                {/* ── Avertissement si non configuré ── */}
+                {item.warning && s.enabled && (
+                  <div className="mx-4 mb-3 px-3 py-2.5 bg-amber-50 rounded-lg border border-amber-100">
+                    <p style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-amber-700">
+                      {item.warning.text}{' '}
+                      <a href={item.warning.href} className="underline font-medium hover:text-amber-800">
+                        {item.warning.cta}
+                      </a>
+                    </p>
+                  </div>
+                )}
+
+                {/* ── Aperçu contenu (si configuré) ── */}
+                {item.preview && s.enabled && (
+                  <div className="px-4 pb-3">
+                    <div className="bg-stone-50 rounded-lg px-3 py-2 flex flex-wrap gap-1.5">
+                      {item.preview.map((p, i) => (
+                        <span
+                          key={i}
+                          style={{ fontWeight: 300, fontSize: '0.65rem' }}
+                          className="text-stone-500 bg-white rounded-md px-2 py-0.5 border border-stone-100"
+                        >
+                          {p}
+                        </span>
+                      ))}
+                      {item.key === 'planTable' && tables.length > 4 && (
+                        <span style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-400 self-center">
+                          +{tables.length - 4} autres
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Quantité (toujours visible si enabled) ── */}
+                {s.enabled && (
+                  <div
+                    className="flex items-center justify-between px-4 py-3 border-t"
+                    style={{ borderColor: 'rgba(74,82,64,0.1)', background: 'rgba(74,82,64,0.03)' }}
+                  >
+                    <div>
+                      <p style={{ fontWeight: 500, fontSize: '0.75rem' }} className="text-stone-600">
+                        Combien en voulez-vous ?
+                      </p>
+                      <p style={{ fontWeight: 300, fontSize: '0.62rem' }} className="text-stone-400 mt-0.5">
+                        Suggestion basée sur vos données : {item.defaultQty} {item.qtyLabel}
+                      </p>
+                    </div>
+
+                    {/* Stepper */}
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <button
+                        onClick={() => setQty(item.key, s.qty - 1)}
+                        className="w-8 h-8 rounded-full border border-stone-200 flex items-center justify-center text-stone-400 hover:border-[#4a5240]/50 hover:text-[#4a5240] transition-all"
+                        style={{ fontSize: '1.1rem', lineHeight: 1 }}
+                      >
+                        −
+                      </button>
+                      <div className="text-center" style={{ minWidth: 50 }}>
+                        <input
+                          type="number"
+                          value={s.qty}
+                          onChange={e => setQty(item.key, parseInt(e.target.value) || 1)}
+                          min={1}
+                          className="w-12 text-center border border-stone-200 rounded-lg py-1.5 focus:outline-none focus:border-[#4a5240]/50"
+                          style={{ fontWeight: 700, fontSize: '1rem', color: '#4a5240' }}
+                        />
+                        <p style={{ fontWeight: 300, fontSize: '0.58rem' }} className="text-stone-400 mt-0.5">
+                          {item.qtyLabel}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setQty(item.key, s.qty + 1)}
+                        className="w-8 h-8 rounded-full border border-stone-200 flex items-center justify-center text-stone-400 hover:border-[#4a5240]/50 hover:text-[#4a5240] transition-all"
+                        style={{ fontSize: '1.1rem', lineHeight: 1 }}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          })}
         </div>
 
-        {/* ── Section A : Programme ── */}
-        <Section
-          enabled={state.programme.enabled}
-          onToggle={v => toggle('programme', 'enabled', v)}
-          icon="📋"
-          title="Programme de cérémonie"
-          badge={programmeSteps.length > 0 ? `${programmeSteps.length} étapes` : 'Non configuré'}
-          badgeOk={programmeSteps.length > 0}
-        >
-          {programmeSteps.length > 0 ? (
-            <div className="flex flex-col gap-2 mb-4">
-              {programmeSteps.map((s, i) => (
-                <div key={s.id} className="flex items-start gap-3">
-                  <div className="flex flex-col items-center flex-shrink-0 pt-0.5">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#4a5240] mt-1" />
-                    {i < programmeSteps.length - 1 && <div className="w-px flex-1 bg-stone-100 mt-1" style={{ minHeight: 16 }} />}
-                  </div>
-                  <div className="flex-1 pb-2">
-                    <div className="flex items-baseline gap-2">
-                      {s.time && <span style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400 flex-shrink-0">{s.time}</span>}
-                      <span style={{ fontWeight: 500, fontSize: '0.8rem' }} className="text-stone-700">{s.title}</span>
-                    </div>
-                    {s.description && <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mt-0.5 leading-snug">{s.description}</p>}
-                  </div>
-                </div>
-              ))}
+        {/* Récap sélection */}
+        {anySelected && (
+          <div className="mt-4 bg-white rounded-xl border border-stone-100 shadow-sm overflow-hidden">
+            <div className="px-4 py-3 border-b border-stone-50">
+              <p style={{ fontWeight: 600, fontSize: '0.82rem' }} className="text-[#2d3228]">Récapitulatif</p>
             </div>
-          ) : (
-            <div className="mb-4 p-3 bg-amber-50 rounded-lg border border-amber-100">
-              <p style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-amber-700">
-                Aucun programme configuré.{' '}
-                <a href={`/mariage/${slug}/programme`} className="underline hover:text-amber-800">
-                  Créer le programme →
-                </a>
-              </p>
-            </div>
-          )}
-
-          {state.programme.enabled && (
-            <div className="flex items-center gap-3 pt-1">
-              <span style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-500">Quantité :</span>
-              <button onClick={() => toggle('programme', 'qty', Math.max(1, state.programme.qty - 1))}
-                className="w-7 h-7 rounded-full border border-stone-200 text-stone-400 hover:border-[#4a5240]/50 flex items-center justify-center transition-all"
-                style={{ fontSize: '1rem' }}>−</button>
-              <input
-                type="number"
-                value={state.programme.qty}
-                onChange={e => toggle('programme', 'qty', parseInt(e.target.value) || 1)}
-                min={1}
-                className="w-14 text-center border border-stone-200 rounded-lg py-1 focus:outline-none focus:border-[#4a5240]/50"
-                style={{ fontWeight: 600, fontSize: '0.9rem', color: '#4a5240' }}
-              />
-              <button onClick={() => toggle('programme', 'qty', state.programme.qty + 1)}
-                className="w-7 h-7 rounded-full border border-stone-200 text-stone-400 hover:border-[#4a5240]/50 flex items-center justify-center transition-all"
-                style={{ fontSize: '1rem' }}>+</button>
-              <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400">exemplaires</span>
-            </div>
-          )}
-        </Section>
-
-        {/* ── Section B : Plan de table ── */}
-        <Section
-          enabled={state.planTable.enabled}
-          onToggle={v => toggle('planTable', 'enabled', v)}
-          icon="🗺️"
-          title="Plan de table"
-          badge={tables.length > 0 ? `${tables.length} tables · ${totalGuests} placés` : 'Non configuré'}
-          badgeOk={tables.length > 0}
-        >
-          {tables.length > 0 ? (
-            <div className="grid grid-cols-2 gap-2 mb-4">
-              {tables.slice(0, 8).map(t => (
-                <div key={t.id} className="bg-stone-50 rounded-lg p-2.5">
-                  <p style={{ fontWeight: 500, fontSize: '0.75rem' }} className="text-stone-700 mb-1">{t.name}</p>
-                  <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-400 leading-snug">
-                    {t.guests.length > 0
-                      ? t.guests.slice(0, 3).join(', ') + (t.guests.length > 3 ? ` +${t.guests.length - 3}` : '')
-                      : 'Aucun invité'}
-                  </p>
-                </div>
-              ))}
-              {tables.length > 8 && (
-                <div className="bg-stone-50 rounded-lg p-2.5 flex items-center justify-center">
-                  <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">
-                    +{tables.length - 8} tables
+            <div className="px-4 py-3 flex flex-col gap-2">
+              {items.filter(i => state[i.key].enabled).map(i => (
+                <div key={i.key} className="flex items-center justify-between">
+                  <span style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-600">
+                    {i.icon} {i.title}
+                  </span>
+                  <span style={{ fontWeight: 600, fontSize: '0.82rem' }} className="text-[#4a5240]">
+                    {state[i.key].qty} {i.qtyLabel}
                   </span>
                 </div>
-              )}
-            </div>
-          ) : (
-            <div className="mb-4 p-3 bg-amber-50 rounded-lg border border-amber-100">
-              <p style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-amber-700">
-                Plan de table non configuré.{' '}
-                <a href={`/mariage/${slug}/tables`} className="underline hover:text-amber-800">
-                  Créer le plan de table →
-                </a>
-              </p>
-            </div>
-          )}
-          {state.planTable.enabled && (
-            <div className="flex items-center gap-3 pt-1">
-              <span style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-500">Quantité :</span>
-              <button onClick={() => toggle('planTable', 'qty', Math.max(1, state.planTable.qty - 1))}
-                className="w-7 h-7 rounded-full border border-stone-200 text-stone-400 hover:border-[#4a5240]/50 flex items-center justify-center transition-all"
-                style={{ fontSize: '1rem' }}>−</button>
-              <input
-                type="number"
-                value={state.planTable.qty}
-                onChange={e => toggle('planTable', 'qty', parseInt(e.target.value) || 1)}
-                min={1}
-                className="w-14 text-center border border-stone-200 rounded-lg py-1 focus:outline-none focus:border-[#4a5240]/50"
-                style={{ fontWeight: 600, fontSize: '0.9rem', color: '#4a5240' }}
-              />
-              <button onClick={() => toggle('planTable', 'qty', state.planTable.qty + 1)}
-                className="w-7 h-7 rounded-full border border-stone-200 text-stone-400 hover:border-[#4a5240]/50 flex items-center justify-center transition-all"
-                style={{ fontSize: '1rem' }}>+</button>
-              <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400">affiches</span>
-            </div>
-          )}
-        </Section>
-
-        {/* ── Section C : Numéros de table ── */}
-        <Section
-          enabled={state.numerosTable.enabled}
-          onToggle={v => toggle('numerosTable', 'enabled', v)}
-          icon="🔢"
-          title="Numéros de table"
-          badge={tables.length > 0 ? `${tables.length} numéros` : 'Non configuré'}
-          badgeOk={tables.length > 0}
-        >
-          {tables.length > 0 ? (
-            <div className="flex flex-wrap gap-1.5 mb-4">
-              {tables.map(t => (
-                <div key={t.id}
-                  className="px-3 py-1.5 bg-stone-50 rounded-lg border border-stone-100 text-center min-w-[44px]">
-                  <span style={{ fontWeight: 500, fontSize: '0.78rem' }} className="text-stone-700">{t.name}</span>
-                </div>
               ))}
             </div>
-          ) : (
-            <p style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-stone-400 mb-3">
-              Les numéros seront générés d'après votre plan de table.
-            </p>
-          )}
-          {state.numerosTable.enabled && (
-            <div className="flex items-center gap-3 pt-1">
-              <span style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-500">Quantité :</span>
-              <button onClick={() => toggle('numerosTable', 'qty', Math.max(1, state.numerosTable.qty - 1))}
-                className="w-7 h-7 rounded-full border border-stone-200 text-stone-400 hover:border-[#4a5240]/50 flex items-center justify-center transition-all"
-                style={{ fontSize: '1rem' }}>−</button>
-              <input
-                type="number"
-                value={state.numerosTable.qty}
-                onChange={e => toggle('numerosTable', 'qty', parseInt(e.target.value) || 1)}
-                min={1}
-                className="w-14 text-center border border-stone-200 rounded-lg py-1 focus:outline-none focus:border-[#4a5240]/50"
-                style={{ fontWeight: 600, fontSize: '0.9rem', color: '#4a5240' }}
-              />
-              <button onClick={() => toggle('numerosTable', 'qty', state.numerosTable.qty + 1)}
-                className="w-7 h-7 rounded-full border border-stone-200 text-stone-400 hover:border-[#4a5240]/50 flex items-center justify-center transition-all"
-                style={{ fontSize: '1rem' }}>+</button>
-              <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400">supports</span>
-            </div>
-          )}
-        </Section>
-
+          </div>
+        )}
       </div>
 
       {/* Barre bas */}
@@ -274,57 +329,12 @@ export default function ReceptionClient({
               style={{ fontWeight: 400, fontSize: '0.8rem', letterSpacing: '0.03em' }}
               className={`flex items-center gap-2 px-5 py-2 rounded-lg transition-all
                 ${anySelected && !saving ? 'bg-[#4a5240] text-white hover:bg-[#2d3228]' : 'bg-stone-100 text-stone-300 cursor-not-allowed'}`}>
-              {saving ? 'Sauvegarde…' : 'Finaliser ma collection →'}
+              {saving ? 'Sauvegarde…' : 'Valider →'}
             </button>
           </div>
         </div>
         <div className="h-safe-bottom" />
       </div>
-    </div>
-  )
-}
-
-// ── Composant Section réutilisable ────────────────────────────────────────────
-
-function Section({
-  enabled, onToggle, icon, title, badge, badgeOk, children,
-}: {
-  enabled: boolean
-  onToggle: (v: boolean) => void
-  icon: string
-  title: string
-  badge: string
-  badgeOk: boolean
-  children?: React.ReactNode
-}) {
-  return (
-    <div className={`bg-white rounded-xl border transition-all duration-150 overflow-hidden
-      ${enabled ? 'border-[#4a5240]/30 shadow-sm' : 'border-stone-100 opacity-70'}`}>
-      {/* Header */}
-      <div className="flex items-center gap-3 p-4 border-b border-stone-50">
-        <button onClick={() => onToggle(!enabled)}
-          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all
-            ${enabled ? 'bg-[#4a5240] border-[#4a5240]' : 'border-stone-300 hover:border-[#4a5240]/60 bg-white'}`}>
-          {enabled && (
-            <svg viewBox="0 0 10 10" fill="none" className="w-2.5 h-2.5">
-              <path d="M1.5 5l2.5 2.5L8.5 2.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          )}
-        </button>
-        <span className="text-lg">{icon}</span>
-        <div className="flex-1">
-          <span style={{ fontWeight: 600, fontSize: '0.9rem' }} className="text-[#2d3228]">{title}</span>
-          <span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${badgeOk ? 'bg-[#4a5240]/10 text-[#4a5240]' : 'bg-amber-50 text-amber-600'}`}
-            style={{ fontWeight: 300, fontSize: '0.65rem' }}>
-            {badge}
-          </span>
-        </div>
-
-      </div>
-      {/* Corps */}
-      {enabled && children && (
-        <div className="p-4">{children}</div>
-      )}
     </div>
   )
 }

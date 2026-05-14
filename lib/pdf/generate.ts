@@ -4,7 +4,10 @@ import { registerFonts, TYPO_FAMILIES } from './fonts'
 import { FairePartPDF } from './faire-part'
 import { MarquePlacePDF } from './marque-place'
 import { MenuPDF } from './menu'
-import type { UniversSettings, UniversColors, WeddingInfo, GuestInfo } from './types'
+import { ProgrammePDF } from './programme'
+import { PlanTablePDF } from './plan-table'
+import { NumeroTablePDF } from './numeros-table'
+import type { UniversSettings, UniversColors, WeddingInfo, GuestInfo, ProgrammeStep, TableInfo } from './types'
 
 const AMBIANCE_PALETTES: Record<string, string[]> = {
   campagne:   ['#e8dcc8', '#c4a882', '#7a8c6e', '#5c4a3a'],
@@ -24,7 +27,6 @@ export function extractUniversSettings(moduleUnivers: unknown): UniversSettings 
   const palette = AMBIANCE_PALETTES[u.ambianceId ?? 'editorial'] ?? AMBIANCE_PALETTES.editorial
   const custom  = u.customColors ?? {}
 
-  // Palette labels per ambiance (order matches AMBIANCES in UniversClient)
   const paletteLabels: Record<string, string[]> = {
     campagne:  ['Blé', 'Terre', 'Sauge', 'Humus'],
     editorial: ['Ivoire', 'Cendre', 'Graphite', 'Or'],
@@ -59,4 +61,19 @@ export async function generateMarquePlaceBuffer(univers: UniversSettings, guest:
 export async function generateMenuBuffer(univers: UniversSettings, wedding: WeddingInfo, courses: string[] = []): Promise<Buffer> {
   registerFonts()
   return renderToBuffer(createElement(MenuPDF, { univers, wedding, courses }) as any)
+}
+
+export async function generateProgrammeBuffer(univers: UniversSettings, wedding: WeddingInfo, steps: ProgrammeStep[]): Promise<Buffer> {
+  registerFonts()
+  return renderToBuffer(createElement(ProgrammePDF, { univers, wedding, steps }) as any)
+}
+
+export async function generatePlanTableBuffer(univers: UniversSettings, wedding: WeddingInfo, tables: TableInfo[]): Promise<Buffer> {
+  registerFonts()
+  return renderToBuffer(createElement(PlanTablePDF, { univers, wedding, tables }) as any)
+}
+
+export async function generateNumeroTableBuffer(univers: UniversSettings, tableName: string): Promise<Buffer> {
+  registerFonts()
+  return renderToBuffer(createElement(NumeroTablePDF, { univers, tableName }) as any)
 }

@@ -180,48 +180,72 @@ export default function DestinatairesClient({
 
   const grandTotal = Object.values(totals).reduce((a, b) => a + b, 0)
 
-  // ── Drag & drop ─────────────────────────────────────────────────────────────
-  const dragId    = useRef<string | null>(null)
-  const dropId    = useRef<string | null>(null)
-  const [dragging, setDragging]     = useState<string | null>(null)
-  const [dropTarget, setDropTarget] = useState<string | null>(null)
+  // ── Drag & drop (niveau famille) ────────────────────────────────────────────
+  // On drague la famille entière : tous les membres bougent ensemble.
+  const dragFamille    = useRef<string | null>(null)
+  const dropFamille    = useRef<string | null>(null)
+  const [draggingFam, setDraggingFam]   = useState<string | null>(null)
+  const [dropTargetFam, setDropTargetFam] = useState<string | null>(null)
+
+  function getFamilleKey(g: Guest) {
+    return cleanName(g.last_name) || g.id
+  }
 
   function onDragStart(e: React.DragEvent, guestId: string) {
-    dragId.current = guestId
-    setDragging(guestId)
+    const guest = orderedGuests.find(g => g.id === guestId)
+    if (!guest) return
+    const famKey = getFamilleKey(guest)
+    dragFamille.current = famKey
+    setDraggingFam(famKey)
     e.dataTransfer.effectAllowed = 'move'
-    e.dataTransfer.setData('text/plain', guestId)
+    e.dataTransfer.setData('text/plain', famKey)
   }
 
   function onDragOver(e: React.DragEvent, guestId: string) {
     e.preventDefault()
     e.dataTransfer.dropEffect = 'move'
-    if (dropId.current !== guestId) {
-      dropId.current = guestId
-      setDropTarget(guestId)
+    const guest = orderedGuests.find(g => g.id === guestId)
+    if (!guest) return
+    const famKey = getFamilleKey(guest)
+    if (dropFamille.current !== famKey) {
+      dropFamille.current = famKey
+      setDropTargetFam(famKey)
     }
   }
 
-  function onDrop(e: React.DragEvent, targetId: string) {
+  function onDrop(e: React.DragEvent, targetGuestId: string) {
     e.preventDefault()
-    const sourceId = dragId.current
-    if (!sourceId || sourceId === targetId) return
+    const sourceFam = dragFamille.current
+    const targetGuest = orderedGuests.find(g => g.id === targetGuestId)
+    if (!sourceFam || !targetGuest) return
+    const targetFam = getFamilleKey(targetGuest)
+    if (sourceFam === targetFam) return
+
     setGuestOrder(prev => {
-      const next = [...prev]
-      const from = next.indexOf(sourceId)
-      const to   = next.indexOf(targetId)
-      if (from === -1 || to === -1) return prev
-      next.splice(from, 1)
-      next.splice(to, 0, sourceId)
-      return next
+      // IDs des membres source et target
+      const sourceIds = prev.filter(id => {
+        const g = guests.find(gg => gg.id === id)
+        return g && getFamilleKey(g) === sourceFam
+      })
+      const targetIdx = prev.findIndex(id => id === targetGuestId)
+      if (targetIdx === -1) return prev
+
+      // Retirer les membres source
+      const without = prev.filter(id => !sourceIds.includes(id))
+      // Trouver la nouvelle position (après la famille cible)
+      const newTargetIdx = without.findIndex(id => id === targetGuestId)
+      if (newTargetIdx === -1) return prev
+      const insertAt = newTargetIdx + 1
+      without.splice(insertAt, 0, ...sourceIds)
+      return without
     })
   }
 
   function onDragEnd() {
-    dragId.current = null
-    dropId.current = null
-    setDragging(null)
-    setDropTarget(null)
+    dragFamille.current = null
+    dropFamille.current = null
+    setDraggingFam(null)
+    setDropTargetFam(null)
   }
 
   if (PRODUCTS.length === 0) {
@@ -263,8 +287,7 @@ export default function DestinatairesClient({
           Personnalisez vos envois
         </h1>
         <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-500">
-          La ligne <strong style={{ fontWeight: 500 }}>Famille</strong> compte comme 1 envoi — ex: 1 faire-part par famille.
-          Glissez <span className="inline-block">⠿</span> pour réorganiser.
+          Ligne <strong style={{ fontWeight: 500 }}>Famille</strong> = 1 envoi. Glissez <span className="inline-block">⠿</span> pour réordonner.
         </p>
       </div>
 
@@ -348,8 +371,9 @@ export default function DestinatairesClient({
                 {/* Membres */}
                 {members.map((guest, gi) => {
                   const guestKey = `guest:${guest.id}`
-                  const isDragged  = dragging === guest.id
-                  const isDropOver = dropTarget === guest.id && dragging !== guest.id
+                  const famKey = getFamilleKey(guest)
+                  const isDragged  = draggingFam === famKey
+                  const isDropOver = dropTargetFam === famKey && draggingFam !== famKey
                   return (
                     <div
                       key={guest.id}

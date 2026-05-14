@@ -23,3 +23,15 @@ export type GuestInfo = {
   lastName: string
   tableName?: string | null
 }
+
+export type ProgrammeStep = {
+  title: string
+  time: string | null
+  description?: string | null
+}
+
+export type TableInfo = {
+  id: string
+  name: string
+  guests: string[]  // display names
+}

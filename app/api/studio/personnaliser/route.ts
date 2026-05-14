@@ -58,9 +58,16 @@ export async function POST(req: NextRequest) {
     .update({ personalization, status: 'personalizing' })
     .eq('id', orderId)
 
-  // Build Gelato order items
-  // NOTE: Each item needs a print file URL. Since we don't have auto-generated PDFs yet,
-  // we use a placeholder kaatch template URL. Real implementation requires PDF generation.
+  // Generate PDFs
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://kaatch.fr'
+  const pdfRes = await fetch(`${baseUrl}/api/studio/pdf`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ orderId }),
+  })
+  const pdfData = pdfRes.ok ? await pdfRes.json() : {}
+  const pdfUrls = (pdfData.urls ?? {}) as Record<string, string>
+
   const quantities = order.quantities as Record<string, number>
   const shipping = order.shipping_address as {
     name?: string; line1?: string; line2?: string;
@@ -78,20 +85,23 @@ export async function POST(req: NextRequest) {
       if (!uid) return null
       const packOf = PACK_OF[productId] ?? 1
       const gelatoQty = packOf > 1 ? Math.ceil(qty / packOf) : qty
+      const fileUrl = pdfUrls[productId]
+      if (!fileUrl) return null
       return {
         productUid: uid,
         quantity: gelatoQty,
-        // Placeholder file — must be replaced with real generated PDF URL
-        files: [{
-          type: 'default',
-          url: `https://kaatch.fr/api/studio/template?product=${productId}&order=${orderId}`,
-        }],
+        files: [{ type: 'default', url: fileUrl }],
       }
     })
     .filter(Boolean)
 
+  if (items.length === 0) {
+    await supabase.from('studio_public_orders').update({ status: 'perso_done', notes: 'PDFs manquants' }).eq('id', orderId)
+    return NextResponse.json({ ok: true, warning: 'PDFs non générés, traitement manuel' })
+  }
+
   const gelatoPayload = {
-    orderType: 'draft', // "draft" until we have real PDFs — change to "order" for live
+    orderType: 'order', // PDFs présents → commande réelle
     orderReferenceId: orderId,
     customerReferenceId: order.email ?? orderId,
     currency: 'EUR',

@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
   const orderId = session.metadata?.order_id
   if (!orderId) return NextResponse.json({ error: 'No order_id in metadata' }, { status: 400 })
 
-  const shipping = session.shipping_details
+  const shipping = (session as unknown as { shipping_details?: { name?: string; address?: { line1?: string; line2?: string; city?: string; postal_code?: string; country?: string } } }).shipping_details
   const shippingAddress = shipping ? {
     name: shipping.name,
     line1: shipping.address?.line1,

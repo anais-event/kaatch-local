@@ -51,7 +51,7 @@ export async function GET() {
   const allUids = (catData.data ?? []).map((c: { catalogUid: string; title: string }) => `${c.catalogUid} — ${c.title}`)
 
   // Fetch products from promising catalogs
-  const interestingCats = ['blank-envelopes', 'posters', 'greeting-cards', 'folded-cards', 'stationery', 'large-format', 'place-cards']
+  const interestingCats = ['pack-of-cards-folded', 'pack-of-cards-folded-envelopes', 'letterheads', 'hanging-posters', 'poster-hangers', 'framed-posters', 'multipage-brochures', 'flyers']
   const catProducts: Record<string, unknown> = {}
   for (const cat of interestingCats) {
     const r = await fetch(`${GELATO_API_BASE}/catalogs/${cat}/products?limit=5`, { headers: { 'X-API-KEY': apiKey } })

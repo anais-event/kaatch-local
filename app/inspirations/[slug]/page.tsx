@@ -26,7 +26,6 @@ function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
-// Composants MDX custom — appliquent le design system Kaatch
 const mdxComponents = {
   h2: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
     <h2 style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1.15rem', color: GREEN, marginTop: '2.5rem', marginBottom: '0.75rem', letterSpacing: '-0.01em' }}
@@ -56,6 +55,22 @@ const mdxComponents = {
   strong: (props: React.HTMLAttributes<HTMLElement>) => (
     <strong style={{ fontWeight: 600, color: '#44403c' }} {...props} />
   ),
+  CTA: () => (
+    <div className="mt-16 rounded-2xl bg-white p-8 border border-stone-100 text-center"
+         style={{ boxShadow: '0 2px 16px rgba(44,59,46,0.06)' }}>
+      <p style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1.1rem', color: GREEN, marginBottom: 8 }}>
+        Envie de tout gérer au même endroit ?
+      </p>
+      <p className="text-stone-500 text-sm mb-6" style={{ fontWeight: 300 }}>
+        Kaatch vous aide à organiser votre mariage de A à Z — invités, plan de table, budget, photos.
+      </p>
+      <Link href="/auth"
+            className="inline-block text-white px-8 py-3.5 rounded-xl hover:opacity-90 transition text-sm"
+            style={{ background: GREEN, fontWeight: 500 }}>
+        Créer mon espace gratuitement →
+      </Link>
+    </div>
+  ),
 }
 
 export default async function InspirationPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -64,23 +79,19 @@ export default async function InspirationPage({ params }: { params: Promise<{ sl
   if (!item) notFound()
 
   return (
-    <main style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, color: '#2d3228', background: CREAM, minHeight: '100vh' }}>
-
-      <nav style={{ background: `${CREAM}f2`, backdropFilter: 'blur(12px)' }}
-           className="fixed top-0 left-0 right-0 z-50 border-b border-stone-200/60">
-        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-5">
-            <Link href="/"
-                  style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '1.2rem', letterSpacing: '-0.02em', color: GREEN }}>
-              Kaatch
-            </Link>
-            <Link href="/inspirations" className="text-sm text-stone-400 hover:text-stone-600 transition flex items-center gap-1" style={{ fontWeight: 400 }}>
-              <span>←</span> Inspirations
-            </Link>
-          </div>
+    <main className="min-h-screen" style={{ background: CREAM }}>
+      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4"
+           style={{ background: 'rgba(245,240,232,0.92)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(44,59,46,0.08)' }}>
+        <Link href="/" style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '1.1rem', color: GREEN }}>
+          Kaatch
+        </Link>
+        <div className="flex items-center gap-6">
+          <Link href="/inspirations" className="text-sm text-stone-500 hover:text-stone-700 transition" style={{ fontWeight: 300 }}>
+            Inspirations
+          </Link>
           <Link href="/auth"
-                className="text-sm px-5 py-2.5 rounded-xl hover:opacity-90 transition text-white"
-                style={{ background: GREEN, fontWeight: 500 }}>
+                className="text-sm px-4 py-2 rounded-xl border transition hover:opacity-80"
+                style={{ borderColor: GREEN, color: GREEN, fontWeight: 500 }}>
             Mon espace
           </Link>
         </div>

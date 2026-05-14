@@ -45,9 +45,23 @@ export async function GET() {
     })
   )
 
-  // Test 2: catalog listing for folded-cards and posters
-  const catFolded = await fetch(`${GELATO_API_BASE}/catalogs`, { headers: { 'X-API-KEY': apiKey } })
-  const catBody = await catFolded.text()
+  // Full catalog list
+  const catRes = await fetch(`${GELATO_API_BASE}/catalogs`, { headers: { 'X-API-KEY': apiKey } })
+  const catData = await catRes.json()
+  const allUids = (catData.data ?? []).map((c: { catalogUid: string; title: string }) => `${c.catalogUid} — ${c.title}`)
 
-  return NextResponse.json({ priceTests, catalogs: catBody.slice(0, 1000) })
+  // Fetch products from promising catalogs
+  const interestingCats = ['blank-envelopes', 'posters', 'greeting-cards', 'folded-cards', 'stationery', 'large-format', 'place-cards']
+  const catProducts: Record<string, unknown> = {}
+  for (const cat of interestingCats) {
+    const r = await fetch(`${GELATO_API_BASE}/catalogs/${cat}/products?limit=5`, { headers: { 'X-API-KEY': apiKey } })
+    if (r.ok) {
+      const d = await r.json()
+      catProducts[cat] = (d.products ?? d.data ?? []).slice(0, 5).map((p: { productUid?: string; uid?: string; title?: string; name?: string }) => ({ uid: p.productUid ?? p.uid, title: p.title ?? p.name }))
+    } else {
+      catProducts[cat] = { status: r.status }
+    }
+  }
+
+  return NextResponse.json({ allCatalogs: allUids, catProducts })
 }

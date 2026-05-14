@@ -8,6 +8,7 @@ type Item = {
   label: string
   icon: string
   desc: string
+  format: string
   defaultQty: number
   qtyLabel: string
   perPerson: boolean
@@ -26,13 +27,13 @@ export default function CollectionClient({
   const [saving, setSaving] = useState(false)
 
   const ITEMS: Item[] = [
-    { key: 'save_the_date', label: 'Save the date',   icon: '📅', desc: '1 par famille — annonce en avant-première', defaultQty: familleCount,            qtyLabel: 'familles', perPerson: false },
-    { key: 'faire_part',   label: 'Faire-part',        icon: '💌', desc: '1 par famille — invitation officielle',    defaultQty: familleCount,            qtyLabel: 'familles', perPerson: false },
-    { key: 'menu',         label: 'Menu',              icon: '🍽️', desc: '1 par personne',                           defaultQty: guestCount,              qtyLabel: 'pers.',    perPerson: true  },
-    { key: 'marque_place', label: 'Marque-place',      icon: '🏷️', desc: '1 par personne',                           defaultQty: guestCount,              qtyLabel: 'pers.',    perPerson: true  },
-    { key: 'programme',   label: 'Programme',          icon: '📋', desc: 'Déroulé de cérémonie',                     defaultQty: Math.max(guestCount, 1), qtyLabel: 'ex.',      perPerson: true  },
-    { key: 'plan_table',  label: 'Plan de table',      icon: '🗺️', desc: 'Affiche grand format',                     defaultQty: 1,                       qtyLabel: 'affiche',  perPerson: false },
-    { key: 'numeros_table',label: 'Numéros de table',  icon: '🔢', desc: `${tableCount || '?'} tables`,              defaultQty: tableCount || 1,         qtyLabel: 'tables',   perPerson: false },
+    { key: 'save_the_date', label: 'Save the date',    icon: '📅', desc: '1 par famille',                            format: 'A5 · double volet',   defaultQty: familleCount,            qtyLabel: 'familles', perPerson: false },
+    { key: 'faire_part',    label: 'Faire-part',        icon: '💌', desc: '1 par famille · envoi personnalisé',      format: 'A5 · recto verso',    defaultQty: familleCount,            qtyLabel: 'familles', perPerson: false },
+    { key: 'menu',          label: 'Menu',              icon: '🍽️', desc: '1 par personne',                          format: 'A5 · recto',          defaultQty: guestCount,              qtyLabel: 'pers.',    perPerson: true  },
+    { key: 'marque_place',  label: 'Marque-place',      icon: '🏷️', desc: '1 par personne',                          format: '9×6 cm · chevalet',   defaultQty: guestCount,              qtyLabel: 'pers.',    perPerson: true  },
+    { key: 'programme',     label: 'Programme',         icon: '📋', desc: 'Déroulé de cérémonie',                   format: 'A5 · 4 pages',        defaultQty: Math.max(guestCount, 1), qtyLabel: 'ex.',      perPerson: true  },
+    { key: 'plan_table',    label: 'Plan de table',     icon: '🗺️', desc: 'Affiche grand format',                   format: 'A2 · portrait',       defaultQty: 1,                       qtyLabel: 'affiche',  perPerson: false },
+    { key: 'numeros_table', label: 'Numéros de table',  icon: '🔢', desc: `${tableCount || '?'} tables`,            format: 'A5 · chevalet',       defaultQty: tableCount || 1,         qtyLabel: 'tables',   perPerson: false },
   ]
 
   const [state, setState] = useState<CollectionState>(() => {
@@ -152,79 +153,76 @@ export default function CollectionClient({
           </div>
         </div>
 
-        {/* ── Section 2 : Tableau impression / téléchargement ── */}
+        {/* ── Section 2 : Récap impression ── */}
         {selected.length > 0 && (
           <div>
             <p style={{ fontWeight: 500, fontSize: '0.72rem', letterSpacing: '0.12em' }} className="text-stone-400 uppercase mb-3">
-              Imprimer ou télécharger
+              Récapitulatif d'impression
             </p>
-            <div className="bg-white rounded-xl border border-stone-100 shadow-sm overflow-hidden">
-              {/* Header */}
-              <div className="grid border-b border-stone-100" style={{ gridTemplateColumns: '1fr 160px 120px' }}>
-                <div className="px-4 py-2.5">
-                  <span style={{ fontWeight: 300, fontSize: '0.62rem', letterSpacing: '0.12em' }} className="text-stone-400 uppercase">Création</span>
-                </div>
-                <div className="px-3 py-2.5 border-l border-stone-100 text-center">
-                  <span style={{ fontWeight: 300, fontSize: '0.62rem', letterSpacing: '0.12em' }} className="text-stone-400 uppercase">Imprimer</span>
-                </div>
-                <div className="px-3 py-2.5 border-l border-stone-100 text-center">
-                  <span style={{ fontWeight: 300, fontSize: '0.62rem', letterSpacing: '0.12em' }} className="text-stone-400 uppercase">PDF</span>
-                </div>
-              </div>
-
-              {/* Rows */}
-              {selected.map((item, idx) => {
+            <div className="flex flex-col gap-2.5">
+              {selected.map(item => {
                 const s = state[item.key]
+                const printQty = s?.printQty ?? s?.qty ?? 0
                 return (
-                  <div
-                    key={item.key}
-                    className={`grid items-center ${idx < selected.length - 1 ? 'border-b border-stone-50' : ''}`}
-                    style={{ gridTemplateColumns: '1fr 160px 120px' }}
-                  >
-                    {/* Produit */}
-                    <div className="flex items-center gap-2 px-4 py-3">
-                      <span className="text-base leading-none">{item.icon}</span>
-                      <span style={{ fontWeight: 400, fontSize: '0.82rem' }} className="text-stone-700">{item.label}</span>
+                  <div key={item.key} className="bg-white rounded-xl border border-stone-100 shadow-sm overflow-hidden">
+                    {/* Ligne produit */}
+                    <div className="flex items-center gap-3 px-4 py-3 border-b border-stone-50">
+                      <span className="text-base leading-none flex-shrink-0">{item.icon}</span>
+                      <div className="flex-1 min-w-0">
+                        <span style={{ fontWeight: 500, fontSize: '0.88rem' }} className="text-[#2d3228]">{item.label}</span>
+                        <span style={{ fontWeight: 300, fontSize: '0.68rem', color: '#a8a29e', marginLeft: 8 }}>{item.format}</span>
+                      </div>
+                      <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-300 flex-shrink-0">— €</span>
                     </div>
 
-                    {/* Qty imprimer */}
-                    <div className="flex items-center justify-center gap-1.5 px-3 py-2 border-l border-stone-50">
-                      <button onClick={() => setPrintQty(item.key, (s?.printQty ?? s?.qty ?? 0) - 1)}
-                        className="w-6 h-6 rounded-full border border-stone-200 flex items-center justify-center text-stone-400 hover:border-[#4a5240]/50 hover:text-[#4a5240] transition-all flex-shrink-0"
-                        style={{ fontSize: '0.9rem' }}>−</button>
-                      <input
-                        type="number"
-                        value={s?.printQty ?? s?.qty ?? 0}
-                        onChange={e => setPrintQty(item.key, parseInt(e.target.value) || 0)}
-                        className="w-10 text-center border border-stone-200 rounded-md py-0.5 focus:outline-none focus:border-[#4a5240]/50"
-                        style={{ fontWeight: 600, fontSize: '0.82rem', color: '#4a5240' }}
-                        min={0}
-                      />
-                      <button onClick={() => setPrintQty(item.key, (s?.printQty ?? s?.qty ?? 0) + 1)}
-                        className="w-6 h-6 rounded-full border border-stone-200 flex items-center justify-center text-stone-400 hover:border-[#4a5240]/50 hover:text-[#4a5240] transition-all flex-shrink-0"
-                        style={{ fontSize: '0.9rem' }}>+</button>
-                    </div>
+                    {/* Actions */}
+                    <div className="flex items-stretch divide-x divide-stone-50">
+                      {/* Imprimer */}
+                      <div className="flex-1 px-4 py-3 flex items-center gap-3">
+                        <div>
+                          <p style={{ fontWeight: 300, fontSize: '0.62rem', letterSpacing: '0.1em' }} className="text-stone-400 uppercase mb-1.5">Imprimer</p>
+                          <div className="flex items-center gap-2">
+                            <button onClick={() => setPrintQty(item.key, Math.max(0, printQty - 1))}
+                              className="w-6 h-6 rounded-full border border-stone-200 flex items-center justify-center text-stone-400 hover:border-[#4a5240]/50 hover:text-[#4a5240] transition-all flex-shrink-0"
+                              style={{ fontSize: '0.9rem', lineHeight: 1 }}>−</button>
+                            <input
+                              type="number"
+                              value={printQty}
+                              onChange={e => setPrintQty(item.key, parseInt(e.target.value) || 0)}
+                              className="w-12 text-center border border-stone-200 rounded-lg py-0.5 focus:outline-none focus:border-[#4a5240]/50"
+                              style={{ fontWeight: 600, fontSize: '0.85rem', color: '#4a5240' }}
+                              min={0}
+                            />
+                            <button onClick={() => setPrintQty(item.key, printQty + 1)}
+                              className="w-6 h-6 rounded-full border border-stone-200 flex items-center justify-center text-stone-400 hover:border-[#4a5240]/50 hover:text-[#4a5240] transition-all flex-shrink-0"
+                              style={{ fontSize: '0.9rem', lineHeight: 1 }}>+</button>
+                            <span style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-400">{item.qtyLabel}</span>
+                          </div>
+                        </div>
+                      </div>
 
-                    {/* Télécharger PDF */}
-                    <div className="flex flex-col items-center justify-center gap-1 px-3 py-2 border-l border-stone-50">
-                      <button
-                        onClick={() => toggleDownload(item.key)}
-                        className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs transition-all border
-                          ${s?.download
-                            ? 'bg-[#4a5240] text-white border-[#4a5240]'
-                            : 'bg-white text-stone-500 border-stone-200 hover:border-[#4a5240]/40'}`}
-                        style={{ fontWeight: s?.download ? 500 : 300, fontSize: '0.7rem' }}
-                      >
-                        <svg viewBox="0 0 14 14" fill="none" className="w-3 h-3 flex-shrink-0">
-                          <path d="M7 2v7M4 7l3 3 3-3M2 11h10" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                        {s?.download ? 'Sélectionné' : 'Télécharger'}
-                      </button>
-                      {s?.download && (
-                        <span style={{ fontWeight: 300, fontSize: '0.55rem' }} className="text-stone-300 text-center leading-tight">
-                          hors destinataires
-                        </span>
-                      )}
+                      {/* Télécharger PDF — optionnel */}
+                      <div className="flex items-center justify-center px-4 py-3 flex-shrink-0">
+                        <div className="flex flex-col items-center gap-1.5">
+                          <p style={{ fontWeight: 300, fontSize: '0.62rem', letterSpacing: '0.1em' }} className="text-stone-400 uppercase">PDF</p>
+                          <button
+                            onClick={() => toggleDownload(item.key)}
+                            title="Télécharger en PDF (hors envoi)"
+                            className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all
+                              ${s?.download
+                                ? 'bg-[#4a5240] border-[#4a5240]'
+                                : 'border-stone-200 hover:border-[#4a5240]/50 bg-white'}`}
+                          >
+                            {s?.download
+                              ? <svg viewBox="0 0 14 14" fill="none" className="w-3.5 h-3.5"><path d="M7 2v7M4 7l3 3 3-3M2 11h10" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                              : <svg viewBox="0 0 14 14" fill="none" className="w-3.5 h-3.5"><path d="M7 2v7M4 7l3 3 3-3M2 11h10" stroke="#d6d3d1" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                            }
+                          </button>
+                          {s?.download && (
+                            <span style={{ fontWeight: 300, fontSize: '0.55rem' }} className="text-[#4a5240] leading-tight text-center">hors envoi</span>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )

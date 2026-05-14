@@ -159,71 +159,58 @@ export default function CollectionClient({
             <p style={{ fontWeight: 500, fontSize: '0.72rem', letterSpacing: '0.12em' }} className="text-stone-400 uppercase mb-3">
               Récapitulatif d'impression
             </p>
-            <div className="flex flex-col gap-2.5">
-              {selected.map(item => {
+            <div className="bg-white rounded-xl border border-stone-100 shadow-sm overflow-hidden">
+              {selected.map((item, idx) => {
                 const s = state[item.key]
                 const printQty = s?.printQty ?? s?.qty ?? 0
                 return (
-                  <div key={item.key} className="bg-white rounded-xl border border-stone-100 shadow-sm overflow-hidden">
-                    {/* Ligne produit */}
-                    <div className="flex items-center gap-3 px-4 py-3 border-b border-stone-50">
-                      <span className="text-base leading-none flex-shrink-0">{item.icon}</span>
-                      <div className="flex-1 min-w-0">
-                        <span style={{ fontWeight: 500, fontSize: '0.88rem' }} className="text-[#2d3228]">{item.label}</span>
-                        <span style={{ fontWeight: 300, fontSize: '0.68rem', color: '#a8a29e', marginLeft: 8 }}>{item.format}</span>
+                  <div
+                    key={item.key}
+                    className={`flex items-center gap-4 px-4 py-3.5 ${idx < selected.length - 1 ? 'border-b border-stone-50' : ''}`}
+                  >
+                    {/* Produit + format */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm leading-none flex-shrink-0">{item.icon}</span>
+                        <span style={{ fontWeight: 500, fontSize: '0.85rem' }} className="text-[#2d3228]">{item.label}</span>
                       </div>
-                      <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-300 flex-shrink-0">— €</span>
+                      <p style={{ fontWeight: 300, fontSize: '0.65rem', color: '#a8a29e' }} className="mt-0.5">{item.format}</p>
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex items-stretch divide-x divide-stone-50">
-                      {/* Imprimer */}
-                      <div className="flex-1 px-4 py-3 flex items-center gap-3">
-                        <div>
-                          <p style={{ fontWeight: 300, fontSize: '0.62rem', letterSpacing: '0.1em' }} className="text-stone-400 uppercase mb-1.5">Imprimer</p>
-                          <div className="flex items-center gap-2">
-                            <button onClick={() => setPrintQty(item.key, Math.max(0, printQty - 1))}
-                              className="w-6 h-6 rounded-full border border-stone-200 flex items-center justify-center text-stone-400 hover:border-[#4a5240]/50 hover:text-[#4a5240] transition-all flex-shrink-0"
-                              style={{ fontSize: '0.9rem', lineHeight: 1 }}>−</button>
-                            <input
-                              type="number"
-                              value={printQty}
-                              onChange={e => setPrintQty(item.key, parseInt(e.target.value) || 0)}
-                              className="w-12 text-center border border-stone-200 rounded-lg py-0.5 focus:outline-none focus:border-[#4a5240]/50"
-                              style={{ fontWeight: 600, fontSize: '0.85rem', color: '#4a5240' }}
-                              min={0}
-                            />
-                            <button onClick={() => setPrintQty(item.key, printQty + 1)}
-                              className="w-6 h-6 rounded-full border border-stone-200 flex items-center justify-center text-stone-400 hover:border-[#4a5240]/50 hover:text-[#4a5240] transition-all flex-shrink-0"
-                              style={{ fontSize: '0.9rem', lineHeight: 1 }}>+</button>
-                            <span style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-400">{item.qtyLabel}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Télécharger PDF — optionnel */}
-                      <div className="flex items-center justify-center px-4 py-3 flex-shrink-0">
-                        <div className="flex flex-col items-center gap-1.5">
-                          <p style={{ fontWeight: 300, fontSize: '0.62rem', letterSpacing: '0.1em' }} className="text-stone-400 uppercase">PDF</p>
-                          <button
-                            onClick={() => toggleDownload(item.key)}
-                            title="Télécharger en PDF (hors envoi)"
-                            className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all
-                              ${s?.download
-                                ? 'bg-[#4a5240] border-[#4a5240]'
-                                : 'border-stone-200 hover:border-[#4a5240]/50 bg-white'}`}
-                          >
-                            {s?.download
-                              ? <svg viewBox="0 0 14 14" fill="none" className="w-3.5 h-3.5"><path d="M7 2v7M4 7l3 3 3-3M2 11h10" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                              : <svg viewBox="0 0 14 14" fill="none" className="w-3.5 h-3.5"><path d="M7 2v7M4 7l3 3 3-3M2 11h10" stroke="#d6d3d1" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                            }
-                          </button>
-                          {s?.download && (
-                            <span style={{ fontWeight: 300, fontSize: '0.55rem' }} className="text-[#4a5240] leading-tight text-center">hors envoi</span>
-                          )}
-                        </div>
-                      </div>
+                    {/* Imprimer qty */}
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                      <button onClick={() => setPrintQty(item.key, Math.max(0, printQty - 1))}
+                        className="w-6 h-6 rounded-full border border-stone-200 flex items-center justify-center text-stone-400 hover:border-[#4a5240]/50 hover:text-[#4a5240] transition-all"
+                        style={{ fontSize: '0.85rem', lineHeight: 1 }}>−</button>
+                      <input
+                        type="number"
+                        value={printQty}
+                        onChange={e => setPrintQty(item.key, parseInt(e.target.value) || 0)}
+                        className="w-11 text-center border border-stone-200 rounded-lg py-0.5 focus:outline-none focus:border-[#4a5240]/50"
+                        style={{ fontWeight: 600, fontSize: '0.82rem', color: '#4a5240' }}
+                        min={0}
+                      />
+                      <button onClick={() => setPrintQty(item.key, printQty + 1)}
+                        className="w-6 h-6 rounded-full border border-stone-200 flex items-center justify-center text-stone-400 hover:border-[#4a5240]/50 hover:text-[#4a5240] transition-all"
+                        style={{ fontSize: '0.85rem', lineHeight: 1 }}>+</button>
+                      <span style={{ fontWeight: 300, fontSize: '0.62rem' }} className="text-stone-400 w-10">{item.qtyLabel}</span>
                     </div>
+
+                    {/* PDF optionnel */}
+                    <button
+                      onClick={() => toggleDownload(item.key)}
+                      title="Aussi disponible en PDF"
+                      className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border transition-all flex-shrink-0
+                        ${s?.download
+                          ? 'bg-[#4a5240]/10 border-[#4a5240]/30 text-[#4a5240]'
+                          : 'border-stone-100 text-stone-300 hover:text-stone-400 hover:border-stone-200 bg-white'}`}
+                      style={{ fontWeight: 300, fontSize: '0.65rem' }}
+                    >
+                      <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3 flex-shrink-0">
+                        <path d="M6 1v6M4 5l2 2 2-2M1 9.5h10" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      PDF
+                    </button>
                   </div>
                 )
               })}

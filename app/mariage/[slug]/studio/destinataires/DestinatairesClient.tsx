@@ -13,10 +13,10 @@ type Guest = {
 
 type Product = { key: string; label: string }
 
-// Selection : clé = `foyer:${nom}` ou `guest:${id}`
 type Selection = Record<string, Record<string, boolean>>
 
-const PRODUCTS: Product[] = [
+// Tous les produits possibles (ordre fixe)
+const ALL_PRODUCTS: Product[] = [
   { key: 'save_the_date', label: 'Save the date' },
   { key: 'faire_part',    label: 'Faire-part' },
   { key: 'menu',          label: 'Menu' },
@@ -24,21 +24,24 @@ const PRODUCTS: Product[] = [
   { key: 'programme',     label: 'Programme' },
 ]
 
+// Produits qui ne vont pas dans le tableau destinataires (grand format uniquement)
+const EXCLUDED_FROM_DEST = new Set(['plan_table', 'numeros_table'])
+
 function cleanName(n: string | null | undefined) {
   if (!n) return ''
   return n.split(' ').filter(p => p && p !== 'null').join(' ')
 }
 
-type Foyer = { foyer: string; members: Guest[] }
+type Famille = { famille: string; members: Guest[] }
 
-function buildFoyers(orderedGuests: Guest[]): Foyer[] {
+function buildFamilles(orderedGuests: Guest[]): Famille[] {
   const map = new Map<string, Guest[]>()
   for (const g of orderedGuests) {
     const key = cleanName(g.last_name) || g.id
     if (!map.has(key)) map.set(key, [])
     map.get(key)!.push(g)
   }
-  return Array.from(map.entries()).map(([foyer, members]) => ({ foyer, members }))
+  return Array.from(map.entries()).map(([famille, members]) => ({ famille, members }))
 }
 
 function CheckCircle({ checked, onChange }: { checked: boolean; onChange: () => void }) {
@@ -59,27 +62,40 @@ function CheckCircle({ checked, onChange }: { checked: boolean; onChange: () => 
 }
 
 export default function DestinatairesClient({
-  slug, weddingName, guests, savedData, onSave,
+  slug, weddingName, guests, collectionData, savedData, onSave,
 }: {
   slug: string
   weddingName: string
   guests: Guest[]
+  collectionData: unknown
   savedData: unknown
   onSave: (data: unknown, progress: number) => Promise<void>
 }) {
   const [saving, setSaving] = useState(false)
   const router = useRouter()
   const storageKey = `studio_dest_${slug}`
-  const orderKey  = `studio_dest_order_${slug}`
+  const orderKey   = `studio_dest_order_${slug}`
 
-  // Ordre des invités (drag & drop)
+  // Dériver les produits actifs depuis la collection
+  const PRODUCTS = useMemo<Product[]>(() => {
+    if (collectionData && typeof collectionData === 'object') {
+      const coll = collectionData as Record<string, { checked: boolean; download?: boolean }>
+      return ALL_PRODUCTS.filter(p =>
+        !EXCLUDED_FROM_DEST.has(p.key) &&
+        coll[p.key]?.checked &&
+        !coll[p.key]?.download  // les produits "téléchargement" ne vont pas dans les destinataires
+      )
+    }
+    return ALL_PRODUCTS
+  }, [collectionData])
+
+  // Ordre drag & drop
   const [guestOrder, setGuestOrder] = useState<string[]>(() => {
     if (typeof window !== 'undefined') {
       try {
         const saved = localStorage.getItem(orderKey)
         if (saved) {
           const order: string[] = JSON.parse(saved)
-          // Garder uniquement les IDs encore valides + ajouter les nouveaux
           const valid = order.filter(id => guests.some(g => g.id === id))
           const added = guests.filter(g => !valid.includes(g.id)).map(g => g.id)
           return [...valid, ...added]
@@ -93,21 +109,25 @@ export default function DestinatairesClient({
     () => guestOrder.map(id => guests.find(g => g.id === id)).filter(Boolean) as Guest[],
     [guestOrder, guests]
   )
-  const foyers = useMemo(() => buildFoyers(orderedGuests), [orderedGuests])
+  const familles = useMemo(() => buildFamilles(orderedGuests), [orderedGuests])
 
-  // Sélection : clés `foyer:X` pour lignes foyer, `guest:X` pour membres individuels
   const [selection, setSelection] = useState<Selection>(() => {
-    if (savedData && typeof savedData === 'object') return savedData as Selection
+    if (savedData && typeof savedData === 'object') {
+      const s = savedData as { selection?: Selection }
+      return s.selection ?? (savedData as Selection)
+    }
     if (typeof window !== 'undefined') {
       try {
         const saved = localStorage.getItem(storageKey)
-        if (saved) return JSON.parse(saved)
+        if (saved) {
+          const parsed = JSON.parse(saved)
+          return parsed.selection ?? parsed
+        }
       } catch {}
     }
     return {}
   })
 
-  // Sauvegarde auto
   useEffect(() => {
     const t = setTimeout(() => localStorage.setItem(storageKey, JSON.stringify(selection)), 800)
     return () => clearTimeout(t)
@@ -125,17 +145,15 @@ export default function DestinatairesClient({
   }
 
   function toggleCol(product: string) {
-    // Collecte toutes les clés actives (foyers multi + guests solo)
     const keys: string[] = []
-    for (const { foyer, members } of foyers) {
-      if (members.length > 1) keys.push(`foyer:${foyer}`)
+    for (const { famille, members } of familles) {
+      if (members.length > 1) keys.push(`famille:${famille}`)
       else keys.push(`guest:${members[0].id}`)
     }
-    // Aussi les membres individuels dans les multi-foyers
-    for (const { members } of foyers) {
+    for (const { members } of familles) {
       if (members.length > 1) members.forEach(m => keys.push(`guest:${m.id}`))
     }
-    const allChecked = keys.every(k => selection[k]?.[product])
+    const allChecked = keys.length > 0 && keys.every(k => selection[k]?.[product])
     setSelection(prev => {
       const next = { ...prev }
       for (const k of keys) next[k] = { ...next[k], [product]: !allChecked }
@@ -143,16 +161,13 @@ export default function DestinatairesClient({
     })
   }
 
-  // Totaux : foyer multi = 1 unité par foyer row, solo = 1 unité par guest row + membres
   const totals = useMemo(() => {
     const t: Record<string, number> = {}
     for (const p of PRODUCTS) {
       let count = 0
-      for (const { foyer, members } of foyers) {
+      for (const { famille, members } of familles) {
         if (members.length > 1) {
-          // Foyer row = 1 unité si coché
-          if (selection[`foyer:${foyer}`]?.[p.key]) count++
-          // Membres individuels = unités supplémentaires
+          if (selection[`famille:${famille}`]?.[p.key]) count++
           for (const m of members) if (selection[`guest:${m.id}`]?.[p.key]) count++
         } else {
           if (selection[`guest:${members[0].id}`]?.[p.key]) count++
@@ -161,14 +176,14 @@ export default function DestinatairesClient({
       t[p.key] = count
     }
     return t
-  }, [selection, foyers])
+  }, [selection, familles, PRODUCTS])
 
   const grandTotal = Object.values(totals).reduce((a, b) => a + b, 0)
 
   // ── Drag & drop ─────────────────────────────────────────────────────────────
   const dragId    = useRef<string | null>(null)
   const dropId    = useRef<string | null>(null)
-  const [dragging, setDragging] = useState<string | null>(null)
+  const [dragging, setDragging]     = useState<string | null>(null)
   const [dropTarget, setDropTarget] = useState<string | null>(null)
 
   function onDragStart(e: React.DragEvent, guestId: string) {
@@ -209,6 +224,25 @@ export default function DestinatairesClient({
     setDropTarget(null)
   }
 
+  if (PRODUCTS.length === 0) {
+    return (
+      <div className="min-h-screen bg-[#f5f0e8] flex items-center justify-center" style={{ fontFamily: 'var(--font-lato)' }}>
+        <div className="text-center max-w-sm px-6">
+          <p style={{ fontSize: '2rem' }} className="mb-4">📋</p>
+          <p style={{ fontWeight: 600, fontSize: '1rem' }} className="text-[#2d3228] mb-2">Aucun produit sélectionné</p>
+          <p style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-500 mb-6">
+            Commencez par choisir vos créations dans l'étape 01 — Collection.
+          </p>
+          <a href={`/mariage/${slug}/studio/collection`}
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#4a5240] text-white rounded-lg"
+            style={{ fontWeight: 400, fontSize: '0.82rem' }}>
+            Configurer ma collection →
+          </a>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
 
@@ -229,8 +263,8 @@ export default function DestinatairesClient({
           Personnalisez vos envois
         </h1>
         <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-500">
-          La ligne <strong style={{ fontWeight: 500 }}>Famille</strong> compte comme 1 envoi (ex: 1 faire-part par foyer).
-          Glissez les lignes <span className="inline-block">⠿</span> pour réorganiser.
+          La ligne <strong style={{ fontWeight: 500 }}>Famille</strong> compte comme 1 envoi — ex: 1 faire-part par famille.
+          Glissez <span className="inline-block">⠿</span> pour réorganiser.
         </p>
       </div>
 
@@ -241,7 +275,6 @@ export default function DestinatairesClient({
           {/* Header sticky */}
           <div className="sticky top-0 z-10 bg-white border-b border-stone-100">
             <div className="flex items-end">
-              {/* Poignée placeholder */}
               <div className="w-8 flex-shrink-0" />
               <div className="flex-1 min-w-[120px] px-3 py-3">
                 <span style={{ fontWeight: 300, fontSize: '0.62rem', letterSpacing: '0.15em' }} className="text-stone-400 uppercase">
@@ -250,8 +283,8 @@ export default function DestinatairesClient({
               </div>
               {PRODUCTS.map(p => {
                 const keys: string[] = []
-                for (const { foyer, members } of foyers) {
-                  keys.push(members.length > 1 ? `foyer:${foyer}` : `guest:${members[0].id}`)
+                for (const { famille, members } of familles) {
+                  keys.push(members.length > 1 ? `famille:${famille}` : `guest:${members[0].id}`)
                   if (members.length > 1) members.forEach(m => keys.push(`guest:${m.id}`))
                 }
                 const allChecked = keys.length > 0 && keys.every(k => selection[k]?.[p.key])
@@ -279,14 +312,14 @@ export default function DestinatairesClient({
           </div>
 
           {/* Corps */}
-          {foyers.map(({ foyer, members }, fi) => {
+          {familles.map(({ famille, members }, fi) => {
             const isMulti = members.length > 1
-            const foyerKey = `foyer:${foyer}`
+            const familleKey = `famille:${famille}`
 
             return (
-              <div key={foyer} className={fi > 0 ? 'border-t border-stone-100' : ''}>
+              <div key={famille} className={fi > 0 ? 'border-t border-stone-100' : ''}>
 
-                {/* Ligne foyer (seulement si multi) */}
+                {/* Ligne famille (seulement si multi) */}
                 {isMulti && (
                   <div className="flex items-center bg-stone-50/80">
                     <div className="w-8 flex-shrink-0 flex items-center justify-center">
@@ -294,7 +327,7 @@ export default function DestinatairesClient({
                     </div>
                     <div className="flex-1 min-w-[120px] px-3 py-2 flex items-center gap-2">
                       <span style={{ fontWeight: 500, fontSize: '0.75rem' }} className="text-stone-600">
-                        Famille {foyer}
+                        Famille {famille}
                       </span>
                       <span style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-stone-400">
                         {members.length} pers. · 1 envoi
@@ -304,8 +337,8 @@ export default function DestinatairesClient({
                       <div key={p.key} className="flex items-center justify-center flex-shrink-0 py-2"
                         style={{ width: 'clamp(64px, 13vw, 96px)' }}>
                         <CheckCircle
-                          checked={!!selection[foyerKey]?.[p.key]}
-                          onChange={() => toggleKey(foyerKey, p.key)}
+                          checked={!!selection[familleKey]?.[p.key]}
+                          onChange={() => toggleKey(familleKey, p.key)}
                         />
                       </div>
                     ))}
@@ -330,12 +363,10 @@ export default function DestinatairesClient({
                         ${isDropOver ? 'border-t-2 border-[#4a5240] bg-[#4a5240]/5' : 'hover:bg-stone-50/40'}
                         ${!isDragged && !isDropOver && gi < members.length - 1 ? 'border-b border-stone-50' : ''}`}
                     >
-                      {/* Poignée drag */}
                       <div className="w-8 flex-shrink-0 flex items-center justify-center cursor-grab active:cursor-grabbing">
                         <span className="text-stone-300 hover:text-stone-400 transition-colors select-none text-sm">⠿</span>
                       </div>
 
-                      {/* Nom */}
                       <div className={`flex-1 min-w-[120px] px-3 py-2.5 flex items-center gap-2 ${isMulti ? 'pl-5' : ''}`}>
                         <span style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-700">
                           {cleanName(guest.first_name)}
@@ -351,7 +382,6 @@ export default function DestinatairesClient({
                         )}
                       </div>
 
-                      {/* Checkboxes individuelles */}
                       {PRODUCTS.map(p => (
                         <div key={p.key} className="flex items-center justify-center flex-shrink-0"
                           style={{ width: 'clamp(64px, 13vw, 96px)' }}>
@@ -439,8 +469,7 @@ export default function DestinatairesClient({
               onClick={async () => {
                 if (grandTotal === 0 || saving) return
                 setSaving(true)
-                const progress = grandTotal > 0 ? 100 : 0
-                await onSave({ selection, guestOrder }, progress)
+                await onSave({ selection, guestOrder }, grandTotal > 0 ? 100 : 0)
                 router.push(`/mariage/${slug}/studio`)
               }}
               disabled={grandTotal === 0 || saving}

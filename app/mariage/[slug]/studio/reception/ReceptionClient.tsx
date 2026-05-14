@@ -8,8 +8,8 @@ type Table = { id: string; name: string; capacity: number; guests: string[] }
 
 type ReceptionState = {
   programme: { enabled: boolean; qty: number }
-  planTable: { enabled: boolean }
-  numerosTable: { enabled: boolean }
+  planTable: { enabled: boolean; qty: number }
+  numerosTable: { enabled: boolean; qty: number }
 }
 
 export default function ReceptionClient({
@@ -41,8 +41,8 @@ export default function ReceptionClient({
     }
     return {
       programme: { enabled: programmeSteps.length > 0, qty: Math.max(totalGuests, 1) },
-      planTable: { enabled: tables.length > 0 },
-      numerosTable: { enabled: tables.length > 0 },
+      planTable: { enabled: tables.length > 0, qty: 1 },
+      numerosTable: { enabled: tables.length > 0, qty: tables.length || 1 },
     }
   })
 
@@ -150,10 +150,9 @@ export default function ReceptionClient({
           title="Plan de table"
           badge={tables.length > 0 ? `${tables.length} tables · ${totalGuests} placés` : 'Non configuré'}
           badgeOk={tables.length > 0}
-          fixedQty="1 affiche grand format"
         >
           {tables.length > 0 ? (
-            <div className="grid grid-cols-2 gap-2 mb-2">
+            <div className="grid grid-cols-2 gap-2 mb-4">
               {tables.slice(0, 8).map(t => (
                 <div key={t.id} className="bg-stone-50 rounded-lg p-2.5">
                   <p style={{ fontWeight: 500, fontSize: '0.75rem' }} className="text-stone-700 mb-1">{t.name}</p>
@@ -182,6 +181,26 @@ export default function ReceptionClient({
               </p>
             </div>
           )}
+          {state.planTable.enabled && (
+            <div className="flex items-center gap-3 pt-1">
+              <span style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-500">Quantité :</span>
+              <button onClick={() => toggle('planTable', 'qty', Math.max(1, state.planTable.qty - 1))}
+                className="w-7 h-7 rounded-full border border-stone-200 text-stone-400 hover:border-[#4a5240]/50 flex items-center justify-center transition-all"
+                style={{ fontSize: '1rem' }}>−</button>
+              <input
+                type="number"
+                value={state.planTable.qty}
+                onChange={e => toggle('planTable', 'qty', parseInt(e.target.value) || 1)}
+                min={1}
+                className="w-14 text-center border border-stone-200 rounded-lg py-1 focus:outline-none focus:border-[#4a5240]/50"
+                style={{ fontWeight: 600, fontSize: '0.9rem', color: '#4a5240' }}
+              />
+              <button onClick={() => toggle('planTable', 'qty', state.planTable.qty + 1)}
+                className="w-7 h-7 rounded-full border border-stone-200 text-stone-400 hover:border-[#4a5240]/50 flex items-center justify-center transition-all"
+                style={{ fontSize: '1rem' }}>+</button>
+              <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400">affiches</span>
+            </div>
+          )}
         </Section>
 
         {/* ── Section C : Numéros de table ── */}
@@ -192,10 +211,9 @@ export default function ReceptionClient({
           title="Numéros de table"
           badge={tables.length > 0 ? `${tables.length} numéros` : 'Non configuré'}
           badgeOk={tables.length > 0}
-          fixedQty={`${tables.length || '—'} supports`}
         >
           {tables.length > 0 ? (
-            <div className="flex flex-wrap gap-1.5 mb-2">
+            <div className="flex flex-wrap gap-1.5 mb-4">
               {tables.map(t => (
                 <div key={t.id}
                   className="px-3 py-1.5 bg-stone-50 rounded-lg border border-stone-100 text-center min-w-[44px]">
@@ -207,6 +225,26 @@ export default function ReceptionClient({
             <p style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-stone-400 mb-3">
               Les numéros seront générés d'après votre plan de table.
             </p>
+          )}
+          {state.numerosTable.enabled && (
+            <div className="flex items-center gap-3 pt-1">
+              <span style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-500">Quantité :</span>
+              <button onClick={() => toggle('numerosTable', 'qty', Math.max(1, state.numerosTable.qty - 1))}
+                className="w-7 h-7 rounded-full border border-stone-200 text-stone-400 hover:border-[#4a5240]/50 flex items-center justify-center transition-all"
+                style={{ fontSize: '1rem' }}>−</button>
+              <input
+                type="number"
+                value={state.numerosTable.qty}
+                onChange={e => toggle('numerosTable', 'qty', parseInt(e.target.value) || 1)}
+                min={1}
+                className="w-14 text-center border border-stone-200 rounded-lg py-1 focus:outline-none focus:border-[#4a5240]/50"
+                style={{ fontWeight: 600, fontSize: '0.9rem', color: '#4a5240' }}
+              />
+              <button onClick={() => toggle('numerosTable', 'qty', state.numerosTable.qty + 1)}
+                className="w-7 h-7 rounded-full border border-stone-200 text-stone-400 hover:border-[#4a5240]/50 flex items-center justify-center transition-all"
+                style={{ fontSize: '1rem' }}>+</button>
+              <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400">supports</span>
+            </div>
           )}
         </Section>
 
@@ -249,7 +287,7 @@ export default function ReceptionClient({
 // ── Composant Section réutilisable ────────────────────────────────────────────
 
 function Section({
-  enabled, onToggle, icon, title, badge, badgeOk, fixedQty, children,
+  enabled, onToggle, icon, title, badge, badgeOk, children,
 }: {
   enabled: boolean
   onToggle: (v: boolean) => void
@@ -257,7 +295,6 @@ function Section({
   title: string
   badge: string
   badgeOk: boolean
-  fixedQty?: string
   children?: React.ReactNode
 }) {
   return (
@@ -282,9 +319,7 @@ function Section({
             {badge}
           </span>
         </div>
-        {fixedQty && enabled && (
-          <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 flex-shrink-0">{fixedQty}</span>
-        )}
+
       </div>
       {/* Corps */}
       {enabled && children && (

@@ -26,7 +26,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
     supabase.from('studio_progress').select('module_collection').eq('wedding_id', wedding.id).single(),
   ])
 
-  const foyerCount = new Set((guestNames ?? []).map(g => g.last_name || 'solo')).size
+  const familleCount = new Set((guestNames ?? []).map(g => g.last_name || 'solo')).size
   const weddingId = wedding.id
 
   async function onSave(data: unknown, progress: number) {
@@ -39,7 +39,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
       slug={slug}
       weddingName={wedding.name ?? ''}
       guestCount={guestCount ?? 0}
-      foyerCount={foyerCount}
+      familleCount={familleCount}
       tableCount={tableCount ?? 0}
       savedData={studioData?.module_collection ?? null}
       onSave={onSave}

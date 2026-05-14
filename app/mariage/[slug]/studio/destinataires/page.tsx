@@ -24,7 +24,7 @@ export default async function DestinatairesPage({
   ] = await Promise.all([
     supabase.from('guests').select('id, first_name, last_name, guest_type, rsvp_status')
       .eq('wedding_id', wedding.id).order('last_name').order('first_name'),
-    supabase.from('studio_progress').select('module_destinataires').eq('wedding_id', wedding.id).single(),
+    supabase.from('studio_progress').select('module_destinataires, module_collection').eq('wedding_id', wedding.id).single(),
   ])
 
   const weddingId = wedding.id
@@ -39,6 +39,7 @@ export default async function DestinatairesPage({
       slug={slug}
       weddingName={wedding.name ?? ''}
       guests={guests ?? []}
+      collectionData={studioData?.module_collection ?? null}
       savedData={studioData?.module_destinataires ?? null}
       onSave={onSave}
     />

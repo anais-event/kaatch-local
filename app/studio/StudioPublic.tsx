@@ -15,6 +15,13 @@ const AMBIANCES = [
 
 type Ambiance = typeof AMBIANCES[0]
 
+type WeddingInfo = {
+  name1: string
+  name2: string
+  date: string
+  lieu: string
+}
+
 type Product = {
   id: string; icon: string; name: string; desc: string; detail: string
   price: number; needs_perso: boolean; shape: 'portrait' | 'portrait-sm' | 'landscape' | 'poster'
@@ -22,17 +29,30 @@ type Product = {
 
 const PRODUCTS: Product[] = [
   { id: 'save_the_date', icon: '📅', name: 'Save the date',     desc: "Annoncez la date en avance — vos invités bloqueront leur agenda.",           detail: 'Carte A6 · 350g/m² · Recto',        price: 2.50, needs_perso: true,  shape: 'portrait-sm' },
-  { id: 'faire_part',    icon: '💌', name: 'Faire-part',        desc: "L’invitation officielle, personnalisée au nom de chaque invité.",         detail: 'Carte A5 · 350g/m² · Recto-verso',  price: 3.50, needs_perso: true,  shape: 'portrait'    },
+  { id: 'faire_part',    icon: '💌', name: 'Faire-part',        desc: "L'invitation officielle, personnalisée au nom de chaque invité.",         detail: 'Carte A5 · 350g/m² · Recto-verso',  price: 3.50, needs_perso: true,  shape: 'portrait'    },
   { id: 'menu',          icon: '🍽️', name: 'Menu',              desc: "Par convive — adaptable aux régimes et menus enfant.",                         detail: 'Carte A5 · 300g/m² · Recto-verso',  price: 2.80, needs_perso: true,  shape: 'portrait'    },
   { id: 'marque_place',  icon: '🪧', name: 'Marque-place',      desc: "Au nom de chaque invité, avec son numéro de table.",                           detail: 'Chevalet A6 · 350g/m²',             price: 1.80, needs_perso: true,  shape: 'landscape'   },
   { id: 'numero_table',  icon: '🔢', name: 'Numéro de table',   desc: "Un chevalet élégant par table, dans votre ambiance.",                          detail: 'Chevalet A5 · 350g/m²',             price: 4.50, needs_perso: false, shape: 'landscape'   },
-  { id: 'plan_ceremonie',icon: '⛪', name: 'Plan de cérémonie', desc: "Grand format — chaque invité sait exactement où il s’asseoit.",           detail: 'Affiche A2 · 200g/m²',              price: 18,   needs_perso: false, shape: 'poster'      },
-  { id: 'plan_table',    icon: '🗺️', name: 'Plan de table',     desc: "Vue générale posée à l’entrée de la salle — tout le monde trouve sa place.", detail: 'Affiche A2 · 200g/m²',            price: 18,   needs_perso: false, shape: 'poster'      },
+  { id: 'plan_ceremonie',icon: '⛪', name: 'Plan de cérémonie', desc: "Grand format — chaque invité sait exactement où il s'asseoit.",           detail: 'Affiche A2 · 200g/m²',              price: 18,   needs_perso: false, shape: 'poster'      },
+  { id: 'plan_table',    icon: '🗺️', name: 'Plan de table',     desc: "Vue générale posée à l'entrée de la salle — tout le monde trouve sa place.", detail: 'Affiche A2 · 200g/m²',            price: 18,   needs_perso: false, shape: 'poster'      },
 ]
+
+function formatDate(dateStr: string): string {
+  if (!dateStr) return ''
+  try {
+    const d = new Date(dateStr)
+    const day = d.getDate().toString().padStart(2, '0')
+    const month = (d.getMonth() + 1).toString().padStart(2, '0')
+    const year = d.getFullYear()
+    return `${day} · ${month} · ${year}`
+  } catch {
+    return dateStr
+  }
+}
 
 // ── Mockup preview ───────────────────────────────────────────────────────────
 
-function MockupCard({ productId, a, scale = 1 }: { productId: string | null; a: Ambiance; scale?: number }) {
+function MockupCard({ productId, a, scale = 1, info }: { productId: string | null; a: Ambiance; scale?: number; info: WeddingInfo }) {
   const shadow = a.dark
     ? '0 32px 80px rgba(0,0,0,0.7), 0 4px 20px rgba(0,0,0,0.5)'
     : '0 32px 80px rgba(0,0,0,0.15), 0 4px 20px rgba(0,0,0,0.07)'
@@ -44,18 +64,23 @@ function MockupCard({ productId, a, scale = 1 }: { productId: string | null; a: 
     transform: `scale(${scale})`,
   }
 
+  const n1 = info.name1 || 'Prénom 1'
+  const n2 = info.name2 || 'Prénom 2'
+  const dateLabel = info.date ? formatDate(info.date) : 'jj · mm · aaaa'
+  const lieuLabel = info.lieu || 'Votre lieu'
+
   if (!productId) {
     return (
       <div style={{ ...base, width: 260, height: 364, background: a.cardBg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 36, textAlign: 'center' }}>
         <div style={{ width: 40, height: 2, background: a.accent, marginBottom: 28, borderRadius: 1 }} />
         <p style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1.7rem', color: a.text, letterSpacing: '-0.02em', lineHeight: 1.15, marginBottom: 10 }}>
-          Emma<br />&amp; Luc
+          {n1}<br />&amp; {n2}
         </p>
         <p style={{ fontFamily: BODY, fontWeight: 300, fontSize: '0.7rem', color: a.text, opacity: 0.55, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 28 }}>
-          14 · 06 · 2026
+          {dateLabel}
         </p>
         <p style={{ fontFamily: BODY, fontWeight: 300, fontSize: '0.68rem', color: a.text, opacity: 0.45, letterSpacing: '0.08em' }}>
-          Château de Vallery
+          {lieuLabel}
         </p>
         <div style={{ width: 40, height: 2, background: a.accent, marginTop: 28, borderRadius: 1 }} />
       </div>
@@ -72,7 +97,7 @@ function MockupCard({ productId, a, scale = 1 }: { productId: string | null; a: 
       return (
         <div style={{ ...base, width: w, height: h, background: a.cardBg, padding: '30px 26px', display: 'flex', flexDirection: 'column' }}>
           <p style={{ fontFamily: BODY, fontWeight: 300, fontSize: '0.58rem', color: a.text, opacity: 0.45, letterSpacing: '0.25em', textTransform: 'uppercase', marginBottom: 4 }}>Menu</p>
-          <p style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1.1rem', color: a.text, letterSpacing: '-0.01em', marginBottom: 6 }}>Emma &amp; Luc</p>
+          <p style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1.1rem', color: a.text, letterSpacing: '-0.01em', marginBottom: 6 }}>{n1} &amp; {n2}</p>
           <div style={{ width: 28, height: 1.5, background: a.accent, borderRadius: 1, marginBottom: 20 }} />
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 14 }}>
             {['Entrée', 'Plat', 'Fromage', 'Dessert'].map((course, i) => (
@@ -96,20 +121,20 @@ function MockupCard({ productId, a, scale = 1 }: { productId: string | null; a: 
         )}
         <div style={{ width: 32, height: 1.5, background: a.accent, marginBottom: 20, borderRadius: 1 }} />
         <p style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1.55rem', color: a.text, letterSpacing: '-0.02em', lineHeight: 1.18, marginBottom: 12 }}>
-          Emma<br />&amp; Luc
+          {n1}<br />&amp; {n2}
         </p>
-        <p style={{ fontFamily: BODY, fontWeight: 300, fontSize: '0.65rem', color: a.text, opacity: 0.5, letterSpacing: '0.22em', marginBottom: 20 }}>14 · 06 · 2026</p>
+        <p style={{ fontFamily: BODY, fontWeight: 300, fontSize: '0.65rem', color: a.text, opacity: 0.5, letterSpacing: '0.22em', marginBottom: 20 }}>{dateLabel}</p>
         <div style={{ width: 32, height: 1.5, background: a.accent, borderRadius: 1, marginBottom: 20 }} />
         {productId === 'faire_part' && (
           <>
             <p style={{ fontFamily: BODY, fontWeight: 300, fontSize: '0.63rem', color: a.text, opacity: 0.5, lineHeight: 1.7, maxWidth: 140 }}>
               Nous avons la joie de vous inviter à célébrer notre union
             </p>
-            <p style={{ fontFamily: BODY, fontWeight: 300, fontSize: '0.6rem', color: a.text, opacity: 0.35, marginTop: 14, letterSpacing: '0.08em' }}>Château de Vallery, Bourgogne</p>
+            <p style={{ fontFamily: BODY, fontWeight: 300, fontSize: '0.6rem', color: a.text, opacity: 0.35, marginTop: 14, letterSpacing: '0.08em' }}>{lieuLabel}</p>
           </>
         )}
         {productId === 'save_the_date' && (
-          <p style={{ fontFamily: BODY, fontWeight: 300, fontSize: '0.6rem', color: a.text, opacity: 0.4, letterSpacing: '0.1em' }}>Château de Vallery</p>
+          <p style={{ fontFamily: BODY, fontWeight: 300, fontSize: '0.6rem', color: a.text, opacity: 0.4, letterSpacing: '0.1em' }}>{lieuLabel}</p>
         )}
       </div>
     )
@@ -144,7 +169,7 @@ function MockupCard({ productId, a, scale = 1 }: { productId: string | null; a: 
       <p style={{ fontFamily: BODY, fontWeight: 300, fontSize: '0.53rem', color: a.text, opacity: 0.42, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 3 }}>
         {isCeremonie ? 'Plan de cérémonie' : 'Plan de table'}
       </p>
-      <p style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '0.98rem', color: a.text, marginBottom: 5 }}>Emma &amp; Luc</p>
+      <p style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '0.98rem', color: a.text, marginBottom: 5 }}>{n1} &amp; {n2}</p>
       <div style={{ width: 22, height: 1.5, background: a.accent, borderRadius: 1, marginBottom: 16 }} />
       {isCeremonie ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center' }}>
@@ -175,9 +200,36 @@ function MockupCard({ productId, a, scale = 1 }: { productId: string | null; a: 
   )
 }
 
+// ── Input field ───────────────────────────────────────────────────────────────
+
+function Field({ label, value, onChange, type = 'text', placeholder }: {
+  label: string; value: string; onChange: (v: string) => void; type?: string; placeholder?: string
+}) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <label style={{ fontFamily: BODY, fontWeight: 500, fontSize: '0.7rem', color: '#a8a29e', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{label}</label>
+      <input
+        type={type}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        placeholder={placeholder}
+        style={{
+          fontFamily: BODY, fontWeight: 300, fontSize: '0.95rem', color: '#2d3228',
+          background: '#fff', border: '1.5px solid #e7e3dc', borderRadius: 12,
+          padding: '12px 16px', outline: 'none', transition: 'border-color 0.2s ease',
+          width: '100%',
+        }}
+        onFocus={e => { e.currentTarget.style.borderColor = '#4a5240' }}
+        onBlur={e => { e.currentTarget.style.borderColor = '#e7e3dc' }}
+      />
+    </div>
+  )
+}
+
 // ── Wizard ───────────────────────────────────────────────────────────────────
 
 export default function StudioPublic() {
+  const [weddingInfo, setWeddingInfo] = useState<WeddingInfo>({ name1: '', name2: '', date: '', lieu: '' })
   const [ambiance, setAmbiance] = useState<string>('classique')
   const [quantities, setQuantities] = useState<Record<string, number>>({})
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null)
@@ -200,10 +252,11 @@ export default function StudioPublic() {
   }, [])
 
   const scrollRef = useRef<HTMLDivElement>(null)
+  const step00Ref = useRef<HTMLDivElement>(null)
   const step0Ref = useRef<HTMLDivElement>(null)
   const step1Ref = useRef<HTMLDivElement>(null)
   const step2Ref = useRef<HTMLDivElement>(null)
-  const stepRefs = [step0Ref, step1Ref, step2Ref]
+  const stepRefs = [step00Ref, step0Ref, step1Ref, step2Ref]
 
   const a = AMBIANCES.find(x => x.id === ambiance) ?? AMBIANCES[1]
   const selectedProducts = PRODUCTS.filter(p => (quantities[p.id] ?? 0) > 0)
@@ -234,6 +287,10 @@ export default function StudioPublic() {
     setQuantities(prev => ({ ...prev, [id]: Math.max(0, (prev[id] ?? 0) + delta) }))
   }
 
+  function setInfo(key: keyof WeddingInfo, value: string) {
+    setWeddingInfo(prev => ({ ...prev, [key]: value }))
+  }
+
   async function handleCheckout() {
     if (selectedProducts.length === 0) return
     setLoading(true)
@@ -241,7 +298,7 @@ export default function StudioPublic() {
       const res = await fetch('/api/studio/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ambianceId: ambiance, quantities }),
+        body: JSON.stringify({ ambianceId: ambiance, quantities, weddingInfo }),
       })
       const { url } = await res.json()
       if (url) window.location.href = url
@@ -249,6 +306,8 @@ export default function StudioPublic() {
       setLoading(false)
     }
   }
+
+  const infoComplete = weddingInfo.name1 && weddingInfo.name2 && weddingInfo.date
 
   return (
     <>
@@ -266,7 +325,7 @@ export default function StudioPublic() {
           >
             Fermer ✕
           </button>
-          <MockupCard productId={previewProduct} a={a} scale={1.9} />
+          <MockupCard productId={previewProduct} a={a} scale={1.9} info={weddingInfo} />
         </div>
       )}
 
@@ -284,6 +343,51 @@ export default function StudioPublic() {
                style={{ background: 'rgba(250,248,245,0.92)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
             <a href="/" style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '1.1rem', letterSpacing: '-0.02em', color: '#2d3228', textDecoration: 'none' }}>Kaatch</a>
             <p style={{ fontFamily: BODY, fontWeight: 300, fontSize: '0.8rem', color: '#a8a29e' }}>Studio Créatif</p>
+          </div>
+
+          {/* ── Step 00 — Mon mariage ── */}
+          <div
+            ref={step00Ref}
+            style={{ scrollSnapAlign: 'start', minHeight: 'calc(100vh - 57px)', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '48px 52px' }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 28 }}>
+              <span style={{ fontFamily: BODY, fontWeight: 700, fontSize: '0.68rem', background: '#4a5240', color: '#fff', borderRadius: 20, padding: '3px 11px', letterSpacing: '0.04em' }}>00</span>
+              <p style={{ fontFamily: BODY, fontWeight: 500, fontSize: '0.75rem', color: '#a8a29e', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Votre mariage</p>
+            </div>
+            <h2 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(1.9rem,3vw,2.5rem)', letterSpacing: '-0.03em', color: '#2d3228', lineHeight: 1.08, marginBottom: 10 }}>
+              Parlez-nous de vous
+            </h2>
+            <p style={{ fontFamily: BODY, fontWeight: 300, fontSize: '0.95rem', color: '#78716c', lineHeight: 1.75, marginBottom: 32 }}>
+              Ces infos apparaîtront sur votre papeterie. La prévisualisation se met à jour en temps réel.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <Field label="Prénom 1" value={weddingInfo.name1} onChange={v => setInfo('name1', v)} placeholder="Sophie" />
+                <Field label="Prénom 2" value={weddingInfo.name2} onChange={v => setInfo('name2', v)} placeholder="Thomas" />
+              </div>
+              <Field label="Date du mariage" value={weddingInfo.date} onChange={v => setInfo('date', v)} type="date" />
+              <Field label="Lieu (optionnel)" value={weddingInfo.lieu} onChange={v => setInfo('lieu', v)} placeholder="Château de Vallery, Bourgogne" />
+            </div>
+            <button
+              onClick={() => scrollToStep(1)}
+              disabled={!infoComplete}
+              style={{
+                marginTop: 32, alignSelf: 'flex-start',
+                background: infoComplete ? '#2d3228' : '#e7e3dc',
+                color: infoComplete ? '#fff' : '#b8b0a8',
+                border: 'none', borderRadius: 12, padding: '13px 30px',
+                fontFamily: BODY, fontWeight: 500, fontSize: '0.9rem',
+                cursor: infoComplete ? 'pointer' : 'not-allowed',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              Choisir mon ambiance →
+            </button>
+            {!infoComplete && (
+              <p style={{ fontFamily: BODY, fontWeight: 300, fontSize: '0.72rem', color: '#b8b0a8', marginTop: 10 }}>
+                Renseignez au moins les deux prénoms et la date pour continuer.
+              </p>
+            )}
           </div>
 
           {/* ── Step 01 — Ambiance ── */}
@@ -332,7 +436,7 @@ export default function StudioPublic() {
               ))}
             </div>
             <button
-              onClick={() => scrollToStep(1)}
+              onClick={() => scrollToStep(2)}
               style={{ marginTop: 28, alignSelf: 'flex-start', background: '#2d3228', color: '#fff', border: 'none', borderRadius: 12, padding: '13px 30px', fontFamily: BODY, fontWeight: 500, fontSize: '0.9rem', cursor: 'pointer' }}
             >
               Continuer →
@@ -404,7 +508,7 @@ export default function StudioPublic() {
             </div>
             {total > 0 && (
               <button
-                onClick={() => scrollToStep(2)}
+                onClick={() => scrollToStep(3)}
                 style={{ marginTop: 22, alignSelf: 'flex-start', background: '#2d3228', color: '#fff', border: 'none', borderRadius: 12, padding: '13px 30px', fontFamily: BODY, fontWeight: 500, fontSize: '0.9rem', cursor: 'pointer' }}
               >
                 Voir le récapitulatif →
@@ -428,13 +532,19 @@ export default function StudioPublic() {
             {selectedProducts.length === 0 ? (
               <div style={{ padding: 24, borderRadius: 14, background: '#f5f0e8', marginBottom: 20 }}>
                 <p style={{ fontFamily: BODY, fontWeight: 300, fontSize: '0.9rem', color: '#78716c', marginBottom: 10 }}>Aucun produit sélectionné.</p>
-                <button onClick={() => scrollToStep(1)} style={{ fontFamily: BODY, fontWeight: 500, fontSize: '0.82rem', color: '#4a5240', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}>
+                <button onClick={() => scrollToStep(2)} style={{ fontFamily: BODY, fontWeight: 500, fontSize: '0.82rem', color: '#4a5240', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}>
                   ← Choisir mes produits
                 </button>
               </div>
             ) : (
               <>
                 <div style={{ borderRadius: 16, border: '1.5px solid #e7e3dc', overflow: 'hidden', marginBottom: 16 }}>
+                  <div style={{ padding: '11px 18px', background: '#f9f7f4', borderBottom: '1px solid #e7e3dc', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <p style={{ fontFamily: BODY, fontWeight: 500, fontSize: '0.7rem', color: '#a8a29e', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Mariage</p>
+                    <p style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '0.88rem', color: '#2d3228' }}>
+                      {weddingInfo.name1 && weddingInfo.name2 ? `${weddingInfo.name1} & ${weddingInfo.name2}` : '—'}
+                    </p>
+                  </div>
                   <div style={{ padding: '11px 18px', background: '#f9f7f4', borderBottom: '1px solid #e7e3dc', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <p style={{ fontFamily: BODY, fontWeight: 500, fontSize: '0.7rem', color: '#a8a29e', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Ambiance</p>
                     <p style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '0.88rem', color: '#2d3228' }}>{a.name}</p>
@@ -490,7 +600,7 @@ export default function StudioPublic() {
         >
           {/* Step dots */}
           <div style={{ position: 'absolute', left: 24, top: '50%', transform: 'translateY(-50%)', display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {[0, 1, 2].map(i => (
+            {[0, 1, 2, 3].map(i => (
               <button
                 key={i}
                 onClick={() => scrollToStep(i)}
@@ -511,7 +621,7 @@ export default function StudioPublic() {
             Plein écran
           </button>
 
-          <MockupCard productId={previewProduct} a={a} />
+          <MockupCard productId={previewProduct} a={a} info={weddingInfo} />
 
           {/* Bottom label */}
           <div style={{ position: 'absolute', bottom: 26, left: 0, right: 0, textAlign: 'center' }}>

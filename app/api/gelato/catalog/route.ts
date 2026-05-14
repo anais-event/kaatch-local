@@ -5,12 +5,15 @@ export async function GET(req: NextRequest) {
   const apiKey = process.env.GELATO_API_KEY
   if (!apiKey) return NextResponse.json({ error: 'GELATO_API_KEY manquante' }, { status: 500 })
 
+  const catalogUid = req.nextUrl.searchParams.get('catalog') ?? ''
   const search = req.nextUrl.searchParams.get('q') ?? ''
 
-  const res = await fetch(
-    `https://product.gelatoapis.com/v3/catalogs`,
-    { headers: { 'X-API-KEY': apiKey } }
-  )
+  // If catalogUid provided, fetch products in that catalog
+  const url = catalogUid
+    ? `https://product.gelatoapis.com/v3/catalogs/${catalogUid}/products`
+    : `https://product.gelatoapis.com/v3/catalogs`
+
+  const res = await fetch(url, { headers: { 'X-API-KEY': apiKey } })
 
   if (!res.ok) {
     const txt = await res.text()
@@ -19,15 +22,14 @@ export async function GET(req: NextRequest) {
 
   const data = await res.json()
 
-  // Filter by search term if provided
+  // Filter by search term
   if (search) {
     const term = search.toLowerCase()
-    if (Array.isArray(data.catalogs)) {
-      data.catalogs = data.catalogs.filter((c: { catalogId?: string; title?: string }) =>
-        (c.catalogId ?? '').toLowerCase().includes(term) ||
-        (c.title ?? '').toLowerCase().includes(term)
-      )
-    }
+    const arr = data.products ?? data.data ?? []
+    const filtered = arr.filter((p: Record<string, string>) =>
+      Object.values(p).some(v => String(v).toLowerCase().includes(term))
+    )
+    return NextResponse.json({ filtered, total: filtered.length })
   }
 
   return NextResponse.json(data)

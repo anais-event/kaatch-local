@@ -171,6 +171,15 @@ export default async function FinaliserPage({ params }: { params: Promise<{ slug
           />
         )}
 
+        {/* Lien historique */}
+        <div className="text-center">
+          <a href={`/mariage/${slug}/studio/commandes`}
+            style={{ fontWeight: 300, fontSize: '0.75rem' }}
+            className="text-stone-400 hover:text-stone-600 transition-colors underline">
+            Voir mes commandes précédentes →
+          </a>
+        </div>
+
       </div>
     </div>
   )

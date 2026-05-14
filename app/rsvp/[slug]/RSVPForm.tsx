@@ -22,6 +22,12 @@ export default function RSVPForm({ guest }: { guest: any }) {
         rsvp_at: new Date().toISOString(),
       })
       .eq('id', guest.id)
+    // Notification couple (fire-and-forget)
+    fetch('/api/rsvp-notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ guestId: guest.id, slug: guest.wedding_slug }),
+    }).catch(() => {})
     setDone(true)
     setLoading(false)
   }

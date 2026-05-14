@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import GuestbookForm from './GuestbookForm'
+import { notifyCouple } from '@/lib/email/notify-couple'
 
 async function submitEntry(formData: FormData) {
   'use server'
@@ -40,6 +41,22 @@ async function submitEntry(formData: FormData) {
   })
 
   revalidatePath(`/invite/${slug}/livre-dor`)
+
+  // Notification email couple
+  const { data: w } = await supabase
+    .from('weddings')
+    .select('name, slug, notification_prefs, notification_email')
+    .eq('slug', slug).single()
+  if (w) {
+    const prefs = (w.notification_prefs ?? {}) as Record<string, boolean>
+    if (prefs.new_guestbook) {
+      const toEmail = w.notification_email || null
+      if (toEmail) {
+        const preview = message.slice(0, 80) + (message.length > 80 ? '…' : '')
+        notifyCouple({ to: toEmail, weddingName: w.name ?? '', slug, type: 'new_guestbook', data: { guestName: author_name, preview } }).catch(() => {})
+      }
+    }
+  }
 }
 
 export default async function LivreDorPage({ params }: { params: Promise<{ slug: string }> }) {

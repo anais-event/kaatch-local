@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import GuestPhotoFeed from './GuestPhotoFeed'
 import MarkPhotosSeen from './MarkPhotosSeen'
+import { notifyCouple } from '@/lib/email/notify-couple'
 
 async function addLike(formData: FormData) {
   'use server'
@@ -90,6 +91,21 @@ async function uploadPhoto(formData: FormData) {
   }))
 
   revalidatePath(`/invite/${slug}/photos`)
+
+  // Notification email couple
+  const { data: w } = await supabase
+    .from('weddings')
+    .select('name, slug, notification_prefs, notification_email, user_id')
+    .eq('slug', slug).single()
+  if (w) {
+    const prefs = (w.notification_prefs ?? {}) as Record<string, boolean>
+    if (prefs.new_photo) {
+      const toEmail = w.notification_email || null
+      if (toEmail) {
+        notifyCouple({ to: toEmail, weddingName: w.name ?? '', slug, type: 'new_photo', data: { guestName: uploader_name } }).catch(() => {})
+      }
+    }
+  }
 }
 
 export default async function GuestPhotosPage({ params }: { params: Promise<{ slug: string }> }) {

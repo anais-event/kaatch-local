@@ -1,5 +1,7 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
+import CommandeClient from './CommandeClient'
+import DownloadButton from './DownloadButton'
 
 export default async function FinaliserPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -135,15 +137,11 @@ export default async function FinaliserPage({ params }: { params: Promise<{ slug
                       <span style={{ fontWeight: 500, fontSize: '0.85rem' }} className="text-[#2d3228]">{item.label}</span>
                       <p style={{ fontWeight: 300, fontSize: '0.65rem', color: '#a8a29e' }} className="mt-0.5">{item.format}</p>
                     </div>
-                    <button
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#4a5240]/10 text-[#4a5240] border border-[#4a5240]/20 transition-all hover:bg-[#4a5240]/15 flex-shrink-0"
-                      style={{ fontWeight: 400, fontSize: '0.72rem' }}
-                    >
-                      <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3">
-                        <path d="M6 1v6M4 5l2 2 2-2M1 9.5h10" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                      Télécharger
-                    </button>
+                    <DownloadButton
+                      weddingId={wedding.id}
+                      productKey={item.key}
+                      label={item.label}
+                    />
                   </div>
                 ))}
               </div>
@@ -165,23 +163,12 @@ export default async function FinaliserPage({ params }: { params: Promise<{ slug
 
         {/* CTA commander */}
         {printItems.length > 0 && (
-          <div className="bg-[#2d3228] rounded-xl p-5 text-center">
-            <p style={{ fontWeight: 300, fontSize: '0.75rem', color: '#a8a29e', letterSpacing: '0.08em' }} className="uppercase mb-1">
-              Prêt à commander
-            </p>
-            <p style={{ fontWeight: 600, fontSize: '1rem', color: '#fff' }} className="mb-1">
-              {totalQty} créations · {printItems.length} produit{printItems.length > 1 ? 's' : ''}
-            </p>
-            <p style={{ fontWeight: 300, fontSize: '0.78rem', color: '#78716c' }} className="mb-4">
-              Impression professionnelle · Livraison à domicile
-            </p>
-            <button
-              className="w-full py-3 rounded-lg text-[#2d3228] transition-all hover:opacity-90"
-              style={{ background: '#f5f0e8', fontWeight: 500, fontSize: '0.88rem' }}
-            >
-              Passer commande ✨
-            </button>
-          </div>
+          <CommandeClient
+            weddingId={wedding.id}
+            weddingSlug={slug}
+            totalQty={totalQty}
+            printCount={printItems.length}
+          />
         )}
 
       </div>

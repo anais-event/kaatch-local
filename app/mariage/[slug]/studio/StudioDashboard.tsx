@@ -74,7 +74,6 @@ export default function StudioDashboard({ slug, weddingName, guestCount, tableCo
       num: '01',
       title: 'Votre collection',
       sub: 'Sélection des créations',
-      desc: 'Choisissez les pièces de votre papeterie — faire-part, menus, marque-places et plus.',
       progress: progress.collection,
       href: `/mariage/${slug}/studio/collection`,
     },
@@ -83,7 +82,6 @@ export default function StudioDashboard({ slug, weddingName, guestCount, tableCo
       num: '02',
       title: 'Vos destinataires',
       sub: `${guestCount} invités · envois personnalisés`,
-      desc: `Attribuez chaque création à vos invités et renseignez les adresses pour l'envoi.`,
       progress: progress.destinataires,
       href: `/mariage/${slug}/studio/destinataires`,
     },
@@ -92,7 +90,6 @@ export default function StudioDashboard({ slug, weddingName, guestCount, tableCo
       num: '03',
       title: 'Univers visuel',
       sub: 'Ambiance · palette · typographie',
-      desc: "Définissez l'esthétique qui unira toutes vos créations en une signature unique.",
       progress: progress.univers,
       href: `/mariage/${slug}/studio/univers`,
     },
@@ -101,7 +98,6 @@ export default function StudioDashboard({ slug, weddingName, guestCount, tableCo
       num: '04',
       title: 'Éléments de réception',
       sub: `Programme · plan de table${tableCount > 0 ? ` · ${tableCount} tables` : ''}`,
-      desc: 'Complétez avec les pièces du jour J — programme de cérémonie et plan de table.',
       progress: progress.reception,
       href: `/mariage/${slug}/studio/reception`,
     },
@@ -109,24 +105,41 @@ export default function StudioDashboard({ slug, weddingName, guestCount, tableCo
 
   return (
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
-      <div className="max-w-4xl mx-auto px-4 py-10 pb-28">
+      <div className="max-w-4xl mx-auto px-4 py-6 pb-28">
 
         {/* En-tête */}
-        <div className="mb-8">
-          <p style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.2em', color: '#a8a29e' }} className="uppercase mb-2">
-            {weddingName}
-          </p>
-          <h1 style={{ fontWeight: 700, fontSize: '1.6rem', color: '#2d3228', lineHeight: 1.2 }} className="mb-1">
-            Studio Créatif
-          </h1>
-          <p style={{ fontWeight: 300, fontSize: '0.88rem', color: '#78716c' }}>
-            Composez la papeterie de votre mariage, pièce par pièce.
-          </p>
+        <div className="mb-5">
+          <div className="flex justify-between items-start">
+            <div>
+              <p style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.2em', color: '#a8a29e' }} className="uppercase mb-2">
+                {weddingName}
+              </p>
+              <h1 style={{ fontWeight: 700, fontSize: '1.6rem', color: '#2d3228', lineHeight: 1.2 }} className="mb-1">
+                Studio Créatif
+              </h1>
+              <p style={{ fontWeight: 300, fontSize: '0.88rem', color: '#78716c' }}>
+                Composez la papeterie de votre mariage, pièce par pièce.
+              </p>
+            </div>
+            <a
+              href={total === 100 ? `/mariage/${slug}/studio/finaliser` : undefined}
+              onClick={total < 100 ? (e) => e.preventDefault() : undefined}
+              className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm transition-all ${
+                total === 100
+                  ? 'bg-[#2d3228] text-white hover:bg-[#2d3228]/90 cursor-pointer'
+                  : 'bg-stone-200 text-stone-400 cursor-not-allowed'
+              }`}
+              style={{ fontWeight: 400, fontSize: '0.82rem', flexShrink: 0 }}
+              title={total < 100 ? 'Complétez tous les modules pour finaliser' : undefined}
+            >
+              Finaliser {total === 100 ? '✨' : `(${total}%)`}
+            </a>
+          </div>
         </div>
 
         {/* Progression globale */}
         {total > 0 && (
-          <div className="bg-white rounded-xl border border-stone-100 shadow-sm px-6 py-4 mb-6 flex items-center gap-6">
+          <div className="bg-white rounded-xl border border-stone-100 shadow-sm px-6 py-4 mb-4 flex items-center gap-6">
             <div className="flex-1">
               <div className="flex items-center justify-between mb-2">
                 <span style={{ fontWeight: 400, fontSize: '0.78rem', color: '#57534e' }}>
@@ -142,7 +155,7 @@ export default function StudioDashboard({ slug, weddingName, guestCount, tableCo
         )}
 
         {/* Grid 2×2 */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {modules.map((mod) => {
             const done    = mod.progress === 100
             const started = mod.progress > 0 && !done
@@ -152,11 +165,11 @@ export default function StudioDashboard({ slug, weddingName, guestCount, tableCo
               <button
                 key={mod.key}
                 onClick={() => router.push(mod.href)}
-                className="group bg-white rounded-xl text-left flex flex-col gap-5 transition-all duration-200 hover:-translate-y-0.5 cursor-pointer"
+                className="group bg-white rounded-xl text-left flex flex-col gap-3 transition-all duration-200 hover:-translate-y-0.5 cursor-pointer"
                 style={{
                   border: '1px solid #e7e5e4',
                   boxShadow: '0 1px 6px 0 rgba(0,0,0,0.05)',
-                  padding: '1.75rem',
+                  padding: '1.1rem',
                 }}
                 onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 6px 20px 0 rgba(0,0,0,0.09)')}
                 onMouseLeave={e => (e.currentTarget.style.boxShadow = '0 1px 6px 0 rgba(0,0,0,0.05)')}
@@ -182,18 +195,13 @@ export default function StudioDashboard({ slug, weddingName, guestCount, tableCo
 
                 {/* Titre + sous-titre */}
                 <div>
-                  <p style={{ fontWeight: 600, fontSize: '1.05rem', color: '#2d3228', lineHeight: 1.25 }} className="mb-1">
+                  <p style={{ fontWeight: 600, fontSize: '0.95rem', color: '#2d3228', lineHeight: 1.25 }} className="mb-1">
                     {mod.title}
                   </p>
                   <p style={{ fontWeight: 300, fontSize: '0.78rem', color: '#78716c' }}>
                     {mod.sub}
                   </p>
                 </div>
-
-                {/* Description */}
-                <p style={{ fontWeight: 300, fontSize: '0.82rem', color: '#57534e', lineHeight: 1.55 }} className="flex-1">
-                  {mod.desc}
-                </p>
 
                 {/* Progression */}
                 <div className="flex flex-col gap-3">
@@ -229,15 +237,6 @@ export default function StudioDashboard({ slug, weddingName, guestCount, tableCo
             </a>
           </div>
         )}
-
-        {/* Lien ancien studio */}
-        <div className="text-center mt-8">
-          <a href={`/mariage/${slug}/impressions`}
-            style={{ fontWeight: 300, fontSize: '0.72rem', color: '#d6d3d1', letterSpacing: '0.04em' }}
-            className="hover:text-stone-400 transition-colors">
-            Accéder à l'ancien studio →
-          </a>
-        </div>
 
       </div>
     </div>

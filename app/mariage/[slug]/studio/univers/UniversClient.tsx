@@ -122,7 +122,7 @@ function FairePartPreview({
   return (
     <div
       className="rounded-xl overflow-hidden shadow-lg border border-white/40 select-none"
-      style={{ background: bg, width: 200, minHeight: 280, position: 'relative', fontFamily: typo.display }}
+      style={{ background: bg, width: 267, minHeight: 373, position: 'relative', fontFamily: typo.display }}
     >
       {/* Bandeau couleur haut */}
       <div style={{ height: 6, background: accent }} />
@@ -195,7 +195,7 @@ function MenuPreview({
   return (
     <div
       className="rounded-lg overflow-hidden shadow border border-white/30 select-none"
-      style={{ background: bg, width: 120, minHeight: 170 }}
+      style={{ background: bg, width: 160, minHeight: 227 }}
     >
       <div style={{ height: 4, background: accent }} />
       <div className="flex flex-col items-center px-3 py-3 gap-1 text-center">
@@ -229,7 +229,7 @@ function MarquePlacePreview({
   return (
     <div
       className="rounded shadow border border-white/30 select-none flex flex-col items-center justify-center px-3 py-2"
-      style={{ background: bg, width: 90, minHeight: 55, borderLeft: `3px solid ${accent}` }}
+      style={{ background: bg, width: 120, minHeight: 73, borderLeft: `3px solid ${accent}` }}
     >
       <p style={{ fontFamily: typo.display, fontSize: '0.65rem', color: text, fontWeight: 400 }}>Marguerite</p>
       <p style={{ fontFamily: typo.body, fontSize: '0.3rem', color: accent, letterSpacing: '0.1em', fontWeight: 300, textTransform: 'uppercase', marginTop: 2 }}>Table 3</p>
@@ -463,7 +463,7 @@ export default function UniversClient({
 
           {/* ── Live preview ── */}
           {showPreview && (
-            <div className="hidden lg:flex flex-col items-center gap-4 sticky top-8 flex-shrink-0" style={{ width: 240 }}>
+            <div className="hidden lg:flex flex-col items-center gap-4 sticky top-8 flex-shrink-0" style={{ width: 320 }}>
               <div className="w-full">
                 {/* Tabs */}
                 <div className="flex rounded-lg overflow-hidden border border-stone-200 mb-4">

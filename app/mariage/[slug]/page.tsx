@@ -55,22 +55,21 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
   ]
 
   const modules = [
-    // Préparatifs
-    { href: 'guests',          emoji: '👥', label: 'Invités',        sub: 'Liste & RSVPs' },
-    { href: 'tables',          emoji: '🪑', label: 'Plan de table',  sub: 'Placement' },
-    { href: 'budget',          emoji: '💰', label: 'Budget',         sub: 'Dépenses & suivi' },
-    { href: 'retro-planning',  emoji: '🗓️', label: 'Rétro-planning', sub: 'Avant le jour J' },
-    // Jour J
-    { href: 'checklist',       emoji: '✅', label: 'Checklist J',    sub: 'Qui fait quoi' },
-    { href: 'programme',       emoji: '📋', label: 'Programme',      sub: 'Déroulé du jour' },
-    { href: 'jeux',            emoji: '🎉', label: 'Jeux',           sub: 'Animations' },
-    { href: 'musique',         emoji: '🎵', label: 'Musique',        sub: 'Playlist', badge: (pendingSuggestionsCount ?? 0) > 0 ? pendingSuggestionsCount! : undefined },
-    { href: 'hebergements',    emoji: '🏨', label: 'Hébergements',   sub: 'Logements' },
-    { href: 'partager',        emoji: '📲', label: 'QR Code',        sub: 'Accès invités' },
-    // Autres
-    { href: 'photos',          emoji: '📷', label: 'Photos',         sub: 'Galerie partagée' },
-    { href: 'livre-dor',       emoji: '📖', label: "Livre d'Or",     sub: 'Messages' },
-    { href: 'messagerie',      emoji: '💬', label: 'Messagerie',     sub: 'Questions invités' },
+    { href: 'studio',         emoji: '✨', label: 'Studio',        sub: 'Papeterie' },
+    { href: 'guests',         emoji: '👥', label: 'Invités',        sub: 'Liste & RSVPs' },
+    { href: 'invitations',    emoji: '💌', label: 'Invitations',    sub: 'Faire-parts' },
+    { href: 'tables',         emoji: '🪑', label: 'Plan de table',  sub: 'Placement' },
+    { href: 'programme',      emoji: '📋', label: 'Programme',      sub: 'Déroulé du jour' },
+    { href: 'budget',         emoji: '💰', label: 'Budget',         sub: 'Dépenses & suivi' },
+    { href: 'retro-planning', emoji: '🗓️', label: 'Rétro-planning', sub: 'Avant le jour J' },
+    { href: 'musique',        emoji: '🎵', label: 'Musique',        sub: 'Playlist', badge: (pendingSuggestionsCount ?? 0) > 0 ? pendingSuggestionsCount! : undefined },
+    { href: 'photos',         emoji: '📷', label: 'Photos',         sub: 'Galerie partagée' },
+    { href: 'livre-dor',      emoji: '📖', label: "Livre d'Or",     sub: 'Messages' },
+    { href: 'messagerie',     emoji: '💬', label: 'Messagerie',     sub: 'Questions invités' },
+    { href: 'hebergements',   emoji: '🏨', label: 'Hébergements',   sub: 'Logements' },
+    { href: 'partager',       emoji: '📲', label: 'QR Code',        sub: 'Accès invités' },
+    { href: 'checklist',      emoji: '✅', label: 'Checklist J',    sub: 'Qui fait quoi' },
+    { href: 'jeux',           emoji: '🎉', label: 'Jeux',           sub: 'Animations' },
   ]
 
   return (

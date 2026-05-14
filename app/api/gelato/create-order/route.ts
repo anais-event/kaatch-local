@@ -4,14 +4,15 @@ import { extractUniversSettings, generateFairePartBuffer, generateMarquePlaceBuf
 
 const GELATO_API_BASE = 'https://order.gelato.com/api/v4'
 
-// Gelato product UIDs — https://dashboard.gelato.com/docs/
+// Gelato product UIDs — format: {type}_pf_{size}_pt_{paper}_cl_{colors}_{orientation}
+// cl_4-4 = recto-verso couleur, cl_4-0 = recto seul couleur
 const PRODUCT_UIDS: Record<string, string> = {
-  faire_part:    'cards_pf_a5_pt_350-gsm-coated-silk_4-0_ver',
-  save_the_date: 'cards_pf_a5_pt_350-gsm-coated-silk_4-0_ver',
-  menu:          'cards_pf_a5_pt_350-gsm-coated-silk_4-0_ver',
-  marque_place:  'tent-cards_pf_a6_pt_300-gsm-coated-silk_4-0_hor',
-  programme:     'booklets_pf_a5_pt_130-gsm-silk_4-4_ver',
-  plan_table:    'poster_pf_a2_pt_200-gsm-silk_4-0_ver',
+  faire_part:    'cards_pf_a5_pt_350-gsm-coated-silk_cl_4-4_ver',
+  save_the_date: 'cards_pf_a5_pt_350-gsm-coated-silk_cl_4-4_ver',
+  menu:          'cards_pf_a5_pt_350-gsm-coated-silk_cl_4-0_ver',
+  marque_place:  'folded-cards_pf_a6_pt_350-gsm-coated-silk_cl_4-4_ver',
+  programme:     'multipage-brochures_pf_a5_pt_130-gsm-silk_cl_4-4_ver',
+  plan_table:    'posters_pf_a2_pt_200-gsm-silk_cl_4-0_ver',
 }
 
 async function uploadPDFToSupabase(

@@ -49,15 +49,14 @@ export function extractUniversSettings(moduleUnivers: unknown): UniversSettings 
 export async function generateFairePartBuffer(univers: UniversSettings, wedding: WeddingInfo): Promise<Buffer> {
   registerFonts()
   return renderToBuffer(createElement(FairePartPDF, { univers, wedding }) as any)
-
 }
 
 export async function generateMarquePlaceBuffer(univers: UniversSettings, guest: GuestInfo): Promise<Buffer> {
   registerFonts()
-  return renderToBuffer(createElement(MarquePlacePDF, { univers, guest }))
+  return renderToBuffer(createElement(MarquePlacePDF, { univers, guest }) as any)
 }
 
 export async function generateMenuBuffer(univers: UniversSettings, wedding: WeddingInfo, courses: string[] = []): Promise<Buffer> {
   registerFonts()
-  return renderToBuffer(createElement(MenuPDF, { univers, wedding, courses }))
+  return renderToBuffer(createElement(MenuPDF, { univers, wedding, courses }) as any)
 }

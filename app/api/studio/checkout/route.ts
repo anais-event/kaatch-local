@@ -52,9 +52,17 @@ export async function POST(req: NextRequest) {
   const apiKey = process.env.GELATO_API_KEY
   if (!apiKey) return NextResponse.json({ error: 'GELATO_API_KEY missing' }, { status: 500 })
 
-  const { ambianceId, quantities } = await req.json() as {
+  const { ambianceId, quantities, weddingInfo, personalization } = await req.json() as {
     ambianceId: string
     quantities: Record<string, number>
+    weddingInfo?: { name1: string; name2: string; date: string; lieu: string }
+    personalization?: {
+      guestList: string[]
+      tables: string[]
+      coupleMessage: string
+      dressCode: string
+      menuVege: boolean
+    }
   }
 
   const activeProducts = Object.entries(quantities).filter(([, qty]) => qty > 0)
@@ -95,6 +103,8 @@ export async function POST(req: NextRequest) {
       quantities,
       total_cents: totalCents,
       status: 'pending_payment',
+      wedding_info: weddingInfo ?? null,
+      personalization: personalization ?? null,
     })
     .select('id')
     .single()

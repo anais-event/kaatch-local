@@ -190,18 +190,44 @@ export default function StudioWizard({ mode, initialInfo, initialGuests, initial
         <div ref={containerRef} className="w-full md:w-[55%] h-screen overflow-y-auto">
 
           {/* Nav bar */}
-          <div className="sticky top-0 z-20" style={{ background: 'rgba(250,248,245,0.95)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-            <div className="flex items-center justify-between px-6 py-3">
-              <a href={mode === 'wedding' && slug ? `/mariage/${slug}` : '/'} className="no-underline" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 800, fontSize: '1.1rem', color: '#2d3228', letterSpacing: '-0.02em' }}>Kaatch</a>
-              <span style={{ fontWeight: 300, fontSize: '0.75rem', color: '#a8a29e' }}>Studio Créatif</span>
+          <div className="sticky top-0 z-20" style={{ background: 'rgba(250,248,245,0.97)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+            <div className="flex items-center justify-between px-6 py-4">
+              <a href={mode === 'wedding' && slug ? `/mariage/${slug}` : '/'} className="no-underline" style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1rem', color: '#2d3228', letterSpacing: '-0.02em' }}>Kaatch</a>
+              <span style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.72rem', color: '#a8a29e', letterSpacing: '0.08em' }}>Studio Créatif</span>
             </div>
-            <div className="flex gap-1 px-6 pb-3 overflow-x-auto">
-              {STEPS.map((label, i) => (
-                <button key={i} onClick={() => canGoTo(i) && setStep(i)} disabled={!canGoTo(i)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-all whitespace-nowrap" style={{ background: step === i ? '#4a5240' : 'transparent', color: step === i ? '#fff' : canGoTo(i) ? '#78716c' : '#d6d3d1', borderColor: step === i ? '#4a5240' : canGoTo(i) ? '#e7e5e4' : '#f5f5f4', fontWeight: step === i ? 500 : 300, fontSize: '0.72rem', cursor: canGoTo(i) ? 'pointer' : 'not-allowed' }}>
-                  <span className="w-4 h-4 rounded-full flex items-center justify-center text-[10px]" style={{ background: step === i ? 'rgba(255,255,255,0.2)' : canGoTo(i) ? '#f5f0e8' : '#fafaf9', color: step === i ? '#fff' : '#a8a29e', fontWeight: 600 }}>{i}</span>
-                  <span className="hidden sm:inline">{label}</span>
-                </button>
-              ))}
+            {/* Step progress bar */}
+            <div className="flex items-center px-6 pb-4 gap-0 overflow-x-auto">
+              {STEPS.map((label, i) => {
+                const done = i < step
+                const active = i === step
+                const locked = !canGoTo(i)
+                return (
+                  <div key={i} className="flex items-center" style={{ flex: i < STEPS.length - 1 ? '1' : 'none', minWidth: 0 }}>
+                    <button
+                      onClick={() => canGoTo(i) && setStep(i)}
+                      disabled={locked}
+                      className="flex flex-col items-center gap-1 group"
+                      style={{ cursor: locked ? 'not-allowed' : 'pointer', opacity: locked ? 0.35 : 1 }}
+                    >
+                      <span
+                        className="w-6 h-6 rounded-full flex items-center justify-center transition-all"
+                        style={{
+                          background: done ? '#4a5240' : active ? '#4a5240' : '#e7e4de',
+                          color: done || active ? '#fff' : '#a8a29e',
+                          fontSize: '0.65rem',
+                          fontWeight: 600,
+                        }}
+                      >
+                        {done ? '✓' : i + 1}
+                      </span>
+                      <span className="hidden sm:block whitespace-nowrap" style={{ fontSize: '0.65rem', fontWeight: active ? 500 : 300, color: active ? '#2d3228' : '#a8a29e', letterSpacing: '0.04em' }}>{label}</span>
+                    </button>
+                    {i < STEPS.length - 1 && (
+                      <div className="flex-1 h-px mx-2" style={{ background: done ? '#4a5240' : '#e7e4de', transition: 'background 0.3s', minWidth: 16 }} />
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
 

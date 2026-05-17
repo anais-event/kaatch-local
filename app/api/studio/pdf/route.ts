@@ -9,11 +9,11 @@ const supabase = createClient(
 )
 
 const AMBIANCE_COLORS: Record<string, { bg: string; accent: string; text: string; card: string }> = {
-  boheme:      { bg: '#e4ddd3', accent: '#a8936a', text: '#5c4f3a', card: '#ede6db' },
-  classique:   { bg: '#e5e8e2', accent: '#4a5240', text: '#2d3228', card: '#eef0eb' },
-  champetre:   { bg: '#ece6dc', accent: '#8b6e5c', text: '#4a3728', card: '#f5efe5' },
-  'art-deco':  { bg: '#1a1610', accent: '#c8a84b', text: '#e8d9b8', card: '#252018' },
-  minimaliste: { bg: '#eeeceb', accent: '#888888', text: '#1c1c1c', card: '#fafaf9' },
+  campagne:    { bg: '#f7f2ea', accent: '#7a8c6e', text: '#5c4a3a', card: '#faf7f2' },
+  classique:   { bg: '#f8f6f1', accent: '#c9a96e', text: '#2c2c2c', card: '#fcfaf7' },
+  boheme:      { bg: '#fdf6ed', accent: '#c4622d', text: '#3d2b1f', card: '#fef9f3' },
+  romance:     { bg: '#fdf4f0', accent: '#b87333', text: '#3a2020', card: '#fef8f5' },
+  artdeco:     { bg: '#1a1814', accent: '#c8a84b', text: '#e8d9b8', card: '#252018' },
 }
 
 // A5 portrait: 419.53 × 595.28 pt

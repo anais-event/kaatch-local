@@ -22,8 +22,8 @@ const PRODUCT_UIDS: Record<string, { uid: string; packOf?: number; name: string 
 }
 
 const AMBIANCE_LABELS: Record<string, string> = {
-  boheme: 'Bohème', classique: 'Classique', champetre: 'Champêtre',
-  'art-deco': 'Art Déco', minimaliste: 'Minimaliste',
+  campagne: 'Maison de campagne', classique: 'Classique intemporel',
+  boheme: 'Bohème chaleureux', romance: 'Modern Romance', artdeco: 'Art Déco prestige',
 }
 
 type GelatoPriceEntry = { quantity: number; price: number; currency: string }

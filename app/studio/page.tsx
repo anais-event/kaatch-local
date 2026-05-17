@@ -13,7 +13,7 @@ export default function StudioPage() {
         <p className="text-xs uppercase tracking-[0.25em] text-stone-400 mb-4" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
           Kaatch Studio
         </p>
-        <h1 className="text-stone-800 mb-6" style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 'clamp(2rem, 5vw, 3rem)', lineHeight: 1.08, letterSpacing: '-0.02em' }}>
+        <h1 className="text-stone-800 mb-6" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(2rem, 5vw, 3rem)', lineHeight: 1.08, letterSpacing: '-0.02em' }}>
           Bientôt disponible
         </h1>
         <div className="w-12 h-px bg-stone-300 mx-auto mb-6" />

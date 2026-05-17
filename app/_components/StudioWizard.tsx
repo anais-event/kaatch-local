@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import StudioEditor, { defaultElements, type TextEl, type EditorColors } from './StudioEditor'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -202,7 +203,8 @@ export default function StudioWizard({ mode, initialInfo, initialGuests, initial
   const [previewTab, setPreviewTab] = useState<string | null>(null)
   const [fullscreen, setFullscreen] = useState(false)
   const [mobilePreview, setMobilePreview] = useState(false)
-  const [textPosition, setTextPosition] = useState<'center' | 'top' | 'bottom'>('center')
+  const [editorElements, setEditorElements] = useState<Record<string, TextEl[]>>({})
+  const [editorProductId, setEditorProductId] = useState<string | null>(null)
 
   // Fetch live prices
   useEffect(() => {
@@ -234,7 +236,20 @@ export default function StudioWizard({ mode, initialInfo, initialGuests, initial
   const previewProduct = previewTab ?? hoveredProduct ?? (selectedProducts.length > 0 ? selectedProducts[0].id : null)
 
   // Handlers
-  function setQty(id: string, delta: number) { setQuantities(prev => ({ ...prev, [id]: Math.max(0, (prev[id] ?? 0) + delta) })) }
+  function setQty(id: string, delta: number) {
+    setQuantities(prev => {
+      const next = Math.max(0, (prev[id] ?? 0) + delta)
+      // Auto-generate editor elements when product first selected
+      if (next > 0 && (prev[id] ?? 0) === 0) {
+        setEditorElements(els => {
+          if (els[id]) return els
+          return { ...els, [id]: defaultElements(id, info, colors, typo.displayFamily, typo.displayWeight) }
+        })
+        setEditorProductId(id)
+      }
+      return { ...prev, [id]: next }
+    })
+  }
   function handleGuestRaw(raw: string) { setGuestRaw(raw); setGuestList(parseNames(raw)) }
   const handleCsv = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -259,6 +274,7 @@ export default function StudioWizard({ mode, initialInfo, initialGuests, initial
           personalization: { guestList, tables, coupleMessage, dressCode, menuVege },
           customColors,
           typoStyleId: typo.id,
+          designElements: editorElements,
         }),
       })
       const { url } = await res.json()
@@ -287,7 +303,7 @@ export default function StudioWizard({ mode, initialInfo, initialGuests, initial
       {fullscreen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center cursor-zoom-out" style={{ background: colors.fond }} onClick={() => setFullscreen(false)}>
           <button className="absolute top-6 right-6 text-sm px-4 py-2 rounded-full" style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)', color: colors.texte, fontFamily: 'var(--font-lato)', fontWeight: 300 }} onClick={() => setFullscreen(false)}>Fermer</button>
-          <PreviewCard productId={previewProduct} colors={colors} typo={typo} info={info} scale={1.8} textPosition={textPosition} />
+          <PreviewCard productId={previewProduct} colors={colors} typo={typo} info={info} scale={1.8} />
         </div>
       )}
 
@@ -343,7 +359,7 @@ export default function StudioWizard({ mode, initialInfo, initialGuests, initial
               </button>
               {mobilePreview && (
                 <div className="relative flex items-center justify-center py-8 px-4" style={{ background: colors.fond, transition: 'background 0.4s' }}>
-                  <PreviewCard productId={previewProduct} colors={colors} typo={typo} info={info} scale={0.85} textPosition={textPosition} />
+                  <PreviewCard productId={previewProduct} colors={colors} typo={typo} info={info} scale={0.85} />
                   <button onClick={() => setFullscreen(true)} className="absolute top-3 right-3 px-2.5 py-1 rounded-lg" style={{ background: `${colors.texte}12`, color: colors.texte, fontWeight: 300, fontSize: '0.62rem' }}>
                     Plein écran
                   </button>
@@ -471,16 +487,6 @@ export default function StudioWizard({ mode, initialInfo, initialGuests, initial
                 ))}
               </div>
 
-              {/* Text position */}
-              <p className="mb-3" style={{ fontWeight: 500, fontSize: '0.7rem', color: '#a8a29e', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Position du texte</p>
-              <div className="flex gap-2 mb-8">
-                {([['top', 'Haut'], ['center', 'Centre'], ['bottom', 'Bas']] as const).map(([pos, label]) => (
-                  <button key={pos} onClick={() => setTextPosition(pos)} className="flex-1 py-2.5 rounded-xl border transition-all" style={{ borderColor: textPosition === pos ? '#4a5240' : '#e7e5e4', background: textPosition === pos ? '#f5f7f4' : '#fff', fontWeight: textPosition === pos ? 500 : 300, fontSize: '0.78rem', color: textPosition === pos ? '#4a5240' : '#78716c' }}>
-                    {label}
-                  </button>
-                ))}
-              </div>
-
               <button onClick={() => setStep(2)} className="px-7 py-3 rounded-xl" style={{ background: '#2d3228', color: '#fff', fontWeight: 500, fontSize: '0.88rem' }}>
                 Choisir mes produits →
               </button>
@@ -514,7 +520,12 @@ export default function StudioWizard({ mode, initialInfo, initialGuests, initial
                           <p style={{ fontWeight: 300, fontSize: '0.7rem', color: '#a8a29e', marginTop: 1 }}>{p.desc}</p>
                           <p style={{ fontWeight: 300, fontSize: '0.62rem', color: '#c8c2ba', marginTop: 2 }}>{p.format}</p>
                         </div>
-                        <div className="flex items-center gap-3 flex-shrink-0">
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {active && (
+                            <button onClick={() => setEditorProductId(p.id)} className="px-2 py-1 rounded-lg border transition-all" style={{ borderColor: editorProductId === p.id ? colors.accent : '#e7e5e4', background: editorProductId === p.id ? `${colors.accent}18` : '#fff', fontSize: '0.62rem', fontWeight: editorProductId === p.id ? 500 : 300, color: editorProductId === p.id ? colors.accent : '#78716c' }}>
+                              ✏️ Éditer
+                            </button>
+                          )}
                           <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '0.85rem', color: active ? colors.accent : '#c8c2ba', minWidth: 55, textAlign: 'right' }}>
                             {qty > 0 ? `${(qty * price).toFixed(2)} €` : `${price.toFixed(2)} €/u`}
                           </p>
@@ -645,12 +656,21 @@ export default function StudioWizard({ mode, initialInfo, initialGuests, initial
                 )}
                 {/* Products */}
                 {selectedProducts.map((p, i) => (
-                  <div key={p.id} className="flex justify-between items-center px-5 py-3.5" style={{ borderBottom: i < selectedProducts.length - 1 ? '1px solid #f5f5f4' : 'none' }}>
-                    <div>
-                      <p style={{ fontWeight: 500, fontSize: '0.85rem', color: '#2d3228' }}>{p.icon} {p.name}</p>
-                      <p style={{ fontWeight: 300, fontSize: '0.68rem', color: '#a8a29e', marginTop: 1 }}>× {quantities[p.id]} · {p.format}</p>
+                  <div key={p.id} className="flex items-center gap-3 px-4 py-3" style={{ borderBottom: i < selectedProducts.length - 1 ? '1px solid #f5f5f4' : 'none' }}>
+                    {/* Mini preview */}
+                    <div className="flex-shrink-0 rounded-lg overflow-hidden" style={{ width: 40, height: 56, background: colors.fond, border: `1px solid ${colors.accent}30`, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div style={{ position: 'absolute', left: '50%', top: '28%', transform: 'translate(-50%,-50%)', width: 12, height: 0.5, background: colors.accent }} />
+                      <div style={{ position: 'absolute', left: '50%', top: '72%', transform: 'translate(-50%,-50%)', width: 12, height: 0.5, background: colors.accent }} />
+                      <span style={{ fontSize: '0.7rem' }}>{p.icon}</span>
                     </div>
-                    <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 700, fontSize: '0.95rem', color: '#2d3228' }}>{((quantities[p.id] ?? 0) * priceOf(p)).toFixed(2)} €</p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <p style={{ fontWeight: 500, fontSize: '0.82rem', color: '#2d3228' }}>{p.name}</p>
+                        <button onClick={() => { setStep(2); setEditorProductId(p.id) }} className="text-[#a8a29e] hover:text-[#4a5240] transition-colors" style={{ fontSize: '0.6rem', fontWeight: 300 }}>Modifier</button>
+                      </div>
+                      <p style={{ fontWeight: 300, fontSize: '0.65rem', color: '#a8a29e', marginTop: 1 }}>× {quantities[p.id]} · {p.format}</p>
+                    </div>
+                    <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 700, fontSize: '0.92rem', color: '#2d3228', flexShrink: 0 }}>{((quantities[p.id] ?? 0) * priceOf(p)).toFixed(2)} €</p>
                   </div>
                 ))}
               </div>
@@ -671,40 +691,52 @@ export default function StudioWizard({ mode, initialInfo, initialGuests, initial
 
         </div>
 
-        {/* ── RIGHT PANEL: Preview ── */}
-        <div className="hidden md:flex w-[45%] h-screen flex-col items-center justify-center relative" style={{ background: colors.fond, transition: 'background 0.5s ease' }}>
+        {/* ── RIGHT PANEL: Editor / Preview ── */}
+        <div className="hidden md:flex w-[45%] h-screen flex-col relative" style={{ background: colors.fond, transition: 'background 0.5s ease' }}>
 
           {/* Step dots */}
-          <div className="absolute left-5 top-1/2 -translate-y-1/2 flex flex-col gap-2">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 flex flex-col gap-2 z-10">
             {STEPS.map((_, i) => (
-              <button key={i} onClick={() => canGoTo(i) && setStep(i)} className="transition-all" style={{ width: 5, height: step === i ? 24 : 5, borderRadius: 3, background: step === i ? colors.accent : colors.texte, opacity: step === i ? 0.9 : 0.15, border: 'none', cursor: canGoTo(i) ? 'pointer' : 'default', padding: 0 }} />
+              <button key={i} onClick={() => canGoTo(i) && setStep(i)} className="transition-all" style={{ width: 4, height: step === i ? 20 : 4, borderRadius: 3, background: step === i ? colors.accent : colors.texte, opacity: step === i ? 0.9 : 0.15, border: 'none', cursor: canGoTo(i) ? 'pointer' : 'default', padding: 0 }} />
             ))}
           </div>
 
-          {/* Preview tabs */}
-          {selectedProducts.length > 1 && (
-            <div className="absolute top-5 left-1/2 -translate-x-1/2 flex rounded-lg overflow-hidden border" style={{ borderColor: `${colors.texte}20` }}>
-              {selectedProducts.slice(0, 4).map(p => (
-                <button key={p.id} onClick={() => setPreviewTab(p.id)} className="px-3 py-1.5 transition-all" style={{ background: previewTab === p.id ? colors.accent : `${colors.fond}`, color: previewTab === p.id ? '#fff' : colors.texte, fontWeight: 300, fontSize: '0.6rem', opacity: previewTab === p.id ? 1 : 0.6 }}>
-                  {p.icon}
-                </button>
-              ))}
+          {editorProductId && editorElements[editorProductId] ? (
+            <>
+              {/* Product switcher tabs */}
+              {selectedProducts.length > 1 && (
+                <div className="flex border-b" style={{ borderColor: `${colors.texte}10` }}>
+                  {selectedProducts.map(p => (
+                    <button key={p.id} onClick={() => setEditorProductId(p.id)} className="flex items-center gap-1.5 px-3 py-2.5 transition-all" style={{ background: editorProductId === p.id ? `${colors.accent}18` : 'transparent', borderBottom: `2px solid ${editorProductId === p.id ? colors.accent : 'transparent'}`, fontSize: '0.65rem', fontWeight: editorProductId === p.id ? 500 : 300, color: editorProductId === p.id ? colors.accent : colors.texte, opacity: editorProductId === p.id ? 1 : 0.55 }}>
+                      <span>{p.icon}</span>
+                      <span className="hidden sm:inline">{p.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Canva-like editor */}
+              <div className="flex-1 overflow-hidden">
+                <StudioEditor
+                  productId={editorProductId}
+                  colors={colors as EditorColors}
+                  elements={editorElements[editorProductId]}
+                  onChange={els => setEditorElements(prev => ({ ...prev, [editorProductId]: els }))}
+                />
+              </div>
+            </>
+          ) : (
+            /* Static preview when no product selected yet */
+            <div className="flex-1 flex flex-col items-center justify-center">
+              <PreviewCard productId={previewProduct} colors={colors} typo={typo} info={info} />
+              <div className="mt-5 text-center">
+                <p style={{ fontWeight: 300, fontSize: '0.62rem', color: colors.texte, opacity: 0.35, letterSpacing: '0.15em', textTransform: 'uppercase' }}>{ambiance.name} · {typo.label}</p>
+                {selectedProducts.length === 0 && (
+                  <p className="mt-2" style={{ fontWeight: 300, fontSize: '0.68rem', color: colors.texte, opacity: 0.45 }}>Choisissez un produit pour lancer l&apos;éditeur</p>
+                )}
+              </div>
             </div>
           )}
-
-          {/* Fullscreen button */}
-          <button onClick={() => setFullscreen(true)} className="absolute top-5 right-5 flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-opacity hover:opacity-80" style={{ background: `${colors.texte}12`, color: colors.texte, fontWeight: 300, fontSize: '0.68rem' }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
-            Agrandir
-          </button>
-
-          {/* Preview card */}
-          <PreviewCard productId={previewProduct} colors={colors} typo={typo} info={info} textPosition={textPosition} />
-
-          {/* Ambiance label */}
-          <div className="absolute bottom-6 left-0 right-0 text-center">
-            <p style={{ fontWeight: 300, fontSize: '0.62rem', color: colors.texte, opacity: 0.35, letterSpacing: '0.15em', textTransform: 'uppercase' }}>{ambiance.name} · {typo.label}</p>
-          </div>
         </div>
 
       </div>

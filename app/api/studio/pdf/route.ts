@@ -205,7 +205,15 @@ export async function POST(req: NextRequest) {
 
   if (error || !order) return NextResponse.json({ error: 'Commande introuvable' }, { status: 404 })
 
-  const perso = (order.personalization ?? {}) as Perso
+  const weddingInfo = (order.wedding_info ?? {}) as Record<string, string>
+  const rawPerso = (order.personalization ?? {}) as Record<string, string>
+  const perso: Perso = {
+    prenom1: rawPerso.prenom1 || weddingInfo.name1 || '',
+    prenom2: rawPerso.prenom2 || weddingInfo.name2 || '',
+    date:    rawPerso.date    || weddingInfo.date   || '',
+    lieu:    rawPerso.lieu    || weddingInfo.lieu   || '',
+    message: rawPerso.message || rawPerso.coupleMessage || '',
+  }
   const quantities = (order.quantities ?? {}) as Record<string, number>
   const ambianceId = order.ambiance_id as string
 

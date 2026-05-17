@@ -1,6 +1,11 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
-import StudioDashboard from './StudioDashboard'
+import StudioWedding from './StudioWedding'
+
+function cleanName(n: string | null | undefined): string {
+  if (!n) return ''
+  return n.split(' ').filter(p => p && p !== 'null').join(' ')
+}
 
 export default async function StudioPage({
   params,
@@ -22,29 +27,24 @@ export default async function StudioPage({
   if (!wedding) return <div className="p-8 text-stone-500">Mariage introuvable</div>
 
   const [
-    { count: guestCount },
-    { count: tableCount },
-    { data: studioData },
+    { data: guests },
+    { data: tables },
   ] = await Promise.all([
-    supabase.from('guests').select('id', { count: 'exact', head: true }).eq('wedding_id', wedding.id),
-    supabase.from('seating_tables').select('id', { count: 'exact', head: true }).eq('wedding_id', wedding.id),
-    supabase.from('studio_progress').select('*').eq('wedding_id', wedding.id).single(),
+    supabase.from('guests').select('first_name, last_name').eq('wedding_id', wedding.id),
+    supabase.from('seating_tables').select('name').eq('wedding_id', wedding.id).order('position'),
   ])
 
-  const progress = {
-    collection:    studioData?.progress_collection    ?? 0,
-    destinataires: studioData?.progress_destinataires ?? 0,
-    univers:       studioData?.progress_univers        ?? 0,
-    reception:     studioData?.progress_reception      ?? 0,
-  }
+  const guestNames = (guests ?? []).map(g => [cleanName(g.first_name), cleanName(g.last_name)].filter(Boolean).join(' ')).filter(Boolean)
+  const tableNames = (tables ?? []).map(t => t.name).filter(Boolean)
 
   return (
-    <StudioDashboard
+    <StudioWedding
       slug={slug}
       weddingName={wedding.name ?? ''}
-      guestCount={guestCount ?? 0}
-      tableCount={tableCount ?? 0}
-      progress={progress}
+      weddingDate={wedding.date}
+      weddingLocation={wedding.location}
+      guestNames={guestNames}
+      tableNames={tableNames}
     />
   )
 }

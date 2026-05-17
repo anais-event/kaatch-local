@@ -44,12 +44,19 @@ export async function POST(req: NextRequest) {
   if (error || !order) return NextResponse.json({ error: 'Commande introuvable' }, { status: 404 })
   if (order.status !== 'paid') return NextResponse.json({ error: 'Commande non payée' }, { status: 400 })
 
+  const weddingInfo = (order.wedding_info ?? {}) as Record<string, string>
+  const existingPerso = (order.personalization ?? {}) as Record<string, unknown>
+
   const personalization = {
-    prenom1: formData.get('prenom1') as string,
-    prenom2: formData.get('prenom2') as string,
-    date: formData.get('date') as string,
-    lieu: formData.get('lieu') as string,
-    message: formData.get('message') as string,
+    prenom1: (formData.get('prenom1') as string) || weddingInfo.name1 || '',
+    prenom2: (formData.get('prenom2') as string) || weddingInfo.name2 || '',
+    date:    (formData.get('date')    as string) || weddingInfo.date   || '',
+    lieu:    (formData.get('lieu')    as string) || weddingInfo.lieu   || '',
+    message: (formData.get('message') as string) || (existingPerso.coupleMessage as string) || '',
+    guestList: existingPerso.guestList ?? [],
+    tables:    existingPerso.tables    ?? [],
+    dressCode: existingPerso.dressCode ?? '',
+    menuVege:  existingPerso.menuVege  ?? false,
   }
 
   // Save personalization to DB

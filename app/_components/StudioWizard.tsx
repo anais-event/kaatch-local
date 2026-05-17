@@ -8,11 +8,11 @@ type Palette = { name: string; hex: string }
 type Ambiance = { id: string; name: string; tag: string; palette: Palette[]; dark: boolean }
 type TypoStyle = { id: string; label: string; displayFamily: string; bodyFamily: string; displayWeight: number; displayItalic: boolean; spacing: string }
 type Product = { id: string; icon: string; name: string; desc: string; format: string; basePrice: number; shape: 'portrait' | 'portrait-sm' | 'landscape' | 'poster'; packOf?: number; perPerson: boolean }
-type WeddingInfo = { name1: string; name2: string; date: string; lieu: string }
+type WeddingInfo = { name1: string; name2: string; date: string; lieu: string; guestCount: number; events: string[] }
 
 export type StudioWizardProps = {
   mode: 'public' | 'wedding'
-  initialInfo?: WeddingInfo
+  initialInfo?: Partial<WeddingInfo>
   initialGuests?: string[]
   initialTables?: string[]
   slug?: string
@@ -70,13 +70,14 @@ function parseNames(raw: string): string[] {
 // ── Preview Card ─────────────────────────────────────────────────────────────
 
 function PreviewCard({
-  productId, colors, typo, info, scale = 1,
+  productId, colors, typo, info, scale = 1, textPosition = 'center',
 }: {
   productId: string | null
   colors: { fond: string; doux: string; accent: string; texte: string }
   typo: TypoStyle
   info: WeddingInfo
   scale?: number
+  textPosition?: 'center' | 'top' | 'bottom'
 }) {
   const n1 = info.name1 || 'Prénom'
   const n2 = info.name2 || 'Prénom'
@@ -104,8 +105,9 @@ function PreviewCard({
 
   if (!productId || productId === 'faire_part' || productId === 'save_the_date') {
     const isSave = productId === 'save_the_date'
+    const justify = textPosition === 'top' ? 'flex-start' : textPosition === 'bottom' ? 'flex-end' : 'center'
     return (
-      <div style={{ ...card, width: 260, height: 364, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32, textAlign: 'center' }}>
+      <div style={{ ...card, width: 260, height: 364, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: justify, padding: 32, textAlign: 'center' }}>
         {isSave && <p style={{ ...bodyStyle, fontSize: '0.5rem', color: colors.texte, opacity: 0.4, letterSpacing: '0.25em', textTransform: 'uppercase', marginBottom: 14 }}>Save the date</p>}
         <div style={{ width: 36, height: 1.5, background: colors.accent, marginBottom: 20, borderRadius: 1 }} />
         <p style={{ ...displayStyle, fontSize: '1.6rem', color: colors.texte, lineHeight: 1.15, marginBottom: 8 }}>{n1}<br />&amp; {n2}</p>
@@ -183,7 +185,7 @@ function PreviewCard({
 export default function StudioWizard({ mode, initialInfo, initialGuests, initialTables, slug }: StudioWizardProps) {
   // State
   const [step, setStep] = useState(mode === 'wedding' && initialInfo?.name1 ? 1 : 0)
-  const [info, setInfo] = useState<WeddingInfo>(initialInfo ?? { name1: '', name2: '', date: '', lieu: '' })
+  const [info, setInfo] = useState<WeddingInfo>({ name1: '', name2: '', date: '', lieu: '', guestCount: 0, events: ['Cérémonie', 'Vin d\'honneur', 'Dîner', 'Soirée'], ...initialInfo })
   const [ambianceId, setAmbianceId] = useState<string>('classique')
   const [customColors, setCustomColors] = useState<Record<string, string>>({})
   const [typoIdx, setTypoIdx] = useState(0)
@@ -200,6 +202,7 @@ export default function StudioWizard({ mode, initialInfo, initialGuests, initial
   const [previewTab, setPreviewTab] = useState<string | null>(null)
   const [fullscreen, setFullscreen] = useState(false)
   const [mobilePreview, setMobilePreview] = useState(false)
+  const [textPosition, setTextPosition] = useState<'center' | 'top' | 'bottom'>('center')
 
   // Fetch live prices
   useEffect(() => {
@@ -284,14 +287,14 @@ export default function StudioWizard({ mode, initialInfo, initialGuests, initial
       {fullscreen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center cursor-zoom-out" style={{ background: colors.fond }} onClick={() => setFullscreen(false)}>
           <button className="absolute top-6 right-6 text-sm px-4 py-2 rounded-full" style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)', color: colors.texte, fontFamily: 'var(--font-lato)', fontWeight: 300 }} onClick={() => setFullscreen(false)}>Fermer</button>
-          <PreviewCard productId={previewProduct} colors={colors} typo={typo} info={info} scale={1.8} />
+          <PreviewCard productId={previewProduct} colors={colors} typo={typo} info={info} scale={1.8} textPosition={textPosition} />
         </div>
       )}
 
       <div className="flex h-screen overflow-hidden" style={{ fontFamily: 'var(--font-lato)' }}>
 
         {/* ── LEFT PANEL ── */}
-        <div ref={containerRef} className="w-full lg:w-[55%] h-screen overflow-y-auto">
+        <div ref={containerRef} className="w-full md:w-[55%] h-screen overflow-y-auto">
 
           {/* Nav bar */}
           <div className="sticky top-0 z-20" style={{ background: 'rgba(250,248,245,0.95)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
@@ -324,8 +327,8 @@ export default function StudioWizard({ mode, initialInfo, initialGuests, initial
           </div>
 
           {/* ── MOBILE PREVIEW ── */}
-          {step >= 1 && (
-            <div className="lg:hidden">
+          {(step >= 1 || (step === 0 && (info.name1 || info.name2))) && (
+            <div className="md:hidden">
               <button
                 onClick={() => setMobilePreview(v => !v)}
                 className="w-full flex items-center justify-between px-6 py-3 border-b border-stone-100"
@@ -340,7 +343,7 @@ export default function StudioWizard({ mode, initialInfo, initialGuests, initial
               </button>
               {mobilePreview && (
                 <div className="relative flex items-center justify-center py-8 px-4" style={{ background: colors.fond, transition: 'background 0.4s' }}>
-                  <PreviewCard productId={previewProduct} colors={colors} typo={typo} info={info} scale={0.85} />
+                  <PreviewCard productId={previewProduct} colors={colors} typo={typo} info={info} scale={0.85} textPosition={textPosition} />
                   <button onClick={() => setFullscreen(true)} className="absolute top-3 right-3 px-2.5 py-1 rounded-lg" style={{ background: `${colors.texte}12`, color: colors.texte, fontWeight: 300, fontSize: '0.62rem' }}>
                     Plein écran
                   </button>
@@ -370,6 +373,24 @@ export default function StudioWizard({ mode, initialInfo, initialGuests, initial
                 </div>
                 <Input label="Date du mariage" type="date" value={info.date} onChange={v => setInfo(p => ({ ...p, date: v }))} />
                 <Input label="Lieu (optionnel)" value={info.lieu} onChange={v => setInfo(p => ({ ...p, lieu: v }))} placeholder="Château de Vallery, Bourgogne" />
+                <Input label="Nombre d'invités (estimation)" type="number" value={info.guestCount ? String(info.guestCount) : ''} onChange={v => setInfo(p => ({ ...p, guestCount: parseInt(v) || 0 }))} placeholder="80" />
+
+                {/* Events */}
+                <div>
+                  <label className="block mb-2" style={{ fontWeight: 500, fontSize: '0.68rem', color: '#a8a29e', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{"Moments de la journée"}</label>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {info.events.map((ev, i) => (
+                      <span key={i} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#f0f4ee] border border-[#c8d4c0]" style={{ fontSize: '0.78rem', fontWeight: 400, color: '#4a5240' }}>
+                        {ev}
+                        <button onClick={() => setInfo(p => ({ ...p, events: p.events.filter((_, j) => j !== i) }))} className="text-[#a8a29e] hover:text-red-400 ml-0.5" style={{ fontSize: '0.9rem', lineHeight: 1 }}>×</button>
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <input id="newEvent" placeholder="Brunch, Cocktail..." className="flex-1 px-3 py-2 rounded-lg border border-stone-200 bg-white focus:border-[#4a5240] outline-none transition-colors" style={{ fontWeight: 300, fontSize: '0.82rem', color: '#2d3228' }} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); const input = e.currentTarget; const v = input.value.trim(); if (v) { setInfo(p => ({ ...p, events: [...p.events, v] })); input.value = '' } } }} />
+                    <button type="button" onClick={() => { const input = document.getElementById('newEvent') as HTMLInputElement; const v = input?.value.trim(); if (v) { setInfo(p => ({ ...p, events: [...p.events, v] })); input.value = '' } }} className="px-3 py-2 rounded-lg border border-[#c8d4c0] bg-[#f0f4ee]" style={{ fontWeight: 500, fontSize: '0.75rem', color: '#4a5240' }}>+</button>
+                  </div>
+                </div>
               </div>
               <button onClick={() => setStep(1)} disabled={!infoComplete} className="mt-8 px-7 py-3 rounded-xl transition-all" style={{ background: infoComplete ? '#2d3228' : '#e7e3dc', color: infoComplete ? '#fff' : '#b8b0a8', fontWeight: 500, fontSize: '0.88rem', cursor: infoComplete ? 'pointer' : 'not-allowed' }}>
                 Choisir mon ambiance →
@@ -450,6 +471,16 @@ export default function StudioWizard({ mode, initialInfo, initialGuests, initial
                 ))}
               </div>
 
+              {/* Text position */}
+              <p className="mb-3" style={{ fontWeight: 500, fontSize: '0.7rem', color: '#a8a29e', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Position du texte</p>
+              <div className="flex gap-2 mb-8">
+                {([['top', 'Haut'], ['center', 'Centre'], ['bottom', 'Bas']] as const).map(([pos, label]) => (
+                  <button key={pos} onClick={() => setTextPosition(pos)} className="flex-1 py-2.5 rounded-xl border transition-all" style={{ borderColor: textPosition === pos ? '#4a5240' : '#e7e5e4', background: textPosition === pos ? '#f5f7f4' : '#fff', fontWeight: textPosition === pos ? 500 : 300, fontSize: '0.78rem', color: textPosition === pos ? '#4a5240' : '#78716c' }}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+
               <button onClick={() => setStep(2)} className="px-7 py-3 rounded-xl" style={{ background: '#2d3228', color: '#fff', fontWeight: 500, fontSize: '0.88rem' }}>
                 Choisir mes produits →
               </button>
@@ -484,8 +515,8 @@ export default function StudioWizard({ mode, initialInfo, initialGuests, initial
                           <p style={{ fontWeight: 300, fontSize: '0.62rem', color: '#c8c2ba', marginTop: 2 }}>{p.format}</p>
                         </div>
                         <div className="flex items-center gap-3 flex-shrink-0">
-                          <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '0.85rem', color: active ? colors.accent : '#c8c2ba', minWidth: 50, textAlign: 'right' }}>
-                            {qty > 0 ? `${(qty * price).toFixed(0)} €` : `${price.toFixed(2)} €`}
+                          <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '0.85rem', color: active ? colors.accent : '#c8c2ba', minWidth: 55, textAlign: 'right' }}>
+                            {qty > 0 ? `${(qty * price).toFixed(2)} €` : `${price.toFixed(2)} €/u`}
                           </p>
                           <div className="flex items-center gap-1.5">
                             <button onClick={() => setQty(p.id, -1)} disabled={qty === 0} className="w-7 h-7 rounded-lg border flex items-center justify-center transition-all" style={{ borderColor: '#e7e5e4', opacity: qty > 0 ? 1 : 0.3, color: '#2d3228', fontSize: '1rem' }}>−</button>
@@ -641,7 +672,7 @@ export default function StudioWizard({ mode, initialInfo, initialGuests, initial
         </div>
 
         {/* ── RIGHT PANEL: Preview ── */}
-        <div className="hidden lg:flex w-[45%] h-screen flex-col items-center justify-center relative" style={{ background: colors.fond, transition: 'background 0.5s ease' }}>
+        <div className="hidden md:flex w-[45%] h-screen flex-col items-center justify-center relative" style={{ background: colors.fond, transition: 'background 0.5s ease' }}>
 
           {/* Step dots */}
           <div className="absolute left-5 top-1/2 -translate-y-1/2 flex flex-col gap-2">
@@ -668,7 +699,7 @@ export default function StudioWizard({ mode, initialInfo, initialGuests, initial
           </button>
 
           {/* Preview card */}
-          <PreviewCard productId={previewProduct} colors={colors} typo={typo} info={info} />
+          <PreviewCard productId={previewProduct} colors={colors} typo={typo} info={info} textPosition={textPosition} />
 
           {/* Ambiance label */}
           <div className="absolute bottom-6 left-0 right-0 text-center">

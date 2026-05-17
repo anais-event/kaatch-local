@@ -25,6 +25,7 @@ export default function StudioWedding({ slug, weddingName, weddingDate, weddingL
         name2,
         date: weddingDate ?? '',
         lieu: weddingLocation ?? '',
+        guestCount: guestNames.length,
       }}
       initialGuests={guestNames}
       initialTables={tableNames.length > 0 ? tableNames : undefined}

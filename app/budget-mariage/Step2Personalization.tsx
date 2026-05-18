@@ -207,6 +207,16 @@ export default function Step2Personalization({ estimate, onNext, onBack, initial
       <div className="grid md:grid-cols-2 gap-4 max-h-96 overflow-y-auto pr-2">
         {lineItems.map((item) => {
           const selection = selections[item.id]
+
+          const featureButtons: { [key: string]: { label: string; href: string } } = {
+            venue: { label: '✨ Plan de table 2D sur Kaatch', href: 'https://kaatch.fr/auth' },
+            photographer: { label: '✨ Album partagé pour vos invités', href: 'https://kaatch.fr/auth' },
+            dj: { label: '✨ Créer ma playlist sur Kaatch', href: 'https://kaatch.fr/auth' },
+            stationery: { label: '✨ Studio créatif Kaatch', href: 'https://kaatch.fr/auth' },
+            accommodation: { label: '✨ Suggérer des hébergements à mes invités', href: 'https://kaatch.fr/auth' },
+          }
+          const featureButton = featureButtons[item.id]
+
           return (
             <div key={item.id} className="border border-stone-200 rounded-lg p-4 hover:bg-stone-50 transition">
               <div className="flex items-start justify-between mb-2">
@@ -247,6 +257,18 @@ export default function Step2Personalization({ estimate, onNext, onBack, initial
                   —
                 </button>
               </div>
+
+              {/* Feature button */}
+              {featureButton && (
+                <a
+                  href={featureButton.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block mt-3 px-3 py-1.5 bg-[rgba(74,82,64,0.1)] text-[#4a5240] text-xs rounded-full text-center hover:bg-[rgba(74,82,64,0.2)] transition font-medium"
+                >
+                  {featureButton.label}
+                </a>
+              )}
             </div>
           )
         })}

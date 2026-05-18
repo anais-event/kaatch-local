@@ -121,22 +121,44 @@ export default function PublicNav({ active }: { active?: string }) {
             )}
           </div>
 
-          {navLinks.map(l => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className={`flex flex-col items-center px-3 py-1.5 rounded-lg transition hover:bg-stone-100 ${active === l.href.slice(1) ? 'bg-stone-100' : ''}`}
-            >
-              <span className="text-sm leading-tight" style={{ fontFamily: BODY, fontWeight: 600, color: '#44403c' }}>
-                {l.label}
-              </span>
-              {l.sub && (
-                <span className="text-[10px] leading-tight text-stone-400" style={{ fontFamily: BODY, fontWeight: 300 }}>
-                  {l.sub}
+          {navLinks.map(l => {
+            const isCalculator = l.href === '/budget-mariage'
+            const linkClass = `flex flex-col items-center px-3 py-1.5 rounded-lg transition hover:bg-stone-100 ${active === l.href.slice(1) ? 'bg-stone-100' : ''}`
+
+            return isCalculator ? (
+              <a
+                key={l.href}
+                href={l.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={linkClass}
+              >
+                <span className="text-sm leading-tight" style={{ fontFamily: BODY, fontWeight: 600, color: '#44403c' }}>
+                  {l.label}
                 </span>
-              )}
-            </Link>
-          ))}
+                {l.sub && (
+                  <span className="text-[10px] leading-tight text-stone-400" style={{ fontFamily: BODY, fontWeight: 300 }}>
+                    {l.sub}
+                  </span>
+                )}
+              </a>
+            ) : (
+              <Link
+                key={l.href}
+                href={l.href}
+                className={linkClass}
+              >
+                <span className="text-sm leading-tight" style={{ fontFamily: BODY, fontWeight: 600, color: '#44403c' }}>
+                  {l.label}
+                </span>
+                {l.sub && (
+                  <span className="text-[10px] leading-tight text-stone-400" style={{ fontFamily: BODY, fontWeight: 300 }}>
+                    {l.sub}
+                  </span>
+                )}
+              </Link>
+            )
+          })}
         </div>
 
         {/* Right side */}
@@ -214,21 +236,42 @@ export default function PublicNav({ active }: { active?: string }) {
               </div>
             )}
 
-            {navLinks.map(l => (
-              <Link
-                key={l.href}
-                href={l.href}
-                onClick={() => setOpen(false)}
-                className="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-stone-100 transition"
-              >
-                <span style={{ fontFamily: BODY, fontWeight: 400, fontSize: '0.95rem', color: GREEN }}>{l.label}</span>
-                {l.sub && (
-                  <span className="text-xs text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full" style={{ fontFamily: BODY, fontWeight: 300 }}>
-                    {l.sub}
-                  </span>
-                )}
-              </Link>
-            ))}
+            {navLinks.map(l => {
+              const isCalculator = l.href === '/budget-mariage'
+              const linkClass = "flex items-center justify-between px-4 py-3 rounded-xl hover:bg-stone-100 transition"
+
+              return isCalculator ? (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setOpen(false)}
+                  className={linkClass}
+                >
+                  <span style={{ fontFamily: BODY, fontWeight: 400, fontSize: '0.95rem', color: GREEN }}>{l.label}</span>
+                  {l.sub && (
+                    <span className="text-xs text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full" style={{ fontFamily: BODY, fontWeight: 300 }}>
+                      {l.sub}
+                    </span>
+                  )}
+                </a>
+              ) : (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  onClick={() => setOpen(false)}
+                  className={linkClass}
+                >
+                  <span style={{ fontFamily: BODY, fontWeight: 400, fontSize: '0.95rem', color: GREEN }}>{l.label}</span>
+                  {l.sub && (
+                    <span className="text-xs text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full" style={{ fontFamily: BODY, fontWeight: 300 }}>
+                      {l.sub}
+                    </span>
+                  )}
+                </Link>
+              )
+            })}
 
             <div className="pt-3 border-t border-stone-200 flex gap-2">
               <Link

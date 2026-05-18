@@ -115,13 +115,13 @@ export default function Step1QuickEstimate({ onNext, initialData }: Props) {
             />
             {citySuggestions.length > 0 && (
               <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-stone-200 rounded-lg shadow-lg z-10">
-                {citySuggestions.map((s) => (
+                {citySuggestions.map((s, idx) => (
                   <button
-                    key={s.code_postal + s.nom}
+                    key={idx}
                     onClick={() => handleCitySelect(s.nom)}
-                    className="w-full text-left px-4 py-2 hover:bg-stone-50 border-b last:border-b-0 text-sm"
+                    className="w-full text-left px-4 py-2 hover:bg-stone-50 border-b last:border-b-0 text-sm font-medium text-stone-800"
                   >
-                    <span className="font-medium">{s.nom}</span> <span className="text-stone-400">({s.code_postal})</span>
+                    {s.nom}
                   </button>
                 ))}
               </div>

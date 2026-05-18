@@ -209,11 +209,11 @@ export default function Step2Personalization({ estimate, onNext, onBack, initial
           const selection = selections[item.id]
 
           const featureButtons: { [key: string]: { label: string; href: string } } = {
-            venue: { label: '✨ Plan de table 2D sur Kaatch', href: 'https://kaatch.fr/auth' },
-            photographer: { label: '✨ Album partagé pour vos invités', href: 'https://kaatch.fr/auth' },
-            dj: { label: '✨ Créer ma playlist sur Kaatch', href: 'https://kaatch.fr/auth' },
-            stationery: { label: '✨ Studio créatif Kaatch', href: 'https://kaatch.fr/auth' },
-            accommodation: { label: '✨ Suggérer des hébergements à mes invités', href: 'https://kaatch.fr/auth' },
+            venue: { label: '✨ Plan de table 2D sur Kaatch', href: '/guide' },
+            photographer: { label: '✨ Album partagé pour vos invités', href: '/guide' },
+            dj: { label: '✨ Créer ma playlist sur Kaatch', href: '/guide' },
+            stationery: { label: '✨ Studio créatif Kaatch', href: '/guide' },
+            accommodation: { label: '✨ Suggérer des hébergements à mes invités', href: '/guide' },
           }
           const featureButton = featureButtons[item.id]
 

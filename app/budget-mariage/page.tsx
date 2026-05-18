@@ -52,12 +52,15 @@ export default function BudgetCalculatorPage() {
       {/* FAQ */}
       <div className="bg-white py-16 md:py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-light text-stone-800 mb-12">Questions fréquentes</h2>
+          <div className="flex items-center justify-between mb-12">
+            <h2 className="text-3xl font-light text-stone-800">Questions fréquentes</h2>
+            <span className="text-xs text-stone-400 bg-stone-50 px-3 py-1 rounded-full">Mis à jour janvier 2026</span>
+          </div>
           <div className="grid md:grid-cols-2 gap-8">
             {[
               {
                 q: 'Comment ces chiffres sont-ils calculés ?',
-                a: 'Nous avons analysé les tarifs réels pratiqués par les prestataires français (2024-2025). Chaque poste correspond à un coût moyen par invité ou coût fixe selon la gamme choisie.',
+                a: 'Nous avons analysé les tarifs réels pratiqués par les prestataires français en 2026. Chaque poste correspond à un coût moyen par invité ou coût fixe selon la gamme choisie. Ces données sont mises à jour chaque année pour rester fiables.',
               },
               {
                 q: 'Les prix varient vraiment autant selon la région ?',

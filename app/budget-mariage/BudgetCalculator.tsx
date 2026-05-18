@@ -323,6 +323,8 @@ export default function BudgetCalculator() {
   const [itemOrder, setItemOrder] = useState<string[]>(lineItems.map(i => i.id))
   const [dragId, setDragId] = useState<string | null>(null)
   const [dragOverId, setDragOverId] = useState<string | null>(null)
+  const [customItems, setCustomItems] = useState<LineItem[]>([])
+  const [showInfoId, setShowInfoId] = useState<string | null>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [hoveredSlice, setHoveredSlice] = useState<number | null>(null)
   const segmentsRef = useRef<{ startAngle: number; endAngle: number }[]>([])
@@ -352,11 +354,12 @@ export default function BudgetCalculator() {
       .reduce((s, item) => s + getAmount(item), 0)
   }, [getAmount, enabled, selections])
 
+  const allItems = useMemo(() => [...lineItems, ...customItems], [customItems])
   const orderedItems = useMemo(() => {
-    const map = new Map(lineItems.map(i => [i.id, i]))
+    const map = new Map(allItems.map(i => [i.id, i]))
     return itemOrder.map(id => map.get(id)!).filter(Boolean)
-  }, [itemOrder])
-  const mainItems = orderedItems.filter(i => !i.horsTotal)
+  }, [itemOrder, allItems])
+  const mainItems = orderedItems
   const horsItems = orderedItems.filter(i => i.horsTotal)
 
   const handleDragStart = (id: string) => { setDragId(id); setExpandedId(null) }
@@ -465,6 +468,39 @@ export default function BudgetCalculator() {
     setCustomBudgets(prev => ({ ...prev, [id]: isNaN(num) || num < 0 ? null : num }))
   }
 
+  const addCustomItem = () => {
+    const id = `custom_${Date.now()}`
+    const newItem: LineItem = {
+      id, emoji: '➕', nom: 'Nouveau poste',
+      description: 'Cliquez pour personnaliser',
+      type: 'fixe', actif: true,
+      conseil: '', messageDesactivation: '',
+      niveaux: {
+        eco: { label: 'Budget mini', base: 200 },
+        classique: { label: 'Budget moyen', base: 500 },
+        premium: { label: 'Budget maxi', base: 1500 },
+      },
+    }
+    setCustomItems(prev => [...prev, newItem])
+    setItemOrder(prev => [...prev.filter(i => i !== 'contingency'), id, 'contingency'])
+    setSelections(prev => ({ ...prev, [id]: 'classique' }))
+    setEnabled(prev => ({ ...prev, [id]: true }))
+    setCustomBudgets(prev => ({ ...prev, [id]: null }))
+    setExpandedId(id)
+  }
+
+  const removeCustomItem = (id: string) => {
+    setCustomItems(prev => prev.filter(i => i.id !== id))
+    setItemOrder(prev => prev.filter(i => i !== id))
+    setSelections(prev => { const n = { ...prev }; delete n[id]; return n })
+    setEnabled(prev => { const n = { ...prev }; delete n[id]; return n })
+    setCustomBudgets(prev => { const n = { ...prev }; delete n[id]; return n })
+  }
+
+  const updateCustomItemName = (id: string, nom: string) => {
+    setCustomItems(prev => prev.map(i => i.id === id ? { ...i, nom } : i))
+  }
+
   const handleCopy = () => {
     const text = `Mon mariage : ~${Math.round(total).toLocaleString()} € pour ${guestCount} invités (${Math.round(total / guestCount)} €/personne)`
     navigator.clipboard.writeText(text)
@@ -566,150 +602,159 @@ export default function BudgetCalculator() {
         onDragOver={e => handleDragOver(e, item.id)}
         onDrop={() => handleDrop(item.id)}
         onDragEnd={handleDragEnd}
-        className={`border-b border-stone-100 transition-all ${!isEnabled ? 'opacity-40' : ''} ${dragId === item.id ? 'opacity-30' : ''} ${dragOverId === item.id && dragId !== item.id ? 'border-t-2 border-t-[#4a5240]' : ''}`}
+        className={`group relative transition-all ${dragId === item.id ? 'opacity-20 scale-[0.98]' : ''} ${dragOverId === item.id && dragId !== item.id ? 'translate-y-0.5' : ''}`}
       >
-        {/* Collapsed row */}
         <div
-          className={`flex items-center gap-2 px-4 md:px-6 py-3.5 cursor-pointer transition hover:bg-stone-50/50 ${isExpanded ? 'bg-stone-50/50' : ''}`}
+          className={`flex items-center gap-3 px-5 py-3 cursor-pointer rounded-xl transition-colors ${isExpanded ? 'bg-stone-100/60' : 'hover:bg-stone-50/80'} ${!isEnabled ? 'opacity-35' : ''}`}
           onClick={() => setExpandedId(isExpanded ? null : item.id)}
         >
           <span
-            className="cursor-grab active:cursor-grabbing text-stone-300 hover:text-stone-500 flex-shrink-0 select-none"
+            className="cursor-grab active:cursor-grabbing text-stone-200 group-hover:text-stone-400 flex-shrink-0 select-none text-xs transition-colors"
             onMouseDown={e => e.stopPropagation()}
-            title="Glisser pour réordonner"
-          >
-            ⠿
-          </span>
-          <input
-            type="checkbox"
-            checked={isEnabled}
-            onChange={e => { e.stopPropagation(); toggleItem(item.id) }}
-            onClick={e => e.stopPropagation()}
-            className="w-4 h-4 accent-[#4a5240] cursor-pointer flex-shrink-0"
-          />
-          <span className="text-lg flex-shrink-0">{item.emoji}</span>
-          <span className="flex-1 text-sm" style={{ fontWeight: 400, color: GREEN_DARK }}>
-            {item.nom}
-          </span>
+          >⠿</span>
+          <label className="flex-shrink-0" onClick={e => e.stopPropagation()}>
+            <input
+              type="checkbox"
+              checked={isEnabled}
+              onChange={() => toggleItem(item.id)}
+              className="sr-only peer"
+            />
+            <div className="w-[18px] h-[18px] rounded-[5px] border border-stone-300 peer-checked:bg-[#4a5240] peer-checked:border-[#4a5240] transition-all flex items-center justify-center cursor-pointer">
+              {isEnabled && <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+            </div>
+          </label>
+          <span className="text-base flex-shrink-0 leading-none">{item.emoji}</span>
+          <div className="flex-1 flex items-center gap-1.5 min-w-0">
+            {item.id.startsWith('custom_') ? (
+              <input
+                type="text"
+                value={item.nom}
+                onChange={e => { e.stopPropagation(); updateCustomItemName(item.id, e.target.value) }}
+                onClick={e => e.stopPropagation()}
+                className="text-[0.82rem] tracking-[-0.01em] bg-transparent border-b border-dashed border-stone-300 focus:border-[#4a5240] outline-none w-full"
+                style={{ fontFamily: BODY, fontWeight: 400, color: GREEN_DARK }}
+              />
+            ) : (
+              <span className="text-[0.82rem] tracking-[-0.01em]" style={{ fontFamily: BODY, fontWeight: 400, color: GREEN_DARK }}>{item.nom}</span>
+            )}
+            {item.description && !isExpanded && (
+              <button
+                onClick={e => { e.stopPropagation(); setShowInfoId(showInfoId === item.id ? null : item.id) }}
+                className="flex-shrink-0 w-4 h-4 rounded-full bg-stone-100 text-stone-400 hover:bg-stone-200 hover:text-stone-600 text-[0.55rem] flex items-center justify-center transition"
+              >?</button>
+            )}
+            {item.id.startsWith('custom_') && (
+              <button
+                onClick={e => { e.stopPropagation(); removeCustomItem(item.id) }}
+                className="flex-shrink-0 w-4 h-4 rounded-full text-stone-300 hover:text-red-400 text-[0.65rem] flex items-center justify-center transition"
+              >✕</button>
+            )}
+          </div>
+          {showInfoId === item.id && !isExpanded && (
+            <div className="absolute left-16 right-16 mt-12 z-10 bg-white border border-stone-100 rounded-lg px-3 py-2 shadow-md text-[0.72rem] text-stone-500" style={{ fontWeight: 300 }}>
+              {item.description}
+              {item.horsTotal && <span className="block text-stone-400 mt-1 text-[0.65rem]">⚠️ Non inclus dans le total principal</span>}
+            </div>
+          )}
           {!isExpanded && isEnabled && sel !== 'skip' && (
-            <span className="text-xs text-stone-400 hidden sm:inline">
+            <span className="text-[0.65rem] tracking-wide uppercase text-stone-400 hidden sm:inline" style={{ fontWeight: 300 }}>
               {hasCustom ? 'devis' : levelLabels[sel]}
             </span>
           )}
-          {!isExpanded && !isEnabled && (
-            <span className="text-xs text-stone-400 italic">désactivé</span>
-          )}
-          <span className="text-sm min-w-[70px] text-right" style={{ fontWeight: 400, color: isEnabled ? GREEN : '#a8a29e' }}>
+          <span className="text-[0.82rem] tabular-nums min-w-[72px] text-right tracking-tight" style={{ fontFamily: BODY, fontWeight: 300, color: isEnabled && sel !== 'skip' ? GREEN : '#c4b8a8' }}>
             {isEnabled && sel !== 'skip' ? `${Math.round(amount).toLocaleString()} €` : '—'}
           </span>
           <svg
-            width="16" height="16" viewBox="0 0 16 16" fill="none"
-            className={`flex-shrink-0 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+            width="14" height="14" viewBox="0 0 14 14" fill="none"
+            className={`flex-shrink-0 transition-transform duration-300 ease-out ${isExpanded ? 'rotate-180' : ''}`}
           >
-            <path d="M4 6L8 10L12 6" stroke="#a8a29e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M3.5 5.25L7 8.75L10.5 5.25" stroke="#c4b8a8" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
 
-        {/* Expanded panel */}
         {isExpanded && (
-          <div className="px-4 md:px-6 pb-5 pt-1 bg-[#faf8f3]">
-            <p className="text-xs text-stone-400 mb-3">{item.description}</p>
-
-            {/* Conseil */}
+          <div className="mx-5 mt-1 mb-3 rounded-xl bg-[#faf9f6] p-5 space-y-4" style={{ boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.03)' }}>
             {item.conseil && (
-              <div className="flex gap-2 mb-4 bg-white rounded-lg px-3 py-2.5 border border-stone-100">
-                <span className="text-sm flex-shrink-0">💡</span>
-                <p className="text-xs text-stone-500 leading-relaxed">{item.conseil}</p>
-              </div>
+              <p className="text-[0.72rem] text-stone-400 leading-relaxed" style={{ fontWeight: 300 }}>
+                💡 {item.conseil}
+              </p>
             )}
 
-            {/* Message désactivation */}
             {!isEnabled && item.messageDesactivation && (
-              <p className="text-xs text-stone-400 italic mb-3">{item.messageDesactivation}</p>
+              <p className="text-[0.72rem] text-stone-400 italic">{item.messageDesactivation}</p>
             )}
 
             {isEnabled && (
               <>
-                {/* Level buttons */}
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {(['eco', 'classique', 'premium'] as const).map(level => (
-                    <button
-                      key={level}
-                      onClick={() => setLevel(item.id, level)}
-                      className={`flex-1 min-w-[120px] px-3 py-2.5 rounded-lg border-2 transition text-left ${
-                        sel === level && !hasCustom
-                          ? 'border-[#4a5240] bg-white'
-                          : 'border-stone-200 bg-white hover:border-stone-300'
-                      }`}
-                    >
-                      <div className="flex items-center gap-1.5 mb-0.5">
-                        <span className="text-xs text-stone-400">{levelIcons[level]}</span>
-                        <span className="text-xs" style={{ fontWeight: 400, color: sel === level && !hasCustom ? GREEN : '#78716c' }}>
-                          {levelLabels[level]}
-                        </span>
-                      </div>
-                      <div className="text-[0.7rem] text-stone-400 leading-snug">{item.niveaux[level].label}</div>
-                      <div className="text-xs mt-1" style={{ fontWeight: 400, color: GREEN }}>
-                        {item.type === 'pourcentage'
-                          ? `${item.niveaux[level].base} %`
-                          : item.type === 'par_invite'
-                            ? `${item.niveaux[level].base} €/invité`
-                            : `${item.niveaux[level].base.toLocaleString()} €`
-                        }
-                      </div>
-                    </button>
-                  ))}
+                <div className="grid grid-cols-3 gap-2">
+                  {(['eco', 'classique', 'premium'] as const).map(level => {
+                    const active = sel === level && !hasCustom
+                    return (
+                      <button
+                        key={level}
+                        onClick={() => setLevel(item.id, level)}
+                        className={`relative px-3 py-3 rounded-xl text-left transition-all duration-200 ${
+                          active
+                            ? 'bg-white shadow-sm ring-1 ring-[#4a5240]/30'
+                            : 'bg-white/50 hover:bg-white hover:shadow-sm'
+                        }`}
+                      >
+                        <div className="text-[0.65rem] uppercase tracking-wider mb-1" style={{ fontWeight: 400, color: active ? GREEN : '#a8a29e' }}>
+                          {levelIcons[level]} {levelLabels[level]}
+                        </div>
+                        <div className="text-[0.68rem] text-stone-400 leading-snug mb-2" style={{ fontWeight: 300 }}>{item.niveaux[level].label}</div>
+                        <div className="text-[0.82rem] tabular-nums" style={{ fontWeight: 400, color: GREEN }}>
+                          {item.type === 'pourcentage'
+                            ? `${item.niveaux[level].base} %`
+                            : item.type === 'par_invite'
+                              ? `${item.niveaux[level].base} €/pers.`
+                              : `${item.niveaux[level].base.toLocaleString()} €`
+                          }
+                        </div>
+                      </button>
+                    )
+                  })}
                 </div>
 
-                {/* Custom input */}
                 {item.type !== 'pourcentage' && (
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-xs text-stone-400">OU</span>
-                    <span className="text-xs text-stone-500">✏️ J&apos;ai déjà un devis :</span>
-                    <input
-                      type="number"
-                      placeholder="Montant"
-                      value={customBudgets[item.id] !== null ? customBudgets[item.id]! : ''}
-                      onChange={e => setCustom(item.id, e.target.value)}
-                      className="w-28 px-3 py-1.5 border border-stone-200 rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-[#4a5240] focus:border-transparent"
-                      style={{ fontFamily: BODY, fontWeight: 300, color: GREEN }}
-                    />
-                    <span className="text-xs text-stone-400">€</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[0.65rem] text-stone-300 uppercase tracking-wider">ou</span>
+                    <div className="flex items-center gap-1.5 flex-1">
+                      <input
+                        type="number"
+                        placeholder="Mon devis"
+                        value={customBudgets[item.id] !== null ? customBudgets[item.id]! : ''}
+                        onChange={e => setCustom(item.id, e.target.value)}
+                        className="w-full max-w-[140px] px-3 py-2 bg-white rounded-lg text-[0.82rem] text-right tabular-nums placeholder:text-stone-300 focus:outline-none focus:ring-1 focus:ring-[#4a5240]/40 transition"
+                        style={{ fontFamily: BODY, fontWeight: 300, color: GREEN }}
+                      />
+                      <span className="text-[0.72rem] text-stone-300">€</span>
+                    </div>
                     {hasCustom && (
                       <button
                         onClick={() => setCustomBudgets(prev => ({ ...prev, [item.id]: null }))}
-                        className="text-xs text-stone-400 hover:text-stone-600 underline"
-                      >
-                        annuler
-                      </button>
+                        className="text-[0.65rem] text-stone-400 hover:text-stone-600 transition"
+                      >✕</button>
                     )}
                   </div>
                 )}
 
-                {/* Type info */}
-                <div className="flex items-center justify-between">
-                  <span className="text-[0.7rem] text-stone-400">
-                    {item.type === 'par_invite' && '✓ Calculé par invité'}
-                    {item.type === 'fixe' && '✓ Prestataire à la journée'}
-                    {item.type === 'pourcentage' && '✓ Pourcentage du budget total'}
+                <div className="flex items-center justify-between pt-1">
+                  <span className="text-[0.65rem] text-stone-300 tracking-wide" style={{ fontWeight: 300 }}>
+                    {item.type === 'par_invite' && 'par invité'}
+                    {item.type === 'fixe' && 'forfait'}
+                    {item.type === 'pourcentage' && '% du total'}
                   </span>
-                  <span className="text-sm" style={{ fontWeight: 400, color: GREEN }}>
-                    {Math.round(amount).toLocaleString()} €
-                  </span>
+                  {item.feature && (
+                    <a
+                      href={item.feature.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[0.65rem] text-[#4a5240]/60 hover:text-[#4a5240] transition"
+                      style={{ fontWeight: 300 }}
+                    >{item.feature.label} →</a>
+                  )}
                 </div>
-
-                {/* Feature link */}
-                {item.feature && (
-                  <a
-                    href={item.feature.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block mt-3 px-3 py-1.5 bg-[rgba(74,82,64,0.1)] text-[#4a5240] text-xs rounded-full hover:bg-[rgba(74,82,64,0.2)] transition"
-                    style={{ fontWeight: 400 }}
-                  >
-                    {item.feature.label}
-                  </a>
-                )}
               </>
             )}
           </div>
@@ -721,23 +766,21 @@ export default function BudgetCalculator() {
   return (
     <div>
       {/* Inputs */}
-      <div className="bg-white rounded-2xl border border-stone-100 p-6 md:p-10 mb-8" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-        <div className="grid md:grid-cols-3 gap-8">
+      <div className="bg-white rounded-2xl border border-stone-100 p-6 md:p-8 mb-6" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+        <div className="grid md:grid-cols-3 gap-6">
           <div>
-            <label className="block text-sm mb-3" style={{ fontFamily: BODY, fontWeight: 400, color: GREEN_DARK }}>
-              Nombre d&apos;invités
+            <label className="block text-[0.65rem] uppercase tracking-wider text-stone-400 mb-3" style={{ fontWeight: 300 }}>
+              Invités
             </label>
-            <div className="flex items-center gap-3 mb-3">
-              <input
-                type="number"
-                min={1}
-                max={500}
-                value={guestCount}
-                onChange={e => { const v = parseInt(e.target.value); if (!isNaN(v) && v >= 1) setGuestCount(v) }}
-                className="w-20 text-2xl bg-transparent outline-none border border-stone-200 rounded-lg px-2 py-1 focus:border-[#4a5240] focus:ring-1 focus:ring-[#4a5240] transition cursor-text"
-                style={{ fontFamily: BODY, fontWeight: 300, color: GREEN }}
-              />
-            </div>
+            <input
+              type="number"
+              min={1}
+              max={500}
+              value={guestCount}
+              onChange={e => { const v = parseInt(e.target.value); if (!isNaN(v) && v >= 1) setGuestCount(v) }}
+              className="w-20 text-2xl bg-transparent outline-none tabular-nums mb-3 border-b border-transparent focus:border-[#4a5240] transition cursor-text"
+              style={{ fontFamily: BODY, fontWeight: 300, color: GREEN }}
+            />
             <input
               type="range"
               min={10}
@@ -746,28 +789,28 @@ export default function BudgetCalculator() {
               onChange={e => setGuestCount(parseInt(e.target.value))}
               className="w-full accent-[#4a5240]"
             />
-            <div className="flex justify-between text-xs text-stone-400 mt-1">
+            <div className="flex justify-between text-[0.6rem] text-stone-300 mt-1">
               <span>10</span><span>300+</span>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm mb-3" style={{ fontFamily: BODY, fontWeight: 400, color: GREEN_DARK }}>
+            <label className="block text-[0.65rem] uppercase tracking-wider text-stone-400 mb-3" style={{ fontWeight: 300 }}>
               Région
             </label>
             <select
               value={city}
               onChange={e => setCity(e.target.value)}
-              className="w-full px-4 py-3 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#4a5240] focus:border-transparent"
-              style={{ fontFamily: BODY, fontWeight: 300 }}
+              className="w-full px-3 py-2.5 bg-stone-50 border-0 rounded-xl text-[0.82rem] focus:outline-none focus:ring-1 focus:ring-[#4a5240]/30 transition appearance-none cursor-pointer"
+              style={{ fontFamily: BODY, fontWeight: 300, color: GREEN_DARK }}
             >
               {regions.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
             </select>
           </div>
 
           <div>
-            <label className="block text-sm mb-3" style={{ fontFamily: BODY, fontWeight: 400, color: GREEN_DARK }}>
-              Style de mariage
+            <label className="block text-[0.65rem] uppercase tracking-wider text-stone-400 mb-3" style={{ fontWeight: 300 }}>
+              Style
             </label>
             <div className="grid grid-cols-3 gap-2">
               {[
@@ -778,12 +821,14 @@ export default function BudgetCalculator() {
                 <button
                   key={s.id}
                   onClick={() => handleStyleChange(s.id)}
-                  className={`p-3 rounded-xl border-2 transition text-center ${
-                    style === s.id ? 'border-[#4a5240] bg-stone-50' : 'border-stone-200 hover:border-stone-300'
+                  className={`py-2.5 rounded-xl text-[0.75rem] transition-all ${
+                    style === s.id
+                      ? 'bg-[#4a5240] text-white shadow-sm'
+                      : 'bg-stone-50 text-stone-500 hover:bg-stone-100'
                   }`}
+                  style={{ fontWeight: style === s.id ? 400 : 300 }}
                 >
-                  <div className="text-xl mb-1">{s.emoji}</div>
-                  <div className="text-xs" style={{ fontWeight: 400 }}>{s.label}</div>
+                  {s.emoji} {s.label}
                 </button>
               ))}
             </div>
@@ -791,66 +836,76 @@ export default function BudgetCalculator() {
         </div>
       </div>
 
-      {/* Main grid: accordion + summary */}
-      <div className="grid lg:grid-cols-[70%_1fr] gap-8">
-        {/* Accordion table */}
+      {/* Main grid */}
+      <div className="grid lg:grid-cols-[1fr_320px] gap-6 items-start">
+        {/* Accordion */}
         <div>
-          <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-            <div className="px-6 md:px-10 pt-8 pb-4">
-              <h2 className="text-xl" style={{ fontFamily: BODY, fontWeight: 400, color: GREEN_DARK }}>
+          <div className="bg-white rounded-2xl border border-stone-100 py-2" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+            <div className="px-5 pt-4 pb-2">
+              <h2 className="text-[0.82rem] tracking-[-0.01em]" style={{ fontFamily: BODY, fontWeight: 400, color: GREEN_DARK }}>
                 Détail des postes
               </h2>
             </div>
             {mainItems.map(item => renderRow(item))}
+            <div className="px-5 py-3">
+              <button
+                onClick={addCustomItem}
+                className="w-full py-2.5 rounded-xl border border-dashed border-stone-200 text-[0.75rem] text-stone-400 hover:border-stone-300 hover:text-stone-500 transition-all"
+                style={{ fontWeight: 300 }}
+              >
+                + Ajouter un poste
+              </button>
+            </div>
           </div>
 
-          {/* Voyage de noces — séparé */}
-          {horsItems.length > 0 && (
-            <div className="bg-white rounded-2xl border border-dashed border-stone-300 overflow-hidden mt-6" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-              <div className="px-6 pt-5 pb-2">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-sm" style={{ fontWeight: 400, color: GREEN_DARK }}>Hors budget mariage</h3>
-                  <span className="text-[0.65rem] text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full">Non inclus dans le total</span>
-                </div>
-              </div>
-              {horsItems.map(item => renderRow(item))}
+          {/* CTA */}
+          <div className="mt-6 bg-white rounded-2xl border border-stone-100 p-6 flex items-center justify-between" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+            <div>
+              <div className="text-[0.82rem]" style={{ fontWeight: 400, color: GREEN_DARK }}>Prêt à organiser ?</div>
+              <div className="text-[0.72rem] text-stone-400" style={{ fontWeight: 300 }}>Transformez cette estimation en plan d&apos;action</div>
             </div>
-          )}
+            <a
+              href="/dashboard"
+              className="px-5 py-2.5 bg-[#4a5240] text-white rounded-xl text-[0.75rem] hover:bg-[#2d3228] transition-all flex-shrink-0"
+              style={{ fontWeight: 400 }}
+            >
+              ✨ Organiser sur Kaatch
+            </a>
+          </div>
         </div>
 
-        {/* Summary sidebar */}
-        <div className="lg:sticky lg:top-5 h-fit">
-          <div
-            className="bg-gradient-to-br from-[#f5f0e8] to-white border-2 border-[#4a5240] rounded-2xl p-8"
-            style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
-          >
-            <div className="text-sm text-stone-500 mb-2">Budget total estimé</div>
-            <div className="text-4xl mb-1" style={{ fontFamily: BODY, fontWeight: 300, color: GREEN }}>
-              {Math.round(total).toLocaleString()} €
-            </div>
-            <div className="text-sm text-stone-600 mb-4 pb-4 border-b border-stone-200">
-              ≈ <strong>{guestCount > 0 ? Math.round(total / guestCount) : 0} €</strong> par invité
+        {/* Sidebar */}
+        <div className="lg:sticky lg:top-20 h-fit">
+          <div className="bg-white rounded-2xl border border-stone-100 p-6 space-y-5" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+            <div>
+              <div className="text-[0.65rem] uppercase tracking-wider text-stone-400 mb-1" style={{ fontWeight: 300 }}>Budget estimé</div>
+              <div className="text-3xl tabular-nums tracking-tight" style={{ fontFamily: BODY, fontWeight: 300, color: GREEN }}>
+                {Math.round(total).toLocaleString()} €
+              </div>
+              <div className="text-[0.72rem] text-stone-400 mt-0.5" style={{ fontWeight: 300 }}>
+                ≈ {guestCount > 0 ? Math.round(total / guestCount) : 0} € par invité
+              </div>
             </div>
 
             {honeymoonAmount > 0 && (
-              <div className="text-xs text-stone-400 mb-4 pb-4 border-b border-stone-200">
-                + Voyage de noces : <strong className="text-stone-500">{Math.round(honeymoonAmount).toLocaleString()} €</strong>
-                <span className="block mt-0.5 text-stone-400">(non inclus dans le total)</span>
+              <div className="text-[0.72rem] text-stone-400 pt-3 border-t border-stone-100" style={{ fontWeight: 300 }}>
+                + Voyage de noces : <span className="text-stone-500">{Math.round(honeymoonAmount).toLocaleString()} €</span>
+                <span className="block text-stone-300 mt-0.5">non inclus dans le total</span>
               </div>
             )}
 
-            <div className="flex justify-center mb-6 relative">
+            <div className="flex justify-center relative pt-2">
               <canvas
                 ref={canvasRef}
                 width={220}
                 height={220}
-                style={{ width: 220, height: 220, cursor: hoveredSlice !== null ? 'pointer' : 'default' }}
+                style={{ width: 200, height: 200, cursor: hoveredSlice !== null ? 'pointer' : 'default' }}
                 onMouseMove={e => {
                   const rect = canvasRef.current!.getBoundingClientRect()
-                  const x = e.clientX - rect.left - 110
-                  const y = e.clientY - rect.top - 110
+                  const x = e.clientX - rect.left - 100
+                  const y = e.clientY - rect.top - 100
                   const dist = Math.sqrt(x * x + y * y)
-                  if (dist < 55 || dist > 94) { setHoveredSlice(null); return }
+                  if (dist < 50 || dist > 85) { setHoveredSlice(null); return }
                   let angle = Math.atan2(y, x)
                   if (angle < -Math.PI / 2) angle += Math.PI * 2
                   const idx = segmentsRef.current.findIndex(s => angle >= s.startAngle && angle < s.endAngle)
@@ -860,49 +915,39 @@ export default function BudgetCalculator() {
               />
               {hoveredSlice !== null && breakdown[hoveredSlice] && (
                 <div
-                  className="absolute pointer-events-none bg-white border border-stone-200 rounded-lg px-3 py-2 shadow-lg text-xs"
+                  className="absolute pointer-events-none bg-white/95 backdrop-blur-sm border border-stone-100 rounded-lg px-3 py-2 shadow-md text-[0.72rem]"
                   style={{ bottom: '100%', left: '50%', transform: 'translateX(-50%)', marginBottom: 4, whiteSpace: 'nowrap' }}
                 >
-                  <span className="font-medium" style={{ color: GREEN_DARK }}>{breakdown[hoveredSlice].label}</span>
-                  <span className="ml-2 text-stone-500">{Math.round(breakdown[hoveredSlice].amount).toLocaleString()} € — {Math.round(breakdown[hoveredSlice].amount / total * 100)} %</span>
+                  <span style={{ fontWeight: 400, color: GREEN_DARK }}>{breakdown[hoveredSlice].label}</span>
+                  <span className="ml-2 text-stone-400">{Math.round(breakdown[hoveredSlice].amount).toLocaleString()} € · {Math.round(breakdown[hoveredSlice].amount / total * 100)} %</span>
                 </div>
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-3 mb-3">
+            <div className="space-y-2 pt-2">
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={handleCopy}
+                  className={`py-2.5 rounded-xl text-[0.75rem] transition-all ${copied ? 'bg-[#4a5240]/5 text-[#4a5240]' : 'bg-stone-50 text-stone-500 hover:bg-stone-100'}`}
+                  style={{ fontWeight: 300 }}
+                >
+                  {copied ? '✓ Copié' : 'Copier'}
+                </button>
+                <button
+                  onClick={handleShare}
+                  className="py-2.5 rounded-xl text-[0.75rem] bg-stone-50 text-stone-500 hover:bg-stone-100 transition-all"
+                  style={{ fontWeight: 300 }}
+                >
+                  Partager
+                </button>
+              </div>
               <button
-                onClick={handleCopy}
-                className={`py-3 px-4 border rounded-lg text-sm transition ${copied ? 'border-[#4a5240] bg-[rgba(74,82,64,0.05)] text-[#4a5240]' : 'border-stone-200 hover:border-[#4a5240]'}`}
+                onClick={handlePDF}
+                className="w-full py-2.5 bg-[#4a5240] text-white rounded-xl text-[0.75rem] hover:bg-[#2d3228] transition-all"
                 style={{ fontWeight: 400 }}
               >
-                {copied ? '✅ Copié !' : '📋 Copier'}
+                Télécharger PDF
               </button>
-              <button
-                onClick={handleShare}
-                className="py-3 px-4 border border-stone-200 rounded-lg text-sm hover:border-[#4a5240] transition"
-                style={{ fontWeight: 400 }}
-              >
-                💬 Partager
-              </button>
-            </div>
-            <button
-              onClick={handlePDF}
-              className="w-full py-3 bg-[#4a5240] text-white rounded-lg text-sm hover:bg-[#2d3228] transition mb-6"
-              style={{ fontWeight: 400 }}
-            >
-              📥 Télécharger PDF
-            </button>
-
-            <div className="bg-white border-2 border-[#4a5240] rounded-xl p-5 text-center">
-              <div className="text-sm mb-1" style={{ fontWeight: 400 }}>Prêt à organiser ?</div>
-              <div className="text-xs text-stone-500 mb-4">Transformez cette estimation en plan d&apos;action</div>
-              <a
-                href="/dashboard"
-                className="inline-block px-6 py-2.5 bg-[#4a5240] text-white rounded-lg text-sm hover:bg-[#2d3228] transition"
-                style={{ fontWeight: 400 }}
-              >
-                ✨ Sur Kaatch
-              </a>
             </div>
           </div>
         </div>

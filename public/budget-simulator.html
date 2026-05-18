@@ -172,7 +172,7 @@
 
     .main-grid {
       display: grid;
-      grid-template-columns: 55% 1fr;
+      grid-template-columns: 70% 1fr;
       gap: 40px;
       margin-bottom: 40px;
     }
@@ -187,8 +187,12 @@
       background: white;
       border: 2px solid #e7e5e0;
       border-radius: 16px;
-      padding: 40px;
+      overflow: hidden;
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .items-section-header {
+      padding: 40px 40px 24px 40px;
     }
 
     .section-title {
@@ -196,82 +200,149 @@
       font-weight: 400;
       font-size: 1.5rem;
       color: #2C3B2E;
-      margin-bottom: 24px;
+      margin-bottom: 0;
     }
 
-    .items-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 16px;
+    .items-table-wrapper {
+      overflow-x: auto;
     }
 
-    .item {
-      border: 1px solid #e7e5e0;
-      border-radius: 12px;
-      padding: 20px;
-      background: white;
-      transition: all 0.2s;
+    .items-cards-mobile {
+      display: none;
     }
 
-    .item:hover {
-      border-color: #d4cfc7;
+    table.items-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    table.items-table thead {
+      background: #f5f0e8;
+      border-bottom: 3px solid #4a5240;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    table.items-table th {
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 400;
+      color: #2d3228;
+      font-size: 0.85rem;
+    }
+
+    table.items-table th:first-child {
+      width: 32px;
+      padding-left: 12px;
+    }
+
+    table.items-table tbody tr {
+      border-bottom: 1px solid #e7e5e0;
+    }
+
+    table.items-table tbody tr:nth-child(even) {
       background: #faf8f3;
     }
 
-    .item-header {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 12px;
+    table.items-table tbody tr:hover {
+      background: rgba(74, 82, 64, 0.03);
     }
 
-    .item-icon {
-      font-size: 1.5rem;
+    table.items-table tbody tr.category-header {
+      background: rgba(74, 82, 64, 0.08);
+      border-bottom: 2px solid #d4cfc7;
     }
 
-    .item-info {
-      flex: 1;
+    table.items-table tbody tr.category-header:hover {
+      background: rgba(74, 82, 64, 0.08);
     }
 
-    .item-label {
-      font-weight: 400;
+    table.items-table tbody tr.disabled {
+      opacity: 0.5;
+    }
+
+    table.items-table td {
+      padding: 12px 16px;
       color: #2d3228;
-      margin-bottom: 3px;
     }
 
-    .item-desc {
+    table.items-table td:first-child {
+      padding-left: 12px;
+      width: 32px;
+    }
+
+    .item-checkbox {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: #4a5240;
+    }
+
+    .item-label-cell {
+      font-weight: 400;
+    }
+
+    .item-desc-cell {
       font-size: 0.8rem;
       color: #a89f99;
     }
 
-    .item-buttons {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-      margin-top: 12px;
+    .level-pills {
+      display: flex;
+      gap: 4px;
+      align-items: center;
     }
 
-    button.level-btn {
-      padding: 8px 4px;
+    button.level-pill {
+      padding: 5px 10px;
       font-size: 0.75rem;
       border: 1px solid #d4cfc7;
-      border-radius: 6px;
+      border-radius: 16px;
       background: white;
       color: #2d3228;
       cursor: pointer;
       transition: all 0.2s;
       font-family: 'Lato', sans-serif;
       font-weight: 300;
+      white-space: nowrap;
     }
 
-    button.level-btn:hover {
+    button.level-pill:hover {
       border-color: #4a5240;
       background: rgba(74, 82, 64, 0.05);
     }
 
-    button.level-btn.active {
+    button.level-pill.active {
       background: #4a5240;
       color: white;
       border-color: #4a5240;
+    }
+
+    input.budget-cell {
+      width: 80px;
+      padding: 4px 8px;
+      border: 1px solid #d4cfc7;
+      border-radius: 4px;
+      font-family: 'Lato', sans-serif;
+      font-weight: 300;
+      font-size: 0.9rem;
+      text-align: right;
+      background: white;
+      color: #4a5240;
+    }
+
+    input.budget-cell:focus {
+      outline: none;
+      border-color: #4a5240;
+      box-shadow: 0 0 0 2px rgba(74, 82, 64, 0.1);
+    }
+
+    .budget-amount {
+      text-align: right;
+      font-weight: 400;
+      color: #4a5240;
     }
 
     .summary-box {
@@ -417,58 +488,6 @@
       background: #2d3228;
     }
 
-    .faq-section {
-      background: white;
-      border: 2px solid #e7e5e0;
-      border-radius: 16px;
-      padding: 40px;
-      margin-bottom: 40px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    }
-
-    .faq-item {
-      margin-bottom: 24px;
-    }
-
-    .faq-question {
-      cursor: pointer;
-      padding: 16px;
-      background: #faf8f3;
-      border-radius: 8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-weight: 400;
-      color: #2d3228;
-      transition: all 0.2s;
-      user-select: none;
-    }
-
-    .faq-question:hover {
-      background: rgba(74, 82, 64, 0.05);
-    }
-
-    .faq-toggle {
-      transition: transform 0.3s;
-    }
-
-    .faq-toggle.open {
-      transform: rotate(180deg);
-    }
-
-    .faq-answer {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s;
-      padding: 0 16px;
-      color: #78716c;
-      font-size: 0.95rem;
-    }
-
-    .faq-answer.open {
-      max-height: 500px;
-      padding: 16px;
-    }
 
     .toast {
       position: fixed;
@@ -505,21 +524,148 @@
 
       .container {
         padding: 20px 16px;
+        padding-bottom: 120px;
       }
 
-      .input-section,
-      .items-section,
-      .faq-section {
+      .input-section {
         padding: 24px;
       }
 
-      .summary-box {
-        position: static;
-        margin-top: 30px;
+      .items-section {
+        padding: 0;
+        border-radius: 0;
+        margin-bottom: 100px;
       }
 
-      .items-grid {
-        grid-template-columns: 1fr;
+      .items-section-header {
+        padding: 24px 24px 16px 24px;
+      }
+
+      .items-table-wrapper {
+        display: none;
+      }
+
+      .items-cards-mobile {
+        display: block;
+        padding: 0 16px;
+      }
+
+      .items-card {
+        background: white;
+        border: 1px solid #e7e5e0;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 12px;
+        transition: all 0.2s;
+      }
+
+      .items-card:hover {
+        border-color: #d4cfc7;
+        background: #faf8f3;
+      }
+
+      .items-card.disabled {
+        opacity: 0.5;
+      }
+
+      .card-header {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 12px;
+        align-items: flex-start;
+      }
+
+      .card-icon {
+        font-size: 1.3rem;
+        flex-shrink: 0;
+      }
+
+      .card-info {
+        flex: 1;
+      }
+
+      .card-label {
+        font-weight: 400;
+        color: #2d3228;
+        margin-bottom: 2px;
+        font-size: 0.9rem;
+      }
+
+      .card-desc {
+        font-size: 0.75rem;
+        color: #a89f99;
+      }
+
+      .card-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .card-levels {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+      }
+
+      .card-budget {
+        text-align: right;
+      }
+
+      .card-budget label {
+        display: block;
+        font-size: 0.75rem;
+        color: #a89f99;
+        margin-bottom: 4px;
+      }
+
+      .card-budget-input {
+        width: 100%;
+        padding: 6px 8px;
+        border: 1px solid #d4cfc7;
+        border-radius: 4px;
+        font-family: 'Lato', sans-serif;
+        font-weight: 300;
+        font-size: 0.85rem;
+        text-align: right;
+        color: #4a5240;
+      }
+
+      .summary-box {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: 0;
+        border-radius: 0;
+        border-top: 2px solid #4a5240;
+        border-bottom: none;
+        padding: 20px 16px;
+        max-height: 120px;
+        overflow-y: auto;
+        background: linear-gradient(135deg, #f5f0e8 0%, rgba(255, 255, 255, 0.5) 100%);
+        z-index: 999;
+      }
+
+      .summary-total {
+        font-size: 2rem;
+        margin-bottom: 10px;
+      }
+
+      .summary-per-guest {
+        font-size: 0.9rem;
+        margin-bottom: 12px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #d4cfc7;
+      }
+
+      .chart-container {
+        display: none;
+      }
+
+      .action-buttons,
+      .kaatch-cta {
+        display: none;
       }
     }
   </style>
@@ -536,7 +682,7 @@
         <div class="input-group">
           <label>Nombre d'invités</label>
           <div class="guest-display">
-            <label class="guest-count" id="guestCountDisplay">100</label>
+            <input type="number" id="guestCountInput" min="10" max="500" value="100" style="font-family: 'Outfit', sans-serif; font-weight: 400; font-size: 2rem; color: #4a5240; border: none; background: transparent; width: 80px; text-align: left; outline: none;">
           </div>
           <input type="range" id="guestCount" min="10" max="300" value="100">
           <div class="range-labels">
@@ -583,8 +729,26 @@
 
     <div class="main-grid">
       <div class="items-section">
-        <h2 class="section-title">Détail des postes</h2>
-        <div class="items-grid" id="itemsGrid"></div>
+        <div class="items-section-header">
+          <h2 class="section-title">Détail des postes</h2>
+        </div>
+        <div class="items-table-wrapper">
+          <table class="items-table" id="itemsTable">
+            <thead>
+              <tr>
+                <th>☐</th>
+                <th>Poste</th>
+                <th style="text-align: center; font-size: 0.8rem;">Économique</th>
+                <th style="text-align: center; font-size: 0.8rem;">Standard</th>
+                <th style="text-align: center; font-size: 0.8rem;">Premium</th>
+                <th style="text-align: center; font-size: 0.8rem;">—</th>
+                <th style="text-align: right;">Votre budget</th>
+              </tr>
+            </thead>
+            <tbody id="itemsBody"></tbody>
+          </table>
+        </div>
+        <div class="items-cards-mobile" id="itemsCardsMobile"></div>
       </div>
 
       <div class="summary-box">
@@ -613,60 +777,30 @@
       </div>
     </div>
 
-    <div class="faq-section">
-      <h2 class="section-title">Questions fréquentes</h2>
-      <div id="faqContainer"></div>
-    </div>
   </div>
 
   <div class="toast" id="toast"></div>
 
   <script>
-    // Line items data
+    // Line items data with categories
     const lineItems = [
-      { id: 'venue', label: 'Salle de réception', icon: '🏛️', desc: 'Lieu principal', intimate: 2500, convivial: 5000, grandiose: 9000 },
-      { id: 'catering', label: 'Traiteur & Menu', icon: '🍽️', desc: 'Par personne', intimate: 25, convivial: 50, grandiose: 85, perGuest: true },
-      { id: 'drinks', label: 'Boissons', icon: '🍾', desc: 'Vin, bière, cocktails', intimate: 6, convivial: 12, grandiose: 20, perGuest: true },
-      { id: 'photographer', label: 'Photographe', icon: '📸', desc: '6-8 heures, album inclus', intimate: 900, convivial: 1500, grandiose: 2500 },
-      { id: 'videographer', label: 'Vidéographe', icon: '🎬', desc: 'Film 3-5 min', intimate: 600, convivial: 1200, grandiose: 2300 },
-      { id: 'dj', label: 'DJ / Animations', icon: '🎵', desc: 'Musique + animations', intimate: 400, convivial: 800, grandiose: 1800 },
-      { id: 'flowers', label: 'Fleurs & Décoration', icon: '🌹', desc: 'Bouquets, déco, arche', intimate: 300, convivial: 800, grandiose: 1800 },
-      { id: 'stationery', label: 'Faire-part & Stationery', icon: '💌', desc: 'Invitations, menus', intimate: 100, convivial: 300, grandiose: 600 },
-      { id: 'rentals', label: 'Location (tentes, tables)', icon: '⛺', desc: 'Si besoin extérieur', intimate: 300, convivial: 800, grandiose: 1800 },
-      { id: 'beauty', label: 'Coiffure & Maquillage', icon: '💄', desc: 'Mariée + demoiselle', intimate: 100, convivial: 250, grandiose: 500 },
-      { id: 'dress', label: 'Robe & Costumes', icon: '👰', desc: 'Robe mariée + costumes', intimate: 600, convivial: 1200, grandiose: 2200 },
-      { id: 'cake', label: 'Gâteau & Desserts', icon: '🎂', desc: 'Pièce montée, macarons', intimate: 150, convivial: 400, grandiose: 900 },
-      { id: 'transport', label: 'Transport & Voiture', icon: '🚗', desc: 'Mariée + navettes', intimate: 200, convivial: 500, grandiose: 1000 },
-      { id: 'accommodation', label: 'Hébergement invités', icon: '🏨', desc: 'Rooms pour invités (optionnel)', intimate: 0, convivial: 600, grandiose: 1500 },
-      { id: 'contingency', label: 'Imprévus & Marge', icon: '🎁', desc: '10-15% pour surprises', intimate: 400, convivial: 1000, grandiose: 2000 },
+      { id: 'venue', label: 'Salle de réception', icon: '🏛️', desc: 'Lieu principal', category: '🥂 Réception', intimate: 2500, convivial: 5000, grandiose: 9000 },
+      { id: 'catering', label: 'Traiteur & Menu', icon: '🍽️', desc: 'Par personne', category: '🥂 Réception', intimate: 25, convivial: 50, grandiose: 85, perGuest: true },
+      { id: 'drinks', label: 'Boissons', icon: '🍾', desc: 'Vin, bière, cocktails', category: '🥂 Réception', intimate: 6, convivial: 12, grandiose: 20, perGuest: true },
+      { id: 'photographer', label: 'Photographe', icon: '📸', desc: '6-8 heures, album inclus', category: '📸 Souvenirs', intimate: 900, convivial: 1500, grandiose: 2500 },
+      { id: 'videographer', label: 'Vidéographe', icon: '🎬', desc: 'Film 3-5 min', category: '📸 Souvenirs', intimate: 600, convivial: 1200, grandiose: 2300 },
+      { id: 'dj', label: 'DJ / Animations', icon: '🎵', desc: 'Musique + animations', category: '🎵 Musique & Animation', intimate: 400, convivial: 800, grandiose: 1800 },
+      { id: 'flowers', label: 'Fleurs & Décoration', icon: '🌹', desc: 'Bouquets, déco, arche', category: '💐 Décoration', intimate: 300, convivial: 800, grandiose: 1800 },
+      { id: 'stationery', label: 'Faire-part & Stationery', icon: '💌', desc: 'Invitations, menus', category: '💌 Communication', intimate: 100, convivial: 300, grandiose: 600 },
+      { id: 'rentals', label: 'Location (tentes, tables)', icon: '⛺', desc: 'Si besoin extérieur', category: '🏕️ Logistique', intimate: 300, convivial: 800, grandiose: 1800 },
+      { id: 'beauty', label: 'Coiffure & Maquillage', icon: '💄', desc: 'Mariée + demoiselle', category: '💄 Apparence', intimate: 100, convivial: 250, grandiose: 500 },
+      { id: 'dress', label: 'Robe & Costumes', icon: '👰', desc: 'Robe mariée + costumes', category: '💄 Apparence', intimate: 600, convivial: 1200, grandiose: 2200 },
+      { id: 'cake', label: 'Gâteau & Desserts', icon: '🎂', desc: 'Pièce montée, macarons', category: '🎂 Gourmandises', intimate: 150, convivial: 400, grandiose: 900 },
+      { id: 'transport', label: 'Transport & Voiture', icon: '🚗', desc: 'Mariée + navettes', category: '🚗 Transport', intimate: 200, convivial: 500, grandiose: 1000 },
+      { id: 'accommodation', label: 'Hébergement invités', icon: '🏨', desc: 'Rooms pour invités (optionnel)', category: '🏨 Hébergement', intimate: 0, convivial: 600, grandiose: 1500 },
+      { id: 'contingency', label: 'Imprévus & Marge', icon: '🎁', desc: '10-15% pour surprises', category: '🎁 Contingency', intimate: 400, convivial: 1000, grandiose: 2000 },
     ];
 
-    const faqItems = [
-      {
-        q: 'Comment sont calculées les régions ?',
-        a: 'Paris & IDF = ×1,30 | Provence = ×1,18 | Grandes villes = ×1,12 | Autres = ×1,00'
-      },
-      {
-        q: 'Qu\'est-ce qui change avec le style ?',
-        a: 'Intime & DIY (×0,70) : petit budget, DIY, salle modeste | Convivial (×1,00) : standard, équilibré | Grandiose (×1,50) : luxe, prestations premium'
-      },
-      {
-        q: 'Puis-je modifier les postes ?',
-        a: 'Oui ! Cliquez sur Basique/Convivial/Premium pour chaque poste, ou "—" pour l\'ignorer. Les totaux se mettent à jour en temps réel.'
-      },
-      {
-        q: 'Les prix incluent-ils les impôts ?',
-        a: 'Non, ces estimations sont HT (hors taxes). Prévoir ~20% TVA supplémentaire selon les prestataires.'
-      },
-      {
-        q: 'Comment utiliser cette estimation ?',
-        a: 'C\'est un guide indicatif. Les prix varient beaucoup selon la région, la saisonnalité (+20-30% mai-sept), et les prestataires. Prévoir 10-15% de marge.'
-      },
-      {
-        q: 'Pourquoi certains postes sont "par personne" ?',
-        a: 'Traiteur et boissons dépendent du nombre d\'invités. Les autres postes (photo, DJ, etc.) sont fixes ou peu variables.'
-      }
-    ];
 
     // State
     let state = {
@@ -674,12 +808,16 @@
       city: '',
       style: 'intimate',
       selections: {},
+      enabled: {},
+      customBudgets: {},
       chart: null
     };
 
-    // Initialize selections
+    // Initialize selections and enabled items
     lineItems.forEach(item => {
       state.selections[item.id] = 'convivial';
+      state.enabled[item.id] = true;
+      state.customBudgets[item.id] = null;
     });
 
     // Load from localStorage
@@ -695,7 +833,9 @@
 
     // Save to localStorage
     function save() {
-      localStorage.setItem('budgetSimulator', JSON.stringify(state));
+      const stateToSave = { ...state };
+      delete stateToSave.chart; // Exclude Chart.js instance (circular reference)
+      localStorage.setItem('budgetSimulator', JSON.stringify(stateToSave));
     }
 
     // Get region multiplier
@@ -721,13 +861,17 @@
       let breakdown = [];
 
       lineItems.forEach(item => {
+        if (!state.enabled[item.id]) return;
+
         const selection = state.selections[item.id];
         if (!selection || selection === 'skip') return;
 
-        let amount = item[selection];
-        if (item.perGuest) amount *= state.guestCount;
+        let amount = state.customBudgets[item.id] !== null ? state.customBudgets[item.id] : item[selection];
+        if (item.perGuest && state.customBudgets[item.id] === null) amount *= state.guestCount;
 
-        amount = Math.round(amount * regionMult * styleMult);
+        amount = Math.round(amount);
+        if (state.customBudgets[item.id] === null) amount = Math.round(amount * regionMult * styleMult);
+
         total += amount;
 
         breakdown.push({ label: item.label, amount });
@@ -736,62 +880,158 @@
       return { total, breakdown };
     }
 
-    // Render items grid
-    function renderItems() {
-      const grid = document.getElementById('itemsGrid');
-      grid.innerHTML = lineItems.map(item => `
-        <div class="item">
-          <div class="item-header">
-            <div class="item-icon">${item.icon}</div>
-            <div class="item-info">
-              <div class="item-label">${item.label}</div>
-              <div class="item-desc">${item.desc}</div>
-            </div>
-          </div>
-          <div class="item-buttons">
-            <button class="level-btn ${state.selections[item.id] === 'intimate' ? 'active' : ''}" data-item="${item.id}" data-level="intimate">I</button>
-            <button class="level-btn ${state.selections[item.id] === 'convivial' ? 'active' : ''}" data-item="${item.id}" data-level="convivial">C</button>
-            <button class="level-btn ${state.selections[item.id] === 'grandiose' ? 'active' : ''}" data-item="${item.id}" data-level="grandiose">G</button>
-            <button class="level-btn ${state.selections[item.id] === 'skip' ? 'active' : ''}" data-item="${item.id}" data-level="skip">—</button>
-          </div>
-        </div>
-      `).join('');
+    // Get calculated amount for item
+    function getItemAmount(item) {
+      if (!state.enabled[item.id]) return 0;
+      const selection = state.selections[item.id];
+      if (!selection || selection === 'skip') return 0;
 
-      // Add event listeners
-      document.querySelectorAll('.level-btn').forEach(btn => {
+      const regionMult = getRegionMultiplier(state.city);
+      const styleMult = getStyleMultiplier(state.style);
+
+      if (state.customBudgets[item.id] !== null) {
+        return state.customBudgets[item.id];
+      }
+
+      let amount = item[selection];
+      if (item.perGuest) amount *= state.guestCount;
+      return Math.round(amount * regionMult * styleMult);
+    }
+
+    // Render items table and mobile cards
+    function renderItems() {
+      const tbody = document.getElementById('itemsBody');
+      const mobileContainer = document.getElementById('itemsCardsMobile');
+      const categories = [...new Set(lineItems.map(i => i.category))];
+      let tableHtml = '';
+      let mobileHtml = '';
+
+      categories.forEach(cat => {
+        // Add category header
+        const catItems = lineItems.filter(i => i.category === cat);
+
+        // Table category header
+        tableHtml += `
+          <tr class="category-header">
+            <td colspan="7" style="font-weight: 400; color: #2d3228; padding: 10px 16px;">${cat}</td>
+          </tr>
+        `;
+
+        // Mobile category header
+        mobileHtml += `<div style="font-weight: 400; color: #2d3228; padding: 16px 0 8px 0; margin-top: 16px; font-size: 0.95rem;">${cat}</div>`;
+
+        // Add items in category
+        catItems.forEach(item => {
+          const enabled = state.enabled[item.id];
+          const selected = state.selections[item.id];
+          const customBudget = state.customBudgets[item.id];
+          const amount = getItemAmount(item);
+          const rowClass = enabled ? '' : 'disabled';
+
+          // Feature buttons mapping
+          const featureButtons = {
+            venue: { label: '✨ Plan de table sur Kaatch', href: '/guide' },
+            photographer: { label: '✨ Album partagé invités', href: '/guide' },
+            dj: { label: '✨ Playlist collaborative', href: '/guide' },
+            stationery: { label: '✨ Studio créatif Kaatch', href: '/guide' },
+            accommodation: { label: '✨ Hébergements invités', href: '/guide' },
+          };
+          const feat = featureButtons[item.id];
+          const featHtml = feat ? `<a href="${feat.href}" target="_blank" rel="noopener" style="display:inline-block; margin-top:4px; padding:2px 8px; background:rgba(74,82,64,0.1); color:#4a5240; font-size:0.7rem; border-radius:12px; text-decoration:none; font-weight:400;">${feat.label}</a>` : '';
+
+          // Table row
+          tableHtml += `
+            <tr class="${rowClass}" data-item="${item.id}">
+              <td>
+                <input type="checkbox" class="item-checkbox" data-item="${item.id}" ${enabled ? 'checked' : ''}>
+              </td>
+              <td>
+                <div class="item-label-cell">${item.icon} ${item.label}</div>
+                <div class="item-desc-cell">${item.desc}${featHtml}</div>
+              </td>
+              <td style="text-align: center;">
+                <button class="level-pill ${selected === 'intimate' ? 'active' : ''}" data-item="${item.id}" data-level="intimate" ${!enabled ? 'disabled' : ''}>Économique</button>
+              </td>
+              <td style="text-align: center;">
+                <button class="level-pill ${selected === 'convivial' ? 'active' : ''}" data-item="${item.id}" data-level="convivial" ${!enabled ? 'disabled' : ''}>Standard</button>
+              </td>
+              <td style="text-align: center;">
+                <button class="level-pill ${selected === 'grandiose' ? 'active' : ''}" data-item="${item.id}" data-level="grandiose" ${!enabled ? 'disabled' : ''}>Premium</button>
+              </td>
+              <td style="text-align: center;">
+                <button class="level-pill ${selected === 'skip' ? 'active' : ''}" data-item="${item.id}" data-level="skip" ${!enabled ? 'disabled' : ''}>—</button>
+              </td>
+              <td class="budget-amount">
+                <input type="number" class="budget-cell" data-item="${item.id}" value="${customBudget !== null ? customBudget : amount}" ${!enabled ? 'disabled' : ''}>
+              </td>
+            </tr>
+          `;
+
+          // Mobile card
+          mobileHtml += `
+            <div class="items-card ${rowClass}" data-item="${item.id}">
+              <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-bottom: 8px;">
+                <input type="checkbox" class="item-checkbox" data-item="${item.id}" ${enabled ? 'checked' : ''}>
+                <span class="card-icon">${item.icon}</span>
+                <div class="card-info">
+                  <div class="card-label">${item.label}</div>
+                  <div class="card-desc">${item.desc}</div>
+                </div>
+              </label>
+              <div class="card-content">
+                <div class="card-levels">
+                  <button class="level-pill ${selected === 'intimate' ? 'active' : ''}" data-item="${item.id}" data-level="intimate" style="flex: 1; padding: 4px 6px; font-size: 0.7rem;" ${!enabled ? 'disabled' : ''}>Éco</button>
+                  <button class="level-pill ${selected === 'convivial' ? 'active' : ''}" data-item="${item.id}" data-level="convivial" style="flex: 1; padding: 4px 6px; font-size: 0.7rem;" ${!enabled ? 'disabled' : ''}>Std</button>
+                  <button class="level-pill ${selected === 'grandiose' ? 'active' : ''}" data-item="${item.id}" data-level="grandiose" style="flex: 1; padding: 4px 6px; font-size: 0.7rem;" ${!enabled ? 'disabled' : ''}>Prm</button>
+                  <button class="level-pill ${selected === 'skip' ? 'active' : ''}" data-item="${item.id}" data-level="skip" style="flex: 1; padding: 4px 6px; font-size: 0.7rem;" ${!enabled ? 'disabled' : ''}>—</button>
+                </div>
+                <div class="card-budget">
+                  <label style="display: block; font-size: 0.7rem; color: #a89f99; margin-bottom: 4px;">Budget</label>
+                  <input type="number" class="budget-cell card-budget-input" data-item="${item.id}" value="${customBudget !== null ? customBudget : amount}" ${!enabled ? 'disabled' : ''}>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+      });
+
+      tbody.innerHTML = tableHtml;
+      mobileContainer.innerHTML = mobileHtml;
+
+      // Add event listeners for checkboxes
+      document.querySelectorAll('.item-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+          const itemId = checkbox.dataset.item;
+          state.enabled[itemId] = checkbox.checked;
+          save();
+          update();
+        });
+      });
+
+      // Add event listeners for level pills
+      document.querySelectorAll('.level-pill').forEach(btn => {
         btn.addEventListener('click', () => {
           const itemId = btn.dataset.item;
           const level = btn.dataset.level;
           state.selections[itemId] = level;
+          state.customBudgets[itemId] = null;
+          save();
+          update();
+        });
+      });
+
+      // Add event listeners for budget cells
+      document.querySelectorAll('.budget-cell').forEach(input => {
+        input.addEventListener('change', () => {
+          const itemId = input.dataset.item;
+          const value = parseFloat(input.value);
+          state.customBudgets[itemId] = isNaN(value) || value < 0 ? null : value;
           save();
           update();
         });
       });
     }
 
-    // Render FAQ
-    function renderFAQ() {
-      const container = document.getElementById('faqContainer');
-      container.innerHTML = faqItems.map((item, i) => `
-        <div class="faq-item">
-          <div class="faq-question" data-faq="${i}">
-            <span>${item.q}</span>
-            <span class="faq-toggle">▼</span>
-          </div>
-          <div class="faq-answer" data-faq="${i}">${item.a}</div>
-        </div>
-      `).join('');
-
-      document.querySelectorAll('.faq-question').forEach(q => {
-        q.addEventListener('click', () => {
-          const idx = q.dataset.faq;
-          const answer = document.querySelector(`.faq-answer[data-faq="${idx}"]`);
-          const toggle = q.querySelector('.faq-toggle');
-          answer.classList.toggle('open');
-          toggle.classList.toggle('open');
-        });
-      });
-    }
 
     // Update display
     function update() {
@@ -845,12 +1085,23 @@
       });
     }
 
-    // Event listeners
-    document.getElementById('guestCount').addEventListener('change', (e) => {
+    // Event listeners — guest count slider (real-time)
+    document.getElementById('guestCount').addEventListener('input', (e) => {
       state.guestCount = parseInt(e.target.value);
-      document.getElementById('guestCountDisplay').textContent = state.guestCount;
+      document.getElementById('guestCountInput').value = state.guestCount;
       save();
       update();
+    });
+
+    // Guest count manual input
+    document.getElementById('guestCountInput').addEventListener('input', (e) => {
+      const val = parseInt(e.target.value);
+      if (!isNaN(val) && val >= 1) {
+        state.guestCount = val;
+        document.getElementById('guestCount').value = Math.min(val, 300);
+        save();
+        update();
+      }
     });
 
     document.getElementById('city').addEventListener('change', (e) => {
@@ -915,8 +1166,15 @@ Estimation indicative - peut varier selon prestataires et saisonnalité`;
 
     // Initialize
     load();
+    // Sync UI from loaded state
+    document.getElementById('guestCount').value = Math.min(state.guestCount, 300);
+    document.getElementById('guestCountInput').value = state.guestCount;
+    document.getElementById('city').value = state.city;
+    document.querySelectorAll('.style-card').forEach(c => {
+      c.classList.toggle('active', c.dataset.style === state.style);
+    });
     renderItems();
-    renderFAQ();
+
     update();
   </script>
 </body>

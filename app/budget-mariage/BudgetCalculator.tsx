@@ -320,6 +320,9 @@ export default function BudgetCalculator() {
   )
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [itemOrder, setItemOrder] = useState<string[]>(lineItems.map(i => i.id))
+  const [dragId, setDragId] = useState<string | null>(null)
+  const [dragOverId, setDragOverId] = useState<string | null>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   const regionMult = useMemo(() => getRegionMult(city), [city])
@@ -347,8 +350,29 @@ export default function BudgetCalculator() {
       .reduce((s, item) => s + getAmount(item), 0)
   }, [getAmount, enabled, selections])
 
-  const mainItems = lineItems.filter(i => !i.horsTotal)
-  const horsItems = lineItems.filter(i => i.horsTotal)
+  const orderedItems = useMemo(() => {
+    const map = new Map(lineItems.map(i => [i.id, i]))
+    return itemOrder.map(id => map.get(id)!).filter(Boolean)
+  }, [itemOrder])
+  const mainItems = orderedItems.filter(i => !i.horsTotal)
+  const horsItems = orderedItems.filter(i => i.horsTotal)
+
+  const handleDragStart = (id: string) => { setDragId(id); setExpandedId(null) }
+  const handleDragOver = (e: React.DragEvent, id: string) => { e.preventDefault(); setDragOverId(id) }
+  const handleDrop = (targetId: string) => {
+    if (!dragId || dragId === targetId) { setDragId(null); setDragOverId(null); return }
+    setItemOrder(prev => {
+      const next = [...prev]
+      const fromIdx = next.indexOf(dragId)
+      const toIdx = next.indexOf(targetId)
+      next.splice(fromIdx, 1)
+      next.splice(toIdx, 0, dragId)
+      return next
+    })
+    setDragId(null)
+    setDragOverId(null)
+  }
+  const handleDragEnd = () => { setDragId(null); setDragOverId(null) }
 
   const breakdown = useMemo(() => {
     return mainItems
@@ -521,12 +545,27 @@ export default function BudgetCalculator() {
     const hasCustom = customBudgets[item.id] !== null
 
     return (
-      <div key={item.id} className={`border-b border-stone-100 ${!isEnabled ? 'opacity-40' : ''}`}>
+      <div
+        key={item.id}
+        draggable
+        onDragStart={() => handleDragStart(item.id)}
+        onDragOver={e => handleDragOver(e, item.id)}
+        onDrop={() => handleDrop(item.id)}
+        onDragEnd={handleDragEnd}
+        className={`border-b border-stone-100 transition-all ${!isEnabled ? 'opacity-40' : ''} ${dragId === item.id ? 'opacity-30' : ''} ${dragOverId === item.id && dragId !== item.id ? 'border-t-2 border-t-[#4a5240]' : ''}`}
+      >
         {/* Collapsed row */}
         <div
-          className={`flex items-center gap-3 px-4 md:px-6 py-3.5 cursor-pointer transition hover:bg-stone-50/50 ${isExpanded ? 'bg-stone-50/50' : ''}`}
+          className={`flex items-center gap-2 px-4 md:px-6 py-3.5 cursor-pointer transition hover:bg-stone-50/50 ${isExpanded ? 'bg-stone-50/50' : ''}`}
           onClick={() => setExpandedId(isExpanded ? null : item.id)}
         >
+          <span
+            className="cursor-grab active:cursor-grabbing text-stone-300 hover:text-stone-500 flex-shrink-0 select-none"
+            onMouseDown={e => e.stopPropagation()}
+            title="Glisser pour réordonner"
+          >
+            ⠿
+          </span>
           <input
             type="checkbox"
             checked={isEnabled}

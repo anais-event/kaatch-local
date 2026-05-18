@@ -74,6 +74,7 @@ export default function BudgetCalculator() {
     Object.fromEntries(lineItems.map(i => [i.id, null])) as Record<ItemId, number | null>
   )
   const [openDetail, setOpenDetail] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   const regionMult = useMemo(() => getRegionMult(city), [city])
@@ -161,6 +162,8 @@ export default function BudgetCalculator() {
   const handleCopy = () => {
     const text = `Mon mariage : ~${Math.round(total).toLocaleString()}€ pour ${guestCount} invités (${Math.round(total / guestCount)}€/personne)`
     navigator.clipboard.writeText(text)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   const handleShare = () => {
@@ -508,10 +511,10 @@ export default function BudgetCalculator() {
             <div className="grid grid-cols-2 gap-3 mb-3">
               <button
                 onClick={handleCopy}
-                className="py-3 px-4 border border-stone-200 rounded-lg text-sm hover:border-[#4a5240] transition"
+                className={`py-3 px-4 border rounded-lg text-sm transition ${copied ? 'border-[#4a5240] bg-[rgba(74,82,64,0.05)] text-[#4a5240]' : 'border-stone-200 hover:border-[#4a5240]'}`}
                 style={{ fontWeight: 400 }}
               >
-                📋 Copier
+                {copied ? '✅ Copié !' : '📋 Copier'}
               </button>
               <button
                 onClick={handleShare}

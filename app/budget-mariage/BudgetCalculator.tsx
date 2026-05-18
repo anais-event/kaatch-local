@@ -14,6 +14,7 @@ import BreakdownChart from './BreakdownChart'
 import ShareButton from './ShareButton'
 import PDFDownloadButton from './PDFDownloadButton'
 import CTAKaatch from './CTAKaatch'
+import DisclaimerBox from './DisclaimerBox'
 
 export default function BudgetCalculator() {
   const [guestCount, setGuestCount] = useState(100)
@@ -53,6 +54,9 @@ export default function BudgetCalculator() {
           message={budgetColor.label}
           color={budgetColor}
         />
+
+        {/* Disclaimer */}
+        <DisclaimerBox />
 
         {/* Breakdown Chart */}
         <div className="mt-8 bg-white rounded-2xl border border-stone-100 p-6 shadow-sm">

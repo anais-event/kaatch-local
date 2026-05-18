@@ -9,7 +9,7 @@ export default function CTAKaatch() {
         budget mariage et à ne rien oublier.
       </p>
       <Link
-        href="/auth"
+        href="/dashboard"
         className="inline-block px-6 py-3 bg-[#4a5240] hover:bg-[#2d3228] text-white rounded-lg font-medium transition-colors"
       >
         Créer mon budget sur Kaatch →

@@ -10,11 +10,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Simulateur de budget mariage gratuit',
     description: 'Estimez le coût de votre mariage en 30 secondes',
-    url: 'https://kaatch.fr/budget-calculator',
+    url: 'https://kaatch.fr/calcul-budget-mariage',
     type: 'website',
     images: [
       {
-        url: 'https://kaatch.fr/og-budget-calculator.png',
+        url: 'https://kaatch.fr/og-calcul-budget-mariage.png',
         width: 1200,
         height: 630,
         alt: 'Simulateur de budget mariage',
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Simulateur de budget mariage gratuit',
     description: 'Estimez le coût de votre mariage en 30 secondes',
-    images: ['https://kaatch.fr/og-budget-calculator.png'],
+    images: ['https://kaatch.fr/og-calcul-budget-mariage.png'],
   },
 }
 

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import BudgetCalculator from './BudgetCalculator'
+import PublicNav from '@/app/_components/PublicNav'
 
 export const metadata: Metadata = {
   title: 'Calcul budget mariage 2026 : estimez le coût de votre mariage gratuitement',
@@ -32,20 +33,39 @@ export const metadata: Metadata = {
 export default function BudgetCalculatorPage() {
   return (
     <main className="min-h-screen bg-[#f5f0e8]">
+      <PublicNav active="budget-mariage" />
+
       {/* Header */}
-      <div className="bg-gradient-to-b from-white to-[#faf8f3] border-b border-stone-200 py-12 md:py-16">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl md:text-5xl font-light text-stone-800 mb-4" style={{ fontFamily: 'var(--font-lato)' }}>
+      <div className="pt-24 pb-10 md:pt-28 md:pb-14 px-5 md:px-10">
+        <div className="mx-auto max-w-7xl">
+          <p
+            className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-4"
+            style={{ fontFamily: 'var(--font-display)', fontWeight: 500 }}
+          >
+            Simulateur budget
+          </p>
+          <h1
+            className="text-[#2C3B2E] mb-3"
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontWeight: 700,
+              fontSize: 'clamp(1.8rem, 4vw, 2.8rem)',
+              lineHeight: 1.15,
+              letterSpacing: '-0.02em',
+            }}
+          >
             Calculez le budget de votre mariage
           </h1>
+          <p className="text-stone-500 max-w-xl" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '1rem' }}>
+            Ajustez chaque poste selon vos envies. Téléchargez le PDF quand vous êtes prêts.
+          </p>
         </div>
       </div>
 
       {/* Calculator */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 md:py-20">
+      <div className="mx-auto max-w-7xl px-5 md:px-10 pb-20">
         <BudgetCalculator />
       </div>
-
     </main>
   )
 }

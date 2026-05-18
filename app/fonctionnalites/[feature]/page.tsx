@@ -165,6 +165,30 @@ const data: Record<string, FeatureData> = {
     seoDesc: "Collectez les messages de vos invités avant, pendant et après le mariage. Texte, photos, vidéos — accessible depuis leur téléphone.",
     relatedFeatures: ['album-photo', 'espace-invites', 'faire-part-rsvp'],
   },
+
+  'playlist-collaborative': {
+    icon: '🎵',
+    title: 'Playlist collaborative',
+    tagline: 'La bande-son de votre mariage, composée par vos invités.',
+    intro: "Fini le DJ qui passe des morceaux que personne ne connaît. Avec Kaatch, vos invités suggèrent leurs morceaux préférés pour chaque moment — cérémonie, vin d'honneur, dîner, soirée. Vous gardez le contrôle.",
+    benefits: [
+      { icon: '🎶', title: 'Par moment', desc: "Les invités suggèrent des morceaux pour la cérémonie, le vin d'honneur, le dîner ou la soirée." },
+      { icon: '📱', title: 'Depuis leur espace', desc: "Pas d'app à installer. Les invités ajoutent leurs suggestions depuis leur espace invité." },
+      { icon: '✅', title: 'Vous validez', desc: 'Chaque suggestion passe par vous. Vous approuvez, refusez ou réorganisez.' },
+      { icon: '🎧', title: 'Partagez au DJ', desc: 'Exportez la playlist validée et envoyez-la à votre DJ ou musicien.' },
+      { icon: '💚', title: 'Implique vos invités', desc: "Vos invités adorent participer. C'est un moyen simple de les impliquer avant le jour J." },
+      { icon: '🔒', title: 'Privée', desc: 'Seuls vos invités connectés peuvent voir et contribuer à la playlist.' },
+    ],
+    howItWorks: [
+      { step: '1', label: 'Activez la playlist', desc: 'Depuis votre tableau de bord, la playlist est accessible à vos invités.' },
+      { step: '2', label: 'Les invités suggèrent', desc: 'Ils choisissent un moment et proposent un titre + artiste.' },
+      { step: '3', label: 'Vous composez', desc: 'Validez les suggestions, organisez par moment, et partagez au DJ.' },
+    ],
+    ctaLine: 'Créer ma playlist collaborative',
+    seoTitle: 'Playlist collaborative mariage | Kaatch',
+    seoDesc: "Laissez vos invités suggérer les morceaux de votre mariage. Organisez par moment, validez, et partagez au DJ.",
+    relatedFeatures: ['programme-jour-j', 'espace-invites', 'faire-part-rsvp'],
+  },
 }
 
 const allFeatures = [
@@ -174,6 +198,7 @@ const allFeatures = [
   { slug: 'programme-jour-j',  icon: '📅', label: 'Programme jour J' },
   { slug: 'espace-invites',    icon: '🔗', label: 'Espace invités' },
   { slug: 'livre-dor',         icon: '📝', label: "Livre d'or" },
+  { slug: 'playlist-collaborative', icon: '🎵', label: 'Playlist collaborative' },
 ]
 
 export async function generateStaticParams() {

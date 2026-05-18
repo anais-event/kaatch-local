@@ -3,26 +3,29 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 
 const BODY = 'var(--font-lato)'
-const DISPLAY = 'var(--font-cormorant)'
 const GREEN = '#4a5240'
 const GREEN_DARK = '#2d3228'
 
 const lineItems = [
-  { id: 'venue', label: 'Salle de réception', icon: '🏛️', desc: 'Lieu principal', category: '🥂 Réception', intimate: 2500, convivial: 5000, grandiose: 9000, perGuest: false, feature: { label: '✨ Plan de table sur Kaatch', href: '/guide' } },
-  { id: 'catering', label: 'Traiteur & Menu', icon: '🍽️', desc: 'Par personne', category: '🥂 Réception', intimate: 25, convivial: 50, grandiose: 85, perGuest: true },
-  { id: 'drinks', label: 'Boissons', icon: '🍾', desc: 'Vin, bière, cocktails', category: '🥂 Réception', intimate: 6, convivial: 12, grandiose: 20, perGuest: true },
-  { id: 'photographer', label: 'Photographe', icon: '📸', desc: '6-8h, album inclus', category: '📸 Souvenirs', intimate: 900, convivial: 1500, grandiose: 2500, perGuest: false, feature: { label: '✨ Album partagé invités', href: '/guide' } },
-  { id: 'videographer', label: 'Vidéographe', icon: '🎬', desc: 'Film 3-5 min', category: '📸 Souvenirs', intimate: 600, convivial: 1200, grandiose: 2300, perGuest: false },
-  { id: 'dj', label: 'DJ / Animations', icon: '🎵', desc: 'Musique + animations', category: '🎵 Musique & Animation', intimate: 400, convivial: 800, grandiose: 1800, perGuest: false, feature: { label: '✨ Playlist collaborative', href: '/guide' } },
-  { id: 'flowers', label: 'Fleurs & Décoration', icon: '🌹', desc: 'Bouquets, déco, arche', category: '💐 Décoration', intimate: 300, convivial: 800, grandiose: 1800, perGuest: false },
-  { id: 'stationery', label: 'Faire-part & Papeterie', icon: '💌', desc: 'Invitations, menus', category: '💌 Communication', intimate: 100, convivial: 300, grandiose: 600, perGuest: false, feature: { label: '✨ Studio créatif Kaatch', href: '/guide' } },
-  { id: 'rentals', label: 'Location (tentes, tables)', icon: '⛺', desc: 'Si besoin extérieur', category: '🏕️ Logistique', intimate: 300, convivial: 800, grandiose: 1800, perGuest: false },
-  { id: 'beauty', label: 'Coiffure & Maquillage', icon: '💄', desc: 'Mariée + cortège', category: '💄 Apparence', intimate: 100, convivial: 250, grandiose: 500, perGuest: false },
-  { id: 'dress', label: 'Robe & Costumes', icon: '👰', desc: 'Robe mariée + costumes', category: '💄 Apparence', intimate: 600, convivial: 1200, grandiose: 2200, perGuest: false },
-  { id: 'cake', label: 'Gâteau & Desserts', icon: '🎂', desc: 'Pièce montée, macarons', category: '🎂 Gourmandises', intimate: 150, convivial: 400, grandiose: 900, perGuest: false },
-  { id: 'transport', label: 'Transport & Voiture', icon: '🚗', desc: 'Mariée + navettes', category: '🚗 Transport', intimate: 200, convivial: 500, grandiose: 1000, perGuest: false },
-  { id: 'accommodation', label: 'Hébergement invités', icon: '🏨', desc: 'Rooms invités (optionnel)', category: '🏨 Hébergement', intimate: 0, convivial: 600, grandiose: 1500, perGuest: false, feature: { label: '✨ Hébergements invités', href: '/guide' } },
-  { id: 'contingency', label: 'Imprévus & Marge', icon: '🎁', desc: '10-15% pour surprises', category: '🎁 Imprévus', intimate: 400, convivial: 1000, grandiose: 2000, perGuest: false },
+  { id: 'venue', label: '🏛️ Lieu de réception', details: 'Location salle, château, domaine, parc', intimate: 2500, convivial: 5000, grandiose: 9000, perGuest: false, feature: { label: '✨ Plan de table sur Kaatch', href: '/guide' } },
+  { id: 'catering', label: '🍽️ Traiteur & repas', details: 'Cocktail, dîner, brunch lendemain', intimate: 25, convivial: 50, grandiose: 85, perGuest: true },
+  { id: 'drinks', label: '🍾 Boissons & alcool', details: 'Vins, champagne, bar, softs', intimate: 6, convivial: 12, grandiose: 20, perGuest: true },
+  { id: 'cake', label: '🎂 Wedding cake & desserts', details: 'Pièce montée, candy bar, dessert', intimate: 150, convivial: 400, grandiose: 900, perGuest: false },
+  { id: 'photographer', label: '📸 Photo & vidéo', details: 'Photographe, vidéaste, drone, album', intimate: 1200, convivial: 2200, grandiose: 4000, perGuest: false, feature: { label: '✨ Album partagé invités', href: '/guide' } },
+  { id: 'dj', label: '🎵 Animation & musique', details: 'DJ, groupe, cérémonie laïque, animations', intimate: 400, convivial: 800, grandiose: 1800, perGuest: false, feature: { label: '✨ Playlist collaborative', href: '/guide' } },
+  { id: 'flowers', label: '💐 Décoration & fleurs', details: 'Bouquets, centres de table, scénographie', intimate: 300, convivial: 800, grandiose: 1800, perGuest: false },
+  { id: 'dress_bride', label: '👗 Tenue de la mariée', details: 'Robe, chaussures, accessoires, retouches', intimate: 600, convivial: 1200, grandiose: 2500, perGuest: false },
+  { id: 'dress_groom', label: '🤵 Tenue du marié', details: 'Costume, chaussures, accessoires', intimate: 300, convivial: 600, grandiose: 1200, perGuest: false },
+  { id: 'rings', label: '💍 Alliances & bijoux', details: 'Alliances, bijoux du jour J', intimate: 300, convivial: 700, grandiose: 1500, perGuest: false },
+  { id: 'beauty', label: '💄 Beauté', details: 'Coiffure, maquillage, manucure, essais', intimate: 100, convivial: 250, grandiose: 500, perGuest: false },
+  { id: 'stationery', label: '✉️ Papeterie & faire-part', details: 'Faire-part, save the date, menus, plan de table', intimate: 100, convivial: 300, grandiose: 600, perGuest: false, feature: { label: '✨ Studio créatif Kaatch', href: '/guide' } },
+  { id: 'gifts', label: '🎁 Cadeaux & dragées', details: 'Invités, témoins, parents', intimate: 100, convivial: 300, grandiose: 700, perGuest: false },
+  { id: 'transport', label: '🚗 Transport & logistique', details: 'Voiture mariés, navettes invités, parking', intimate: 200, convivial: 500, grandiose: 1000, perGuest: false },
+  { id: 'accommodation', label: '🏨 Hébergement', details: 'Nuit mariés, chambres invités/famille', intimate: 0, convivial: 600, grandiose: 1500, perGuest: false, feature: { label: '✨ Hébergements invités', href: '/guide' } },
+  { id: 'kids', label: '👶 Enfants', details: 'Vêtements, chaussures, baby-sitter, menus spécifiques', intimate: 0, convivial: 200, grandiose: 500, perGuest: false },
+  { id: 'admin', label: '📜 Administratif & impressions', details: 'Livret de cérémonie, signalétique, impressions', intimate: 50, convivial: 150, grandiose: 300, perGuest: false },
+  { id: 'honeymoon', label: '🌴 Voyage de noces', details: 'Voyage, hébergement, activités', intimate: 1000, convivial: 3000, grandiose: 6000, perGuest: false },
+  { id: 'contingency', label: '🎲 Divers & imprévus', details: 'Parapluies, médicaments, trousse de secours, bouteilles d\'eau, etc.', intimate: 400, convivial: 1000, grandiose: 2000, perGuest: false },
 ] as const
 
 type ItemId = typeof lineItems[number]['id']
@@ -49,14 +52,20 @@ function getStyleMult(style: string) {
   return ({ intimate: 0.70, convivial: 1.00, grandiose: 1.50 } as Record<string, number>)[style] ?? 1.00
 }
 
-const chartColors = ['#4a5240', '#78716c', '#d4cfc7', '#a89f99', '#c9a877', '#6b7461', '#9c8e77', '#5a6350', '#8a7c6b', '#b5a48e', '#3d4536', '#a8a29e', '#7c8572', '#c4b89c', '#505d44']
+function styleToLevel(style: string): Level {
+  if (style === 'intimate') return 'intimate'
+  if (style === 'convivial') return 'convivial'
+  return 'grandiose'
+}
+
+const chartColors = ['#4a5240', '#78716c', '#d4cfc7', '#a89f99', '#c9a877', '#6b7461', '#9c8e77', '#5a6350', '#8a7c6b', '#b5a48e', '#3d4536', '#a8a29e', '#7c8572', '#c4b89c', '#505d44', '#8b8072', '#607055', '#b0a090', '#6a7560']
 
 export default function BudgetCalculator() {
   const [guestCount, setGuestCount] = useState(100)
   const [city, setCity] = useState('')
   const [style, setStyle] = useState('intimate')
   const [selections, setSelections] = useState<Record<ItemId, Level>>(
-    Object.fromEntries(lineItems.map(i => [i.id, 'convivial'])) as Record<ItemId, Level>
+    Object.fromEntries(lineItems.map(i => [i.id, 'intimate'])) as Record<ItemId, Level>
   )
   const [enabled, setEnabled] = useState<Record<ItemId, boolean>>(
     Object.fromEntries(lineItems.map(i => [i.id, true])) as Record<ItemId, boolean>
@@ -64,6 +73,7 @@ export default function BudgetCalculator() {
   const [customBudgets, setCustomBudgets] = useState<Record<ItemId, number | null>>(
     Object.fromEntries(lineItems.map(i => [i.id, null])) as Record<ItemId, number | null>
   )
+  const [openDetail, setOpenDetail] = useState<string | null>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   const regionMult = useMemo(() => getRegionMult(city), [city])
@@ -102,6 +112,7 @@ export default function BudgetCalculator() {
     canvas.style.width = size + 'px'
     canvas.style.height = size + 'px'
     ctx.scale(dpr, dpr)
+    ctx.clearRect(0, 0, size, size)
 
     const cx = size / 2, cy = size / 2, r = 90, inner = 55
     let startAngle = -Math.PI / 2
@@ -118,6 +129,21 @@ export default function BudgetCalculator() {
     })
   }, [breakdown, total])
 
+  const handleStyleChange = (newStyle: string) => {
+    setStyle(newStyle)
+    const level = styleToLevel(newStyle)
+    setSelections(prev => {
+      const next = { ...prev }
+      for (const item of lineItems) {
+        if (prev[item.id] !== 'skip') {
+          next[item.id] = level
+        }
+      }
+      return next
+    })
+    setCustomBudgets(Object.fromEntries(lineItems.map(i => [i.id, null])) as Record<ItemId, number | null>)
+  }
+
   const setLevel = (id: ItemId, level: Level) => {
     setSelections(prev => ({ ...prev, [id]: level }))
     setCustomBudgets(prev => ({ ...prev, [id]: null }))
@@ -131,8 +157,6 @@ export default function BudgetCalculator() {
     const num = parseFloat(value)
     setCustomBudgets(prev => ({ ...prev, [id]: isNaN(num) || num < 0 ? null : num }))
   }
-
-  const categories = [...new Set(lineItems.map(i => i.category))]
 
   const handleCopy = () => {
     const text = `Mon mariage : ~${Math.round(total).toLocaleString()}€ pour ${guestCount} invités (${Math.round(total / guestCount)}€/personne)`
@@ -161,7 +185,6 @@ export default function BudgetCalculator() {
     doc.text(`${guestCount} invités  •  ${region}  •  Style ${style}`, w / 2, y, { align: 'center' })
     y += 14
 
-    // Total
     doc.setFillColor(245, 240, 232)
     doc.roundedRect(20, y, w - 40, 20, 3, 3, 'F')
     doc.setFontSize(16)
@@ -169,7 +192,6 @@ export default function BudgetCalculator() {
     doc.text(`Total : ${Math.round(total).toLocaleString()}€`, w / 2, y + 13, { align: 'center' })
     y += 30
 
-    // Table header
     doc.setFontSize(9)
     doc.setTextColor(120, 113, 108)
     doc.text('Poste', 22, y)
@@ -180,7 +202,6 @@ export default function BudgetCalculator() {
     doc.line(20, y, w - 20, y)
     y += 6
 
-    // Items
     doc.setFontSize(10)
     breakdown.forEach(b => {
       const item = lineItems.find(i => i.id === b.id)!
@@ -188,17 +209,14 @@ export default function BudgetCalculator() {
       const levelLabel = sel === 'intimate' ? 'Économique' : sel === 'convivial' ? 'Standard' : 'Premium'
 
       doc.setTextColor(45, 50, 40)
-      doc.text(`${item.label}`, 22, y)
+      doc.text(item.label.replace(/^.{1,2}\s/, ''), 22, y)
       doc.setTextColor(120, 113, 108)
       doc.text(levelLabel, 110, y)
       doc.setTextColor(74, 82, 64)
       doc.text(`${Math.round(b.amount).toLocaleString()}€`, w - 22, y, { align: 'right' })
       y += 7
 
-      if (y > 270) {
-        doc.addPage()
-        y = 20
-      }
+      if (y > 270) { doc.addPage(); y = 20 }
     })
 
     y += 4
@@ -233,7 +251,6 @@ export default function BudgetCalculator() {
       {/* Inputs */}
       <div className="bg-white rounded-2xl border border-stone-100 p-6 md:p-10 mb-8" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
         <div className="grid md:grid-cols-3 gap-8">
-          {/* Guests */}
           <div>
             <label className="block text-sm mb-3" style={{ fontFamily: BODY, fontWeight: 400, color: GREEN_DARK }}>
               Nombre d&apos;invités
@@ -262,7 +279,6 @@ export default function BudgetCalculator() {
             </div>
           </div>
 
-          {/* Region */}
           <div>
             <label className="block text-sm mb-3" style={{ fontFamily: BODY, fontWeight: 400, color: GREEN_DARK }}>
               Région
@@ -277,7 +293,6 @@ export default function BudgetCalculator() {
             </select>
           </div>
 
-          {/* Style */}
           <div>
             <label className="block text-sm mb-3" style={{ fontFamily: BODY, fontWeight: 400, color: GREEN_DARK }}>
               Style de mariage
@@ -290,7 +305,7 @@ export default function BudgetCalculator() {
               ].map(s => (
                 <button
                   key={s.id}
-                  onClick={() => setStyle(s.id)}
+                  onClick={() => handleStyleChange(s.id)}
                   className={`p-3 rounded-xl border-2 transition text-center ${
                     style === s.id ? 'border-[#4a5240] bg-stone-50' : 'border-stone-200 hover:border-stone-300'
                   }`}
@@ -329,95 +344,80 @@ export default function BudgetCalculator() {
                 </tr>
               </thead>
               <tbody>
-                {categories.map(cat => {
-                  const catItems = lineItems.filter(i => i.category === cat)
-                  return [
-                    <tr key={cat} className="bg-[rgba(74,82,64,0.08)] border-b-2 border-stone-200">
-                      <td colSpan={7} className="py-2.5 px-4" style={{ fontWeight: 400, color: GREEN_DARK }}>
-                        {cat}
+                {lineItems.map((item, idx) => {
+                  const amount = getAmount(item)
+                  const isEnabled = enabled[item.id]
+                  return (
+                    <tr
+                      key={item.id}
+                      className={`border-b border-stone-100 transition ${idx % 2 === 1 ? 'bg-[#faf8f3]' : ''} ${!isEnabled ? 'opacity-40' : 'hover:bg-stone-50/50'}`}
+                    >
+                      <td className="py-3 px-3">
+                        <input
+                          type="checkbox"
+                          checked={isEnabled}
+                          onChange={() => toggleItem(item.id)}
+                          className="w-4 h-4 accent-[#4a5240] cursor-pointer"
+                        />
                       </td>
-                    </tr>,
-                    ...catItems.map(item => {
-                      const amount = getAmount(item)
-                      const isEnabled = enabled[item.id]
-                      return (
-                        <tr
-                          key={item.id}
-                          className={`border-b border-stone-100 hover:bg-stone-50/50 transition ${!isEnabled ? 'opacity-40' : ''}`}
-                        >
-                          <td className="py-3 px-3">
-                            <input
-                              type="checkbox"
-                              checked={isEnabled}
-                              onChange={() => toggleItem(item.id)}
-                              className="w-4 h-4 accent-[#4a5240] cursor-pointer"
-                            />
-                          </td>
-                          <td className="py-3 px-3">
-                            <div style={{ fontWeight: 400 }}>{item.icon} {item.label}</div>
-                            <div className="text-xs text-stone-400">{item.desc}</div>
-                            {'feature' in item && item.feature && (
-                              <a
-                                href={item.feature.href}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-block mt-1 px-2 py-0.5 bg-[rgba(74,82,64,0.1)] text-[#4a5240] text-[0.7rem] rounded-full hover:bg-[rgba(74,82,64,0.2)] transition"
-                                style={{ fontWeight: 400 }}
-                              >
-                                {item.feature.label}
-                              </a>
-                            )}
-                          </td>
-                          <td className="py-3 px-3 text-center">
-                            <button
-                              className={pillClass(item.id, 'intimate')}
-                              onClick={() => setLevel(item.id, 'intimate')}
-                              disabled={!isEnabled}
-                            >
-                              Économique
-                            </button>
-                          </td>
-                          <td className="py-3 px-3 text-center">
-                            <button
-                              className={pillClass(item.id, 'convivial')}
-                              onClick={() => setLevel(item.id, 'convivial')}
-                              disabled={!isEnabled}
-                            >
-                              Standard
-                            </button>
-                          </td>
-                          <td className="py-3 px-3 text-center">
-                            <button
-                              className={pillClass(item.id, 'grandiose')}
-                              onClick={() => setLevel(item.id, 'grandiose')}
-                              disabled={!isEnabled}
-                            >
-                              Premium
-                            </button>
-                          </td>
-                          <td className="py-3 px-3 text-center">
-                            <button
-                              className={pillClass(item.id, 'skip')}
-                              onClick={() => setLevel(item.id, 'skip')}
-                              disabled={!isEnabled}
-                            >
-                              —
-                            </button>
-                          </td>
-                          <td className="py-3 px-3 text-right">
-                            <input
-                              type="number"
-                              value={customBudgets[item.id] !== null ? customBudgets[item.id]! : amount}
-                              onChange={e => setCustom(item.id, e.target.value)}
-                              disabled={!isEnabled}
-                              className="w-20 px-2 py-1 border border-stone-200 rounded text-right text-sm focus:outline-none focus:ring-2 focus:ring-[#4a5240] focus:border-transparent"
-                              style={{ fontFamily: BODY, fontWeight: 300, color: GREEN }}
-                            />
-                          </td>
-                        </tr>
-                      )
-                    })
-                  ]
+                      <td className="py-3 px-3">
+                        <div className="flex items-center gap-1.5">
+                          <span style={{ fontWeight: 400 }}>{item.label}</span>
+                          <button
+                            onClick={() => setOpenDetail(openDetail === item.id ? null : item.id)}
+                            className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-stone-200 text-stone-500 text-[0.6rem] leading-none hover:bg-stone-300 transition flex-shrink-0"
+                            title={item.details}
+                          >
+                            ?
+                          </button>
+                        </div>
+                        {openDetail === item.id && (
+                          <div className="text-xs text-stone-400 mt-1 pl-0.5">{item.details}</div>
+                        )}
+                        {'feature' in item && item.feature && (
+                          <a
+                            href={item.feature.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-block mt-1 px-2 py-0.5 bg-[rgba(74,82,64,0.1)] text-[#4a5240] text-[0.7rem] rounded-full hover:bg-[rgba(74,82,64,0.2)] transition"
+                            style={{ fontWeight: 400 }}
+                          >
+                            {item.feature.label}
+                          </a>
+                        )}
+                      </td>
+                      <td className="py-3 px-3 text-center">
+                        <button className={pillClass(item.id, 'intimate')} onClick={() => setLevel(item.id, 'intimate')} disabled={!isEnabled}>
+                          Économique
+                        </button>
+                      </td>
+                      <td className="py-3 px-3 text-center">
+                        <button className={pillClass(item.id, 'convivial')} onClick={() => setLevel(item.id, 'convivial')} disabled={!isEnabled}>
+                          Standard
+                        </button>
+                      </td>
+                      <td className="py-3 px-3 text-center">
+                        <button className={pillClass(item.id, 'grandiose')} onClick={() => setLevel(item.id, 'grandiose')} disabled={!isEnabled}>
+                          Premium
+                        </button>
+                      </td>
+                      <td className="py-3 px-3 text-center">
+                        <button className={pillClass(item.id, 'skip')} onClick={() => setLevel(item.id, 'skip')} disabled={!isEnabled}>
+                          —
+                        </button>
+                      </td>
+                      <td className="py-3 px-3 text-right">
+                        <input
+                          type="number"
+                          value={customBudgets[item.id] !== null ? customBudgets[item.id]! : amount}
+                          onChange={e => setCustom(item.id, e.target.value)}
+                          disabled={!isEnabled}
+                          className="w-20 px-2 py-1 border border-stone-200 rounded text-right text-sm focus:outline-none focus:ring-2 focus:ring-[#4a5240] focus:border-transparent"
+                          style={{ fontFamily: BODY, fontWeight: 300, color: GREEN }}
+                        />
+                      </td>
+                    </tr>
+                  )
                 })}
               </tbody>
             </table>
@@ -425,61 +425,62 @@ export default function BudgetCalculator() {
 
           {/* Mobile cards */}
           <div className="md:hidden px-4 pb-4">
-            {categories.map(cat => {
-              const catItems = lineItems.filter(i => i.category === cat)
+            {lineItems.map(item => {
+              const amount = getAmount(item)
+              const isEnabled = enabled[item.id]
               return (
-                <div key={cat}>
-                  <div className="text-sm py-3 mt-3" style={{ fontWeight: 400, color: GREEN_DARK }}>{cat}</div>
-                  {catItems.map(item => {
-                    const amount = getAmount(item)
-                    const isEnabled = enabled[item.id]
-                    return (
-                      <div key={item.id} className={`border border-stone-100 rounded-xl p-4 mb-3 ${!isEnabled ? 'opacity-40' : ''}`}>
-                        <label className="flex items-center gap-3 mb-3 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={isEnabled}
-                            onChange={() => toggleItem(item.id)}
-                            className="w-4 h-4 accent-[#4a5240]"
-                          />
-                          <span className="text-lg">{item.icon}</span>
-                          <div>
-                            <div className="text-sm" style={{ fontWeight: 400 }}>{item.label}</div>
-                            <div className="text-xs text-stone-400">{item.desc}</div>
-                          </div>
-                        </label>
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="flex gap-1 flex-wrap">
-                            {(['intimate', 'convivial', 'grandiose', 'skip'] as Level[]).map(level => (
-                              <button
-                                key={level}
-                                className={`flex-1 py-1 text-[0.7rem] rounded-full border transition ${
-                                  selections[item.id] === level
-                                    ? 'bg-[#4a5240] text-white border-[#4a5240]'
-                                    : 'bg-white text-stone-500 border-stone-200'
-                                }`}
-                                onClick={() => setLevel(item.id, level)}
-                                disabled={!isEnabled}
-                              >
-                                {level === 'intimate' ? 'Éco' : level === 'convivial' ? 'Std' : level === 'grandiose' ? 'Prm' : '—'}
-                              </button>
-                            ))}
-                          </div>
-                          <div className="text-right">
-                            <div className="text-[0.7rem] text-stone-400 mb-1">Budget</div>
-                            <input
-                              type="number"
-                              value={customBudgets[item.id] !== null ? customBudgets[item.id]! : amount}
-                              onChange={e => setCustom(item.id, e.target.value)}
-                              disabled={!isEnabled}
-                              className="w-full px-2 py-1 border border-stone-200 rounded text-right text-sm"
-                              style={{ fontFamily: BODY, fontWeight: 300, color: GREEN }}
-                            />
-                          </div>
-                        </div>
+                <div key={item.id} className={`border border-stone-100 rounded-xl p-4 mb-3 ${!isEnabled ? 'opacity-40' : ''}`}>
+                  <label className="flex items-center gap-3 mb-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={isEnabled}
+                      onChange={() => toggleItem(item.id)}
+                      className="w-4 h-4 accent-[#4a5240]"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-sm" style={{ fontWeight: 400 }}>{item.label}</span>
+                        <button
+                          onClick={e => { e.preventDefault(); setOpenDetail(openDetail === item.id ? null : item.id) }}
+                          className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-stone-200 text-stone-500 text-[0.6rem] leading-none"
+                        >
+                          ?
+                        </button>
                       </div>
-                    )
-                  })}
+                      {openDetail === item.id && (
+                        <div className="text-xs text-stone-400 mt-1">{item.details}</div>
+                      )}
+                    </div>
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex gap-1 flex-wrap">
+                      {(['intimate', 'convivial', 'grandiose', 'skip'] as Level[]).map(level => (
+                        <button
+                          key={level}
+                          className={`flex-1 py-1 text-[0.7rem] rounded-full border transition ${
+                            selections[item.id] === level
+                              ? 'bg-[#4a5240] text-white border-[#4a5240]'
+                              : 'bg-white text-stone-500 border-stone-200'
+                          }`}
+                          onClick={() => setLevel(item.id, level)}
+                          disabled={!isEnabled}
+                        >
+                          {level === 'intimate' ? 'Éco' : level === 'convivial' ? 'Std' : level === 'grandiose' ? 'Prm' : '—'}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="text-right">
+                      <div className="text-[0.7rem] text-stone-400 mb-1">Budget</div>
+                      <input
+                        type="number"
+                        value={customBudgets[item.id] !== null ? customBudgets[item.id]! : amount}
+                        onChange={e => setCustom(item.id, e.target.value)}
+                        disabled={!isEnabled}
+                        className="w-full px-2 py-1 border border-stone-200 rounded text-right text-sm"
+                        style={{ fontFamily: BODY, fontWeight: 300, color: GREEN }}
+                      />
+                    </div>
+                  </div>
                 </div>
               )
             })}
@@ -500,12 +501,10 @@ export default function BudgetCalculator() {
               ≈ <strong>{guestCount > 0 ? Math.round(total / guestCount) : 0}€</strong> par invité
             </div>
 
-            {/* Chart */}
             <div className="flex justify-center mb-6">
               <canvas ref={canvasRef} width={220} height={220} style={{ width: 220, height: 220 }} />
             </div>
 
-            {/* Actions */}
             <div className="grid grid-cols-2 gap-3 mb-3">
               <button
                 onClick={handleCopy}
@@ -530,7 +529,6 @@ export default function BudgetCalculator() {
               📥 Télécharger PDF
             </button>
 
-            {/* CTA */}
             <div className="bg-white border-2 border-[#4a5240] rounded-xl p-5 text-center">
               <div className="text-sm mb-1" style={{ fontWeight: 400 }}>Prêt à organiser ?</div>
               <div className="text-xs text-stone-500 mb-4">Transformez cette estimation en plan d&apos;action</div>

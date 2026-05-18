@@ -1,84 +1,72 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import {
-  calculateBudget,
-  getBudgetColor,
-  getBreakdownData,
-  type WeddingLevel,
-  type Region,
-} from '@/lib/calculator/budget-formulas'
-import ResultDisplay from './ResultDisplay'
-import Inputs from './Inputs'
-import BreakdownChart from './BreakdownChart'
-import ShareButton from './ShareButton'
-import PDFDownloadButton from './PDFDownloadButton'
-import CTAKaatch from './CTAKaatch'
-import DisclaimerBox from './DisclaimerBox'
+import { useState } from 'react'
+import Step1QuickEstimate, { type EstimateData } from './Step1QuickEstimate'
+import Step2Personalization, { type PersonalizationData } from './Step2Personalization'
+import Step3Recap from './Step3Recap'
 
 export default function BudgetCalculator() {
-  const [guestCount, setGuestCount] = useState(100)
-  const [level, setLevel] = useState<WeddingLevel>('classique')
-  const [region, setRegion] = useState<Region>('province')
-  const [includeHoneymoon, setIncludeHoneymoon] = useState(true)
+  const [step, setStep] = useState<1 | 2 | 3>(1)
+  const [estimate, setEstimate] = useState<EstimateData | null>(null)
+  const [selections, setSelections] = useState<PersonalizationData | null>(null)
 
-  const breakdown = useMemo(
-    () => calculateBudget(guestCount, level, region, includeHoneymoon),
-    [guestCount, level, region, includeHoneymoon]
-  )
+  const handleStep1Next = (data: EstimateData) => {
+    setEstimate(data)
+    setStep(2)
+  }
 
-  const breakdownData = useMemo(() => getBreakdownData(breakdown, guestCount), [breakdown, guestCount])
-  const budgetColor = useMemo(() => getBudgetColor(breakdown.grandTotal), [breakdown.grandTotal])
+  const handleStep2Next = (data: PersonalizationData) => {
+    setSelections(data)
+    setStep(3)
+  }
+
+  const handleStep2Back = () => {
+    setStep(1)
+  }
+
+  const handleStep3Back = () => {
+    setStep(2)
+  }
 
   return (
-    <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
-      {/* Inputs — Left column */}
-      <div>
-        <Inputs
-          guestCount={guestCount}
-          level={level}
-          region={region}
-          includeHoneymoon={includeHoneymoon}
-          onGuestCountChange={setGuestCount}
-          onLevelChange={setLevel}
-          onRegionChange={setRegion}
-          onIncludeHoneymoonChange={setIncludeHoneymoon}
-        />
+    <div className="max-w-2xl mx-auto">
+      {/* Progress indicator */}
+      <div className="mb-8 flex items-center justify-between">
+        <div className="flex-1 flex items-center gap-4">
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${
+            step >= 1 ? 'bg-[#4a5240] text-white' : 'bg-stone-200 text-stone-600'
+          }`}>
+            1
+          </div>
+          <div className={`flex-1 h-1 ${step > 1 ? 'bg-[#4a5240]' : 'bg-stone-200'}`} />
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${
+            step >= 2 ? 'bg-[#4a5240] text-white' : 'bg-stone-200 text-stone-600'
+          }`}>
+            2
+          </div>
+          <div className={`flex-1 h-1 ${step > 2 ? 'bg-[#4a5240]' : 'bg-stone-200'}`} />
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${
+            step >= 3 ? 'bg-[#4a5240] text-white' : 'bg-stone-200 text-stone-600'
+          }`}>
+            3
+          </div>
+        </div>
       </div>
 
-      {/* Results — Right column (sticky on desktop) */}
-      <div className="lg:sticky lg:top-8 h-fit">
-        <ResultDisplay
-          total={breakdown.grandTotal}
-          perGuest={breakdown.grandTotalPerGuest}
-          message={budgetColor.label}
-          color={budgetColor}
-        />
-
-        {/* Disclaimer */}
-        <DisclaimerBox />
-
-        {/* Breakdown Chart */}
-        <div className="mt-8 bg-white rounded-2xl border border-stone-100 p-6 shadow-sm">
-          <h3 className="font-medium text-stone-800 mb-6">Répartition des coûts</h3>
-          <BreakdownChart data={breakdownData} total={breakdown.grandTotal} />
-        </div>
-
-        {/* Share & Export */}
-        <div className="mt-6 flex gap-3">
-          <ShareButton total={breakdown.grandTotal} />
-          <PDFDownloadButton
-            breakdown={breakdown}
-            guestCount={guestCount}
-            level={level}
-            region={region}
-            includeHoneymoon={includeHoneymoon}
-            breakdownData={breakdownData}
+      {/* Steps */}
+      <div className="bg-white rounded-2xl border border-stone-100 p-8">
+        {step === 1 && <Step1QuickEstimate onNext={handleStep1Next} initialData={estimate || undefined} />}
+        {step === 2 && estimate && (
+          <Step2Personalization
+            estimate={estimate}
+            onNext={handleStep2Next}
+            onBack={handleStep2Back}
+            initialData={selections || undefined}
           />
-        </div>
-
-        {/* CTA Kaatch */}
-        <CTAKaatch />
+        )}
+        {step === 3 && estimate && selections && (
+          <Step3Recap estimate={estimate} selections={selections} onBack={handleStep3Back} />
+        )}
       </div>
     </div>
   )

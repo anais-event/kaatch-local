@@ -17,208 +17,215 @@ export default function MethodologiePage() {
           <Link href="/budget-mariage" className="text-sm text-stone-600 hover:text-stone-800 mb-6 inline-block">
             ← Retour au calculateur
           </Link>
-          <h1 className="text-4xl md:text-5xl font-light text-stone-800 mb-4" style={{ fontFamily: 'var(--font-lato)' }}>
-            Notre méthodologie
+          <h1 className="text-4xl md:text-5xl font-light text-stone-800 mb-4" style={{ fontFamily: 'var(--font-display)' }}>
+            D'où viennent nos chiffres ?
           </h1>
           <h2 className="text-lg text-stone-600 font-light">
-            Comment fonctionne le calcul de budget mariage
+            Transparence totale sur la méthodologie — parce que vous méritez mieux que des estimations sorties de nulle part
           </h2>
         </div>
       </div>
 
       {/* Content */}
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16 md:py-20">
-        <article className="space-y-10">
+        <article className="space-y-12">
           {/* Intro */}
-          <section className="space-y-4">
+          <section className="space-y-4 bg-white border border-stone-100 rounded-2xl p-6">
             <p className="text-stone-700 text-lg leading-relaxed">
-              Vous vous demandez d'où viennent nos chiffres ? Excellente question. Ici, on prône la transparence
-              totale. Voilà comment on a construit ce calculateur.
+              Vous vous demandez d'où viennent nos chiffres ? Excellente question — c'est même la question qu'on se pose tout le temps en voyant certaines estimations de mariage qui font tellement peur qu'on a envie de repenser tout en petit comité 😅
+            </p>
+            <p className="text-stone-700 leading-relaxed">
+              Ici, on prône la transparence totale. Voilà comment on a construit ce calculateur, en s'appuyant sur <strong>des sources réelles</strong> et <strong>des tarifs terrain 2026</strong>.
             </p>
           </section>
 
-          {/* Où viennent les tarifs */}
+          {/* 3 sources */}
           <section className="space-y-6">
-            <h3 className="text-2xl font-light text-stone-800">📊 Où viennent les tarifs ?</h3>
+            <h3 className="text-2xl font-light text-stone-800">📊 Trois sources qui se parlent</h3>
             <p className="text-stone-700">
-              Nos montants moyens sont basés sur <strong>3 sources fiables</strong> :
+              On ne s'invente pas des chiffres. Nos estimations reposent sur trois piliers :
             </p>
 
-            <div className="space-y-6 pl-6 border-l-2 border-stone-300">
-              <div>
-                <h4 className="font-medium text-stone-800 mb-3">1. Études sectorielles de référence</h4>
+            <div className="space-y-6">
+              <div className="bg-white border border-stone-100 rounded-xl p-6">
+                <h4 className="font-medium text-stone-800 mb-3 text-lg">1. Les grandes études sectorielles</h4>
+                <p className="text-stone-700 text-sm mb-3">Des enquêtes annuelles, fiables :</p>
                 <ul className="space-y-2 text-stone-700 text-sm">
                   <li>
-                    <strong>Mariages.net</strong> — Baromètre annuel du budget mariage en France (2 000+ couples
-                    interrogés)
+                    <strong>Mariages.net</strong> — Le baromètre annuel français (2 000+ couples interrogés chaque année)
                   </li>
                   <li>
-                    <strong>Zankyou Wedding Report 2025</strong> — Enquête internationale avec focus France
+                    <strong>Zankyou Wedding Report 2025</strong> — Enquête internationale avec données France détaillées
                   </li>
                   <li>
-                    <strong>INSEE</strong> — Données sur les dépenses des ménages français par catégorie
+                    <strong>INSEE</strong> — Dépenses réelles des ménages français par catégorie (données gouvernementales)
                   </li>
                 </ul>
               </div>
 
-              <div>
-                <h4 className="font-medium text-stone-800 mb-3">2. Données terrain collectées directement</h4>
-                <p className="text-stone-700 text-sm mb-3">Chaque trimestre, on contacte des prestataires réels :</p>
+              <div className="bg-white border border-stone-100 rounded-xl p-6">
+                <h4 className="font-medium text-stone-800 mb-3 text-lg">2. Le terrain, quatre fois par an</h4>
+                <p className="text-stone-700 text-sm mb-4">
+                  Chaque trimestre (janvier, avril, juillet, octobre), on appelle les prestataires directement pour récupérer les vrais tarifs :
+                </p>
                 <ul className="space-y-1 text-stone-700 text-sm list-disc list-inside">
                   <li>30+ salles de réception en France (petites, moyennes, grandes villes)</li>
                   <li>25+ traiteurs de différentes régions</li>
-                  <li>20+ photographes/vidéographes</li>
-                  <li>15+ fleuristes/décorateurs</li>
-                  <li>DJ, animateurs, pâtissiers, etc.</li>
+                  <li>20+ photographes / vidéographes indépendants</li>
+                  <li>15+ fleuristes / décorateurs</li>
+                  <li>DJ, animateurs, pâtissiers, prestataires divers</li>
                 </ul>
-                <p className="text-stone-700 text-sm mt-3">
-                  <em>
-                    On récupère les tarifs de base 2026, on fait des moyennes par région, et on applique des
-                    coefficients pour tenir compte du coût de la vie local.
-                  </em>
+                <p className="text-stone-700 text-sm mt-4 italic">
+                  On récupère les tarifs de base 2026, on calcule les moyennes par région, on applique des coefficients pour tenir compte du coût de la vie local (Paris ≠ Corrèze). C'est du vrai boulot.
                 </p>
               </div>
 
-              <div>
-                <h4 className="font-medium text-stone-800 mb-3">3. Retours anonymes de couples Kaatch</h4>
+              <div className="bg-white border border-stone-100 rounded-xl p-6">
+                <h4 className="font-medium text-stone-800 mb-3 text-lg">3. Vous — les vrais chiffres de vrais mariages</h4>
                 <p className="text-stone-700 text-sm">
-                  Si vous utilisez Kaatch pour budgéter votre mariage, vos dépenses réelles (totalement anonymisées)
-                  alimentent nos données futures. C'est un cercle vertueux : plus les gens utilisent le calculateur,
-                  plus nos estimations deviennent précises.
+                  Si vous utilisez Kaatch pour budgéter votre mariage et qu'on vous demande (complètement anonyme) vos dépenses réelles, elles alimentent nos données futures. C'est un cercle vertueux : <strong>plus les gens utilisent le calculateur, plus les estimations deviennent précises.</strong>
                 </p>
               </div>
             </div>
           </section>
 
-          {/* Comment on calcule */}
+          {/* Architecture */}
           <section className="space-y-6">
-            <h3 className="text-2xl font-light text-stone-800">🎯 Comment on calcule les montants ?</h3>
+            <h3 className="text-2xl font-light text-stone-800">🎯 Comment on construit le calcul</h3>
             <p className="text-stone-700">
-              Pour chaque catégorie, on utilise <strong>3 paliers</strong> :
+              Pour chaque ligne (photographe, DJ, fleurs, etc.), on propose <strong>trois paliers de budget</strong> :
             </p>
 
             <div className="overflow-x-auto">
               <table className="w-full text-sm border-collapse">
                 <thead>
-                  <tr className="border-b-2 border-stone-300">
-                    <th className="text-left py-3 px-3 font-medium text-stone-800">Palier</th>
-                    <th className="text-left py-3 px-3 font-medium text-stone-800">Définition</th>
-                    <th className="text-left py-3 px-3 font-medium text-stone-800">Exemple : Salle</th>
+                  <tr className="bg-stone-50">
+                    <th className="text-left py-3 px-4 font-medium text-stone-800 border-b border-stone-200">Palier</th>
+                    <th className="text-left py-3 px-4 font-medium text-stone-800 border-b border-stone-200">Signification</th>
+                    <th className="text-left py-3 px-4 font-medium text-stone-800 border-b border-stone-200">Exemple : Salle</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="border-b border-stone-200">
-                    <td className="py-3 px-3 text-stone-700 font-medium">Basique</td>
-                    <td className="py-3 px-3 text-stone-700">Budget serré, choix simplifiés</td>
-                    <td className="py-3 px-3 text-stone-700">3 000-4 500€ (lieu classique, peu de prestations)</td>
+                  <tr className="border-b border-stone-100 hover:bg-stone-50">
+                    <td className="py-3 px-4 text-stone-700 font-medium">Basique</td>
+                    <td className="py-3 px-4 text-stone-700">Budget serré, choix épurés</td>
+                    <td className="py-3 px-4 text-stone-700">3 000-4 500€ (lieu classique, peu de prestations)</td>
                   </tr>
-                  <tr className="border-b border-stone-200">
-                    <td className="py-3 px-3 text-stone-700 font-medium">Standard</td>
-                    <td className="py-3 px-3 text-stone-700">La médiane, budget « normal »</td>
-                    <td className="py-3 px-3 text-stone-700">5 500-7 000€ (lieu sympa, quelques plus)</td>
+                  <tr className="border-b border-stone-100 hover:bg-stone-50">
+                    <td className="py-3 px-4 text-stone-700 font-medium">Classique</td>
+                    <td className="py-3 px-4 text-stone-700">La médiane — c'est ici que la plupart des gens sont</td>
+                    <td className="py-3 px-4 text-stone-700">5 500-7 000€ (lieu sympa, quelques plus)</td>
                   </tr>
-                  <tr>
-                    <td className="py-3 px-3 text-stone-700 font-medium">Premium</td>
-                    <td className="py-3 px-3 text-stone-700">Haut de gamme, service exclusive</td>
-                    <td className="py-3 px-3 text-stone-700">8 500-12 000€+ (château, vignoble, luxe)</td>
+                  <tr className="hover:bg-stone-50">
+                    <td className="py-3 px-4 text-stone-700 font-medium">Premium</td>
+                    <td className="py-3 px-4 text-stone-700">Haut de gamme, service premium</td>
+                    <td className="py-3 px-4 text-stone-700">8 500-12 000€+ (château, vignoble, luxe)</td>
                   </tr>
                 </tbody>
               </table>
             </div>
 
             <p className="text-stone-700">
-              Vous choisissez votre niveau de budget pour chaque poste, et on compile automatiquement le total.{' '}
-              <strong>C'est simple comme ça.</strong>
+              Vous sélectionnez votre palier pour chaque poste, et l'estimateur compile automatiquement le total. Rien de magique, juste de l'addition intelligente.
             </p>
           </section>
 
-          {/* Variations régionales */}
+          {/* Régions */}
           <section className="space-y-6">
-            <h3 className="text-2xl font-light text-stone-800">📍 Les variations régionales</h3>
-            <p className="text-stone-700">Un mariage à Paris n'a pas le même prix qu'en Auvergne, c'est logique.</p>
-            <p className="text-stone-700">Notre calculateur tient compte du coefficient régional :</p>
+            <h3 className="text-2xl font-light text-stone-800">📍 Les tarifs varient énormément selon où vous êtes</h3>
+            <p className="text-stone-700">
+              Organiser un mariage à Paris, en Île-de-France, en Provence, et en Auvergne... ce ne sont clairement pas les mêmes prix. Notre calculateur applique un <strong>coefficient régional</strong> automatique :
+            </p>
 
-            <div className="space-y-2 pl-6 border-l-2 border-stone-300">
-              <div className="text-stone-700">
-                <strong>Île-de-France</strong> : +25 à +35% vs moyenne France
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="bg-white border border-stone-100 rounded-lg p-4">
+                <p className="text-stone-700 font-medium">Île-de-France</p>
+                <p className="text-2xl font-light text-[#4a5240] mt-1">+30% à +35%</p>
+                <p className="text-stone-600 text-sm mt-2">vs moyenne France</p>
               </div>
-              <div className="text-stone-700">
-                <strong>Côte d'Azur / Provence</strong> : +15 à +20%
+              <div className="bg-white border border-stone-100 rounded-lg p-4">
+                <p className="text-stone-700 font-medium">Côte d'Azur / Provence</p>
+                <p className="text-2xl font-light text-[#4a5240] mt-1">+15% à +20%</p>
+                <p className="text-stone-600 text-sm mt-2">vs moyenne France</p>
               </div>
-              <div className="text-stone-700">
-                <strong>Grandes métropoles</strong> (Lyon, Toulouse, Bordeaux) : +10 à +15%
+              <div className="bg-white border border-stone-100 rounded-lg p-4">
+                <p className="text-stone-700 font-medium">Grandes métropoles</p>
+                <p className="text-2xl font-light text-[#4a5240] mt-1">+10% à +15%</p>
+                <p className="text-stone-600 text-sm mt-2">Lyon, Toulouse, Bordeaux</p>
               </div>
-              <div className="text-stone-700">
-                <strong>Régions rurales</strong> : -10 à -20%
+              <div className="bg-white border border-stone-100 rounded-lg p-4">
+                <p className="text-stone-700 font-medium">Régions rurales</p>
+                <p className="text-2xl font-light text-[#4a5240] mt-1">-10% à -20%</p>
+                <p className="text-stone-600 text-sm mt-2">vs moyenne France</p>
               </div>
             </div>
 
-            <p className="text-stone-700">
-              C'est pour ça que si vous habitez en Île-de-France, les montants proposés seront automatiquement ajustés
-              à la hausse. C'est plus juste.
+            <p className="text-stone-700 mt-4">
+              Quand vous entrez votre ville ou région, le calculateur ajuste les montants automatiquement. C'est plus juste qu'une moyenne unique.
             </p>
           </section>
 
-          {/* Mise à jour */}
-          <section className="space-y-6">
-            <h3 className="text-2xl font-light text-stone-800">🔄 Mise à jour : quand on recalcule ?</h3>
-            <p className="text-stone-700 font-medium">Tous les trimestres.</p>
+          {/* Updates */}
+          <section className="space-y-6 bg-white border border-stone-100 rounded-xl p-6">
+            <h3 className="text-2xl font-light text-stone-800">🔄 Mise à jour : comment on reste à jour</h3>
+            <p className="text-stone-700 font-medium">Tous les trimestres (janvier, avril, juillet, octobre).</p>
             <p className="text-stone-700">
-              En janvier, avril, juillet, octobre, on redémarche nos prestataires, on récupère les nouveaux tarifs
-              (inflation, saisonnalité, tendances), et on update le calculateur.
+              On redémarche nos contacts prestataires, on récupère les nouveaux tarifs (inflation, saisonnalité, tendances du moment), et on met à jour le calculateur. Pas de données fossilisées, on suit le marché réel.
             </p>
-            <p className="text-stone-700 text-sm text-stone-500">
+            <p className="text-stone-700 text-sm text-stone-500 mt-4">
               <em>Dernière mise à jour : janvier 2026</em>
             </p>
           </section>
 
-          {/* Les limites */}
+          {/* Limites — honest */}
           <section className="space-y-6">
-            <h3 className="text-2xl font-light text-stone-800">⚠️ Les limites (qu'on assume)</h3>
+            <h3 className="text-2xl font-light text-stone-800">⚠️ Soyons honnêtes : les limites</h3>
             <p className="text-stone-700">
-              Soyons honnêtes : c'est une <strong>estimation indicative, pas un devis.</strong>
+              <strong>C'est une estimation indicative, pas un devis.</strong> On voudrait que les chiffres soient magiquement précis, mais la réalité, c'est plus nuancé.
             </p>
 
-            <div className="bg-stone-50 p-6 rounded-lg space-y-4">
+            <div className="bg-stone-50 border border-stone-200 rounded-lg p-6 space-y-4">
               <p className="font-medium text-stone-800">Votre budget réel peut varier parce que :</p>
               <ul className="space-y-2 text-stone-700 list-disc list-inside">
-                <li>Vous avez des goûts / demandes spécifiques</li>
-                <li>La saison impacte (mai-septembre = +20-30%)</li>
-                <li>Les imprévus arrivent toujours (budget +15% de marge)</li>
-                <li>Les prestataires font des prix custom (négociation possible)</li>
-                <li>Vous vivez dans une micro-région pas représentée dans nos données</li>
+                <li><strong>Vous avez des goûts spécifiques</strong> — Vous voulez un photographe étranger ? Un traiteur ultra spécialisé ? Un DJ en vinyl uniquement ? Ça coûtera plus cher.</li>
+                <li><strong>La saisonnalité joue énormément</strong> — Mai à septembre = +20-30% minimum. Décembre et janvier, ça baisse.</li>
+                <li><strong>Les imprévus arrivent toujours</strong> — Prévoir une marge de 10-15% est sage.</li>
+                <li><strong>Les prestataires négocient</strong> — Surtout en basse saison ou si vous prenez plusieurs services d'une même personne.</li>
+                <li><strong>Votre micro-région n'est peut-être pas représentée</strong> — Si vous vivez dans un coin très reculé ou très touristique, l'estimation moyenne peut dévier.</li>
               </ul>
             </div>
 
-            <p className="text-stone-700 font-medium">→ À utiliser comme point de départ, pas comme vérité absolue.</p>
+            <p className="text-stone-700 font-medium">
+              → À utiliser comme <strong>point de départ réaliste</strong>, pas comme vérité absolue.
+            </p>
           </section>
 
-          {/* Pourquoi on fait ça gratuitement */}
+          {/* Pourquoi gratuit */}
           <section className="space-y-6">
             <h3 className="text-2xl font-light text-stone-800">💡 Pourquoi on fait ça gratuitement ?</h3>
-            <p className="text-stone-700">Simple : c'est une valeur ajoutée pour vous.</p>
             <p className="text-stone-700">
-              Si vous avez une estimation fiable du coût de votre mariage, vous allez naturellement vouloir
-              l'organiser quelque part. Et nous, on pense que{' '}
+              Logique simple : si vous avez une estimation <strong>fiable et apaisante</strong> du coût réel de votre mariage, vous allez naturellement vouloir l'organiser quelque part. Et on pense vraiment que{' '}
               <Link href="/" className="text-[#4a5240] hover:underline font-medium">
-                Kaatch est l'endroit idéal pour budgéter et tracker vos dépenses
+                Kaatch est l'endroit idéal pour budgéter, tracker vos dépenses, et tout centraliser.
               </Link>
-              .
             </p>
-            <p className="text-stone-700">Sans pression, sans obligation. C'est juste du bon sens. 😊</p>
+            <p className="text-stone-700">
+              Aucune pression, aucune obligation. C'est juste du bon sens.
+            </p>
           </section>
 
           {/* Feedback */}
-          <section className="space-y-6">
+          <section className="space-y-6 bg-white border border-stone-100 rounded-xl p-6">
             <h3 className="text-2xl font-light text-stone-800">📧 Vous pensez qu'on s'est trompés ?</h3>
             <p className="text-stone-700">
-              Si les chiffres que vous avez eus de vos prestataires divergent beaucoup de nos estimations,{' '}
-              <strong>dites-nous</strong> ! On aime les retours.
+              Si vos prestataires vous donnent des tarifs qui divergent vraiment de nos estimations, <strong>dites-nous</strong> — on adore les retours et on améliore les données continuellement.
             </p>
             <p className="text-stone-700">
-              Envoyez un mail à <strong>hello@kaatch.fr</strong> avec la région + le poste + votre prix réel.
+              Envoyez un mail à <strong>hello@kaatch.fr</strong> avec : région + type de prestataire + tarif réel obtenu.
             </p>
-            <p className="text-stone-700">Plus on reçoit de feedback, plus nos données s'améliorent. Et c'est du win-win.</p>
+            <p className="text-stone-700 text-sm mt-3">
+              Chaque retour améliore la base pour les couples suivants. Win-win.
+            </p>
           </section>
 
           {/* Footer */}
@@ -226,7 +233,7 @@ export default function MethodologiePage() {
             <p className="text-stone-600 text-sm">
               <em>Dernière mise à jour : janvier 2026</em>
             </p>
-            <div className="mt-8 flex gap-4">
+            <div className="mt-8 flex gap-4 flex-wrap">
               <Link
                 href="/budget-mariage"
                 className="px-6 py-3 bg-[#4a5240] text-white rounded-lg font-medium hover:bg-[#2d3228] transition-colors"

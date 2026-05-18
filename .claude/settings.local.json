@@ -144,7 +144,8 @@
       "mcp__Claude_in_Chrome__list_connected_browsers",
       "mcp__Claude_in_Chrome__select_browser",
       "PowerShell(Get-Process -Name \"node\" -ErrorAction SilentlyContinue)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(vercel logs *)"
     ]
   }
 }

@@ -5,7 +5,7 @@ import type { EstimateData } from './Step1QuickEstimate'
 
 export interface PersonalizationData {
   [key: string]: {
-    level: 'basique' | 'classique' | 'premium' | 'skip'
+    level: 'intimate' | 'convivial' | 'grandiose' | 'skip'
   }
 }
 
@@ -22,141 +22,141 @@ const lineItems = [
     label: 'Salle de réception',
     icon: '🏛️',
     description: 'Lieu principal du mariage',
-    basique: 3500,
-    classique: 6000,
-    premium: 10000,
+    intimate: 3500,
+    convivial: 6000,
+    grandiose: 10000,
   },
   {
     id: 'catering',
     label: 'Traiteur & Menu',
     icon: '🍽️',
     description: 'Par personne',
-    basique: 35,
-    classique: 60,
-    premium: 100,
+    intimate: 35,
+    convivial: 60,
+    grandiose: 100,
   },
   {
     id: 'drinks',
     label: 'Boissons',
     icon: '🍾',
     description: 'Vin, bière, cocktails, alcools',
-    basique: 8,
-    classique: 15,
-    premium: 25,
+    intimate: 8,
+    convivial: 15,
+    grandiose: 25,
   },
   {
     id: 'photographer',
     label: 'Photographe',
     icon: '📸',
     description: '6-8 heures, album inclus',
-    basique: 1200,
-    classique: 1800,
-    premium: 3000,
+    intimate: 1200,
+    convivial: 1800,
+    grandiose: 3000,
   },
   {
     id: 'videographer',
     label: 'Vidéographe',
     icon: '🎬',
     description: 'Film d\'environ 3-5 min',
-    basique: 800,
-    classique: 1500,
-    premium: 2800,
+    intimate: 800,
+    convivial: 1500,
+    grandiose: 2800,
   },
   {
     id: 'dj',
     label: 'DJ / Animations',
     icon: '🎵',
     description: 'Musique pour la soirée + animations',
-    basique: 600,
-    classique: 1200,
-    premium: 2500,
+    intimate: 600,
+    convivial: 1200,
+    grandiose: 2500,
   },
   {
     id: 'flowers',
     label: 'Fleurs & Décoration',
     icon: '🌹',
     description: 'Bouquets, déco tables, arche',
-    basique: 400,
-    classique: 1200,
-    premium: 2500,
+    intimate: 400,
+    convivial: 1200,
+    grandiose: 2500,
   },
   {
     id: 'stationery',
     label: 'Faire-part & Stationery',
     icon: '💌',
     description: 'Invitations, menus, programmes',
-    basique: 150,
-    classique: 400,
-    premium: 800,
+    intimate: 150,
+    convivial: 400,
+    grandiose: 800,
   },
   {
     id: 'rentals',
     label: 'Location (tentes, tables, chaises)',
     icon: '⛺',
     description: 'Si besoin extérieur ou complément',
-    basique: 500,
-    classique: 1200,
-    premium: 2500,
+    intimate: 500,
+    convivial: 1200,
+    grandiose: 2500,
   },
   {
     id: 'beauty',
     label: 'Coiffure & Maquillage',
     icon: '💄',
     description: 'Mariée + demoiselle d\'honneur',
-    basique: 150,
-    classique: 350,
-    premium: 700,
+    intimate: 150,
+    convivial: 350,
+    grandiose: 700,
   },
   {
     id: 'dress',
     label: 'Robe & Costumes',
     icon: '👰',
     description: 'Robe de mariée + costumes invités',
-    basique: 800,
-    classique: 1600,
-    premium: 3000,
+    intimate: 800,
+    convivial: 1600,
+    grandiose: 3000,
   },
   {
     id: 'cake',
     label: 'Gâteau & Desserts',
     icon: '🎂',
     description: 'Pièce montée, macarons, etc.',
-    basique: 200,
-    classique: 500,
-    premium: 1200,
+    intimate: 200,
+    convivial: 500,
+    grandiose: 1200,
   },
   {
     id: 'transport',
     label: 'Transport & Voiture',
     icon: '🚗',
     description: 'Voiture mariée + navettes invités',
-    basique: 300,
-    classique: 700,
-    premium: 1500,
+    intimate: 300,
+    convivial: 700,
+    grandiose: 1500,
   },
   {
     id: 'accommodation',
     label: 'Hébergement invités',
     icon: '🏨',
     description: 'Rooms pour invités de loin (optionnel)',
-    basique: 0,
-    classique: 800,
-    premium: 2000,
+    intimate: 0,
+    convivial: 800,
+    grandiose: 2000,
   },
   {
     id: 'contingency',
     label: 'Imprévus & Marge',
     icon: '🎁',
     description: '10-15% du budget pour les surprises',
-    basique: 500,
-    classique: 1200,
-    premium: 2500,
+    intimate: 500,
+    convivial: 1200,
+    grandiose: 2500,
   },
 ]
 
 export default function Step2Personalization({ estimate, onNext, onBack, initialData }: Props) {
   const [selections, setSelections] = useState<PersonalizationData>(
-    initialData ?? Object.fromEntries(lineItems.map((item) => [item.id, { level: 'classique' }]))
+    initialData ?? Object.fromEntries(lineItems.map((item) => [item.id, { level: 'convivial' }]))
   )
 
   const regionMultiplier = useMemo(() => {
@@ -168,14 +168,14 @@ export default function Step2Personalization({ estimate, onNext, onBack, initial
     return 1.0
   }, [estimate.city])
 
-  const styleMultiplier = { basique: 0.8, classique: 1.0, premium: 1.4 }[estimate.style]
+  const styleMultiplier = { intimate: 0.7, convivial: 1.0, grandiose: 1.5 }[estimate.style]
 
   const total = useMemo(() => {
     return lineItems.reduce((sum, item) => {
       const selection = selections[item.id]
       if (!selection || selection.level === 'skip') return sum
 
-      let baseAmount = item[selection.level as 'basique' | 'classique' | 'premium']
+      let baseAmount = item[selection.level as 'intimate' | 'convivial' | 'grandiose']
       // Multiply per-person items by guest count
       if (['catering', 'drinks'].includes(item.id)) {
         baseAmount *= estimate.guestCount
@@ -221,7 +221,7 @@ export default function Step2Personalization({ estimate, onNext, onBack, initial
 
               {/* Level buttons */}
               <div className="flex gap-2 mt-3">
-                {(['basique', 'classique', 'premium'] as const).map((level) => (
+                {(['intimate', 'convivial', 'grandiose'] as const).map((level) => (
                   <button
                     key={level}
                     onClick={() => {

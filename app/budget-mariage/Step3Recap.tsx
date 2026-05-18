@@ -11,21 +11,21 @@ interface Props {
 }
 
 const lineItems = [
-  { id: 'venue', label: 'Salle', basique: 3500, classique: 6000, premium: 10000 },
-  { id: 'catering', label: 'Traiteur', basique: 35, classique: 60, premium: 100 },
-  { id: 'drinks', label: 'Boissons', basique: 8, classique: 15, premium: 25 },
-  { id: 'photographer', label: 'Photographe', basique: 1200, classique: 1800, premium: 3000 },
-  { id: 'videographer', label: 'Vidéographe', basique: 800, classique: 1500, premium: 2800 },
-  { id: 'dj', label: 'DJ', basique: 600, classique: 1200, premium: 2500 },
-  { id: 'flowers', label: 'Fleurs', basique: 400, classique: 1200, premium: 2500 },
-  { id: 'stationery', label: 'Faire-part', basique: 150, classique: 400, premium: 800 },
-  { id: 'rentals', label: 'Location', basique: 500, classique: 1200, premium: 2500 },
-  { id: 'beauty', label: 'Coiffure', basique: 150, classique: 350, premium: 700 },
-  { id: 'dress', label: 'Robe & costumes', basique: 800, classique: 1600, premium: 3000 },
-  { id: 'cake', label: 'Gâteau', basique: 200, classique: 500, premium: 1200 },
-  { id: 'transport', label: 'Transport', basique: 300, classique: 700, premium: 1500 },
-  { id: 'accommodation', label: 'Hébergement', basique: 0, classique: 800, premium: 2000 },
-  { id: 'contingency', label: 'Imprévus', basique: 500, classique: 1200, premium: 2500 },
+  { id: 'venue', label: 'Salle', intimate: 3500, convivial: 6000, grandiose: 10000 },
+  { id: 'catering', label: 'Traiteur', intimate: 35, convivial: 60, grandiose: 100 },
+  { id: 'drinks', label: 'Boissons', intimate: 8, convivial: 15, grandiose: 25 },
+  { id: 'photographer', label: 'Photographe', intimate: 1200, convivial: 1800, grandiose: 3000 },
+  { id: 'videographer', label: 'Vidéographe', intimate: 800, convivial: 1500, grandiose: 2800 },
+  { id: 'dj', label: 'DJ', intimate: 600, convivial: 1200, grandiose: 2500 },
+  { id: 'flowers', label: 'Fleurs', intimate: 400, convivial: 1200, grandiose: 2500 },
+  { id: 'stationery', label: 'Faire-part', intimate: 150, convivial: 400, grandiose: 800 },
+  { id: 'rentals', label: 'Location', intimate: 500, convivial: 1200, grandiose: 2500 },
+  { id: 'beauty', label: 'Coiffure', intimate: 150, convivial: 350, grandiose: 700 },
+  { id: 'dress', label: 'Robe & costumes', intimate: 800, convivial: 1600, grandiose: 3000 },
+  { id: 'cake', label: 'Gâteau', intimate: 200, convivial: 500, grandiose: 1200 },
+  { id: 'transport', label: 'Transport', intimate: 300, convivial: 700, grandiose: 1500 },
+  { id: 'accommodation', label: 'Hébergement', intimate: 0, convivial: 800, grandiose: 2000 },
+  { id: 'contingency', label: 'Imprévus', intimate: 500, convivial: 1200, grandiose: 2500 },
 ]
 
 export default function Step3Recap({ estimate, selections, onBack }: Props) {
@@ -38,7 +38,7 @@ export default function Step3Recap({ estimate, selections, onBack }: Props) {
     return 1.0
   }, [estimate.city])
 
-  const styleMultiplier = { basique: 0.8, classique: 1.0, premium: 1.4 }[estimate.style]
+  const styleMultiplier = { intimate: 0.7, convivial: 1.0, grandiose: 1.5 }[estimate.style]
 
   const breakdown = useMemo(() => {
     return lineItems
@@ -46,7 +46,7 @@ export default function Step3Recap({ estimate, selections, onBack }: Props) {
         const selection = selections[item.id]
         if (!selection || selection.level === 'skip') return null
 
-        let amount = item[selection.level as 'basique' | 'classique' | 'premium']
+        let amount = item[selection.level as 'intimate' | 'convivial' | 'grandiose']
         if (['catering', 'drinks'].includes(item.id)) {
           amount *= estimate.guestCount
         }

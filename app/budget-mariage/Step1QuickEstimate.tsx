@@ -5,7 +5,7 @@ import { useState } from 'react'
 export interface EstimateData {
   guestCount: number
   city: string
-  style: 'basique' | 'classique' | 'premium'
+  style: 'intimate' | 'convivial' | 'grandiose'
 }
 
 interface Props {
@@ -15,22 +15,22 @@ interface Props {
 
 const styleCards = [
   {
-    id: 'basique',
-    label: 'Basique',
+    id: 'intimate',
+    label: 'Intime & DIY',
     desc: 'Budget maîtrisé',
     emoji: '🌱',
     color: '#a8a29e',
   },
   {
-    id: 'classique',
-    label: 'Classique',
+    id: 'convivial',
+    label: 'Convivial',
     desc: 'Confortable & sympa',
     emoji: '💚',
     color: '#4a5240',
   },
   {
-    id: 'premium',
-    label: 'Premium',
+    id: 'grandiose',
+    label: 'Grandiose',
     desc: 'Haut de gamme',
     emoji: '✨',
     color: '#c9b59a',
@@ -40,7 +40,7 @@ const styleCards = [
 export default function Step1QuickEstimate({ onNext, initialData }: Props) {
   const [guestCount, setGuestCount] = useState(initialData?.guestCount ?? 100)
   const [city, setCity] = useState(initialData?.city ?? '')
-  const [style, setStyle] = useState<EstimateData['style']>(initialData?.style ?? 'classique')
+  const [style, setStyle] = useState<EstimateData['style']>(initialData?.style ?? 'convivial')
   const [citySuggestions, setCitySuggestions] = useState<Array<{ nom: string; code_postal: string }>>([])
 
   const handleCityChange = async (value: string) => {
@@ -79,51 +79,54 @@ export default function Step1QuickEstimate({ onNext, initialData }: Props) {
         <p className="text-stone-600">3 infos pour démarrer</p>
       </div>
 
-      {/* Guests slider */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <label className="font-medium text-stone-800">Nombre d'invités</label>
-          <span className="text-2xl font-light text-[#4a5240]">{guestCount}</span>
-        </div>
-        <input
-          type="range"
-          min="10"
-          max="300"
-          value={guestCount}
-          onChange={(e) => setGuestCount(Number(e.target.value))}
-          className="w-full accent-[#4a5240]"
-          style={{ height: '4px' }}
-        />
-        <div className="flex justify-between text-xs text-stone-500">
-          <span>10</span>
-          <span>300+</span>
-        </div>
-      </div>
-
-      {/* City autocomplete */}
-      <div className="space-y-2 relative">
-        <label className="block font-medium text-stone-800">Où aura lieu le mariage ?</label>
-        <div className="relative">
+      {/* 2-column grid for guests & city */}
+      <div className="grid md:grid-cols-2 gap-8">
+        {/* Guests slider */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <label className="font-medium text-stone-800">Nombre d'invités</label>
+            <span className="text-2xl font-light text-[#4a5240]">{guestCount}</span>
+          </div>
           <input
-            type="text"
-            value={city}
-            onChange={(e) => handleCityChange(e.target.value)}
-            placeholder="Commencez à taper une ville..."
-            className="w-full px-4 py-3 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4a5240] focus:border-transparent"
+            type="range"
+            min="10"
+            max="300"
+            value={guestCount}
+            onChange={(e) => setGuestCount(Number(e.target.value))}
+            className="w-full accent-[#4a5240]"
+            style={{ height: '4px' }}
           />
-          {citySuggestions.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-stone-200 rounded-lg shadow-lg z-10">
-              {citySuggestions.map((s) => (
-                <button
-                  key={s.code_postal + s.nom}
-                  onClick={() => handleCitySelect(s.nom)}
-                  className="w-full text-left px-4 py-2 hover:bg-stone-50 border-b last:border-b-0 text-sm"
-                >
-                  <span className="font-medium">{s.nom}</span> <span className="text-stone-400">({s.code_postal})</span>
-                </button>
-              ))}
-            </div>
-          )}
+          <div className="flex justify-between text-xs text-stone-500">
+            <span>10</span>
+            <span>300+</span>
+          </div>
+        </div>
+
+        {/* City autocomplete */}
+        <div className="space-y-2 relative">
+          <label className="block font-medium text-stone-800">Où aura lieu le mariage ?</label>
+          <div className="relative">
+            <input
+              type="text"
+              value={city}
+              onChange={(e) => handleCityChange(e.target.value)}
+              placeholder="Commencez à taper une ville..."
+              className="w-full px-4 py-3 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4a5240] focus:border-transparent"
+            />
+            {citySuggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-stone-200 rounded-lg shadow-lg z-10">
+                {citySuggestions.map((s) => (
+                  <button
+                    key={s.code_postal + s.nom}
+                    onClick={() => handleCitySelect(s.nom)}
+                    className="w-full text-left px-4 py-2 hover:bg-stone-50 border-b last:border-b-0 text-sm"
+                  >
+                    <span className="font-medium">{s.nom}</span> <span className="text-stone-400">({s.code_postal})</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

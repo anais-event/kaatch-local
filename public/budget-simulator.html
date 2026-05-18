@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Simulateur de budget mariage Kaatch — Estimez le coût de votre mariage en quelques clics">
+  <meta name="theme-color" content="#4a5240">
+  <title>Simulateur Budget Mariage | Kaatch</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Lato', sans-serif;
+      font-weight: 300;
+      background: linear-gradient(135deg, #f5f0e8 0%, #faf8f3 100%);
+      color: #2d3228;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+
+    h1 {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 400;
+      font-size: 3rem;
+      color: #2C3B2E;
+      margin-bottom: 12px;
+    }
+
+    .tagline {
+      font-size: 1.1rem;
+      color: #78716c;
+      margin-bottom: 30px;
+    }
+
+    .input-section {
+      background: white;
+      border: 2px solid #e7e5e0;
+      border-radius: 16px;
+      padding: 40px;
+      margin-bottom: 40px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .input-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      font-weight: 400;
+      color: #2d3228;
+      margin-bottom: 12px;
+      font-size: 0.95rem;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+      font-family: 'Lato', sans-serif;
+      font-weight: 300;
+      padding: 12px 16px;
+      border: 1px solid #d4cfc7;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    select:focus {
+      outline: none;
+      border-color: #4a5240;
+      box-shadow: 0 0 0 3px rgba(74, 82, 64, 0.1);
+    }
+
+    .guest-display {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .guest-count {
+      font-size: 2rem;
+      font-weight: 400;
+      color: #4a5240;
+    }
+
+    input[type="range"] {
+      accent-color: #4a5240;
+      width: 100%;
+      height: 6px;
+      cursor: pointer;
+    }
+
+    .range-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: #a89f99;
+      margin-top: 8px;
+    }
+
+    .style-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+
+    .style-card {
+      padding: 24px;
+      border: 2px solid #d4cfc7;
+      border-radius: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: white;
+    }
+
+    .style-card:hover {
+      border-color: #4a5240;
+      transform: translateY(-2px);
+    }
+
+    .style-card.active {
+      border-color: #4a5240;
+      background: rgba(74, 82, 64, 0.05);
+    }
+
+    .style-emoji {
+      font-size: 2.5rem;
+      margin-bottom: 12px;
+    }
+
+    .style-label {
+      font-weight: 400;
+      font-size: 1.1rem;
+      color: #2d3228;
+      margin-bottom: 6px;
+    }
+
+    .style-desc {
+      font-size: 0.85rem;
+      color: #78716c;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 55% 1fr;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 1024px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .items-section {
+      background: white;
+      border: 2px solid #e7e5e0;
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .section-title {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 400;
+      font-size: 1.5rem;
+      color: #2C3B2E;
+      margin-bottom: 24px;
+    }
+
+    .items-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .item {
+      border: 1px solid #e7e5e0;
+      border-radius: 12px;
+      padding: 20px;
+      background: white;
+      transition: all 0.2s;
+    }
+
+    .item:hover {
+      border-color: #d4cfc7;
+      background: #faf8f3;
+    }
+
+    .item-header {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .item-icon {
+      font-size: 1.5rem;
+    }
+
+    .item-info {
+      flex: 1;
+    }
+
+    .item-label {
+      font-weight: 400;
+      color: #2d3228;
+      margin-bottom: 3px;
+    }
+
+    .item-desc {
+      font-size: 0.8rem;
+      color: #a89f99;
+    }
+
+    .item-buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-top: 12px;
+    }
+
+    button.level-btn {
+      padding: 8px 4px;
+      font-size: 0.75rem;
+      border: 1px solid #d4cfc7;
+      border-radius: 6px;
+      background: white;
+      color: #2d3228;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Lato', sans-serif;
+      font-weight: 300;
+    }
+
+    button.level-btn:hover {
+      border-color: #4a5240;
+      background: rgba(74, 82, 64, 0.05);
+    }
+
+    button.level-btn.active {
+      background: #4a5240;
+      color: white;
+      border-color: #4a5240;
+    }
+
+    .summary-box {
+      background: linear-gradient(135deg, #f5f0e8 0%, rgba(255, 255, 255, 0.5) 100%);
+      border: 2px solid #4a5240;
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      position: sticky;
+      top: 20px;
+    }
+
+    .summary-label {
+      color: #78716c;
+      font-size: 0.95rem;
+      margin-bottom: 12px;
+    }
+
+    .summary-total {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 300;
+      font-size: 3rem;
+      color: #4a5240;
+      margin-bottom: 20px;
+      line-height: 1;
+    }
+
+    .summary-per-guest {
+      font-size: 1rem;
+      color: #2d3228;
+      margin-bottom: 30px;
+      padding-bottom: 30px;
+      border-bottom: 1px solid #d4cfc7;
+    }
+
+    .summary-breakdown {
+      margin-bottom: 30px;
+    }
+
+    .breakdown-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #e7e5e0;
+      font-size: 0.9rem;
+    }
+
+    .breakdown-row:last-child {
+      border-bottom: none;
+    }
+
+    .breakdown-label {
+      color: #78716c;
+    }
+
+    .breakdown-value {
+      font-weight: 400;
+      color: #2d3228;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 250px;
+      margin-bottom: 30px;
+    }
+
+    .action-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 640px) {
+      .action-buttons {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    button.btn {
+      padding: 14px 20px;
+      border: 1px solid #d4cfc7;
+      border-radius: 8px;
+      background: white;
+      color: #2d3228;
+      cursor: pointer;
+      font-family: 'Lato', sans-serif;
+      font-weight: 400;
+      transition: all 0.3s;
+      font-size: 0.9rem;
+    }
+
+    button.btn:hover {
+      border-color: #4a5240;
+      background: rgba(74, 82, 64, 0.05);
+    }
+
+    button.btn-primary {
+      background: #4a5240;
+      color: white;
+      border-color: #4a5240;
+    }
+
+    button.btn-primary:hover {
+      background: #2d3228;
+      border-color: #2d3228;
+    }
+
+    .kaatch-cta {
+      background: white;
+      border: 2px solid #4a5240;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .kaatch-title {
+      font-weight: 400;
+      color: #2d3228;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+    }
+
+    .kaatch-desc {
+      color: #78716c;
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+    }
+
+    .kaatch-btn {
+      background: #4a5240;
+      color: white;
+      text-decoration: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      display: inline-block;
+      transition: all 0.3s;
+      font-weight: 400;
+      font-size: 0.9rem;
+    }
+
+    .kaatch-btn:hover {
+      background: #2d3228;
+    }
+
+    .faq-section {
+      background: white;
+      border: 2px solid #e7e5e0;
+      border-radius: 16px;
+      padding: 40px;
+      margin-bottom: 40px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .faq-item {
+      margin-bottom: 24px;
+    }
+
+    .faq-question {
+      cursor: pointer;
+      padding: 16px;
+      background: #faf8f3;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 400;
+      color: #2d3228;
+      transition: all 0.2s;
+      user-select: none;
+    }
+
+    .faq-question:hover {
+      background: rgba(74, 82, 64, 0.05);
+    }
+
+    .faq-toggle {
+      transition: transform 0.3s;
+    }
+
+    .faq-toggle.open {
+      transform: rotate(180deg);
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s;
+      padding: 0 16px;
+      color: #78716c;
+      font-size: 0.95rem;
+    }
+
+    .faq-answer.open {
+      max-height: 500px;
+      padding: 16px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #4a5240;
+      color: white;
+      padding: 14px 20px;
+      border-radius: 8px;
+      display: none;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      display: block;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+
+      .container {
+        padding: 20px 16px;
+      }
+
+      .input-section,
+      .items-section,
+      .faq-section {
+        padding: 24px;
+      }
+
+      .summary-box {
+        position: static;
+        margin-top: 30px;
+      }
+
+      .items-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Simulateur Budget Mariage</h1>
+      <p class="tagline">Estimez le coût de votre grand jour en quelques clics</p>
+    </header>
+
+    <div class="input-section">
+      <div class="input-grid">
+        <div class="input-group">
+          <label>Nombre d'invités</label>
+          <div class="guest-display">
+            <label class="guest-count" id="guestCountDisplay">100</label>
+          </div>
+          <input type="range" id="guestCount" min="10" max="300" value="100">
+          <div class="range-labels">
+            <span>10</span>
+            <span>300+</span>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label>Région</label>
+          <select id="city">
+            <option value="">Choisir une région...</option>
+            <option value="paris">Paris & Île-de-France</option>
+            <option value="provence">Provence & Côte d'Azur</option>
+            <option value="lyon">Lyon & Rhône-Alpes</option>
+            <option value="toulouse">Toulouse</option>
+            <option value="bordeaux">Bordeaux</option>
+            <option value="autres">Autres régions</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label>Quel style de mariage ?</label>
+        <div class="style-cards">
+          <div class="style-card active" data-style="intimate">
+            <div class="style-emoji">🌱</div>
+            <div class="style-label">Intime & DIY</div>
+            <div class="style-desc">Budget maîtrisé</div>
+          </div>
+          <div class="style-card" data-style="convivial">
+            <div class="style-emoji">💚</div>
+            <div class="style-label">Convivial</div>
+            <div class="style-desc">Confortable & sympa</div>
+          </div>
+          <div class="style-card" data-style="grandiose">
+            <div class="style-emoji">✨</div>
+            <div class="style-label">Grandiose</div>
+            <div class="style-desc">Haut de gamme</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-grid">
+      <div class="items-section">
+        <h2 class="section-title">Détail des postes</h2>
+        <div class="items-grid" id="itemsGrid"></div>
+      </div>
+
+      <div class="summary-box">
+        <div class="summary-label">Budget total estimé</div>
+        <div class="summary-total" id="totalPrice">0€</div>
+        <div class="summary-per-guest">
+          ≈ <strong id="perGuest">0€</strong> par invité
+        </div>
+
+        <div class="chart-container">
+          <canvas id="budgetChart"></canvas>
+        </div>
+
+        <div class="action-buttons">
+          <button class="btn" id="copyBtn">📋 Copier</button>
+          <button class="btn" id="shareBtn">💬 Partager</button>
+        </div>
+
+        <button class="btn btn-primary" id="pdfBtn">📥 Télécharger PDF</button>
+
+        <div class="kaatch-cta" style="margin-top: 30px;">
+          <div class="kaatch-title">Prêt à organiser ?</div>
+          <div class="kaatch-desc">Transformez cette estimation en plan d'action avec Kaatch</div>
+          <a href="/dashboard" class="kaatch-btn">✨ Sur Kaatch</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-section">
+      <h2 class="section-title">Questions fréquentes</h2>
+      <div id="faqContainer"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // Line items data
+    const lineItems = [
+      { id: 'venue', label: 'Salle de réception', icon: '🏛️', desc: 'Lieu principal', intimate: 2500, convivial: 5000, grandiose: 9000 },
+      { id: 'catering', label: 'Traiteur & Menu', icon: '🍽️', desc: 'Par personne', intimate: 25, convivial: 50, grandiose: 85, perGuest: true },
+      { id: 'drinks', label: 'Boissons', icon: '🍾', desc: 'Vin, bière, cocktails', intimate: 6, convivial: 12, grandiose: 20, perGuest: true },
+      { id: 'photographer', label: 'Photographe', icon: '📸', desc: '6-8 heures, album inclus', intimate: 900, convivial: 1500, grandiose: 2500 },
+      { id: 'videographer', label: 'Vidéographe', icon: '🎬', desc: 'Film 3-5 min', intimate: 600, convivial: 1200, grandiose: 2300 },
+      { id: 'dj', label: 'DJ / Animations', icon: '🎵', desc: 'Musique + animations', intimate: 400, convivial: 800, grandiose: 1800 },
+      { id: 'flowers', label: 'Fleurs & Décoration', icon: '🌹', desc: 'Bouquets, déco, arche', intimate: 300, convivial: 800, grandiose: 1800 },
+      { id: 'stationery', label: 'Faire-part & Stationery', icon: '💌', desc: 'Invitations, menus', intimate: 100, convivial: 300, grandiose: 600 },
+      { id: 'rentals', label: 'Location (tentes, tables)', icon: '⛺', desc: 'Si besoin extérieur', intimate: 300, convivial: 800, grandiose: 1800 },
+      { id: 'beauty', label: 'Coiffure & Maquillage', icon: '💄', desc: 'Mariée + demoiselle', intimate: 100, convivial: 250, grandiose: 500 },
+      { id: 'dress', label: 'Robe & Costumes', icon: '👰', desc: 'Robe mariée + costumes', intimate: 600, convivial: 1200, grandiose: 2200 },
+      { id: 'cake', label: 'Gâteau & Desserts', icon: '🎂', desc: 'Pièce montée, macarons', intimate: 150, convivial: 400, grandiose: 900 },
+      { id: 'transport', label: 'Transport & Voiture', icon: '🚗', desc: 'Mariée + navettes', intimate: 200, convivial: 500, grandiose: 1000 },
+      { id: 'accommodation', label: 'Hébergement invités', icon: '🏨', desc: 'Rooms pour invités (optionnel)', intimate: 0, convivial: 600, grandiose: 1500 },
+      { id: 'contingency', label: 'Imprévus & Marge', icon: '🎁', desc: '10-15% pour surprises', intimate: 400, convivial: 1000, grandiose: 2000 },
+    ];
+
+    const faqItems = [
+      {
+        q: 'Comment sont calculées les régions ?',
+        a: 'Paris & IDF = ×1,30 | Provence = ×1,18 | Grandes villes = ×1,12 | Autres = ×1,00'
+      },
+      {
+        q: 'Qu\'est-ce qui change avec le style ?',
+        a: 'Intime & DIY (×0,70) : petit budget, DIY, salle modeste | Convivial (×1,00) : standard, équilibré | Grandiose (×1,50) : luxe, prestations premium'
+      },
+      {
+        q: 'Puis-je modifier les postes ?',
+        a: 'Oui ! Cliquez sur Basique/Convivial/Premium pour chaque poste, ou "—" pour l\'ignorer. Les totaux se mettent à jour en temps réel.'
+      },
+      {
+        q: 'Les prix incluent-ils les impôts ?',
+        a: 'Non, ces estimations sont HT (hors taxes). Prévoir ~20% TVA supplémentaire selon les prestataires.'
+      },
+      {
+        q: 'Comment utiliser cette estimation ?',
+        a: 'C\'est un guide indicatif. Les prix varient beaucoup selon la région, la saisonnalité (+20-30% mai-sept), et les prestataires. Prévoir 10-15% de marge.'
+      },
+      {
+        q: 'Pourquoi certains postes sont "par personne" ?',
+        a: 'Traiteur et boissons dépendent du nombre d\'invités. Les autres postes (photo, DJ, etc.) sont fixes ou peu variables.'
+      }
+    ];
+
+    // State
+    let state = {
+      guestCount: 100,
+      city: '',
+      style: 'intimate',
+      selections: {},
+      chart: null
+    };
+
+    // Initialize selections
+    lineItems.forEach(item => {
+      state.selections[item.id] = 'convivial';
+    });
+
+    // Load from localStorage
+    function load() {
+      const saved = localStorage.getItem('budgetSimulator');
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          state = { ...state, ...data };
+        } catch (e) {}
+      }
+    }
+
+    // Save to localStorage
+    function save() {
+      localStorage.setItem('budgetSimulator', JSON.stringify(state));
+    }
+
+    // Get region multiplier
+    function getRegionMultiplier(city) {
+      if (city.includes('paris')) return 1.30;
+      if (['provence', 'alpes', 'azur'].some(r => city.includes(r))) return 1.18;
+      if (['lyon', 'toulouse', 'bordeaux'].some(c => city.includes(c))) return 1.12;
+      return 1.00;
+    }
+
+    // Get style multiplier
+    function getStyleMultiplier(style) {
+      const multipliers = { intimate: 0.70, convivial: 1.00, grandiose: 1.50 };
+      return multipliers[style] || 1.00;
+    }
+
+    // Calculate totals
+    function calculate() {
+      const regionMult = getRegionMultiplier(state.city);
+      const styleMult = getStyleMultiplier(state.style);
+
+      let total = 0;
+      let breakdown = [];
+
+      lineItems.forEach(item => {
+        const selection = state.selections[item.id];
+        if (!selection || selection === 'skip') return;
+
+        let amount = item[selection];
+        if (item.perGuest) amount *= state.guestCount;
+
+        amount = Math.round(amount * regionMult * styleMult);
+        total += amount;
+
+        breakdown.push({ label: item.label, amount });
+      });
+
+      return { total, breakdown };
+    }
+
+    // Render items grid
+    function renderItems() {
+      const grid = document.getElementById('itemsGrid');
+      grid.innerHTML = lineItems.map(item => `
+        <div class="item">
+          <div class="item-header">
+            <div class="item-icon">${item.icon}</div>
+            <div class="item-info">
+              <div class="item-label">${item.label}</div>
+              <div class="item-desc">${item.desc}</div>
+            </div>
+          </div>
+          <div class="item-buttons">
+            <button class="level-btn ${state.selections[item.id] === 'intimate' ? 'active' : ''}" data-item="${item.id}" data-level="intimate">I</button>
+            <button class="level-btn ${state.selections[item.id] === 'convivial' ? 'active' : ''}" data-item="${item.id}" data-level="convivial">C</button>
+            <button class="level-btn ${state.selections[item.id] === 'grandiose' ? 'active' : ''}" data-item="${item.id}" data-level="grandiose">G</button>
+            <button class="level-btn ${state.selections[item.id] === 'skip' ? 'active' : ''}" data-item="${item.id}" data-level="skip">—</button>
+          </div>
+        </div>
+      `).join('');
+
+      // Add event listeners
+      document.querySelectorAll('.level-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const itemId = btn.dataset.item;
+          const level = btn.dataset.level;
+          state.selections[itemId] = level;
+          save();
+          update();
+        });
+      });
+    }
+
+    // Render FAQ
+    function renderFAQ() {
+      const container = document.getElementById('faqContainer');
+      container.innerHTML = faqItems.map((item, i) => `
+        <div class="faq-item">
+          <div class="faq-question" data-faq="${i}">
+            <span>${item.q}</span>
+            <span class="faq-toggle">▼</span>
+          </div>
+          <div class="faq-answer" data-faq="${i}">${item.a}</div>
+        </div>
+      `).join('');
+
+      document.querySelectorAll('.faq-question').forEach(q => {
+        q.addEventListener('click', () => {
+          const idx = q.dataset.faq;
+          const answer = document.querySelector(`.faq-answer[data-faq="${idx}"]`);
+          const toggle = q.querySelector('.faq-toggle');
+          answer.classList.toggle('open');
+          toggle.classList.toggle('open');
+        });
+      });
+    }
+
+    // Update display
+    function update() {
+      const { total, breakdown } = calculate();
+
+      document.getElementById('totalPrice').textContent = Math.round(total).toLocaleString() + '€';
+      document.getElementById('perGuest').textContent = Math.round(total / state.guestCount) + '€';
+
+      renderItems();
+      updateChart(breakdown);
+      save();
+    }
+
+    // Update chart
+    function updateChart(breakdown) {
+      const ctx = document.getElementById('budgetChart').getContext('2d');
+
+      if (state.chart) state.chart.destroy();
+
+      const colors = ['#4a5240', '#78716c', '#d4cfc7', '#a89f99', '#c9a877', '#4a5240', '#6b7461', '#9c8e77', '#5a6350', '#8a7c6b'];
+
+      state.chart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: breakdown.map(b => b.label),
+          datasets: [{
+            data: breakdown.map(b => b.amount),
+            backgroundColor: colors,
+            borderColor: 'white',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              backgroundColor: 'rgba(45, 50, 40, 0.9)',
+              padding: 12,
+              titleFont: { family: "'Lato', sans-serif", weight: '400' },
+              bodyFont: { family: "'Lato', sans-serif", weight: '300' },
+              callbacks: {
+                label: (ctx) => `${Math.round(ctx.parsed)}€`
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Event listeners
+    document.getElementById('guestCount').addEventListener('change', (e) => {
+      state.guestCount = parseInt(e.target.value);
+      document.getElementById('guestCountDisplay').textContent = state.guestCount;
+      save();
+      update();
+    });
+
+    document.getElementById('city').addEventListener('change', (e) => {
+      state.city = e.target.value;
+      save();
+      update();
+    });
+
+    document.querySelectorAll('.style-card').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('.style-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        state.style = card.dataset.style;
+        save();
+        update();
+      });
+    });
+
+    document.getElementById('copyBtn').addEventListener('click', () => {
+      const { total } = calculate();
+      const text = `Mon mariage : ~${Math.round(total)}€ pour ${state.guestCount} invités (${Math.round(total / state.guestCount)}€/personne)`;
+      navigator.clipboard.writeText(text);
+      showToast('📋 Copié !');
+    });
+
+    document.getElementById('shareBtn').addEventListener('click', () => {
+      const { total } = calculate();
+      const text = `Mon mariage : ~${Math.round(total)}€ pour ${state.guestCount} invités via le simulateur Kaatch`;
+      const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+      window.open(url, '_blank');
+    });
+
+    document.getElementById('pdfBtn').addEventListener('click', () => {
+      const { total, breakdown } = calculate();
+      const content = `BUDGET MARIAGE
+
+Nombre d'invités: ${state.guestCount}
+Région: ${state.city || 'Non définie'}
+Style: ${state.style}
+
+DÉTAIL
+${breakdown.map(b => `${b.label}: ${Math.round(b.amount)}€`).join('\n')}
+
+TOTAL: ${Math.round(total)}€
+Par invité: ${Math.round(total / state.guestCount)}€
+
+Estimation indicative - peut varier selon prestataires et saisonnalité`;
+
+      const link = document.createElement('a');
+      link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(content);
+      link.download = 'budget-mariage.txt';
+      link.click();
+      showToast('📥 Téléchargé !');
+    });
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    // Initialize
+    load();
+    renderItems();
+    renderFAQ();
+    update();
+  </script>
+</body>
+</html>

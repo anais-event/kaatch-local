@@ -572,7 +572,7 @@ export default function Home() {
                   Impression professionnelle incluse · Livraison 5–7 jours · Papier premium 300g/m²
                 </p>
               </div>
-              <a href="/budget-mariage"
+              <a href="/auth"
                  className="shrink-0 bg-white text-[#2C3B2E] px-8 py-4 rounded-2xl hover:bg-[#f5f0e8] transition text-sm text-center whitespace-nowrap"
                  style={{ fontWeight: 600, minWidth: 200 }}>
                 Créer ma papeterie →

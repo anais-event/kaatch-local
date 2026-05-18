@@ -17,8 +17,8 @@ export default function ShareButton({ total }: ShareButtonProps) {
     minimumFractionDigits: 0,
   }).format(total)
 
-  const shareText = `On vient de simuler le budget de notre mariage : ${totalFormatted} 😱 Faites le vôtre sur Kaatch 👉 https://kaatch.fr/calcul-budget-mariage`
-  const shareUrl = 'https://kaatch.fr/calcul-budget-mariage'
+  const shareText = `On vient de calculer le budget de notre mariage : ${totalFormatted} 😱 Faites le vôtre sur Kaatch 👉 https://kaatch.fr/budget-mariage`
+  const shareUrl = 'https://kaatch.fr/budget-mariage'
 
   const handleShare = async () => {
     if (navigator.share) {

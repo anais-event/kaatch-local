@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import type { EstimateData } from './Step1QuickEstimate'
 
 export interface PersonalizationData {
@@ -155,7 +155,9 @@ const lineItems = [
 ]
 
 export default function Step2Personalization({ estimate, onNext, onBack, initialData }: Props) {
-  const selections = initialData ?? Object.fromEntries(lineItems.map((item) => [item.id, { level: 'classique' }]))
+  const [selections, setSelections] = useState<PersonalizationData>(
+    initialData ?? Object.fromEntries(lineItems.map((item) => [item.id, { level: 'classique' }]))
+  )
 
   const regionMultiplier = useMemo(() => {
     const city = estimate.city.toLowerCase()
@@ -223,7 +225,7 @@ export default function Step2Personalization({ estimate, onNext, onBack, initial
                   <button
                     key={level}
                     onClick={() => {
-                      selections[item.id] = { level }
+                      setSelections({ ...selections, [item.id]: { level } })
                     }}
                     className={`flex-1 text-xs py-1.5 rounded transition ${
                       selection?.level === level
@@ -236,7 +238,7 @@ export default function Step2Personalization({ estimate, onNext, onBack, initial
                 ))}
                 <button
                   onClick={() => {
-                    selections[item.id] = { level: 'skip' }
+                    setSelections({ ...selections, [item.id]: { level: 'skip' } })
                   }}
                   className={`flex-1 text-xs py-1.5 rounded transition ${
                     selection?.level === 'skip' ? 'bg-stone-400 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'

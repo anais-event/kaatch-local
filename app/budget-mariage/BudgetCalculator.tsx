@@ -324,6 +324,8 @@ export default function BudgetCalculator() {
   const [dragId, setDragId] = useState<string | null>(null)
   const [dragOverId, setDragOverId] = useState<string | null>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [hoveredSlice, setHoveredSlice] = useState<number | null>(null)
+  const segmentsRef = useRef<{ startAngle: number; endAngle: number }[]>([])
 
   const regionMult = useMemo(() => getRegionMult(city), [city])
   const styleMult = useMemo(() => getStyleMult(style), [style])
@@ -409,18 +411,30 @@ export default function BudgetCalculator() {
 
     const cx = size / 2, cy = size / 2, r = 90, inner = 55
     let startAngle = -Math.PI / 2
+    const segs: { startAngle: number; endAngle: number }[] = []
 
     breakdown.forEach((b, i) => {
       const slice = (b.amount / total) * Math.PI * 2
+      const endAngle = startAngle + slice
+      segs.push({ startAngle, endAngle })
+      const isHovered = hoveredSlice === i
+      const pop = isHovered ? 8 : 0
+      const midAngle = startAngle + slice / 2
+      const ox = Math.cos(midAngle) * pop
+      const oy = Math.sin(midAngle) * pop
+
       ctx.beginPath()
-      ctx.arc(cx, cy, r, startAngle, startAngle + slice)
-      ctx.arc(cx, cy, inner, startAngle + slice, startAngle, true)
+      ctx.arc(cx + ox, cy + oy, isHovered ? r + 4 : r, startAngle, endAngle)
+      ctx.arc(cx + ox, cy + oy, inner, endAngle, startAngle, true)
       ctx.closePath()
       ctx.fillStyle = chartColors[i % chartColors.length]
+      ctx.globalAlpha = (hoveredSlice !== null && !isHovered) ? 0.45 : 1
       ctx.fill()
-      startAngle += slice
+      ctx.globalAlpha = 1
+      startAngle = endAngle
     })
-  }, [breakdown, total])
+    segmentsRef.current = segs
+  }, [breakdown, total, hoveredSlice])
 
   const handleStyleChange = (newStyle: string) => {
     setStyle(newStyle)
@@ -720,7 +734,7 @@ export default function BudgetCalculator() {
                 max={500}
                 value={guestCount}
                 onChange={e => { const v = parseInt(e.target.value); if (!isNaN(v) && v >= 1) setGuestCount(v) }}
-                className="w-20 text-2xl border-none bg-transparent outline-none"
+                className="w-20 text-2xl bg-transparent outline-none border border-stone-200 rounded-lg px-2 py-1 focus:border-[#4a5240] focus:ring-1 focus:ring-[#4a5240] transition cursor-text"
                 style={{ fontFamily: BODY, fontWeight: 300, color: GREEN }}
               />
             </div>
@@ -825,8 +839,34 @@ export default function BudgetCalculator() {
               </div>
             )}
 
-            <div className="flex justify-center mb-6">
-              <canvas ref={canvasRef} width={220} height={220} style={{ width: 220, height: 220 }} />
+            <div className="flex justify-center mb-6 relative">
+              <canvas
+                ref={canvasRef}
+                width={220}
+                height={220}
+                style={{ width: 220, height: 220, cursor: hoveredSlice !== null ? 'pointer' : 'default' }}
+                onMouseMove={e => {
+                  const rect = canvasRef.current!.getBoundingClientRect()
+                  const x = e.clientX - rect.left - 110
+                  const y = e.clientY - rect.top - 110
+                  const dist = Math.sqrt(x * x + y * y)
+                  if (dist < 55 || dist > 94) { setHoveredSlice(null); return }
+                  let angle = Math.atan2(y, x)
+                  if (angle < -Math.PI / 2) angle += Math.PI * 2
+                  const idx = segmentsRef.current.findIndex(s => angle >= s.startAngle && angle < s.endAngle)
+                  setHoveredSlice(idx >= 0 ? idx : null)
+                }}
+                onMouseLeave={() => setHoveredSlice(null)}
+              />
+              {hoveredSlice !== null && breakdown[hoveredSlice] && (
+                <div
+                  className="absolute pointer-events-none bg-white border border-stone-200 rounded-lg px-3 py-2 shadow-lg text-xs"
+                  style={{ bottom: '100%', left: '50%', transform: 'translateX(-50%)', marginBottom: 4, whiteSpace: 'nowrap' }}
+                >
+                  <span className="font-medium" style={{ color: GREEN_DARK }}>{breakdown[hoveredSlice].label}</span>
+                  <span className="ml-2 text-stone-500">{Math.round(breakdown[hoveredSlice].amount).toLocaleString()} € — {Math.round(breakdown[hoveredSlice].amount / total * 100)} %</span>
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-3 mb-3">

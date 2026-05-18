@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import PublicNav from '@/app/_components/PublicNav'
 
 export const metadata: Metadata = {
   title: 'Notre méthodologie : calcul budget mariage Kaatch',
@@ -11,18 +12,20 @@ export const metadata: Metadata = {
 export default function MethodologiePage() {
   return (
     <main className="min-h-screen bg-[#f5f0e8]">
+      <PublicNav active="budget-mariage" />
+
       {/* Header */}
-      <div className="bg-gradient-to-b from-white to-[#faf8f3] border-b border-stone-200 py-12 md:py-16">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+      <div className="pt-24 pb-10 md:pt-28 md:pb-14 px-5 md:px-10">
+        <div className="mx-auto max-w-3xl">
           <Link href="/budget-mariage" className="text-sm text-stone-600 hover:text-stone-800 mb-6 inline-block">
             ← Retour au calculateur
           </Link>
-          <h1 className="text-4xl md:text-5xl font-light text-stone-800 mb-4" style={{ fontFamily: 'var(--font-display)' }}>
-            D'où viennent nos chiffres ?
+          <h1 className="text-[#2C3B2E] mb-3" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', lineHeight: 1.15, letterSpacing: '-0.02em' }}>
+            D&apos;où viennent nos chiffres ?
           </h1>
-          <h2 className="text-lg text-stone-600 font-light">
+          <p className="text-stone-500 max-w-xl" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '1rem' }}>
             Transparence totale sur la méthodologie — parce que vous méritez mieux que des estimations sorties de nulle part
-          </h2>
+          </p>
         </div>
       </div>
 
@@ -32,7 +35,7 @@ export default function MethodologiePage() {
           {/* Intro */}
           <section className="space-y-4 bg-white border border-stone-100 rounded-2xl p-6">
             <p className="text-stone-700 text-lg leading-relaxed">
-              Vous vous demandez d'où viennent nos chiffres ? Excellente question — c'est même la question qu'on se pose tout le temps en voyant certaines estimations de mariage qui font tellement peur qu'on a envie de repenser tout en petit comité 😅
+              Vous vous demandez d&apos;où viennent nos chiffres ? Excellente question — c'est même la question qu'on se pose tout le temps en voyant certaines estimations de mariage qui font tellement peur qu'on a envie de repenser tout en petit comité 😅
             </p>
             <p className="text-stone-700 leading-relaxed">
               Ici, on prône la transparence totale. Voilà comment on a construit ce calculateur, en s'appuyant sur <strong>des sources réelles</strong> et <strong>des tarifs terrain 2026</strong>.
@@ -107,27 +110,40 @@ export default function MethodologiePage() {
                 </thead>
                 <tbody>
                   <tr className="border-b border-stone-100 hover:bg-stone-50">
-                    <td className="py-3 px-4 text-stone-700 font-medium">Basique</td>
+                    <td className="py-3 px-4 text-stone-700 font-medium">€ Économique</td>
                     <td className="py-3 px-4 text-stone-700">Budget serré, choix épurés</td>
-                    <td className="py-3 px-4 text-stone-700">3 000-4 500€ (lieu classique, peu de prestations)</td>
+                    <td className="py-3 px-4 text-stone-700">800 € (salle municipale, lieu familial)</td>
                   </tr>
                   <tr className="border-b border-stone-100 hover:bg-stone-50">
-                    <td className="py-3 px-4 text-stone-700 font-medium">Classique</td>
-                    <td className="py-3 px-4 text-stone-700">La médiane — c'est ici que la plupart des gens sont</td>
-                    <td className="py-3 px-4 text-stone-700">5 500-7 000€ (lieu sympa, quelques plus)</td>
+                    <td className="py-3 px-4 text-stone-700 font-medium">€€ Classique</td>
+                    <td className="py-3 px-4 text-stone-700">La médiane — la plupart des couples</td>
+                    <td className="py-3 px-4 text-stone-700">4 000 € (domaine, grange rénovée)</td>
                   </tr>
                   <tr className="hover:bg-stone-50">
-                    <td className="py-3 px-4 text-stone-700 font-medium">Premium</td>
-                    <td className="py-3 px-4 text-stone-700">Haut de gamme, service premium</td>
-                    <td className="py-3 px-4 text-stone-700">8 500-12 000€+ (château, vignoble, luxe)</td>
+                    <td className="py-3 px-4 text-stone-700 font-medium">€€€ Premium</td>
+                    <td className="py-3 px-4 text-stone-700">Haut de gamme, prestation complète</td>
+                    <td className="py-3 px-4 text-stone-700">10 000 € (château, vignoble, luxe)</td>
                   </tr>
                 </tbody>
               </table>
             </div>
 
             <p className="text-stone-700">
-              Vous sélectionnez votre palier pour chaque poste, et l'estimateur compile automatiquement le total. Rien de magique, juste de l'addition intelligente.
+              Vous sélectionnez votre palier pour chaque poste, et le calculateur compile automatiquement le total. Rien de magique, juste de l&apos;addition intelligente.
             </p>
+
+            <div className="bg-white border border-stone-100 rounded-xl p-6 space-y-4 mt-6">
+              <h4 className="font-medium text-stone-800 text-lg">Fonctionnalités du calculateur</h4>
+              <ul className="space-y-2 text-stone-700 text-sm list-disc list-inside">
+                <li><strong>19 postes détaillés</strong> — chacun avec description, conseil pratique 💡, et 3 niveaux chiffrés</li>
+                <li><strong>3 types de calcul</strong> — forfait fixe, coût par invité (×nombre de convives), ou pourcentage du sous-total</li>
+                <li><strong>{"\"J'ai déjà un devis\""}</strong> — saisissez votre propre montant pour remplacer l&apos;estimation</li>
+                <li><strong>Voyage de noces hors total</strong> — séparé du budget mariage principal pour plus de clarté</li>
+                <li><strong>Divers & imprévus</strong> — calculé en % du sous-total (5 %, 8 % ou 12 % selon le niveau)</li>
+                <li><strong>Réorganisation libre</strong> — glissez-déposez les postes dans l&apos;ordre qui vous convient</li>
+                <li><strong>Export PDF</strong> — téléchargez votre estimation complète en un clic</li>
+              </ul>
+            </div>
           </section>
 
           {/* Régions */}
@@ -140,17 +156,17 @@ export default function MethodologiePage() {
             <div className="grid md:grid-cols-2 gap-4">
               <div className="bg-white border border-stone-100 rounded-lg p-4">
                 <p className="text-stone-700 font-medium">Île-de-France</p>
-                <p className="text-2xl font-light text-[#4a5240] mt-1">+30% à +35%</p>
+                <p className="text-2xl font-light text-[#4a5240] mt-1">+30%</p>
                 <p className="text-stone-600 text-sm mt-2">vs moyenne France</p>
               </div>
               <div className="bg-white border border-stone-100 rounded-lg p-4">
                 <p className="text-stone-700 font-medium">Côte d'Azur / Provence</p>
-                <p className="text-2xl font-light text-[#4a5240] mt-1">+15% à +20%</p>
+                <p className="text-2xl font-light text-[#4a5240] mt-1">+18%</p>
                 <p className="text-stone-600 text-sm mt-2">vs moyenne France</p>
               </div>
               <div className="bg-white border border-stone-100 rounded-lg p-4">
                 <p className="text-stone-700 font-medium">Grandes métropoles</p>
-                <p className="text-2xl font-light text-[#4a5240] mt-1">+10% à +15%</p>
+                <p className="text-2xl font-light text-[#4a5240] mt-1">+12%</p>
                 <p className="text-stone-600 text-sm mt-2">Lyon, Toulouse, Bordeaux</p>
               </div>
               <div className="bg-white border border-stone-100 rounded-lg p-4">
@@ -173,7 +189,7 @@ export default function MethodologiePage() {
               On redémarche nos contacts prestataires, on récupère les nouveaux tarifs (inflation, saisonnalité, tendances du moment), et on met à jour le calculateur. Pas de données fossilisées, on suit le marché réel.
             </p>
             <p className="text-stone-700 text-sm text-stone-500 mt-4">
-              <em>Dernière mise à jour : janvier 2026</em>
+              <em>Dernière mise à jour : mai 2026</em>
             </p>
           </section>
 
@@ -231,7 +247,7 @@ export default function MethodologiePage() {
           {/* Footer */}
           <div className="pt-12 border-t border-stone-200">
             <p className="text-stone-600 text-sm">
-              <em>Dernière mise à jour : janvier 2026</em>
+              <em>Dernière mise à jour : mai 2026</em>
             </p>
             <div className="mt-8 flex gap-4 flex-wrap">
               <Link

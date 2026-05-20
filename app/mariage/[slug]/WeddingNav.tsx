@@ -53,6 +53,7 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
         { label: 'Checklist Jour J', sub: 'Qui fait quoi', href: `/mariage/${slug}/checklist` },
         { label: 'Boîte à outils', sub: 'QR code, PDF & impressions', href: `/mariage/${slug}/partager` },
         { label: 'Studio créatif', sub: 'Papeterie & univers visuel', href: `/mariage/${slug}/studio` },
+        { label: 'Prestataires', sub: 'Gestion & accès prestas', href: `/mariage/${slug}/prestataires` },
       ],
     },
     {

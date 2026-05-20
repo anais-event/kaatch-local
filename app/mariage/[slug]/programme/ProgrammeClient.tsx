@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic'
 import { useState, useRef } from 'react'
+import ProgrammeTableau from './ProgrammeTableau'
 
 const ProgrammeMap = dynamic(() => import('./ProgrammeMap'), { ssr: false })
 
@@ -14,29 +15,36 @@ type Step = {
   icon?: string
   position: number
   visible_to_guests: boolean
+  responsible?: string | null
+  vendor_ids?: string[]
 }
+
+type Vendor = { id: string; name: string; category: string }
 
 type Props = {
   slug: string
   steps: Step[]
   icons: string[]
+  vendors: Vendor[]
   addStep: (formData: FormData) => Promise<void>
   deleteStep: (formData: FormData) => Promise<void>
   updateStep: (formData: FormData) => Promise<void>
+  toggleStepVendor: (formData: FormData) => Promise<void>
 }
 
-export default function ProgrammeClient({ slug, steps, icons, addStep, deleteStep, updateStep }: Props) {
+export default function ProgrammeClient({ slug, steps, icons, vendors, addStep, deleteStep, updateStep, toggleStepVendor }: Props) {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [addFormKey, setAddFormKey] = useState(0)
+  const [view, setView] = useState<'timeline' | 'tableau'>('tableau')
 
   return (
     <div className="min-h-screen bg-[#f5f0e8] p-4 md:p-8">
-      <div className="max-w-2xl mx-auto">
+      <div className={view === 'tableau' ? 'max-w-full' : 'max-w-2xl mx-auto'}>
 
         <div className="mb-6">
           <a href={`/mariage/${slug}`} className="text-sm text-[#4a5240] hover:underline mb-4 block"
              style={{ fontWeight: 300 }}>
-            ← Retour aux préparatifs
+            {"←"} Retour aux préparatifs
           </a>
           <p style={{ fontWeight: 300, fontSize: '0.68rem', letterSpacing: '0.2em' }}
              className="text-stone-400 uppercase mb-1">Programme</p>
@@ -46,8 +54,21 @@ export default function ProgrammeClient({ slug, steps, icons, addStep, deleteSte
           </h1>
         </div>
 
-        <div className="flex items-center justify-between mb-8">
-          <div />
+        <div className="flex items-center justify-between mb-6">
+          {/* View toggle */}
+          <div className="flex bg-white rounded-xl border border-stone-100 overflow-hidden shadow-sm">
+            <button onClick={() => setView('tableau')}
+              className={`px-3.5 py-2 text-xs transition cursor-pointer ${view === 'tableau' ? 'bg-[#4a5240] text-white' : 'text-stone-500 hover:bg-stone-50'}`}
+              style={{ fontWeight: view === 'tableau' ? 500 : 300 }}>
+              Tableau
+            </button>
+            <button onClick={() => setView('timeline')}
+              className={`px-3.5 py-2 text-xs transition cursor-pointer ${view === 'timeline' ? 'bg-[#4a5240] text-white' : 'text-stone-500 hover:bg-stone-50'}`}
+              style={{ fontWeight: view === 'timeline' ? 500 : 300 }}>
+              Timeline
+            </button>
+          </div>
+
           <a
             href={`/mariage/${slug}/programme/recap`}
             target="_blank"
@@ -62,8 +83,21 @@ export default function ProgrammeClient({ slug, steps, icons, addStep, deleteSte
           </a>
         </div>
 
+        {/* Tableau view */}
+        {view === 'tableau' && (
+          <ProgrammeTableau
+            slug={slug}
+            steps={steps}
+            vendors={vendors}
+            addStep={addStep}
+            deleteStep={deleteStep}
+            updateStep={updateStep}
+            toggleStepVendor={toggleStepVendor}
+          />
+        )}
+
         {/* Timeline */}
-        {steps.length > 0 && (
+        {view === 'timeline' && steps.length > 0 && (
           <div className="mb-8 relative">
             <div className="absolute left-[22px] top-0 bottom-0 w-px bg-stone-200" />
             <div className="space-y-3">
@@ -133,8 +167,8 @@ export default function ProgrammeClient({ slug, steps, icons, addStep, deleteSte
           </div>
         )}
 
-        {/* Formulaire ajout */}
-        <div className="bg-white/70 rounded-3xl p-6 shadow-sm mb-6">
+        {/* Formulaire ajout — timeline seulement */}
+        {view === 'timeline' && <div className="bg-white/70 rounded-3xl p-6 shadow-sm mb-6">
           <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '1.6rem' }}
               className="text-[#2d3228] mb-4">
             Ajouter un moment
@@ -169,10 +203,10 @@ export default function ProgrammeClient({ slug, steps, icons, addStep, deleteSte
               + Ajouter ce moment
             </button>
           </form>
-        </div>
+        </div>}
 
-        {/* Carte */}
-        {steps.length > 0 && (
+        {/* Carte — timeline seulement */}
+        {view === 'timeline' && steps.length > 0 && (
           <div className="rounded-3xl overflow-hidden shadow-sm">
             <ProgrammeMap steps={steps} />
           </div>

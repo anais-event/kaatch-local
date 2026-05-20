@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { ALL_PERMISSIONS, PERMISSION_LABELS, PERMISSION_ICONS, DEFAULT_TYPE_PERMISSIONS } from '@/lib/vendor-permissions'
+import type { VendorPermissions, VendorPermissionKey } from '@/lib/vendor-permissions'
 
 type Vendor = {
   id: string
@@ -8,252 +10,289 @@ type Vendor = {
   category: string
   email: string | null
   phone: string | null
-  website: string | null
-  notes: string | null
-  status: string
-  montant_total: number | null
-  acompte: number | null
-  created_at: string
+  permissions: VendorPermissions
+  inviteToken: string
+  isSuspended: boolean
 }
 
-const CATEGORIES = [
-  { label: 'Lieu & réception', icon: '🏛️' },
-  { label: 'Traiteur', icon: '🍽️' },
-  { label: 'Photo & vidéo', icon: '📸' },
-  { label: 'Fleurs & déco', icon: '🌸' },
-  { label: 'Musique & DJ', icon: '🎵' },
-  { label: 'Robe & costume', icon: '👗' },
-  { label: 'Transport', icon: '🚗' },
-  { label: 'Faire-part', icon: '✉️' },
-  { label: 'Coiffure & maquillage', icon: '💄' },
-  { label: 'Gâteau', icon: '🎂' },
-  { label: 'Animation', icon: '🎪' },
-  { label: 'Autre', icon: '📦' },
-]
+const CATEGORIES = Object.keys(DEFAULT_TYPE_PERMISSIONS).concat(['Autre'])
 
-const STATUSES = [
-  { value: 'en_contact', label: 'En contact', color: 'bg-stone-100 text-stone-500' },
-  { value: 'devis_recu', label: 'Devis reçu', color: 'bg-blue-50 text-blue-600' },
-  { value: 'signe', label: 'Signé ✓', color: 'bg-emerald-50 text-emerald-600' },
-  { value: 'acompte', label: 'Acompte versé', color: 'bg-amber-50 text-amber-600' },
-  { value: 'solde', label: 'Soldé ✓✓', color: 'bg-emerald-100 text-emerald-700' },
-  { value: 'annule', label: 'Annulé', color: 'bg-red-50 text-red-500' },
-]
-
-function getStatus(val: string) {
-  return STATUSES.find(s => s.value === val) ?? STATUSES[0]
-}
-
-function getCategoryIcon(cat: string) {
-  return CATEGORIES.find(c => c.label === cat)?.icon ?? '📦'
-}
-
-const EMPTY_FORM = { name: '', category: CATEGORIES[0].label, email: '', phone: '', website: '', notes: '', status: 'en_contact', montant_total: '', acompte: '' }
-
-export default function PrestatairesClient({ slug, weddingId, vendors, addPrestataire, updatePrestataire, deletePrestataire }: {
+type Props = {
   slug: string
   weddingId: string
   vendors: Vendor[]
-  addPrestataire: (f: FormData) => Promise<void>
-  updatePrestataire: (f: FormData) => Promise<void>
-  deletePrestataire: (f: FormData) => Promise<void>
-}) {
-  const [, startTransition] = useTransition()
-  const [showForm, setShowForm] = useState(false)
-  const [editing, setEditing] = useState<Vendor | null>(null)
-  const [form, setForm] = useState(EMPTY_FORM)
-  const [filterCat, setFilterCat] = useState('')
-  const [expandedId, setExpandedId] = useState<string | null>(null)
+  addAction: (fd: FormData) => Promise<void>
+  updateAction: (fd: FormData) => Promise<void>
+  deleteAction: (fd: FormData) => Promise<void>
+}
 
-  function openAdd() {
-    setEditing(null)
-    setForm(EMPTY_FORM)
-    setShowForm(true)
+export default function PrestatairesClient({ slug, weddingId, vendors, addAction, updateAction, deleteAction }: Props) {
+  const [showAdd, setShowAdd] = useState(false)
+  const [expanded, setExpanded] = useState<string | null>(null)
+  const [copied, setCopied] = useState<string | null>(null)
+  const [pending, startTransition] = useTransition()
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+
+  function copyLink(token: string, vendorId: string) {
+    const url = `${window.location.origin}/v/${token}`
+    navigator.clipboard.writeText(url)
+    setCopied(vendorId)
+    setTimeout(() => setCopied(null), 2000)
   }
 
-  function openEdit(v: Vendor) {
-    setEditing(v)
-    setForm({ name: v.name, category: v.category, email: v.email ?? '', phone: v.phone ?? '', website: v.website ?? '', notes: v.notes ?? '', status: v.status, montant_total: v.montant_total?.toString() ?? '', acompte: v.acompte?.toString() ?? '' })
-    setShowForm(true)
-  }
-
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    const fd = new FormData(e.currentTarget)
-    fd.set('slug', slug)
-    if (editing) {
-      fd.set('id', editing.id)
-      startTransition(() => updatePrestataire(fd))
-    } else {
-      fd.set('wedding_id', weddingId)
-      startTransition(() => addPrestataire(fd))
-    }
-    setShowForm(false)
-    setEditing(null)
-    setForm(EMPTY_FORM)
-  }
-
-  function handleDelete(id: string, name: string) {
-    if (!confirm(`Supprimer "${name}" ?`)) return
+  function togglePermission(vendor: Vendor, key: VendorPermissionKey) {
+    const newPerms = { ...vendor.permissions, [key]: !vendor.permissions[key] }
     const fd = new FormData()
-    fd.set('id', id)
+    fd.set('id', vendor.id)
     fd.set('slug', slug)
-    startTransition(() => deletePrestataire(fd))
+    fd.set('field', 'permissions')
+    fd.set('value', JSON.stringify(newPerms))
+    startTransition(() => updateAction(fd))
   }
 
-  const usedCategories = [...new Set(vendors.map(v => v.category))]
-  const filtered = filterCat ? vendors.filter(v => v.category === filterCat) : vendors
-  const signed = vendors.filter(v => v.status === 'signe' || v.status === 'solde').length
+  function toggleSuspend(vendor: Vendor) {
+    const fd = new FormData()
+    fd.set('id', vendor.id)
+    fd.set('slug', slug)
+    fd.set('field', 'is_suspended')
+    fd.set('value', String(!vendor.isSuspended))
+    startTransition(() => updateAction(fd))
+  }
+
+  function handleDelete(vendorId: string) {
+    const fd = new FormData()
+    fd.set('id', vendorId)
+    fd.set('slug', slug)
+    startTransition(() => deleteAction(fd))
+    setConfirmDelete(null)
+  }
 
   return (
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
       <div className="max-w-3xl mx-auto px-4 py-8">
 
-        {/* Back link */}
-        <a href={`/mariage/${slug}`} className="text-sm text-[#4a5240] hover:underline mb-4 block"
-           style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
-          ← Retour aux préparatifs
-        </a>
-
-        {/* Header */}
-        <div className="flex items-start justify-between mb-6 flex-wrap gap-3">
+        <div className="flex items-start justify-between mb-6">
           <div>
             <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.8rem' }}
-                className="text-[#2d3228]">Prestataires</h1>
-            <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-400">
-              {vendors.length} prestataire{vendors.length !== 1 ? 's' : ''}
-              {vendors.length > 0 && ` · ${signed} confirmé${signed !== 1 ? 's' : ''}`}
+                className="text-[#2d3228] mb-1">Prestataires</h1>
+            <p className="text-stone-400" style={{ fontWeight: 300, fontSize: '0.85rem' }}>
+              {"Gérez vos prestataires et leurs accès aux infos du mariage"}
             </p>
           </div>
-          <button onClick={openAdd}
-            className="text-sm bg-[#4a5240] text-white px-4 py-2 rounded-xl hover:bg-[#2d3228] transition cursor-pointer"
-            style={{ fontWeight: 300 }}>
+          <button
+            onClick={() => setShowAdd(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-[#4a5240] text-white rounded-xl text-sm hover:bg-[#2d3228] transition cursor-pointer"
+            style={{ fontWeight: 400 }}
+          >
             + Ajouter
           </button>
         </div>
 
-        {/* Filtres catégorie */}
-        {usedCategories.length > 1 && (
-          <div className="flex flex-wrap gap-1.5 mb-5">
-            <button onClick={() => setFilterCat('')}
-              className={`px-3 py-1 rounded-full text-xs transition cursor-pointer ${!filterCat ? 'bg-[#4a5240] text-white' : 'bg-white text-stone-400 hover:text-stone-600 border border-stone-200'}`}
-              style={{ fontWeight: 300 }}>Tous</button>
-            {usedCategories.map(cat => (
-              <button key={cat} onClick={() => setFilterCat(filterCat === cat ? '' : cat)}
-                className={`px-3 py-1 rounded-full text-xs transition cursor-pointer ${filterCat === cat ? 'bg-[#4a5240] text-white' : 'bg-white text-stone-400 hover:text-stone-600 border border-stone-200'}`}
-                style={{ fontWeight: 300 }}>
-                {getCategoryIcon(cat)} {cat}
-              </button>
-            ))}
+        {/* Add vendor form */}
+        {showAdd && (
+          <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-5 mb-4">
+            <form action={async (fd) => {
+              fd.set('slug', slug)
+              fd.set('wedding_id', weddingId)
+              await addAction(fd)
+              setShowAdd(false)
+            }}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                <div>
+                  <label className="text-xs text-stone-500 mb-1 block" style={{ fontWeight: 300 }}>Nom *</label>
+                  <input name="name" required placeholder="Ex: Studio Photo Martin"
+                    className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm bg-[#f5f0e8] outline-none focus:border-[#4a5240] transition"
+                    style={{ fontWeight: 300 }} />
+                </div>
+                <div>
+                  <label className="text-xs text-stone-500 mb-1 block" style={{ fontWeight: 300 }}>{"Catégorie *"}</label>
+                  <select name="category" required
+                    className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm bg-[#f5f0e8] outline-none focus:border-[#4a5240] transition cursor-pointer"
+                    style={{ fontWeight: 300 }}>
+                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs text-stone-500 mb-1 block" style={{ fontWeight: 300 }}>Email</label>
+                  <input name="email" type="email" placeholder="contact@presta.fr"
+                    className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm bg-[#f5f0e8] outline-none focus:border-[#4a5240] transition"
+                    style={{ fontWeight: 300 }} />
+                </div>
+                <div>
+                  <label className="text-xs text-stone-500 mb-1 block" style={{ fontWeight: 300 }}>{"Téléphone"}</label>
+                  <input name="phone" type="tel" placeholder="06 12 34 56 78"
+                    className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm bg-[#f5f0e8] outline-none focus:border-[#4a5240] transition"
+                    style={{ fontWeight: 300 }} />
+                </div>
+              </div>
+              <div className="flex gap-2 justify-end">
+                <button type="button" onClick={() => setShowAdd(false)}
+                  className="px-4 py-2 text-sm text-stone-500 hover:text-stone-700 transition cursor-pointer"
+                  style={{ fontWeight: 300 }}>Annuler</button>
+                <button type="submit"
+                  className="px-4 py-2 bg-[#4a5240] text-white rounded-xl text-sm hover:bg-[#2d3228] transition cursor-pointer"
+                  style={{ fontWeight: 400 }}>Ajouter</button>
+              </div>
+            </form>
           </div>
         )}
 
-        {/* Liste */}
-        {vendors.length === 0 ? (
+        {/* Vendor list */}
+        {vendors.length === 0 && !showAdd ? (
           <div className="bg-white rounded-2xl border border-dashed border-stone-200 py-16 text-center">
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', fontWeight: 300 }}
-               className="text-stone-300 mb-2">Aucun prestataire pour l'instant</p>
+            <div className="text-4xl mb-3">🤝</div>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 300 }}
+               className="text-stone-300 mb-2">Aucun prestataire</p>
             <p style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-300">
-              Ajoutez votre photographe, traiteur, fleuriste…
+              {"Ajoutez vos prestataires pour leur donner accès aux infos du mariage"}
             </p>
           </div>
         ) : (
-          <div className="space-y-2">
-            {filtered.map(v => {
-              const status = getStatus(v.status)
-              const isExpanded = expandedId === v.id
+          <div className="space-y-3">
+            {vendors.map(v => {
+              const isExpanded = expanded === v.id
               return (
-                <div key={v.id} className="bg-white rounded-2xl border border-stone-100 overflow-hidden shadow-sm">
-                  {/* Row principale */}
-                  <div className="flex items-center gap-3 px-4 py-3 cursor-pointer"
-                       onClick={() => setExpandedId(isExpanded ? null : v.id)}>
-                    <span className="text-xl shrink-0">{getCategoryIcon(v.category)}</span>
-                    <div className="flex-1 min-w-0">
-                      <p style={{ fontWeight: 400, fontSize: '0.9rem' }} className="text-[#2d3228] truncate">{v.name}</p>
-                      <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">{v.category}</p>
+                <div key={v.id} className={`bg-white rounded-2xl border shadow-sm overflow-hidden transition ${
+                  v.isSuspended ? 'border-red-200 opacity-60' : 'border-stone-100'
+                }`}>
+                  {/* Header row */}
+                  <div
+                    className="flex items-center gap-3 px-5 py-4 cursor-pointer hover:bg-stone-50/50 transition"
+                    onClick={() => setExpanded(isExpanded ? null : v.id)}
+                  >
+                    <div className="w-9 h-9 rounded-full bg-[#4a5240]/10 text-[#4a5240] flex items-center justify-center shrink-0 text-sm"
+                         style={{ fontFamily: 'var(--font-display)', fontWeight: 600 }}>
+                      {v.name.charAt(0).toUpperCase()}
                     </div>
-                    {v.montant_total != null && (
-                      <div className="text-right shrink-0">
-                        <p className="text-xs text-stone-600" style={{ fontWeight: 300 }}>
-                          {v.montant_total.toLocaleString('fr-FR')} €
-                        </p>
-                        {v.acompte != null && v.acompte > 0 && (
-                          <p className="text-xs text-amber-500" style={{ fontWeight: 300 }}>
-                            {v.acompte.toLocaleString('fr-FR')} € versé
-                          </p>
-                        )}
-                      </div>
-                    )}
-                    <span className={`px-2.5 py-0.5 rounded-full text-xs shrink-0 ${status.color}`}
-                          style={{ fontWeight: 300 }}>
-                      {status.label}
-                    </span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}
-                         className={`w-4 h-4 text-stone-300 shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                    </svg>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-[#2d3228] truncate" style={{ fontWeight: 400 }}>{v.name}</p>
+                      <p className="text-xs text-stone-400" style={{ fontWeight: 300 }}>{v.category}</p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {v.isSuspended && (
+                        <span className="text-[10px] bg-red-50 text-red-400 px-2 py-0.5 rounded-full" style={{ fontWeight: 300 }}>
+                          {"Suspendu"}
+                        </span>
+                      )}
+                      <span className="text-[11px] text-stone-300" style={{ fontWeight: 300 }}>
+                        {Object.values(v.permissions).filter(Boolean).length} {"accès"}
+                      </span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}
+                           className={`w-4 h-4 text-stone-300 transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
                   </div>
 
-                  {/* Détails dépliés */}
+                  {/* Expanded details */}
                   {isExpanded && (
-                    <div className="px-4 pb-4 border-t border-stone-50 pt-3 space-y-2">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-                        {v.phone && (
-                          <a href={`tel:${v.phone}`} className="flex items-center gap-2 text-stone-600 hover:text-[#4a5240] transition">
-                            <span className="text-stone-300">📞</span>
-                            <span style={{ fontWeight: 300 }}>{v.phone}</span>
-                          </a>
-                        )}
-                        {v.email && (
-                          <a href={`mailto:${v.email}`} className="flex items-center gap-2 text-stone-600 hover:text-[#4a5240] transition">
-                            <span className="text-stone-300">✉️</span>
-                            <span style={{ fontWeight: 300 }} className="truncate">{v.email}</span>
-                          </a>
-                        )}
-                        {v.website && (
-                          <a href={v.website} target="_blank" rel="noopener noreferrer"
-                             className="flex items-center gap-2 text-stone-600 hover:text-[#4a5240] transition col-span-full">
-                            <span className="text-stone-300">🔗</span>
-                            <span style={{ fontWeight: 300 }} className="truncate">{v.website}</span>
-                          </a>
-                        )}
-                      </div>
-                      {v.montant_total != null && (
-                        <div className="flex gap-4 text-sm bg-stone-50 rounded-xl px-3 py-2.5">
-                          <div>
-                            <p className="text-xs text-stone-400 mb-0.5" style={{ fontWeight: 300 }}>Devis total</p>
-                            <p className="text-stone-700" style={{ fontWeight: 400 }}>{v.montant_total.toLocaleString('fr-FR')} €</p>
-                          </div>
-                          {v.acompte != null && (
-                            <div>
-                              <p className="text-xs text-stone-400 mb-0.5" style={{ fontWeight: 300 }}>Acompte versé</p>
-                              <p className="text-amber-600" style={{ fontWeight: 400 }}>{v.acompte.toLocaleString('fr-FR')} €</p>
-                            </div>
-                          )}
-                          {v.montant_total != null && v.acompte != null && v.acompte > 0 && (
-                            <div>
-                              <p className="text-xs text-stone-400 mb-0.5" style={{ fontWeight: 300 }}>Reste à payer</p>
-                              <p className="text-[#4a5240]" style={{ fontWeight: 400 }}>{(v.montant_total - v.acompte).toLocaleString('fr-FR')} €</p>
-                            </div>
-                          )}
+                    <div className="border-t border-stone-100 px-5 py-4 bg-stone-50/30 space-y-4">
+
+                      {/* Contact info */}
+                      {(v.email || v.phone) && (
+                        <div className="flex gap-4 flex-wrap text-xs text-stone-500" style={{ fontWeight: 300 }}>
+                          {v.email && <span>{"📧"} {v.email}</span>}
+                          {v.phone && <span>{"📞"} {v.phone}</span>}
                         </div>
                       )}
-                      {v.notes && (
-                        <p style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-500 bg-stone-50 rounded-xl px-3 py-2 italic">
-                          {v.notes}
+
+                      {/* Invite link */}
+                      <div>
+                        <p className="text-[10px] text-stone-400 uppercase tracking-wider mb-2" style={{ fontWeight: 400 }}>
+                          {"Lien d’accès"}
                         </p>
-                      )}
-                      <div className="flex gap-2 pt-1">
-                        <button onClick={() => openEdit(v)}
-                          className="text-xs text-[#4a5240] border border-[#4a5240]/30 px-3 py-1.5 rounded-lg hover:bg-[#4a5240]/5 transition cursor-pointer"
-                          style={{ fontWeight: 300 }}>
-                          ✏ Modifier
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 bg-white border border-stone-200 rounded-lg px-3 py-2 text-xs text-stone-500 truncate"
+                               style={{ fontWeight: 300 }}>
+                            {`${typeof window !== 'undefined' ? window.location.origin : ''}/v/${v.inviteToken}`}
+                          </div>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); copyLink(v.inviteToken, v.id) }}
+                            className="px-3 py-2 bg-[#4a5240] text-white rounded-lg text-xs hover:bg-[#2d3228] transition cursor-pointer shrink-0"
+                            style={{ fontWeight: 400 }}
+                          >
+                            {copied === v.id ? "Copié !" : "Copier"}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Permissions */}
+                      <div>
+                        <p className="text-[10px] text-stone-400 uppercase tracking-wider mb-2" style={{ fontWeight: 400 }}>
+                          {"Accès aux informations"}
+                        </p>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                          {ALL_PERMISSIONS.map(key => {
+                            const on = v.permissions[key] === true
+                            return (
+                              <button
+                                key={key}
+                                onClick={(e) => { e.stopPropagation(); togglePermission(v, key) }}
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs transition cursor-pointer ${
+                                  on
+                                    ? 'bg-[#4a5240]/10 border-[#4a5240]/30 text-[#4a5240]'
+                                    : 'bg-white border-stone-200 text-stone-400'
+                                }`}
+                                style={{ fontWeight: on ? 400 : 300 }}
+                              >
+                                <span>{PERMISSION_ICONS[key]}</span>
+                                <span className="flex-1 text-left truncate">{PERMISSION_LABELS[key]}</span>
+                                <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                                  on ? 'border-[#4a5240] bg-[#4a5240]' : 'border-stone-300'
+                                }`}>
+                                  {on && (
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={3} className="w-2.5 h-2.5">
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                  )}
+                                </span>
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center justify-between pt-2 border-t border-stone-100">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); toggleSuspend(v) }}
+                          className={`text-xs px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                            v.isSuspended
+                              ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
+                              : 'bg-amber-50 text-amber-600 hover:bg-amber-100'
+                          }`}
+                          style={{ fontWeight: 300 }}
+                        >
+                          {v.isSuspended ? "Réactiver" : "Suspendre"}
                         </button>
-                        <button onClick={() => handleDelete(v.id, v.name)}
-                          className="text-xs text-red-400 border border-red-200 px-3 py-1.5 rounded-lg hover:bg-red-50 transition cursor-pointer"
-                          style={{ fontWeight: 300 }}>
-                          Supprimer
-                        </button>
+
+                        {confirmDelete === v.id ? (
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-red-400" style={{ fontWeight: 300 }}>Confirmer ?</span>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleDelete(v.id) }}
+                              className="text-xs px-3 py-1.5 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition cursor-pointer"
+                              style={{ fontWeight: 400 }}
+                            >
+                              Supprimer
+                            </button>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setConfirmDelete(null) }}
+                              className="text-xs text-stone-400 hover:text-stone-600 transition cursor-pointer"
+                              style={{ fontWeight: 300 }}
+                            >
+                              Annuler
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setConfirmDelete(v.id) }}
+                            className="text-xs text-stone-300 hover:text-red-400 transition cursor-pointer"
+                            style={{ fontWeight: 300 }}
+                          >
+                            Supprimer
+                          </button>
+                        )}
                       </div>
                     </div>
                   )}
@@ -263,93 +302,6 @@ export default function PrestatairesClient({ slug, weddingId, vendors, addPresta
           </div>
         )}
       </div>
-
-      {/* Modal ajout/édition */}
-      {showForm && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-4"
-             onClick={e => { if (e.target === e.currentTarget) setShowForm(false) }}>
-          <div className="bg-white rounded-2xl w-full max-w-md p-6 space-y-4 max-h-[90vh] overflow-y-auto shadow-xl">
-            <div className="flex items-center justify-between">
-              <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.4rem' }}
-                  className="text-[#2d3228]">
-                {editing ? 'Modifier' : 'Nouveau prestataire'}
-              </h2>
-              <button onClick={() => setShowForm(false)} className="text-stone-400 hover:text-stone-600 text-xl cursor-pointer">×</button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-3">
-              {/* Nom */}
-              <input name="name" required defaultValue={form.name} placeholder="Nom du prestataire *"
-                className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-stone-700 outline-none focus:border-[#4a5240] transition text-sm"
-                style={{ fontWeight: 300 }} />
-
-              {/* Catégorie */}
-              <select name="category" defaultValue={form.category}
-                className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-stone-700 outline-none focus:border-[#4a5240] transition text-sm bg-white"
-                style={{ fontWeight: 300 }}>
-                {CATEGORIES.map(c => (
-                  <option key={c.label} value={c.label}>{c.icon} {c.label}</option>
-                ))}
-              </select>
-
-              {/* Statut */}
-              <select name="status" defaultValue={form.status}
-                className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-stone-700 outline-none focus:border-[#4a5240] transition text-sm bg-white"
-                style={{ fontWeight: 300 }}>
-                {STATUSES.map(s => (
-                  <option key={s.value} value={s.value}>{s.label}</option>
-                ))}
-              </select>
-
-              {/* Montants */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex items-center gap-2 border border-stone-200 rounded-xl px-3 py-2.5">
-                  <span className="text-stone-300 text-xs shrink-0" style={{ fontWeight: 300 }}>€</span>
-                  <input name="montant_total" type="number" min="0" step="1" defaultValue={form.montant_total}
-                    placeholder="Devis total"
-                    className="flex-1 text-stone-700 outline-none text-sm bg-transparent"
-                    style={{ fontWeight: 300 }} />
-                </div>
-                <div className="flex items-center gap-2 border border-stone-200 rounded-xl px-3 py-2.5">
-                  <span className="text-stone-300 text-xs shrink-0" style={{ fontWeight: 300 }}>€</span>
-                  <input name="acompte" type="number" min="0" step="1" defaultValue={form.acompte}
-                    placeholder="Acompte versé"
-                    className="flex-1 text-stone-700 outline-none text-sm bg-transparent"
-                    style={{ fontWeight: 300 }} />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <input name="phone" defaultValue={form.phone} placeholder="Téléphone"
-                  className="border border-stone-200 rounded-xl px-4 py-2.5 text-stone-700 outline-none focus:border-[#4a5240] transition text-sm"
-                  style={{ fontWeight: 300 }} />
-                <input name="email" type="email" defaultValue={form.email} placeholder="Email"
-                  className="border border-stone-200 rounded-xl px-4 py-2.5 text-stone-700 outline-none focus:border-[#4a5240] transition text-sm"
-                  style={{ fontWeight: 300 }} />
-              </div>
-
-              <input name="website" defaultValue={form.website} placeholder="Site web"
-                className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-stone-700 outline-none focus:border-[#4a5240] transition text-sm"
-                style={{ fontWeight: 300 }} />
-
-              <textarea name="notes" defaultValue={form.notes} placeholder="Notes, remarques…" rows={3}
-                className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-stone-700 outline-none focus:border-[#4a5240] transition text-sm resize-none"
-                style={{ fontWeight: 300 }} />
-
-              <div className="flex gap-3">
-                <button type="button" onClick={() => setShowForm(false)}
-                  className="flex-1 py-2.5 border border-stone-200 rounded-xl text-stone-400 text-sm hover:border-stone-300 transition cursor-pointer"
-                  style={{ fontWeight: 300 }}>Annuler</button>
-                <button type="submit"
-                  className="flex-1 py-2.5 bg-[#4a5240] text-white rounded-xl text-sm hover:bg-[#2d3228] transition cursor-pointer"
-                  style={{ fontWeight: 300 }}>
-                  {editing ? 'Enregistrer' : 'Ajouter'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

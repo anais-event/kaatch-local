@@ -20,6 +20,38 @@ export default async function PrestatairesPage({ params }: { params: Promise<{ s
     .eq('wedding_id', wedding.id)
     .order('created_at', { ascending: true })
 
+  // Devis retenus depuis le budget, pas encore importés comme vendor
+  const existingNames = (vendors ?? []).map(v => v.name.toLowerCase())
+
+  // D'abord les items du mariage
+  const { data: budgetItems } = await supabase
+    .from('budget_items')
+    .select('id, budget_categories(name)')
+    .eq('wedding_id', wedding.id)
+
+  const itemIds = (budgetItems ?? []).map(i => i.id)
+  const categoryByItemId: Record<string, string> = {}
+  for (const item of budgetItems ?? []) {
+    categoryByItemId[item.id] = (item.budget_categories as any)?.name ?? 'Autre'
+  }
+
+  const { data: retainedQuotes } = itemIds.length > 0
+    ? await supabase
+        .from('budget_quotes')
+        .select('vendor_name, item_id')
+        .eq('status', 'retenu')
+        .in('item_id', itemIds)
+        .not('vendor_name', 'is', null)
+    : { data: [] }
+
+  const budgetSuggestions = (retainedQuotes ?? [])
+    .filter(q => q.vendor_name && !existingNames.includes(q.vendor_name!.toLowerCase()))
+    .map(q => ({
+      name: q.vendor_name!,
+      category: categoryByItemId[q.item_id] ?? 'Autre',
+    }))
+    .filter((s, i, arr) => arr.findIndex(x => x.name.toLowerCase() === s.name.toLowerCase()) === i)
+
   async function addVendor(formData: FormData) {
     'use server'
     const supabase = await createSupabaseServerClient()
@@ -91,6 +123,7 @@ export default async function PrestatairesPage({ params }: { params: Promise<{ s
         inviteToken: v.invite_token,
         isSuspended: v.is_suspended,
       }))}
+      budgetSuggestions={budgetSuggestions}
       addAction={addVendor}
       updateAction={updateVendor}
       deleteAction={deleteVendor}

@@ -17,16 +17,19 @@ type Vendor = {
 
 const CATEGORIES = Object.keys(DEFAULT_TYPE_PERMISSIONS).concat(['Autre'])
 
+type BudgetSuggestion = { name: string; category: string }
+
 type Props = {
   slug: string
   weddingId: string
   vendors: Vendor[]
+  budgetSuggestions: BudgetSuggestion[]
   addAction: (fd: FormData) => Promise<void>
   updateAction: (fd: FormData) => Promise<void>
   deleteAction: (fd: FormData) => Promise<void>
 }
 
-export default function PrestatairesClient({ slug, weddingId, vendors, addAction, updateAction, deleteAction }: Props) {
+export default function PrestatairesClient({ slug, weddingId, vendors, budgetSuggestions, addAction, updateAction, deleteAction }: Props) {
   const [showAdd, setShowAdd] = useState(false)
   const [expanded, setExpanded] = useState<string | null>(null)
   const [copied, setCopied] = useState<string | null>(null)
@@ -137,8 +140,38 @@ export default function PrestatairesClient({ slug, weddingId, vendors, addAction
           </div>
         )}
 
+        {/* Budget suggestions */}
+        {budgetSuggestions.length > 0 && (
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 mb-4">
+            <p className="text-xs text-amber-700 mb-3 flex items-center gap-1.5" style={{ fontWeight: 400 }}>
+              💡 Prestataires retenus dans le budget — pas encore ajoutés ici
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {budgetSuggestions.map((s, i) => (
+                <button
+                  key={i}
+                  onClick={() => {
+                    const fd = new FormData()
+                    fd.set('slug', slug)
+                    fd.set('wedding_id', weddingId)
+                    fd.set('name', s.name)
+                    fd.set('category', s.category)
+                    startTransition(() => addAction(fd))
+                  }}
+                  className="flex items-center gap-2 bg-white border border-amber-200 rounded-xl px-3 py-2 text-xs hover:border-amber-400 hover:bg-amber-50 transition cursor-pointer"
+                  style={{ fontWeight: 300 }}
+                >
+                  <span className="text-[#2d3228]" style={{ fontWeight: 400 }}>{s.name}</span>
+                  <span className="text-stone-400">{s.category}</span>
+                  <span className="text-amber-500 ml-1">+ Importer</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Vendor list */}
-        {vendors.length === 0 && !showAdd ? (
+        {vendors.length === 0 && !showAdd && budgetSuggestions.length === 0 ? (
           <div className="bg-white rounded-2xl border border-dashed border-stone-200 py-16 text-center">
             <div className="text-4xl mb-3">🤝</div>
             <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 300 }}

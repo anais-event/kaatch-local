@@ -9,7 +9,25 @@ export const metadata: Metadata = {
 export default function StudioPage() {
   return (
     <main className="min-h-screen bg-[#f5f0e8] flex flex-col items-center justify-center px-6">
+      {/* Back button top-left */}
+      <div className="fixed top-5 left-5">
+        <Link href="/" className="flex items-center gap-2 text-stone-500 hover:text-[#4a5240] transition"
+              style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem' }}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+          Retour
+        </Link>
+      </div>
+
       <div className="max-w-md text-center">
+        {/* Logo */}
+        <div className="flex items-center justify-center gap-2 mb-8">
+          <img src="/logo.png" alt="Kaatch" className="w-8 h-8 object-contain" />
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.2rem' }}
+                className="text-[#2d3228]">Kaatch</span>
+        </div>
+
         <p className="text-xs uppercase tracking-[0.25em] text-stone-400 mb-4" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
           Kaatch Studio
         </p>

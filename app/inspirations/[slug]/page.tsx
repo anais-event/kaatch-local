@@ -17,8 +17,18 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const item = getInspiration(slug)
   if (!item) return {}
   return {
-    title: `${item.title} — Kaatch Inspirations`,
+    title: `${item.title} — Kaatch`,
     description: item.excerpt,
+    openGraph: {
+      title: item.title,
+      description: item.excerpt,
+      url: `https://kaatch.fr/inspirations/${slug}`,
+      siteName: "Kaatch",
+      locale: "fr_FR",
+      type: "article",
+      publishedTime: item.date,
+      images: [{ url: "https://kaatch.fr/og-image.png", width: 1200, height: 630, alt: item.title }],
+    },
   }
 }
 
@@ -127,8 +137,33 @@ export default async function InspirationPage({ params }: { params: Promise<{ sl
   const item = getInspiration(slug)
   if (!item) notFound()
 
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": item.title,
+    "description": item.excerpt,
+    "datePublished": item.date,
+    "dateModified": item.date,
+    "inLanguage": "fr",
+    "url": `https://kaatch.fr/inspirations/${slug}`,
+    "image": "https://kaatch.fr/og-image.png",
+    "author": {
+      "@type": "Organization",
+      "name": "Kaatch",
+      "url": "https://kaatch.fr",
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Kaatch",
+      "url": "https://kaatch.fr",
+      "logo": { "@type": "ImageObject", "url": "https://kaatch.fr/logo.png" },
+    },
+    "mainEntityOfPage": { "@type": "WebPage", "@id": `https://kaatch.fr/inspirations/${slug}` },
+  }
+
   return (
     <main className="min-h-screen" style={{ background: CREAM }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4"
            style={{ background: 'rgba(245,240,232,0.92)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(44,59,46,0.08)' }}>
         <Link href="/" style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '1.1rem', color: GREEN }}>

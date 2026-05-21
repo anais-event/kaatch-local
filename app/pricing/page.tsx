@@ -32,11 +32,41 @@ export default function PricingPage() {
     'Accès à vie',
   ]
 
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "Kaatch — Application organisation mariage",
+    "description": "Plateforme tout-en-un pour organiser son mariage : invités, faire-part animés, RSVP, plan de table, album photo, budget, programme, messagerie, coordination prestataires. Espace invités sans compte.",
+    "url": "https://kaatch.fr",
+    "brand": { "@type": "Brand", "name": "Kaatch" },
+    "offers": [
+      {
+        "@type": "Offer",
+        "name": "Plan Gratuit",
+        "price": "0",
+        "priceCurrency": "EUR",
+        "availability": "https://schema.org/InStock",
+        "description": "1 mariage, jusqu'à 20 invités, RSVP basique, suivi budget, livre d'or.",
+        "url": "https://kaatch.fr/pricing",
+      },
+      {
+        "@type": "Offer",
+        "name": "Plan Mariage",
+        "price": "45",
+        "priceCurrency": "EUR",
+        "availability": "https://schema.org/InStock",
+        "description": "Invités illimités, faire-part animé, espace invités complet, plan de table, photos illimitées, programme jour J, RSVP complet, accès à vie. Paiement unique.",
+        "url": "https://kaatch.fr/pricing",
+      },
+    ],
+  }
+
   return (
     <main
       className="min-h-screen bg-[#f5f0e8]"
       style={{ fontFamily: LATO, fontWeight: 300, color: GREEN_DARK }}
     >
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }} />
       {/* NAV */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-[#f5f0e8]/95 backdrop-blur-md border-b border-stone-200">
         <div className="max-w-5xl mx-auto px-8 md:px-10 h-16 flex items-center justify-between">

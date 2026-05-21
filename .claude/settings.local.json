@@ -160,7 +160,10 @@
       "PowerShell(Start-Sleep -Seconds 5; try { $r = Invoke-WebRequest -Uri \"http://localhost:3000/v/test-traiteur-token-abc123\" -MaximumRedirection 0 -ErrorAction Stop; $r.StatusCode } catch { $_.Exception.Response.StatusCode.value__; $_.Exception.Response.Headers.Location })",
       "PowerShell(try { $r = Invoke-WebRequest -Uri \"http://localhost:3000/v/test-traiteur-token-abc123\" -MaximumRedirection 0 -ErrorAction Stop; \"Status: $\\($r.StatusCode\\)\" } catch { \"Error: $\\($_.Exception.Message\\)\" })",
       "Bash(echo \"\")",
-      "Bash(echo \"\" > \"app/v/[token]/route.ts\")"
+      "Bash(echo \"\" > \"app/v/[token]/route.ts\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/)",
+      "Bash(node -e \"const matter = require\\('gray-matter'\\); const fs = require\\('fs'\\); const files = ['budget-3fbi','budget-moyen-mariage-france','photographe-mariage-questions-a-poser','liste-invites-sans-prise-de-tete']; files.forEach\\(f => { const {data} = matter\\(fs.readFileSync\\('content/inspirations/'+f+'.mdx','utf-8'\\)\\); console.log\\(f, data.date\\); }\\)\")",
+      "Bash(git mv *)"
     ]
   }
 }

@@ -19,8 +19,25 @@ export default async function VendorLayout({
     redirect('/')
   }
 
-  const vendor = JSON.parse(vendorCookie.value)
+  const vendorData = JSON.parse(vendorCookie.value)
   const supabase = await createSupabaseServerClient()
+
+  // Always fetch fresh permissions from DB (cookie may be stale)
+  const { data: freshVendor } = await supabase
+    .from('wedding_vendors')
+    .select('permissions, is_suspended')
+    .eq('id', vendorData.id)
+    .single()
+
+  if (!freshVendor || freshVendor.is_suspended) {
+    redirect('/')
+  }
+
+  const vendor = { ...vendorData, permissions: freshVendor.permissions ?? {} }
+
+  // Update cookie with fresh permissions
+  const cookieStore2 = await cookies()
+  cookieStore2.set(`vendor_${slug}`, JSON.stringify(vendor), { maxAge: 60 * 60 * 24 * 90, path: '/' })
 
   const { data: wedding } = await supabase
     .from('weddings')

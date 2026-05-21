@@ -35,6 +35,7 @@ export default function PrestatairesClient({ slug, weddingId, vendors, budgetSug
   const [copied, setCopied] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+  const [savedVendor, setSavedVendor] = useState<string | null>(null)
 
   function copyLink(token: string, vendorId: string) {
     const url = `${window.location.origin}/v/${token}`
@@ -50,7 +51,11 @@ export default function PrestatairesClient({ slug, weddingId, vendors, budgetSug
     fd.set('slug', slug)
     fd.set('field', 'permissions')
     fd.set('value', JSON.stringify(newPerms))
-    startTransition(() => updateAction(fd))
+    startTransition(async () => {
+      await updateAction(fd)
+      setSavedVendor(vendor.id)
+      setTimeout(() => setSavedVendor(null), 2000)
+    })
   }
 
   function toggleSuspend(vendor: Vendor) {
@@ -251,9 +256,16 @@ export default function PrestatairesClient({ slug, weddingId, vendors, budgetSug
 
                       {/* Permissions */}
                       <div>
-                        <p className="text-[10px] text-stone-400 uppercase tracking-wider mb-2" style={{ fontWeight: 400 }}>
-                          {"Accès aux informations"}
-                        </p>
+                        <div className="flex items-center gap-2 mb-2">
+                          <p className="text-[10px] text-stone-400 uppercase tracking-wider" style={{ fontWeight: 400 }}>
+                            {"Accès aux informations"}
+                          </p>
+                          {savedVendor === v.id && (
+                            <span className="text-[10px] text-emerald-500 flex items-center gap-1" style={{ fontWeight: 400 }}>
+                              ✓ Enregistré
+                            </span>
+                          )}
+                        </div>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                           {ALL_PERMISSIONS.map(key => {
                             const on = v.permissions[key] === true

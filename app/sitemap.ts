@@ -35,6 +35,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.9,
   }))
 
+  // getAllInspirations() lit dynamiquement content/inspirations/*.mdx — inclut tous les articles automatiquement
   const blogPosts: MetadataRoute.Sitemap = getAllInspirations().map((item) => ({
     url: `${baseUrl}/inspirations/${item.slug}`,
     lastModified: new Date(item.date),

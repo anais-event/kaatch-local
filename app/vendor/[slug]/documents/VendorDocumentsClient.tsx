@@ -6,6 +6,7 @@ type Doc = {
   id: string
   name: string
   file_url: string
+  signed_url: string
   file_type: string | null
   file_size: number | null
   uploaded_by: string
@@ -40,25 +41,28 @@ export default function VendorDocumentsClient({
   vendor: { id: string; name: string }
   weddingId: string
   documents: Doc[]
-  uploadAction: (formData: FormData) => Promise<void>
+  uploadAction: (formData: FormData) => Promise<{ error?: string }>
   deleteAction: (formData: FormData) => Promise<void>
 }) {
   const fileRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
     setUploading(true)
+    setUploadError(null)
     const fd = new FormData()
     fd.set('file', file)
     fd.set('vendor_id', vendor.id)
     fd.set('wedding_id', weddingId)
     fd.set('uploaded_by', vendor.name)
     fd.set('slug', slug)
-    await uploadAction(fd)
+    const result = await uploadAction(fd)
     setUploading(false)
     if (fileRef.current) fileRef.current.value = ''
+    if (result?.error) setUploadError(result.error)
   }
 
   return (
@@ -88,6 +92,11 @@ export default function VendorDocumentsClient({
             >
               {uploading ? '⏳ Envoi...' : '📎 Ajouter un fichier'}
             </button>
+            {uploadError && (
+              <p className="text-red-500 text-xs mt-2 text-right" style={{ fontWeight: 300 }}>
+                Erreur : {uploadError}
+              </p>
+            )}
           </div>
         </div>
 
@@ -106,7 +115,7 @@ export default function VendorDocumentsClient({
               <div key={doc.id} className="flex items-center gap-3 px-5 py-3.5 hover:bg-stone-50/30 transition">
                 <span className="text-xl shrink-0">{fileIcon(doc.file_type)}</span>
                 <div className="flex-1 min-w-0">
-                  <a href={doc.file_url} target="_blank" rel="noopener noreferrer"
+                  <a href={doc.signed_url} target="_blank" rel="noopener noreferrer"
                      className="text-sm text-[#2d3228] hover:text-[#4a5240] transition truncate block"
                      style={{ fontWeight: 400 }}>
                     {doc.name}
@@ -129,7 +138,7 @@ export default function VendorDocumentsClient({
                     </span>
                   </div>
                 </div>
-                <a href={doc.file_url} target="_blank" rel="noopener noreferrer"
+                <a href={doc.signed_url} target="_blank" rel="noopener noreferrer"
                    className="text-xs text-[#4a5240] hover:underline shrink-0 hidden sm:block"
                    style={{ fontWeight: 300 }}>
                   Ouvrir ↗

@@ -78,17 +78,182 @@ export default function Home() {
     { icon: '📸', label: "Album partagé", detail: "Toutes les photos, au même endroit, pour tout le monde." },
   ]
 
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'SoftwareApplication',
-    name: 'Kaatch',
-    applicationCategory: 'LifestyleApplication',
-    operatingSystem: 'Web',
-    url: 'https://kaatch.fr',
-    description: "Application d'organisation de mariage : invitations personnalisées, RSVP, plan de table, album photo partagé.",
-    offers: { '@type': 'Offer', price: '45', priceCurrency: 'EUR', description: 'Plan Mariage — paiement unique' },
-    inLanguage: 'fr',
-  }
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Kaatch",
+      "url": "https://kaatch.fr",
+      "applicationCategory": "LifestyleApplication",
+      "operatingSystem": "Web",
+      "description": "Plateforme française d'organisation de mariage tout-en-un. Gestion des invités, faire-part animés, RSVP, plan de table, album photo partagé, playlist participative, livre d'or, messagerie interne, budget, programme du jour J et coordination des prestataires en temps réel. Les invités accèdent à leur espace sans compte et sans application à télécharger.",
+      "inLanguage": "fr",
+      "offers": [
+        {
+          "@type": "Offer",
+          "name": "Gratuit",
+          "price": "0",
+          "priceCurrency": "EUR",
+          "description": "1 mariage, jusqu'à 20 invités, RSVP basique, suivi budget, livre d'or"
+        },
+        {
+          "@type": "Offer",
+          "name": "Mariage",
+          "price": "45",
+          "priceCurrency": "EUR",
+          "description": "Invités illimités, faire-part animé personnalisé, espace invités complet, plan de table, photos illimitées, programme jour J, RSVP complet, coordination prestataires. Paiement unique, accès à vie."
+        }
+      ],
+      "featureList": [
+        "Gestion de la liste d'invités avec import Excel et Google Sheets",
+        "Faire-part interactifs et animés personnalisés par invité",
+        "RSVP en temps réel avec suivi des réponses",
+        "Plan de table en glisser-déposer",
+        "Album photo partagé avec taggage des personnes",
+        "Playlist participative par moment du mariage",
+        "Livre d'or numérique",
+        "Messagerie interne avec groupes personnalisés",
+        "Rétro-planning avec suggestions intégrées",
+        "Suivi de budget poste par poste",
+        "Programme du jour J avec sections par rôle",
+        "Coordination des prestataires via lien de partage en temps réel",
+        "Espace invités sans inscription ni mot de passe",
+        "Espace prestataires avec mises à jour en temps réel",
+        "QR code imprimable pour accès rapide le jour J",
+        "Export et impression PDF de tous les documents",
+        "Suggestions d'hébergements pour les invités",
+        "Animations et jeux pour la soirée",
+        "Aucune publicité"
+      ],
+      "screenshot": "https://kaatch.fr/og-image.png",
+      "creator": {
+        "@type": "Organization",
+        "name": "Cogitium",
+        "url": "https://kaatch.fr",
+        "email": "bonjour@kaatch.fr"
+      }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Kaatch",
+      "url": "https://kaatch.fr",
+      "logo": "https://kaatch.fr/logo.png",
+      "email": "bonjour@kaatch.fr",
+      "description": "Kaatch est une plateforme française d'organisation de mariage tout-en-un, sans publicité, où les invités et les prestataires accèdent à leur espace sans créer de compte.",
+      "sameAs": []
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Les invités doivent-ils créer un compte pour utiliser Kaatch ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Non. Chaque invité reçoit un lien unique à son prénom. Il accède directement à son espace (RSVP, programme, album photo, livre d'or, playlist) sans inscription, sans mot de passe et sans télécharger d'application."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Combien coûte Kaatch pour organiser son mariage ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Le plan gratuit permet d'organiser un mariage avec jusqu'à 20 invités. Le plan complet coûte 45 euros en paiement unique (prix de lancement), avec invités illimités et accès à vie. Aucun abonnement, aucun frais caché."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Faut-il télécharger une application pour utiliser Kaatch ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Non. Kaatch est une application web accessible depuis n'importe quel navigateur, sur mobile comme sur ordinateur. Ni les mariés, ni les invités, ni les prestataires n'ont besoin de télécharger quoi que ce soit."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Comment fonctionne l'album photo partagé de Kaatch ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Les mariés et les invités déposent leurs photos dans un album centralisé. Les invités peuvent taguer les personnes présentes sur chaque photo. Le jour J, un QR code imprimable peut être posé sur les tables : les invités le scannent et déposent leurs photos en deux clics."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Comment fonctionne le plan de table sur Kaatch ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Le plan de table utilise une interface glisser-déposer. Vous créez vos tables avec un nom et une capacité, puis vous assignez les invités en les faisant glisser. Modifiable jusqu'à la veille du mariage. Un récapitulatif est imprimable en PDF."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Comment coordonner ses prestataires avec Kaatch ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Les mariés invitent leurs prestataires via un lien de partage dédié et choisissent exactement quelles informations partager. Si un changement est fait sur la plateforme (horaire, menu, nombre d'invités), le prestataire voit la mise à jour en temps réel. Plus besoin de jongler entre mails, WhatsApp et SMS."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Comment fonctionne la playlist participative de Kaatch ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Les mariés créent la bande-son organisée par moment : cérémonie, vin d'honneur, dîner, soirée. Les invités peuvent suggérer des morceaux depuis leur espace. La liste est exportable pour le DJ."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Kaatch contient-il de la publicité ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Non. Aucune publicité, aucun démarchage. L'interface est entièrement dédiée à l'organisation du mariage, sans distraction commerciale."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Peut-on importer sa liste d'invités depuis Excel dans Kaatch ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Oui. Kaatch permet l'import direct depuis un fichier Excel ou Google Sheets avec tous les champs : prénom, nom, email, téléphone, lien de parenté, régime alimentaire, etc."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Comment les invités accèdent-ils à leur espace sur Kaatch ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Trois manières : un lien personnel unique envoyé dans le faire-part (numérique ou papier), un code de partage personnalisable, ou un QR code imprimable. Dans tous les cas, aucune inscription ni mot de passe n'est nécessaire."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Comment gérer ses invitations de mariage sans application à télécharger ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Kaatch fonctionne directement dans le navigateur. Vous créez votre liste d'invités (import Excel possible), générez un faire-part animé personnalisé par invité, et suivez les réponses RSVP en temps réel. Les invités reçoivent leur invitation par lien, e-mail, WhatsApp ou SMS et accèdent à leur espace en un clic."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "La messagerie de Kaatch remplace-t-elle les groupes WhatsApp pour le mariage ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Oui. Kaatch intègre une messagerie interne avec des groupes personnalisés et ciblés par tags (@lestemoins, @babysittermariage, @famille, @prestataires). Plus besoin de créer et gérer une quinzaine de groupes WhatsApp différents."
+          }
+        }
+      ]
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Kaatch",
+      "url": "https://kaatch.fr",
+      "description": "Plateforme française d'organisation de mariage tout-en-un",
+      "inLanguage": "fr"
+    }
+  ]
 
   return (
     <main className="bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, color: '#2d3228' }}>

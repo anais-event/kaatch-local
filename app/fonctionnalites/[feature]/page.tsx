@@ -205,15 +205,77 @@ export async function generateStaticParams() {
   return Object.keys(data).map(feature => ({ feature }))
 }
 
+const ogData: Record<string, { title: string; description: string; url: string }> = {
+  "faire-part-rsvp": {
+    title: "Faire-parts animés & RSVP en ligne | Kaatch",
+    description: "Faire-part animé personnalisé par invité. RSVP sans compte, suivi en temps réel, QR code intégré.",
+    url: "https://kaatch.fr/fonctionnalites/faire-part-rsvp",
+  },
+  "plan-de-table": {
+    title: "Plan de table mariage en glisser-déposer | Kaatch",
+    description: "Plan de table drag & drop, filtrage RSVP, modifiable à la veille, export PDF.",
+    url: "https://kaatch.fr/fonctionnalites/plan-de-table",
+  },
+  "album-photo": {
+    title: "Album photo de mariage partagé | Kaatch",
+    description: "Album photo centralisé. QR code, upload mobile, taggage, téléchargement ZIP.",
+    url: "https://kaatch.fr/fonctionnalites/album-photo",
+  },
+  "programme-jour-j": {
+    title: "Programme du jour J — déroulé mariage | Kaatch",
+    description: "Programme heure par heure, sections par rôle, export PDF.",
+    url: "https://kaatch.fr/fonctionnalites/programme-jour-j",
+  },
+  "espace-invites": {
+    title: "Espace invités sans compte ni application | Kaatch",
+    description: "Espace invité accessible en un clic. RSVP, programme, photos, livre d'or, playlist. Sans compte.",
+    url: "https://kaatch.fr/fonctionnalites/espace-invites",
+  },
+  "livre-dor": {
+    title: "Livre d'or numérique mariage | Kaatch",
+    description: "Livre d'or en ligne. Messages des invités sans compte, accessible pour toujours.",
+    url: "https://kaatch.fr/fonctionnalites/livre-dor",
+  },
+}
+
+const metaTitles: Record<string, string> = {
+  "faire-part-rsvp": "Faire-parts animés & RSVP en ligne | Kaatch",
+  "plan-de-table": "Plan de table mariage en glisser-déposer | Kaatch",
+  "album-photo": "Album photo de mariage partagé | Kaatch",
+  "programme-jour-j": "Programme du jour J — déroulé mariage | Kaatch",
+  "espace-invites": "Espace invités sans compte ni application | Kaatch",
+  "livre-dor": "Livre d'or numérique mariage | Kaatch",
+}
+
+const metaDescs: Record<string, string> = {
+  "faire-part-rsvp": "Créez des faire-part animés personnalisés au prénom de chaque invité. RSVP en 2 clics, sans compte. Suivi en temps réel. Partage par lien, WhatsApp ou QR code.",
+  "plan-de-table": "Organisez votre plan de table en drag & drop. Filtrage par RSVP, modifiable jusqu'à la veille, récapitulatif imprimable en PDF. Simple et visuel.",
+  "album-photo": "Toutes les photos de votre mariage au même endroit. QR code sur les tables, upload mobile sans app, taggage des visages, téléchargement ZIP.",
+  "programme-jour-j": "Créez le programme détaillé de votre journée de mariage. Sections visibles selon le rôle (invités, témoins, prestataires). Imprimable en PDF.",
+  "espace-invites": "Vos invités accèdent à leur espace mariage en un clic. RSVP, programme, photos, livre d'or, playlist — sans inscription, sans mot de passe, sans application.",
+  "livre-dor": "Un livre d'or en ligne où vos invités laissent leurs mots doux. Accessible sans compte, consultable pour toujours. Des souvenirs qui ne se perdent pas.",
+}
+
 export async function generateMetadata(
   { params }: { params: Promise<{ feature: string }> }
 ): Promise<Metadata> {
   const { feature } = await params
   const d = data[feature]
-  if (!d) return { title: 'Fonctionnalité | Kaatch' }
+  if (!d) return { title: "Fonctionnalité | Kaatch" }
+  const og = ogData[feature]
   return {
-    title: d.seoTitle,
-    description: d.seoDesc,
+    title: metaTitles[feature] ?? d.seoTitle,
+    description: metaDescs[feature] ?? d.seoDesc,
+    ...(og && {
+      openGraph: {
+        title: og.title,
+        description: og.description,
+        url: og.url,
+        siteName: "Kaatch",
+        locale: "fr_FR",
+        type: "website",
+      },
+    }),
   }
 }
 

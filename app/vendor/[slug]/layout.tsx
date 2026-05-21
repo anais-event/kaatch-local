@@ -35,10 +35,6 @@ export default async function VendorLayout({
 
   const vendor = { ...vendorData, permissions: freshVendor.permissions ?? {} }
 
-  // Update cookie with fresh permissions
-  const cookieStore2 = await cookies()
-  cookieStore2.set(`vendor_${slug}`, JSON.stringify(vendor), { maxAge: 60 * 60 * 24 * 90, path: '/' })
-
   const { data: wedding } = await supabase
     .from('weddings')
     .select('id, name, plan, is_suspended, date, location')

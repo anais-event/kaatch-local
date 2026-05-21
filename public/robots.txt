@@ -1,5 +1,9 @@
+# robots.txt — Kaatch.fr
+
 User-agent: *
 Allow: /
+
+# Disallow private/auth areas
 Disallow: /api/
 Disallow: /auth
 Disallow: /dashboard
@@ -9,5 +13,93 @@ Disallow: /p/
 Disallow: /i/
 Disallow: /rsvp/
 Disallow: /register
+
+# ==========================================
+# AI Crawlers — TOUS AUTORISÉS
+# ==========================================
+
+# OpenAI (ChatGPT, GPT-4)
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+# Anthropic (Claude)
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+# Google AI (Gemini, Bard, PaLM)
+User-agent: Google-Extended
+Allow: /
+
+User-agent: GoogleOther
+Allow: /
+
+User-agent: Gemini-Bot
+Allow: /
+
+# Perplexity AI
+User-agent: PerplexityBot
+Allow: /
+
+# Meta AI (Llama)
+User-agent: FacebookBot
+Allow: /
+
+User-agent: Meta-ExternalAgent
+Allow: /
+
+# Mistral AI
+User-agent: MistralAI
+Allow: /
+
+# Cohere
+User-agent: cohere-ai
+Allow: /
+
+# You.com
+User-agent: YouBot
+Allow: /
+
+# Anthropic (legacy)
+User-agent: anthropic-ai
+Allow: /
+
+# Common Crawl (used by many AI trainers)
+User-agent: CCBot
+Allow: /
+
+# AI2 (Allen Institute)
+User-agent: AI2Bot
+Allow: /
+
+# Diffbot
+User-agent: Diffbot
+Allow: /
+
+# Apple Intelligence / AppleBot
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+# Bing AI (Copilot)
+User-agent: bingbot
+Allow: /
+
+# Yandex (Russian search + AI)
+User-agent: YandexBot
+Allow: /
+
+# Baidu (Chinese search + AI)
+User-agent: Baiduspider
+Allow: /
+
+# ==========================================
 
 Sitemap: https://kaatch.fr/sitemap.xml

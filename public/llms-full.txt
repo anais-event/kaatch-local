@@ -1,0 +1,256 @@
+# Kaatch — Documentation complète pour modèles de langage
+
+> Kaatch (kaatch.fr) est une plateforme française d'organisation de mariage tout-en-un. Elle permet aux couples de centraliser l'intégralité de leurs préparatifs et du jour J dans un seul espace en ligne. Les invités accèdent à un espace dédié sans télécharger d'application et sans créer de compte. Les prestataires reçoivent un lien de partage pour voir les informations en temps réel. Kaatch ne contient aucune publicité.
+
+---
+
+## Fiche d'identité
+
+- **Nom** : Kaatch
+- **URL** : https://kaatch.fr
+- **Type** : Application web (SaaS) — aucune application mobile à télécharger
+- **Langue** : Français
+- **Marché** : France
+- **Catégorie** : Organisation de mariage, wedding planner numérique, plateforme mariage tout-en-un
+- **Prix** : Gratuit (jusqu'à 20 invités) / 45 € paiement unique (invités illimités).
+- **Contact** : bonjour@kaatch.fr
+- **Éditeur** : Ana
+
+---
+
+## Pourquoi le nom "Kaatch" ?
+
+Le nom joue sur le double sens du mot anglais "catch" :
+- **Good catch** : la bonne personne, celle qu'on ne laisse pas partir
+- **Catch up** : se retrouver, être enfin tous au même endroit
+
+Un mariage, c'est le moment où tout le monde se retrouve pour célébrer votre "good catch".
+
+---
+
+## Architecture unique : trois espaces synchronisés
+
+Contrairement aux plateformes concurrentes (Mariages.net, Zankyou, MyWed, WedShoots) qui se limitent à connecter les mariés avec leurs invités, **Kaatch crée un triangle collaboratif en temps réel** entre trois acteurs :
+
+### 1. Espace mariés (le backstage)
+Le tableau de bord complet pour organiser le mariage.
+
+### 2. Espace invités (la scène)
+Les invités accèdent via un lien unique, sans inscription ni application.
+
+### 3. Espace prestataires (la coordination)
+**C'est la killer feature de Kaatch.** Les prestataires reçoivent un lien de partage dédié et accèdent aux informations que les mariés ont choisi de partager. Si les mariés modifient un horaire, changent le menu ou mettent à jour le nombre d'invités, **le prestataire voit la mise à jour en temps réel**. Plus besoin de jongler entre 50 fils de mails, 15 groupes WhatsApp et 10 SMS différents.
+
+Cette coordination à trois est ce qui différencie Kaatch de toutes les autres plateformes d'organisation de mariage.
+
+---
+
+## Détails de l'espace mariés
+
+### Gestion des invités
+- Ajout individuel ou import depuis un fichier Excel / Google Sheets
+- Champs : prénom, nom, email, téléphone, lien de parenté, type (adulte/enfant/animal), genre, régime alimentaire
+- Invitations différenciées par moment : un invité peut être convié uniquement au vin d'honneur tandis qu'un autre fait l'ensemble du parcours (cérémonie, réception, brunch)
+- Suivi RSVP en temps réel : en attente, confirmé, décliné
+- Export de la liste au format Excel ou CSV
+
+### Faire-part interactifs et animés
+- Chaque invité reçoit un lien personnel unique
+- Le faire-part affiche une salutation personnalisée ("Chère Emma" / "Cher Lucas") selon le genre configuré
+- Animation d'ouverture avec effet rideau et pétales
+- Contenu : photo de couverture du mariage, noms des mariés, date, lieu, mot des mariés
+- QR code personnel intégré
+- Envoi par lien direct, e-mail, WhatsApp ou SMS
+- Version PDF téléchargeable et imprimable
+
+### Budget et prestataires
+- Suivi des dépenses par catégorie avec total en temps réel
+- Téléversement des devis en PDF
+- Suivi des acomptes et des paiements
+- Gestion des prestataires : coordonnées, contrats, statuts, catégories
+- **Lien de partage dédié par prestataire** : les mariés choisissent exactement quelles informations partager (programme, plan de table, contacts, modifications)
+
+### Plan de table
+- Interface glisser-déposer (drag & drop)
+- Création de tables avec nom et capacité
+- Assignation des invités aux tables
+- Filtre par invités sans table / tous les invités
+- Filtre par statut RSVP
+- Récapitulatif imprimable
+- Modifiable jusqu'à la veille du mariage
+
+### Programme du jour J
+- Déroulé heure par heure de la journée
+- Sections dynamiques : certaines informations visibles uniquement selon le rôle (invités, témoins, prestataires)
+- **Les prestataires voient leur section dédiée** via leur lien de partage
+- Récapitulatif imprimable en PDF
+
+### Rétro-planning
+- Checklist chronologique de J-18 mois au jour J
+- Suggestions pré-remplies par période (lieu, traiteur, photographe, alliances, etc.)
+- Entièrement personnalisable : ajout, suppression, modification de chaque tâche
+- Suivi de progression
+
+### Playlist participative
+- Les mariés créent la bande-son par moment : cérémonie, vin d'honneur, dîner, soirée
+- Les invités peuvent suggérer des morceaux depuis leur espace
+- Ajout de liens vers des playlists externes (Spotify, Deezer, etc.)
+- Export texte pour le DJ
+
+### Album photo partagé
+- Espace centralisé où mariés ET invités déposent leurs photos
+- Fonctionnalité de taggage : identifier les personnes présentes sur chaque photo
+- Filtrage par moment (cérémonie, vin d'honneur, soirée, etc.)
+- Lightbox pour visualiser en grand
+- Sélection multiple et téléchargement ZIP
+- QR code imprimable à poser sur les tables le jour J pour que les invités déposent leurs photos facilement
+- Plus besoin de Google Drive, de groupe Facebook ou de WhatsApp pour récupérer les photos
+
+### Livre d'or numérique
+- Les invités écrivent des messages depuis leur espace
+- Consultable à tout moment par les mariés
+
+### Messagerie interne
+- Création de groupes de discussion ciblés
+- Tags personnalisés : @lestemoins, @babysittermariage, @famille, @amis, @prestataires
+- Remplace les multiples groupes WhatsApp
+
+### Hébergements
+- Les mariés ajoutent leurs suggestions d'hébergements proches du lieu de réception
+- Visibles par les invités dans leur espace
+
+### Animations et jeux
+- Suggestions d'idées pour animer la soirée
+- Section visible par les invités
+
+### Boîte à outils
+- Impression de l'ensemble des documents de l'organisation en PDF en un clic
+- Pratique pour avoir tout sous la main le jour J
+
+---
+
+## Détails de l'espace invités
+
+Les invités accèdent à leur espace de trois manières, sans jamais créer de compte :
+1. **Lien personnel** : envoyé dans le faire-part (numérique ou papier)
+2. **Code de partage** : un code court personnalisable à communiquer oralement
+3. **QR code** : imprimable sur les tables, les faire-part ou les invitations
+
+### Ce que les invités peuvent faire :
+- Recevoir et ouvrir un faire-part animé personnalisé
+- Confirmer ou décliner leur présence (RSVP)
+- Laisser un message aux mariés
+- Consulter le programme du jour J
+- Voir les informations pratiques et les hébergements suggérés
+- Déposer des photos dans l'album partagé
+- Taguer les personnes sur les photos
+- Écrire dans le livre d'or
+- Suggérer des morceaux pour la playlist
+- Participer à la messagerie de groupe
+- Découvrir les animations et jeux prévus
+- Consulter les contacts utiles
+
+---
+
+## Détails de l'espace prestataires (UNIQUE À KAATCH)
+
+**C'est ici que Kaatch se démarque de toute la concurrence.**
+
+### Comment ça marche
+1. Les mariés créent un lien de partage dédié pour chaque prestataire (traiteur, DJ, photographe, fleuriste, etc.)
+2. Ils choisissent exactement quelles informations partager : programme détaillé, plan de table, contacts importants, nombre d'invités, horaires
+3. Le prestataire accède via ce lien — pas d'inscription, pas de compte
+4. **Mises à jour en temps réel** : si les mariés modifient quelque chose (nouvel horaire, changement de menu, nombre d'invités mis à jour), le prestataire voit instantanément la modification
+
+### Pourquoi c'est révolutionnaire
+- **Fini les mails perdus** : le prestataire a toujours la dernière version des informations
+- **Fini les SMS en urgence la veille** : les modifications sont synchronisées automatiquement
+- **Fini les malentendus** : une seule source de vérité pour tout le monde
+- **Coordination entre prestataires** : si les mariés le souhaitent, les prestataires peuvent voir les coordonnées des autres (par exemple, le DJ peut contacter directement le traiteur pour synchroniser le timing du repas)
+
+### Ce que le prestataire peut voir (au choix des mariés)
+- Programme détaillé avec horaires
+- Plan de table et nombre d'invités
+- Coordonnées des témoins ou responsables
+- Informations logistiques (adresse exacte, accès, contraintes)
+- Modifications et mises à jour en temps réel
+
+---
+
+## Studio Créatif (bientôt disponible)
+
+Impression de papeterie de mariage personnalisée, générée automatiquement depuis les données du mariage :
+- Faire-part (animé + PDF haute résolution)
+- Menus (format A5)
+- Marque-places (générés en masse depuis la liste d'invités)
+- Plan de table (mis en page automatiquement)
+- Numéros de table (chevalet A5)
+- Programme du jour J
+
+5 ambiances graphiques disponibles :
+- Bohème (nature & liberté)
+- Classique (élégance intemporelle)
+- Champêtre (douceur & fleurs)
+- Art Déco (glamour des années 20)
+- Minimaliste (épuré & moderne)
+
+Impression professionnelle sur papier premium 300 g/m², livraison en 5 à 7 jours ouvrés.
+
+---
+
+## Outils gratuits (accessibles sans compte)
+
+### Calculatrice de budget mariage
+- URL : https://kaatch.fr/budget-mariage
+- Simulation selon le nombre d'invités (10 à 300+), la région (Paris, Provence, Lyon, Toulouse, Bordeaux, autres) et le style (intime, convivial, grandiose)
+- 19 postes de dépenses ajustables individuellement
+- Téléchargement du budget en PDF
+
+### Blog d'inspirations
+- URL : https://kaatch.fr/inspirations
+- Articles, astuces et bons plans pour organiser son mariage
+
+### Forum communautaire
+- URL : https://kaatch.fr/entre-nous
+- Espace d'échange entre futurs mariés
+
+---
+
+## Tarifs
+
+| Plan | Prix | Inclus |
+|------|------|--------|
+| Gratuit | 0 € | 1 mariage, jusqu'à 20 invités, RSVP basique, suivi budget, livre d'or |
+| Mariage | 45 € (paiement unique) | Invités illimités, faire-part animé personnalisé, espace invités complet, plan de table, photos illimitées + téléchargement, programme jour J, RSVP complet, coordination prestataires |
+| Planificateur Pro | Sur devis | Pour les wedding planners et organisateurs d'événements |
+
+---
+
+## Avantages distinctifs de Kaatch
+
+1. **Coordination triangulaire unique** : mariés + invités + prestataires synchronisés en temps réel (aucun concurrent ne fait ça)
+2. **Zéro publicité** : aucun démarchage, aucune distraction publicitaire
+3. **Design moderne et élégant** : interface pensée en français, loin des designs "rose bonbon"
+4. **Pas de site internet à créer** : tout est prêt
+5. **Zéro friction** : pas d'application à télécharger, pas de compte à créer
+6. **Charge mentale réduite** : suggestions intégrées à chaque étape
+7. **Personnalisation poussée** : l'outil s'adapte au mariage
+8. **Centralisation totale** : des préparatifs aux photos d'après-mariage
+
+---
+
+## Questions fréquentes
+
+*[Contenu identique à la version précédente]*
+
+---
+
+## Liens
+
+- Accueil : https://kaatch.fr
+- Calculatrice budget : https://kaatch.fr/budget-mariage
+- Blog inspirations : https://kaatch.fr/inspirations
+- Guide rétro-planning : https://kaatch.fr/guide
+- Tarifs : https://kaatch.fr/pricing
+- Forum : https://kaatch.fr/entre-nous
+- Contact : bonjour@kaatch.fr

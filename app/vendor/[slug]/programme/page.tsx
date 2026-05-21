@@ -1,8 +1,10 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { hasPermission } from '@/lib/vendor-permissions'
 import type { VendorPermissions } from '@/lib/vendor-permissions'
+import VendorProgrammeClient from './VendorProgrammeClient'
 
 export default async function VendorProgrammePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -19,10 +21,10 @@ export default async function VendorProgrammePage({ params }: { params: Promise<
         <div className="bg-white rounded-2xl border border-stone-100 p-10 max-w-sm w-full text-center shadow-sm">
           <div className="text-4xl mb-4">🔒</div>
           <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.4rem' }}
-              className="text-[#2d3228] mb-3">Accès non autorisé</h2>
+              className="text-[#2d3228] mb-3">{"Accès non autorisé"}</h2>
           <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem' }}
              className="text-stone-500">
-            Les mariés ne vous ont pas donné accès au programme.
+            {"Les mariés ne vous ont pas donné accès au programme."}
           </p>
         </div>
       </div>
@@ -39,56 +41,65 @@ export default async function VendorProgrammePage({ params }: { params: Promise<
 
   if (!wedding) return <div className="p-8">Mariage introuvable</div>
 
-  const { data: steps } = await supabase
-    .from('program_steps')
-    .select('id, title, description, address, time, icon, position')
-    .eq('wedding_id', wedding.id)
-    .order('position', { ascending: true })
+  const vendorId: string | null = vendor.id ?? null
 
-  const weddingDate = wedding.date ? new Date(wedding.date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : null
+  const [{ data: steps }, { data: notes }] = await Promise.all([
+    supabase
+      .from('program_steps')
+      .select('id, title, description, address, time, icon, position')
+      .eq('wedding_id', wedding.id)
+      .order('position', { ascending: true }),
+    vendorId
+      ? supabase
+          .from('vendor_step_notes')
+          .select('step_id, content')
+          .eq('vendor_id', vendorId)
+      : { data: [] },
+  ])
+
+  const notesByStepId: Record<string, string> = {}
+  for (const n of notes ?? []) {
+    notesByStepId[n.step_id] = n.content
+  }
+
+  async function saveNote(formData: FormData) {
+    'use server'
+    const supabase = await createSupabaseServerClient()
+    const vendorId = formData.get('vendor_id') as string
+    const stepId = formData.get('step_id') as string
+    const content = formData.get('content') as string
+    const slugVal = formData.get('slug') as string
+
+    if (!vendorId) return
+
+    await supabase
+      .from('vendor_step_notes')
+      .upsert({ vendor_id: vendorId, step_id: stepId, content, updated_at: new Date().toISOString() },
+               { onConflict: 'vendor_id,step_id' })
+
+    revalidatePath(`/vendor/${slugVal}/programme`)
+  }
+
+  const weddingDate = wedding.date
+    ? new Date(wedding.date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+    : null
 
   return (
-    <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
-      <div className="max-w-3xl mx-auto px-4 py-8">
-        <a href={`/vendor/${slug}`} className="text-sm text-[#4a5240] hover:underline mb-4 block"
-           style={{ fontWeight: 300 }}>
-          ← Retour au tableau de bord
-        </a>
-
-        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.8rem' }}
-            className="text-[#2d3228] mb-1">Programme du jour J</h1>
-        {weddingDate && (
-          <p className="text-stone-400 mb-6" style={{ fontWeight: 300, fontSize: '0.85rem' }}>
-            📅 {weddingDate}
-          </p>
-        )}
-
-        {(!steps || steps.length === 0) ? (
-          <div className="bg-white rounded-2xl border border-dashed border-stone-200 py-16 text-center">
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', fontWeight: 300 }}
-               className="text-stone-300">Programme non encore défini</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {steps.map((step, i) => (
-              <div key={step.id ?? i} className="bg-white rounded-2xl border border-stone-100 shadow-sm p-4 flex gap-4">
-                <div className="text-right shrink-0 w-14">
-                  <p className="text-sm text-[#4a5240]" style={{ fontWeight: 500 }}>{step.time}</p>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[#2d3228]" style={{ fontWeight: 400, fontSize: '0.95rem' }}>{step.title}</p>
-                  {step.description && (
-                    <p className="text-stone-400 mt-1" style={{ fontWeight: 300, fontSize: '0.82rem' }}>{step.description}</p>
-                  )}
-                  {step.address && (
-                    <p className="text-stone-400 mt-1" style={{ fontWeight: 300, fontSize: '0.78rem' }}>📍 {step.address}</p>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+    <VendorProgrammeClient
+      slug={slug}
+      vendorId={vendorId ?? ''}
+      weddingName={wedding.name}
+      weddingDate={weddingDate}
+      steps={(steps ?? []).map(s => ({
+        id: s.id,
+        title: s.title,
+        description: s.description,
+        address: s.address,
+        time: s.time,
+        icon: s.icon,
+        note: notesByStepId[s.id] ?? '',
+      }))}
+      saveNote={saveNote}
+    />
   )
 }

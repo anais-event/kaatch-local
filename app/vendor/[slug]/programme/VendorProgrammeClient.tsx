@@ -133,14 +133,14 @@ export default function VendorProgrammeClient({ slug, vendorId, weddingName, wed
             <>
               {/* Column headers */}
               <div className="grid grid-cols-2 gap-4 mb-2">
-                <div className="text-[10px] text-stone-400 uppercase tracking-wider px-1" style={{ fontWeight: 400 }}>
-                  Programme des mariés
-                </div>
                 <div className="text-[10px] text-stone-400 uppercase tracking-wider px-1 no-print" style={{ fontWeight: 400 }}>
                   Vos notes
                 </div>
                 <div className="hidden print:block text-[10px] text-stone-400 uppercase tracking-wider px-1" style={{ fontWeight: 400 }}>
                   Vos notes
+                </div>
+                <div className="text-[10px] text-stone-400 uppercase tracking-wider px-1" style={{ fontWeight: 400 }}>
+                  Programme des mariés
                 </div>
               </div>
 
@@ -148,7 +148,16 @@ export default function VendorProgrammeClient({ slug, vendorId, weddingName, wed
               <div className="space-y-3">
                 {steps.map((step, i) => (
                   <div key={step.id} className="grid grid-cols-2 gap-4 items-start">
-                    {/* Left: programme mariés */}
+                    {/* Left: notes presta */}
+                    <div className="no-print">
+                      <NoteCell step={step} vendorId={vendorId} slug={slug} saveNote={saveNote} />
+                    </div>
+                    {/* Print version of notes */}
+                    <div className="hidden print:block bg-white border border-stone-200 rounded-lg px-3 py-2 text-xs text-stone-600 min-h-[72px]" style={{ fontWeight: 300 }}>
+                      {step.note || ''}
+                    </div>
+
+                    {/* Right: programme mariés */}
                     <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-4">
                       <div className="flex gap-3">
                         <div className="shrink-0 text-right w-12">
@@ -173,15 +182,6 @@ export default function VendorProgrammeClient({ slug, vendorId, weddingName, wed
                           )}
                         </div>
                       </div>
-                    </div>
-
-                    {/* Right: notes presta */}
-                    <div className="no-print">
-                      <NoteCell step={step} vendorId={vendorId} slug={slug} saveNote={saveNote} />
-                    </div>
-                    {/* Print version of notes */}
-                    <div className="hidden print:block bg-white border border-stone-200 rounded-lg px-3 py-2 text-xs text-stone-600 min-h-[72px]" style={{ fontWeight: 300 }}>
-                      {step.note || ''}
                     </div>
                   </div>
                 ))}

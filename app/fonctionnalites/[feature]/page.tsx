@@ -274,6 +274,7 @@ export async function generateMetadata(
         siteName: "Kaatch",
         locale: "fr_FR",
         type: "website",
+        images: [{ url: "https://kaatch.fr/og-image.png", width: 1200, height: 630, alt: "Kaatch — Organisation de mariage" }],
       },
     }),
   }
@@ -288,8 +289,25 @@ export default async function FeaturePage(
 
   const related = allFeatures.filter(f => d.relatedFeatures.includes(f.slug))
 
+  const howToSchema = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": d.title,
+    "description": d.intro,
+    "step": d.howItWorks.map((s, i) => ({
+      "@type": "HowToStep",
+      "position": i + 1,
+      "name": s.label,
+      "text": s.desc,
+    })),
+  }
+
   return (
     <main className="bg-[#f5f0e8]" style={{ fontFamily: BODY, fontWeight: 300, color: '#2d3228' }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+      />
       <PublicNav />
 
       {/* Hero */}

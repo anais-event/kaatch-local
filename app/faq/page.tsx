@@ -10,6 +10,7 @@ export const metadata: Metadata = {
     siteName: "Kaatch",
     locale: "fr_FR",
     type: "website",
+    images: [{ url: "https://kaatch.fr/og-image.png", width: 1200, height: 630, alt: "Kaatch — Organisation de mariage" }],
   },
 }
 

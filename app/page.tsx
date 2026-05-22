@@ -820,6 +820,25 @@ export default function Home() {
             </div>
             <a href="/auth" className="text-sm text-[#2C3B2E] hover:underline shrink-0" style={{ fontWeight: 400 }}>Connexion →</a>
           </div>
+          {/* Product Hunt */}
+          <div className="border-t border-stone-200 pt-6 pb-4 flex justify-center">
+            <a href="https://www.producthunt.com/products/kaatch?embed=true&utm_source=embed&utm_medium=post_embed"
+               target="_blank" rel="noopener noreferrer"
+               className="inline-flex items-center gap-3 border border-stone-200 rounded-xl px-4 py-2.5 bg-white hover:border-[#FF6154] transition group">
+              <img src="https://ph-files.imgix.net/3fcc3c1c-fd88-4f87-a9fe-f2b47ec6f6e2.png?auto=format&fit=crop&w=80&h=80"
+                   alt="Kaatch sur Product Hunt" width={32} height={32}
+                   className="rounded-md object-cover" />
+              <span className="text-sm text-stone-500 group-hover:text-[#FF6154] transition" style={{ fontWeight: 400 }}>
+                Retrouvez Kaatch sur{' '}
+                <span style={{ fontWeight: 600, color: '#FF6154' }}>Product Hunt</span>
+              </span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                   className="text-stone-300 group-hover:text-[#FF6154] transition">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </a>
+          </div>
+
           <div className="border-t border-stone-200 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-xs text-stone-400" style={{ fontWeight: 300 }}>
               © 2026 Kaatch —{' '}

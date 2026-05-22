@@ -290,7 +290,7 @@ export default async function AdminPage() {
                         {c.active ? 'Désactiver' : 'Réactiver'}
                       </button>
                     </form>
-                    <form action={deleteCode} onSubmit={(e) => { if (!confirm('Supprimer ce code ?')) e.preventDefault() }}>
+                    <form action={deleteCode}>
                       <input type="hidden" name="id" value={c.id} />
                       <button type="submit"
                         className="text-xs border border-red-100 text-red-300 px-3 py-1 rounded-lg hover:border-red-300 hover:text-red-500 transition cursor-pointer"

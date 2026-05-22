@@ -281,6 +281,11 @@ export default async function AdminPage() {
                           style={{ fontWeight: 500 }}>
                       {c.active ? 'Actif' : 'Désactivé'}
                     </span>
+                    <a href={`/admin/promo/${c.id}`}
+                      className="text-xs border border-stone-200 text-stone-400 px-3 py-1 rounded-lg hover:border-[#4a5240] hover:text-[#4a5240] transition"
+                      style={{ fontWeight: 300 }}>
+                      Modifier
+                    </a>
                     <form action={toggleCode}>
                       <input type="hidden" name="id" value={c.id} />
                       <input type="hidden" name="active" value={String(c.active)} />

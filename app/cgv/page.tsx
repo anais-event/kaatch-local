@@ -40,13 +40,13 @@ export default function CGV() {
         </Section>
 
         <Section n="2" title="Offres disponibles">
-          <p>Kaatch propose trois niveaux d'accès :</p>
+          <p>Kaatch propose trois niveaux d&apos;accès :</p>
           <ul className="mt-3 space-y-2 list-none">
-            <li><strong>Gratuit</strong> — Accès limité (30 invités, 20 photos, 1 événement). Sans engagement, sans carte bleue.</li>
-            <li><strong>Mariage (45 €)</strong> — Paiement unique. Accès complet pour un mariage, à vie : invités illimités, photos illimitées, plan de table, RSVP complet, sans branding Kaatch.</li>
-            <li><strong>Pro (49 €/mois ou 399 €/an)</strong> — Accès multi-événements pour les professionnels de l'événementiel.</li>
+            <li><strong>Découverte</strong> — Sans frais. Accès limité : 30 invités, 20 photos, 1 mariage, accès 3 mois. Sans engagement, sans carte bleue.</li>
+            <li><strong>Mariage (45, prix en euros)</strong> — Paiement unique. Accès complet pour un mariage : invités sans limite, 200 photos incluses, plan de table, budget, RSVP complet, musique, livre d&apos;or, export Excel, import CSV, téléchargement ZIP photos.</li>
+            <li><strong>Premium (99, prix en euros)</strong> — Paiement unique. Inclut tout le plan Mariage et des fonctionnalités exclusives (templates faire-part, papeterie imprimable, design sur-mesure). Non disponible à la vente actuellement.</li>
           </ul>
-          <p className="mt-3">Les prix sont indiqués en euros TTC. Kaatch se réserve le droit de modifier ses tarifs ; les modifications n'affectent pas les commandes déjà passées.</p>
+          <p className="mt-3">Les prix sont indiqués en euros TTC. Kaatch se réserve le droit de modifier ses tarifs ; les modifications n&apos;affectent pas les commandes déjà passées.</p>
         </Section>
 
         <Section n="3" title="Commande et paiement">

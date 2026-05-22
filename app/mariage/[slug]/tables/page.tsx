@@ -4,6 +4,8 @@ import TablesClient from './TablesClient'
 import RoomView from './RoomView'
 import PageIntro from '../PageIntro'
 import StudioBanner from '../StudioBanner'
+import UpgradePrompt from '@/components/UpgradePrompt'
+import { normalizePlan, canAccess } from '@/lib/plan'
 
 async function createTable(formData: FormData) {
   'use server'
@@ -70,11 +72,16 @@ export default async function TablesPage({
 
   const { data: wedding } = await supabase
     .from('weddings')
-    .select('id, name')
+    .select('id, name, plan')
     .eq('slug', slug)
     .single()
 
   if (!wedding) return <div className="p-8">Mariage introuvable</div>
+
+  const plan = normalizePlan(wedding.plan)
+  if (!canAccess(plan, 'tables')) {
+    return <UpgradePrompt feature="tables" currentPlan={plan} slug={slug} />
+  }
 
   const [{ data: tables }, { data: guests }, { data: roomObjects }] = await Promise.all([
     supabase

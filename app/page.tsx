@@ -20,7 +20,7 @@ function FAQ() {
     },
     {
       q: "Puis-je passer du plan gratuit au plan Mariage plus tard ?",
-      a: "Oui, à tout moment. Vos données et votre espace sont entièrement conservés. Vous n'avez pas à recommencer de zéro.",
+      a: "Oui, à tout moment depuis la page Compte de votre mariage. Vos données et votre espace sont entièrement conservés. Vous n'avez pas à recommencer de zéro.",
     },
     {
       q: "Mes données sont-elles sécurisées ?",
@@ -91,17 +91,17 @@ export default function Home() {
       "offers": [
         {
           "@type": "Offer",
-          "name": "Gratuit",
+          "name": "Découverte",
           "price": "0",
           "priceCurrency": "EUR",
-          "description": "1 mariage, jusqu'à 20 invités, RSVP basique, suivi budget, livre d'or"
+          "description": "1 mariage, 30 invités, 20 photos, accès 3 mois. Programme jour J, faire-part digital, RSVP basique."
         },
         {
           "@type": "Offer",
           "name": "Mariage",
           "price": "45",
           "priceCurrency": "EUR",
-          "description": "Invités illimités, faire-part animé personnalisé, espace invités complet, plan de table, photos illimitées, programme jour J, RSVP complet, coordination prestataires. Paiement unique, accès à vie."
+          "description": "Invités sans limite, 200 photos incluses, faire-part animé personnalisé, espace invités complet, plan de table, budget, programme jour J, RSVP complet. Paiement unique, en euros."
         }
       ],
       "featureList": [
@@ -160,7 +160,7 @@ export default function Home() {
           "name": "Combien coûte Kaatch pour organiser son mariage ?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Le plan gratuit permet d'organiser un mariage avec jusqu'à 20 invités. Le plan complet coûte 45 euros en paiement unique (prix de lancement), avec invités illimités et accès à vie. Aucun abonnement, aucun frais caché."
+            "text": "Le plan Découverte permet de commencer sans frais avec 30 invités. Le plan Mariage coûte 45 euros en paiement unique, avec invités sans limite et 200 photos incluses. Aucun abonnement, aucun frais caché."
           }
         },
         {
@@ -523,32 +523,42 @@ export default function Home() {
           }}
           aria-hidden="true"
         >
-          45€
+          45
         </div>
         <div className="max-w-5xl mx-auto relative">
-          <div className="mb-14">
+          <div className="mb-10">
             <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-4" style={{ fontWeight: 500 }}>Offres</p>
             <h2 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(1.7rem, 3vw, 2.5rem)', lineHeight: 1.15, letterSpacing: '-0.02em' }}
                 className="text-[#2C3B2E] mb-3">
               Aucune mauvaise surprise.
             </h2>
-            <p style={{ fontSize: '0.95rem', lineHeight: 1.85 }} className="text-stone-500">
+            <p style={{ fontSize: '0.95rem', lineHeight: 1.85 }} className="text-stone-500 mb-4">
               Un tarif unique, un seul paiement. Pas d&apos;abonnement caché. Prix en euros.
             </p>
+            {/* Bannière Product Hunt */}
+            <div className="inline-flex items-center gap-3 bg-[#2d3228] text-white text-sm px-5 py-3 rounded-2xl" style={{ fontWeight: 300 }}>
+              <span>🚀</span>
+              <span>
+                <strong style={{ fontWeight: 600 }}>Lancement Product Hunt</strong> — Code{' '}
+                <span className="font-mono bg-white/15 px-1.5 py-0.5 rounded text-xs">KAATCH2026</span>{' '}
+                : plan Mariage offert · 100 places
+              </span>
+            </div>
           </div>
 
           <div className="md:grid md:grid-cols-3 md:gap-6 md:items-start flex overflow-x-auto gap-5 snap-x snap-mandatory pb-4 -mx-2 px-2">
 
-            {/* Gratuit */}
+            {/* Découverte */}
             <div className="bg-[#f5f0e8] rounded-2xl p-8 flex flex-col min-w-[280px] snap-start md:min-w-0" style={{ boxShadow: SHADOW }}>
               <div className="mb-6">
-                <p className="text-xs tracking-widest uppercase text-stone-400 mb-3" style={{ fontWeight: 500 }}>Gratuit</p>
+                <p className="text-xs tracking-widest uppercase text-stone-400 mb-1" style={{ fontWeight: 500 }}>Découverte</p>
+                <p className="text-stone-400 text-xs mb-3" style={{ fontWeight: 300 }}>Pour commencer à organiser</p>
                 <p style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '2.6rem', lineHeight: 1, letterSpacing: '-0.03em' }}
                    className="text-[#2C3B2E]">0</p>
-                <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-400 mt-2">Pour découvrir</p>
+                <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-400 mt-2">Inclus · sans frais</p>
               </div>
-              <ul className="space-y-3 flex-1 mb-7">
-                {["1 mariage", "jusqu'à 20 invités", 'RSVP basique', 'Suivi budget', "Livre d'or"].map(f => (
+              <ul className="space-y-2.5 flex-1 mb-7">
+                {["1 mariage", "30 invités", "20 photos", "Accès 3 mois", 'Programme jour J', "Faire-part digital", "RSVP basique", "1 groupe de discussion"].map(f => (
                   <li key={f} className="flex items-start gap-3 text-sm text-stone-600" style={{ fontWeight: 300 }}>
                     <span className="text-[#2C3B2E] mt-0.5 shrink-0 font-bold">✓</span>{f}
                   </li>
@@ -557,7 +567,7 @@ export default function Home() {
               <a href="/auth"
                  className="w-full text-center border-2 border-stone-300 text-stone-500 px-6 py-3 rounded-2xl hover:border-[#2C3B2E] hover:text-[#2C3B2E] transition text-sm"
                  style={{ fontWeight: 500 }}>
-                Commencer gratuitement
+                Commencer
               </a>
             </div>
 
@@ -567,29 +577,29 @@ export default function Home() {
               <div className="flex justify-center pt-5">
                 <span className="bg-[#f5f0e8] text-[#2C3B2E] text-xs px-4 py-1.5 rounded-full whitespace-nowrap border border-[#2C3B2E]/20"
                       style={{ fontWeight: 600 }}>
-                  ✦ Prix de lancement
+                  ✦ Recommandé
                 </span>
               </div>
               <div className="px-8 pb-8 pt-4 flex flex-col flex-1">
               <div className="mb-6">
-                <p className="text-xs tracking-widest uppercase text-white/70 mb-3" style={{ fontWeight: 500 }}>💍 Mariage</p>
-                <div className="flex items-end gap-3">
-                  <p style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '2.6rem', lineHeight: 1, letterSpacing: '-0.03em' }}
+                <p className="text-xs tracking-widest uppercase text-white/70 mb-1" style={{ fontWeight: 500 }}>💍 Mariage</p>
+                <p className="text-white/50 text-xs mb-3" style={{ fontWeight: 300 }}>Tout pour votre mariage</p>
+                <p style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '2.6rem', lineHeight: 1, letterSpacing: '-0.03em' }}
                      className="text-white">45</p>
-                  <p style={{ fontWeight: 300, fontSize: '0.9rem', textDecoration: 'line-through' }}
-                     className="text-white/55 mb-1">65</p>
-                </div>
-                <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-white/65 mt-2">Paiement unique · 1 mariage</p>
+                <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-white/65 mt-2">Paiement unique · en euros · 1 mariage</p>
               </div>
-              <ul className="space-y-3 flex-1 mb-7">
+              <ul className="space-y-2.5 flex-1 mb-7">
                 {[
-                  'Invités illimités',
+                  'Invités sans limite',
+                  '200 photos incluses',
                   'Faire-part animé personnalisé',
-                  'Espace invités complet',
-                  'Plan de table',
-                  'Photos illimitées + téléchargement',
-                  'Programme jour J',
                   'RSVP complet',
+                  'Plan de table',
+                  'Budget et prestataires',
+                  'Musique / playlist',
+                  "Livre d'or",
+                  'Export & import invités',
+                  'Téléchargement ZIP photos',
                 ].map(f => (
                   <li key={f} className="flex items-start gap-3 text-sm text-white/85" style={{ fontWeight: 300 }}>
                     <span className="text-white/80 mt-0.5 shrink-0 font-bold">✓</span>{f}
@@ -604,34 +614,46 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Pro */}
-            <div className="bg-[#f5f0e8] rounded-2xl p-8 flex flex-col min-w-[280px] snap-start md:min-w-0" style={{ boxShadow: SHADOW }}>
-              <div className="mb-4">
-                <p className="text-xs tracking-widest uppercase text-stone-400 mb-3" style={{ fontWeight: 500 }}>👔 Planificateur Pro</p>
+            {/* Premium */}
+            <div className="bg-white rounded-2xl p-8 flex flex-col min-w-[280px] snap-start md:min-w-0 relative"
+                 style={{ boxShadow: SHADOW, border: '1.5px solid #c4a87c' }}>
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                <span className="bg-[#c4a87c] text-white text-xs px-4 py-1.5 rounded-full whitespace-nowrap"
+                      style={{ fontWeight: 600 }}>
+                  Bientôt disponible
+                </span>
               </div>
-              <div className="flex-1 flex flex-col items-center justify-center text-center py-6 gap-3">
-                <p style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1.2rem', letterSpacing: '-0.01em' }}
-                   className="text-[#2C3B2E]">
-                  Professionnels ?
-                </p>
-                <p className="text-stone-500 text-sm" style={{ lineHeight: 1.7 }}>
-                  Parlons-en 😊
-                </p>
-                <p className="text-stone-400 text-xs max-w-[180px] mx-auto" style={{ lineHeight: 1.6 }}>
-                  Wedding planners, organisateurs d&apos;événements — on a pensé à vous.
-                </p>
+              <div className="mb-6 mt-1">
+                <p className="text-xs tracking-widest uppercase text-stone-400 mb-1" style={{ fontWeight: 500 }}>👑 Premium</p>
+                <p className="text-stone-400 text-xs mb-3" style={{ fontWeight: 300 }}>L&apos;expérience complète</p>
+                <p style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '2.6rem', lineHeight: 1, letterSpacing: '-0.03em' }}
+                   className="text-[#2C3B2E]">99</p>
+                <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-400 mt-2">Paiement unique · en euros</p>
               </div>
-              <a href="mailto:bonjour@kaatch.fr?subject=Kaatch%20Pro%20%E2%80%94%20Parlons-en"
-                 className="w-full text-center bg-[#2C3B2E] text-white px-6 py-3 rounded-2xl hover:bg-[#1a2419] transition text-sm"
+              <ul className="space-y-2.5 flex-1 mb-7">
+                {[
+                  'Tout le plan Mariage',
+                  'Templates faire-part exclusifs',
+                  'Papeterie imprimable',
+                  'Design sur-mesure',
+                  'Support prioritaire',
+                ].map(f => (
+                  <li key={f} className="flex items-start gap-3 text-sm text-stone-500" style={{ fontWeight: 300 }}>
+                    <span className="text-[#c4a87c] mt-0.5 shrink-0">🔜</span>{f}
+                  </li>
+                ))}
+              </ul>
+              <a href="/pricing"
+                 className="w-full text-center border border-[#c4a87c] text-[#c4a87c] px-6 py-3 rounded-2xl hover:bg-[#c4a87c]/5 transition text-sm"
                  style={{ fontWeight: 500 }}>
-                bonjour@kaatch.fr →
+                En savoir plus →
               </a>
             </div>
 
           </div>
 
           <p className="text-center mt-10 text-xs text-stone-400" style={{ fontWeight: 300 }}>
-            Aucune carte bleue requise pour le plan gratuit · Paiement sécurisé · Accès immédiat · Prix en euros
+            Plan Découverte inclus sans carte bleue · Paiement sécurisé · Accès immédiat · Prix en euros
           </p>
         </div>
       </section>

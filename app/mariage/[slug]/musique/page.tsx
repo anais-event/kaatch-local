@@ -1,6 +1,8 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
 import MusiqueClient from './MusiqueClient'
+import UpgradePrompt from '@/components/UpgradePrompt'
+import { normalizePlan, canAccess } from '@/lib/plan'
 
 async function addSong(formData: FormData) {
   'use server'
@@ -76,8 +78,13 @@ export default async function MusiquePage({ params }: { params: Promise<{ slug: 
   const supabase = await createSupabaseServerClient()
 
   const { data: wedding } = await supabase
-    .from('weddings').select('id, name').eq('slug', slug).single()
+    .from('weddings').select('id, name, plan').eq('slug', slug).single()
   if (!wedding) return <div className="p-8">Mariage introuvable</div>
+
+  const plan = normalizePlan(wedding.plan)
+  if (!canAccess(plan, 'musique')) {
+    return <UpgradePrompt feature="musique" currentPlan={plan} slug={slug} />
+  }
 
   const [{ data: songs }, { data: playlistLinks }] = await Promise.all([
     supabase.from('playlist_songs').select('*').eq('wedding_id', wedding.id).order('position'),

@@ -1,6 +1,8 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import GuestbookViewer from './GuestbookViewer'
+import UpgradePrompt from '@/components/UpgradePrompt'
+import { normalizePlan, canAccess } from '@/lib/plan'
 
 export default async function LivreDorPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -11,11 +13,16 @@ export default async function LivreDorPage({ params }: { params: Promise<{ slug:
 
   const { data: wedding } = await supabase
     .from('weddings')
-    .select('id, name')
+    .select('id, name, plan')
     .eq('slug', slug)
     .single()
 
   if (!wedding) return <div className="p-8 text-stone-500">Mariage introuvable.</div>
+
+  const plan = normalizePlan(wedding.plan)
+  if (!canAccess(plan, 'livre-dor')) {
+    return <UpgradePrompt feature="livre-dor" currentPlan={plan} slug={slug} />
+  }
 
   // RLS SELECT policy is USING (true) — no service role needed
   const { data: entries } = await supabase

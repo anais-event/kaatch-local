@@ -90,7 +90,7 @@ export default async function Dashboard() {
                         FORMULE GRATUITE
                       </span>
                       <p className="text-xs text-stone-400 hidden sm:block" style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}>
-                        20 invités · faire-part limité
+                        30 invités · fonctionnalités limitées
                       </p>
                     </div>
                     <a href={checkoutUrl(wedding.id, wedding.slug)}

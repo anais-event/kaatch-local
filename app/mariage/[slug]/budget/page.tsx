@@ -3,6 +3,8 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import BudgetBoard from './BudgetBoard'
 import BudgetGlobalView from './BudgetGlobalView'
+import UpgradePrompt from '@/components/UpgradePrompt'
+import { normalizePlan, canAccess } from '@/lib/plan'
 
 export const DEFAULT_CATEGORIES = [
   { name: 'Lieu & réception', icon: '🏛️', color: '#8b7355' },
@@ -237,8 +239,13 @@ export default async function BudgetPage({
   const supabase = await createSupabaseServerClient()
 
   const { data: wedding } = await supabase
-    .from('weddings').select('id, name, budget_total, budget_currency').eq('slug', slug).single()
+    .from('weddings').select('id, name, budget_total, budget_currency, plan').eq('slug', slug).single()
   if (!wedding) redirect(`/mariage/${slug}`)
+
+  const plan = normalizePlan(wedding.plan)
+  if (!canAccess(plan, 'budget')) {
+    return <UpgradePrompt feature="budget" currentPlan={plan} slug={slug} />
+  }
 
   const [
     { data: categories },

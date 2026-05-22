@@ -28,7 +28,7 @@ const sections = [
       },
       {
         q: "Kaatch est-il adapté aux petits mariages ?",
-        a: "Oui. Le plan gratuit permet d'organiser un mariage avec jusqu'à 20 invités. Pour un mariage entre 20 et 50 invités, le plan à 45 euros donne accès à toutes les fonctionnalités sans limite. Kaatch s'adapte aussi bien à un mariage intime qu'à une grande réception.",
+        a: "Oui. Le plan Découverte permet de commencer sans frais avec 30 invités. Le plan Mariage à 45 euros (paiement unique) donne accès à toutes les fonctionnalités avec invités sans limite. Kaatch s'adapte aussi bien à un mariage intime qu'à une grande réception.",
       },
       {
         q: "Est-ce que Kaatch fonctionne sur mobile ?",
@@ -120,7 +120,7 @@ const sections = [
     questions: [
       {
         q: "Combien coûte Kaatch ?",
-        a: "Plan gratuit jusqu'à 20 invités. Plan complet à 45 euros en paiement unique (prix de lancement), invités illimités, accès à vie. Pas d'abonnement, pas de frais cachés, pas de carte bleue requise pour le plan gratuit.",
+        a: "Plan Découverte inclus sans frais (30 invités, 20 photos). Plan Mariage à 45 euros en paiement unique, invités sans limite, 200 photos incluses. Pas d'abonnement, pas de frais cachés, pas de carte bleue requise pour le plan Découverte.",
       },
       {
         q: "Peut-on passer du plan gratuit au plan payant ?",

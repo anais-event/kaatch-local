@@ -89,7 +89,7 @@ const rows = [
   {
     feature: "Prix",
     excel: "Gratuit (si vous avez déjà Office) ou ~10€/mois (Microsoft 365)",
-    kaatch: "Gratuit jusqu'à 20 invités, puis 45€ paiement unique",
+    kaatch: "Inclus jusqu'à 30 invités (plan Découverte), puis 45 euros paiement unique (plan Mariage)",
     winner: "neutral",
   },
 ]
@@ -237,7 +237,7 @@ export default function KaatchVsExcelPage() {
             Prêt à fermer le tableur ?
           </h2>
           <p className="text-stone-500 mb-8 text-sm" style={{ fontWeight: 300, lineHeight: 1.8 }}>
-            Gratuit jusqu'à 20 invités. Import de votre liste existante en 5 minutes. Aucune carte bleue requise.
+            Plan Découverte inclus jusqu'à 30 invités. Import de votre liste existante en 5 minutes. Aucune carte bleue requise.
           </p>
           <Link href="/auth"
             className="inline-block px-8 py-4 rounded-full text-white text-sm transition hover:opacity-90"

@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
+import { isPaid } from '@/lib/plan'
 
 export default async function UpgradePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -12,7 +13,7 @@ export default async function UpgradePage({ params }: { params: Promise<{ slug: 
     .single()
 
   if (!wedding) redirect(`/mariage/${slug}`)
-  if (wedding.plan === 'mariage' || wedding.plan === 'pro') redirect(`/mariage/${slug}`)
+  if (isPaid(wedding.plan)) redirect(`/mariage/${slug}`)
 
   const checkoutUrl = `/api/stripe/checkout?wedding_id=${wedding.id}&slug=${slug}`
 
@@ -30,7 +31,7 @@ export default async function UpgradePage({ params }: { params: Promise<{ slug: 
             Offre 💍 Mariage
           </h1>
           <p style={{ fontWeight: 300, fontSize: '0.9rem' }} className="text-stone-400">
-            Un paiement unique. Accès à vie pour votre mariage.
+            Un paiement unique, en euros.
           </p>
         </div>
 
@@ -54,7 +55,7 @@ export default async function UpgradePage({ params }: { params: Promise<{ slug: 
           </div>
           <ul className="space-y-2.5">
             {[
-              'Invités & photos illimités',
+              'Invités sans limite · 200 photos incluses',
               'RSVP complet',
               'Invitation à plusieurs moments de la fête',
               'Plan de table',

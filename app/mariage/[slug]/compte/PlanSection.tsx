@@ -11,7 +11,7 @@ type Props = {
 }
 
 export default function PlanSection({ plan, weddingId, slug, redeemCode, checkoutUrl }: Props) {
-  const isPaid = plan === 'mariage' || plan === 'pro'
+  const isPaid = plan === 'mariage' || plan === 'pro' || plan === 'essential' || plan === 'premium'
   const [showPromo, setShowPromo] = useState(false)
   const [result, setResult] = useState<{ success: boolean; error?: string } | null>(null)
   const [isPending, startTransition] = useTransition()

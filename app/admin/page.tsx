@@ -90,7 +90,7 @@ export default async function AdminPage() {
     .order('created_at', { ascending: false })
 
   const total = weddings?.length ?? 0
-  const paid = weddings?.filter(w => w.plan === 'mariage' || w.plan === 'pro').length ?? 0
+  const paid = weddings?.filter(w => w.plan === 'mariage' || w.plan === 'pro' || w.plan === 'essential' || w.plan === 'premium').length ?? 0
   const free = total - paid
 
   const LATO = 'var(--font-lato)'
@@ -150,7 +150,7 @@ export default async function AdminPage() {
           ) : (
             <div className="divide-y divide-stone-50">
               {(weddings ?? []).map(w => {
-                const isPaidPlan = w.plan === 'mariage' || w.plan === 'pro'
+                const isPaidPlan = w.plan === 'mariage' || w.plan === 'pro' || w.plan === 'essential' || w.plan === 'premium'
                 const dateStr = w.date
                   ? new Date(w.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
                   : '—'

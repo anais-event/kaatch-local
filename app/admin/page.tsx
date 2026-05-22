@@ -19,8 +19,22 @@ async function createCode(formData: FormData) {
   if (user?.email !== ADMIN_EMAIL) return
 
   const code = (formData.get('code') as string).trim().toUpperCase()
-  const maxUses = parseInt(formData.get('max_uses') as string) || 1
-  await adminClient().from('promo_codes').insert({ code, max_uses: maxUses, plan: 'mariage' })
+  const maxUsesRaw = formData.get('max_uses') as string
+  const maxUses = maxUsesRaw === '' || maxUsesRaw === '0' ? 9999 : (parseInt(maxUsesRaw) || 1)
+  const expiresAtRaw = formData.get('expires_at') as string
+  const expiresAt = expiresAtRaw ? new Date(expiresAtRaw).toISOString() : null
+  await adminClient().from('promo_codes').insert({ code, max_uses: maxUses, plan: 'mariage', expires_at: expiresAt })
+  revalidatePath('/admin')
+}
+
+async function deleteCode(formData: FormData) {
+  'use server'
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user?.email !== ADMIN_EMAIL) return
+
+  const id = formData.get('id') as string
+  await adminClient().from('promo_codes').delete().eq('id', id)
   revalidatePath('/admin')
 }
 
@@ -72,7 +86,7 @@ export default async function AdminPage() {
 
   const { data: promoCodes } = await adminClient()
     .from('promo_codes')
-    .select('id, code, plan, max_uses, uses_count, active, created_at')
+    .select('id, code, plan, max_uses, uses_count, active, created_at, expires_at')
     .order('created_at', { ascending: false })
 
   const total = weddings?.length ?? 0
@@ -220,19 +234,21 @@ export default async function AdminPage() {
                 className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#4a5240] transition uppercase"
                 style={{ fontWeight: 300, letterSpacing: '0.05em' }} />
             </div>
-            <div className="w-36">
+            <div className="w-28">
               <label className="block text-xs text-stone-400 uppercase tracking-wide mb-1" style={{ fontWeight: 400 }}>
-                Nb d'utilisations
+                Nb utilisations
               </label>
-              <select name="max_uses"
-                className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#4a5240] transition bg-white"
-                style={{ fontWeight: 300 }}>
-                <option value="1">1 fois</option>
-                <option value="5">5 fois</option>
-                <option value="10">10 fois</option>
-                <option value="50">50 fois</option>
-                <option value="9999">Illimité (∞)</option>
-              </select>
+              <input type="number" name="max_uses" min="0" placeholder="∞"
+                className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#4a5240] transition"
+                style={{ fontWeight: 300 }} />
+            </div>
+            <div className="w-44">
+              <label className="block text-xs text-stone-400 uppercase tracking-wide mb-1" style={{ fontWeight: 400 }}>
+                Date limite
+              </label>
+              <input type="date" name="expires_at"
+                className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#4a5240] transition"
+                style={{ fontWeight: 300 }} />
             </div>
             <button type="submit"
               className="bg-[#4a5240] text-white px-5 py-2.5 rounded-xl text-sm hover:bg-[#2d3228] transition cursor-pointer"
@@ -256,6 +272,11 @@ export default async function AdminPage() {
                     <span className="text-xs text-stone-400" style={{ fontWeight: 300 }}>
                       {c.uses_count} / {c.max_uses >= 9999 ? '∞' : c.max_uses} utilisations
                     </span>
+                    {c.expires_at && (
+                      <span className="text-xs text-stone-400" style={{ fontWeight: 300 }}>
+                        jusqu&apos;au {new Date(c.expires_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </span>
+                    )}
                     <span className={`text-[10px] px-2 py-0.5 rounded-full ${c.active ? 'bg-emerald-50 text-emerald-600' : 'bg-stone-100 text-stone-400'}`}
                           style={{ fontWeight: 500 }}>
                       {c.active ? 'Actif' : 'Désactivé'}
@@ -267,6 +288,14 @@ export default async function AdminPage() {
                         className="text-xs border border-stone-200 text-stone-400 px-3 py-1 rounded-lg hover:border-stone-300 hover:text-stone-600 transition cursor-pointer"
                         style={{ fontWeight: 300 }}>
                         {c.active ? 'Désactiver' : 'Réactiver'}
+                      </button>
+                    </form>
+                    <form action={deleteCode} onSubmit={(e) => { if (!confirm('Supprimer ce code ?')) e.preventDefault() }}>
+                      <input type="hidden" name="id" value={c.id} />
+                      <button type="submit"
+                        className="text-xs border border-red-100 text-red-300 px-3 py-1 rounded-lg hover:border-red-300 hover:text-red-500 transition cursor-pointer"
+                        style={{ fontWeight: 300 }}>
+                        Supprimer
                       </button>
                     </form>
                   </div>

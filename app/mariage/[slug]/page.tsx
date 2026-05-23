@@ -97,10 +97,17 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
 
       {/* Cover banner */}
-      <div className="relative w-full h-[140px] overflow-hidden rounded-b-3xl">
+      <div className="relative w-full h-[160px] overflow-hidden rounded-b-3xl group">
         {wedding.cover_image_url
           ? <img src={wedding.cover_image_url} alt="" className="w-full h-full object-cover" style={{ objectPosition: `center ${wedding.cover_position_y ?? 50}%` }} />
-          : <div className="w-full h-full" style={{ background: 'linear-gradient(135deg, #6b7a5e 0%, #4a5240 100%)' }} />
+          : <div className="w-full h-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #6b7a5e 0%, #4a5240 100%)' }}>
+              <Link href={`/mariage/${slug}/edit`}
+                className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full text-white transition"
+                style={{ fontWeight: 400, fontSize: '0.85rem' }}>
+                <Camera className="w-4 h-4" />
+                Ajouter une photo de couverture
+              </Link>
+            </div>
         }
         <div className="absolute inset-0 bg-black/25" />
         <div className="absolute bottom-5 left-6 z-10 text-white">
@@ -113,6 +120,15 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
             </p>
           )}
         </div>
+        {/* Edit cover button */}
+        {wedding.cover_image_url && (
+          <Link href={`/mariage/${slug}/edit`}
+            className="absolute top-3 right-3 z-10 flex items-center gap-1.5 px-3 py-1.5 bg-black/30 hover:bg-black/50 backdrop-blur-sm rounded-full text-white transition opacity-0 group-hover:opacity-100"
+            style={{ fontWeight: 400, fontSize: '0.75rem' }}>
+            <Camera className="w-3.5 h-3.5" />
+            Modifier la photo
+          </Link>
+        )}
       </div>
 
       {/* Main content */}
@@ -211,8 +227,47 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
 
           </div>
 
-          {/* RIGHT: Accès rapides + Divers */}
+          {/* RIGHT: Infos mariage + Accès rapides + Divers */}
           <div className="space-y-6">
+
+            {/* Pastille infos mariage */}
+            <div className="bg-white rounded-2xl border border-stone-100 p-4">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <p style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.25rem', lineHeight: 1.2 }} className="text-[#2d3228] truncate">
+                    {wedding.name}
+                  </p>
+                  <div className="mt-2 space-y-1">
+                    {wedding.date && (
+                      <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-500 flex items-center gap-1.5">
+                        <span className="text-[#4a5240]">📅</span>
+                        <span className="capitalize">{dateFormatted}</span>
+                      </p>
+                    )}
+                    {!wedding.date && (
+                      <Link href={`/mariage/${slug}/edit`} style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-400 italic flex items-center gap-1.5 hover:text-[#4a5240] transition">
+                        <span>📅</span> Date non renseignée
+                      </Link>
+                    )}
+                    {wedding.location && (
+                      <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-500 flex items-center gap-1.5">
+                        <span className="text-[#4a5240]">📍</span> {wedding.location}
+                      </p>
+                    )}
+                    {!wedding.location && (
+                      <Link href={`/mariage/${slug}/edit`} style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-400 italic flex items-center gap-1.5 hover:text-[#4a5240] transition">
+                        <span>📍</span> Lieu non renseigné
+                      </Link>
+                    )}
+                  </div>
+                </div>
+                <Link href={`/mariage/${slug}/edit`}
+                  className="shrink-0 p-2 rounded-xl bg-stone-50 hover:bg-[#4a5240]/10 transition"
+                  title="Modifier les infos">
+                  <Settings className="w-4 h-4 text-stone-400 hover:text-[#4a5240]" />
+                </Link>
+              </div>
+            </div>
 
             {/* Accès rapides */}
             <div className="bg-white rounded-3xl border border-stone-100 p-6">

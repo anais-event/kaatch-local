@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import BudgetCalculator from './BudgetCalculator'
 import PublicNav from '@/app/_components/PublicNav'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Calcul budget mariage 2026 : estimez le coût de votre mariage gratuitement',
   description:

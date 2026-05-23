@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicNav from '@/app/_components/PublicNav'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Notre méthodologie : calcul budget mariage Kaatch',
   description:

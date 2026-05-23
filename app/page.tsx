@@ -5,6 +5,8 @@ import ForumEmbed from './_components/ForumEmbed'
 import ScrollReveal from './_components/ScrollReveal'
 import FeatureTicker from './_components/FeatureTicker'
 
+export const dynamic = 'force-dynamic'
+
 const DISPLAY = 'var(--font-display)'
 const SHADOW = '0 4px 24px rgba(44,59,46,0.08), 0 1px 4px rgba(44,59,46,0.04)'
 

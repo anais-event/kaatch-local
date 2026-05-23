@@ -414,11 +414,7 @@ export default function LandingClient() {
           </ScrollReveal>
 
           <ScrollReveal delay={0.3}>
-            <FeatureTicker
-              steps={(t.raw('landing.creativeStudio.steps') as any[]).map((s: any) => ({ n: s.n, title: s.title, desc: s.desc }))}
-              ambiances={(t.raw('landing.creativeStudio.ambiances') as any[]).map((a: any) => ({ name: a.name, tag: a.tag }))}
-              products={(t.raw('landing.creativeStudio.products') as any[]).map((p: any) => ({ icon: p.icon, name: p.name, desc: p.desc }))}
-            />
+            <FeatureTicker />
           </ScrollReveal>
 
           <ScrollReveal delay={0.4}>

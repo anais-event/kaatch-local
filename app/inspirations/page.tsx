@@ -3,6 +3,8 @@ import { getAllInspirations, categoryLabel, categoryColor, categoryBg, type Insp
 import type { Metadata } from 'next'
 import PublicNav from '@/app/_components/PublicNav'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Inspirations — Kaatch',
   description: 'Astuces, bons plans et conseils pour organiser votre mariage sereinement.',

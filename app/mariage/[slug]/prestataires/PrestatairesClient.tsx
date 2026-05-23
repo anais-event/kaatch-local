@@ -242,7 +242,7 @@ export default function PrestatairesClient({ slug, weddingId, vendors, budgetSug
                         </p>
                         <div className="flex items-center gap-2">
                           <div className="bg-[#f5f0e8] border border-stone-200 rounded-lg px-4 py-2.5 text-lg tracking-[0.3em] text-[#2C3B2E] text-center select-all"
-                               style={{ fontWeight: 600, fontFamily: ‘monospace’ }}>
+                               style={{ fontWeight: 600, fontFamily: "monospace" }}>
                             {v.vendorCode}
                           </div>
                           <p className="text-[10px] text-stone-400" style={{ fontWeight: 300, lineHeight: 1.4 }}>

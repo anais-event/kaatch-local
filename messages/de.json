@@ -1,12 +1,23 @@
 {
   "nav": {
+    "discover": "Entdecke",
+    "discoverSub": "Kaatch",
     "commentCaMarche": "So funktioniert es",
-    "studio": "Creative Studio",
+    "studio": "Studio",
+    "studioSub": "Kreativ",
+    "calculator": "Kalkulator",
+    "calculatorSub": "Budget",
+    "inspirations": "Inspiration",
+    "inspirationsSub": "Blog",
+    "forum": "Gemeinschaft",
+    "forumSub": "Forum",
     "offres": "Pläne",
     "tarifs": "Preise",
     "connexion": "Anmelden",
     "monEspace": "Mein Bereich",
-    "invite": "Gast bei einer Hochzeit?"
+    "invite": "Gast?",
+    "commencer": "Loslegen →",
+    "discoverKaatch": "Entdecke Kaatch"
   },
   "landing": {
     "hero": {
@@ -37,13 +48,41 @@
         "sublabel": "für das Paar",
         "title": "Alles, was du für einfache, effiziente Organisation brauchst.",
         "items": [
-          { "icon": "📋", "label": "Zeitstrahl", "detail": "Jeden Schritt von 12 Monaten davor bis zum großen Tag, in Reihenfolge." },
-          { "icon": "💌", "label": "Einladungen & RSVP", "detail": "Persönlicher Link pro Gast, Antworten kommen in Echtzeit." },
-          { "icon": "🪑", "label": "Sitzplan", "detail": "Drag-and-drop, bis zur Nacht davor anpassbar." },
-          { "icon": "💰", "label": "Gesamtbudget", "detail": "Angebote, Ausgaben, Anbieter — alles auf einen Blick." },
-          { "icon": "🤝", "label": "Anbieter", "detail": "Kontakte, Verträge, Zahlungen — kein Email-Durcheinander mehr." },
-          { "icon": "📅", "label": "Ablauf des Tages", "detail": "Der Tagesablauf. Eure Trauzeugen können durchatmen." },
-          { "icon": "🎵", "label": "Playlist & Ideen", "detail": "Baut den Soundtrack, Ideen zum Beleben des Abends." }
+          {
+            "icon": "📋",
+            "label": "Zeitstrahl",
+            "detail": "Jeden Schritt von 12 Monaten davor bis zum großen Tag, in Reihenfolge."
+          },
+          {
+            "icon": "💌",
+            "label": "Einladungen & RSVP",
+            "detail": "Persönlicher Link pro Gast, Antworten kommen in Echtzeit."
+          },
+          {
+            "icon": "🪑",
+            "label": "Sitzplan",
+            "detail": "Drag-and-drop, bis zur Nacht davor anpassbar."
+          },
+          {
+            "icon": "💰",
+            "label": "Gesamtbudget",
+            "detail": "Angebote, Ausgaben, Anbieter — alles auf einen Blick."
+          },
+          {
+            "icon": "🤝",
+            "label": "Anbieter",
+            "detail": "Kontakte, Verträge, Zahlungen — kein Email-Durcheinander mehr."
+          },
+          {
+            "icon": "📅",
+            "label": "Ablauf des Tages",
+            "detail": "Der Tagesablauf. Eure Trauzeugen können durchatmen."
+          },
+          {
+            "icon": "🎵",
+            "label": "Playlist & Ideen",
+            "detail": "Baut den Soundtrack, Ideen zum Beleben des Abends."
+          }
         ]
       },
       "scene": {
@@ -52,12 +91,36 @@
         "title": "Ein Link in der Einladung. Und sie sind bei dir.",
         "desc": "Kein Account nötig. Deine Gäste klicken auf ihren persönlichen Link — Papier oder digital, du entscheidest — und haben Zugang zu allem.",
         "items": [
-          { "icon": "🔗", "label": "Magischer Link", "detail": "Kein Account zu erstellen. Der Link in der Einladung, und sie sind bei dir." },
-          { "icon": "📅", "label": "Tagesablauf", "detail": "Ohne jemanden belästigen zu müssen." },
-          { "icon": "📝", "label": "Gästebuch", "detail": "Nette Worte, Videos, Erinnerungen — alles vom Handy." },
-          { "icon": "🏠", "label": "Unterkünfte", "detail": "Deine Unterkunftsvorschläge, ein Klick entfernt." },
-          { "icon": "💬", "label": "Messaging", "detail": "Direkter Chat zwischen Gästen." },
-          { "icon": "📸", "label": "Gemeinsames Album", "detail": "Alle Fotos, an einem Ort, für alle." }
+          {
+            "icon": "🔗",
+            "label": "Magischer Link",
+            "detail": "Kein Account zu erstellen. Der Link in der Einladung, und sie sind bei dir."
+          },
+          {
+            "icon": "📅",
+            "label": "Tagesablauf",
+            "detail": "Ohne jemanden belästigen zu müssen."
+          },
+          {
+            "icon": "📝",
+            "label": "Gästebuch",
+            "detail": "Nette Worte, Videos, Erinnerungen — alles vom Handy."
+          },
+          {
+            "icon": "🏠",
+            "label": "Unterkünfte",
+            "detail": "Deine Unterkunftsvorschläge, ein Klick entfernt."
+          },
+          {
+            "icon": "💬",
+            "label": "Messaging",
+            "detail": "Direkter Chat zwischen Gästen."
+          },
+          {
+            "icon": "📸",
+            "label": "Gemeinsames Album",
+            "detail": "Alle Fotos, an einem Ort, für alle."
+          }
         ],
         "footerNote": "Lieber eine Papiereinladung? Kein Problem — der Kaatch-Link kann auch darauf stehen."
       }
@@ -140,24 +203,75 @@
       "subtitle": "automatisch erstellt.",
       "desc": "Wähle einen Stil, wir generieren deine Einladungen, Menüs, Platzkarten und Sitzplan. Gedruckt und geliefert. Du musst nichts anderes tun.",
       "steps": [
-        { "n": "01", "title": "Wähle deinen Stil", "desc": "Boho, klassisch, rustical, Art Deco… 5 Designuniversen von unseren Designern." },
-        { "n": "02", "title": "Wir generieren alles", "desc": "Einladung, Menü, Platzkarte, Sitzplan — automatisch aus deiner Gästeliste generiert." },
-        { "n": "03", "title": "Gedruckt und geliefert", "desc": "Professioneller Druck, Premium-Papier, Lieferung in 5–7 Werktagen." }
+        {
+          "n": "01",
+          "title": "Wähle deinen Stil",
+          "desc": "Boho, klassisch, rustical, Art Deco… 5 Designuniversen von unseren Designern."
+        },
+        {
+          "n": "02",
+          "title": "Wir generieren alles",
+          "desc": "Einladung, Menü, Platzkarte, Sitzplan — automatisch aus deiner Gästeliste generiert."
+        },
+        {
+          "n": "03",
+          "title": "Gedruckt und geliefert",
+          "desc": "Professioneller Druck, Premium-Papier, Lieferung in 5–7 Werktagen."
+        }
       ],
       "ambiances": [
-        { "name": "Boho", "tag": "Natur & Freiheit" },
-        { "name": "Klassisch", "tag": "Zeitlose Eleganz" },
-        { "name": "Rustikal", "tag": "Zartheit & Blumen" },
-        { "name": "Art Deco", "tag": "1920er Glanz" },
-        { "name": "Minimalistisch", "tag": "Sauber & modern" }
+        {
+          "name": "Boho",
+          "tag": "Natur & Freiheit"
+        },
+        {
+          "name": "Klassisch",
+          "tag": "Zeitlose Eleganz"
+        },
+        {
+          "name": "Rustikal",
+          "tag": "Zartheit & Blumen"
+        },
+        {
+          "name": "Art Deco",
+          "tag": "1920er Glanz"
+        },
+        {
+          "name": "Minimalistisch",
+          "tag": "Sauber & modern"
+        }
       ],
       "products": [
-        { "icon": "💌", "name": "Einladung", "desc": "Animiert + hochauflösendes PDF. Teilbarer Link oder druckbar." },
-        { "icon": "🍽️", "name": "Menü", "desc": "A5-Format, aus deinem Ablauf und Speiseoptionen generiert." },
-        { "icon": "📋", "name": "Tagesablauf", "desc": "Kompletter Ablauf, automatisch aus deinem Zeitstrahl gestaltet." },
-        { "icon": "🪧", "name": "Platzkarten", "detail": "Eine pro Gast, Batch-generiert aus deiner Liste. Null manuelle Eingabe." },
-        { "icon": "🗺️", "name": "Sitzplan", "detail": "Alle deine Tische und Gäste, ordentlich angeordnet." },
-        { "icon": "🔢", "name": "Tischnummern", "desc": "A5-Staffelei mit jeder Tischnummer. Gedruckt, bereit zum Aufstellen." }
+        {
+          "icon": "💌",
+          "name": "Einladung",
+          "desc": "Animiert + hochauflösendes PDF. Teilbarer Link oder druckbar."
+        },
+        {
+          "icon": "🍽️",
+          "name": "Menü",
+          "desc": "A5-Format, aus deinem Ablauf und Speiseoptionen generiert."
+        },
+        {
+          "icon": "📋",
+          "name": "Tagesablauf",
+          "desc": "Kompletter Ablauf, automatisch aus deinem Zeitstrahl gestaltet."
+        },
+        {
+          "icon": "🪧",
+          "name": "Platzkarten",
+          "detail": "Eine pro Gast, Batch-generiert aus deiner Liste. Null manuelle Eingabe."
+        },
+        {
+          "icon": "🗺️",
+          "name": "Sitzplan",
+          "detail": "Alle deine Tische und Gäste, ordentlich angeordnet."
+        },
+        {
+          "icon": "🔢",
+          "name": "Tischnummern",
+          "desc": "A5-Staffelei mit jeder Tischnummer. Gedruckt, bereit zum Aufstellen."
+        }
       ],
       "ctaSection": {
         "tagline": "Launch-Preise",
@@ -284,26 +398,67 @@
   "footer": {
     "description": "Die App, die Tabellenkalkulationen, WhatsApp-Chaos und endlose Listen ersetzt. Für Paare, die sich auf ihre Hochzeit konzentrieren wollen, nicht sie organisieren.",
     "linksNav": [
-      { "label": "So funktioniert es", "href": "#comment-ca-marche" },
-      { "label": "Creative Studio", "href": "#studio" },
-      { "label": "Pläne", "href": "#offres" },
-      { "label": "Inspiration", "href": "/inspirations" },
-      { "label": "Gästebereich", "href": "/rejoindre" }
+      {
+        "label": "So funktioniert es",
+        "href": "#comment-ca-marche"
+      },
+      {
+        "label": "Creative Studio",
+        "href": "#studio"
+      },
+      {
+        "label": "Pläne",
+        "href": "#offres"
+      },
+      {
+        "label": "Inspiration",
+        "href": "/inspirations"
+      },
+      {
+        "label": "Gästebereich",
+        "href": "/rejoindre"
+      }
     ],
     "linksBottom": [
-      { "label": "Start", "href": "/" },
-      { "label": "Preise", "href": "/pricing" },
-      { "label": "Bedingungen", "href": "/cgv" },
-      { "label": "Gästebereich", "href": "/rejoindre" }
+      {
+        "label": "Start",
+        "href": "/"
+      },
+      {
+        "label": "Preise",
+        "href": "/pricing"
+      },
+      {
+        "label": "Bedingungen",
+        "href": "/cgv"
+      },
+      {
+        "label": "Gästebereich",
+        "href": "/rejoindre"
+      }
     ],
     "legalLinks": [
-      { "label": "Rechtlicher Hinweis", "href": "/mentions-legales" },
-      { "label": "Bedingungen", "href": "/cgv" },
-      { "label": "Datenschutz", "href": "/politique-de-confidentialite" }
+      {
+        "label": "Rechtlicher Hinweis",
+        "href": "/mentions-legales"
+      },
+      {
+        "label": "Bedingungen",
+        "href": "/cgv"
+      },
+      {
+        "label": "Datenschutz",
+        "href": "/politique-de-confidentialite"
+      }
     ],
     "copyright": "© 2026 Kaatch",
     "copyrightDesktop": "Keine WhatsApp-Gruppe wurde bei der Erstellung dieser Website beschädigt.",
     "productHunt": "Finde Kaatch auf Product Hunt",
     "email": "hello@kaatch.fr"
+  },
+  "cookies": {
+    "message": "Diese Website verwendet nur technische Cookies, die für den Betrieb erforderlich sind.",
+    "learnMore": "Mehr erfahren",
+    "accept": "Verstanden"
   }
 }

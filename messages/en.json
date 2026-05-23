@@ -1,12 +1,23 @@
 {
   "nav": {
+    "discover": "Discover",
+    "discoverSub": "Kaatch",
     "commentCaMarche": "How it works",
     "studio": "Creative Studio",
+    "studioSub": "Design",
+    "calculator": "Calculator",
+    "calculatorSub": "Budget",
+    "inspirations": "Inspiration",
+    "inspirationsSub": "Blog",
+    "forum": "Community",
+    "forumSub": "Forum",
     "offres": "Offers",
     "tarifs": "Pricing",
     "connexion": "Sign in",
     "monEspace": "My space",
-    "invite": "Guest at a wedding?"
+    "invite": "Guest?",
+    "commencer": "Get started →",
+    "discoverKaatch": "Discover Kaatch"
   },
   "landing": {
     "hero": {
@@ -280,6 +291,11 @@
       "contactForm": "Contact form",
       "email": "hello@kaatch.fr →"
     }
+  },
+  "cookies": {
+    "message": "This site uses only technical cookies necessary for its operation.",
+    "learnMore": "Learn more",
+    "accept": "Understood"
   },
   "footer": {
     "description": "The app that replaces spreadsheets, WhatsApp chaos, and endless lists. For couples who want to focus on their wedding, not organizing it.",

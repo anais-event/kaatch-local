@@ -1,12 +1,23 @@
 {
   "nav": {
+    "discover": "Découvrir",
+    "discoverSub": "Kaatch",
     "commentCaMarche": "Comment ça marche",
-    "studio": "Studio Créatif",
+    "studio": "Studio",
+    "studioSub": "Créatif",
+    "calculator": "Calculette",
+    "calculatorSub": "Budget",
+    "inspirations": "Inspirations",
+    "inspirationsSub": "Le Blog",
+    "forum": "Entre nous",
+    "forumSub": "Le Forum",
     "offres": "Offres",
     "tarifs": "Tarifs",
     "connexion": "Connexion",
     "monEspace": "Mon espace",
-    "invite": "Invité(e) à un mariage ?"
+    "invite": "Invité ?",
+    "commencer": "Commencer →",
+    "discoverKaatch": "Découvrir Kaatch"
   },
   "landing": {
     "hero": {
@@ -279,6 +290,11 @@
       "contactForm": "Formulaire de contact",
       "email": "bonjour@kaatch.fr →"
     }
+  },
+  "cookies": {
+    "message": "Ce site utilise uniquement des cookies techniques nécessaires à son fonctionnement.",
+    "learnMore": "En savoir plus",
+    "accept": "Compris"
   },
   "footer": {
     "description": "L'app qui remplace les listes, les WhatsApp galère, et les tableurs Excel. Pour les mariés qui veulent se concentrer sur leur mariage, pas sur son organisation.",

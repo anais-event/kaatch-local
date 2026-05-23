@@ -3,6 +3,7 @@ import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, getLocale } from 'next-intl/server'
 import { ReactNode } from 'react'
 import '../globals.css'
+import CookieBannerLocalized from './_components/CookieBannerLocalized'
 
 type Props = {
   children: ReactNode
@@ -31,6 +32,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   return (
     <NextIntlClientProvider messages={messages}>
       {children}
+      <CookieBannerLocalized />
     </NextIntlClientProvider>
   )
 }

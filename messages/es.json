@@ -1,12 +1,23 @@
 {
   "nav": {
+    "discover": "Descubre",
+    "discoverSub": "Kaatch",
     "commentCaMarche": "Cómo funciona",
-    "studio": "Studio Creativo",
+    "studio": "Studio",
+    "studioSub": "Creativo",
+    "calculator": "Calculadora",
+    "calculatorSub": "Presupuesto",
+    "inspirations": "Inspiración",
+    "inspirationsSub": "Blog",
+    "forum": "Comunidad",
+    "forumSub": "Foro",
     "offres": "Planes",
     "tarifs": "Precios",
     "connexion": "Entra",
     "monEspace": "Mi espacio",
-    "invite": "¿Invitado a una boda?"
+    "invite": "¿Invitado?",
+    "commencer": "Empezar →",
+    "discoverKaatch": "Descubre Kaatch"
   },
   "landing": {
     "hero": {
@@ -37,13 +48,41 @@
         "sublabel": "para los novios",
         "title": "Todo lo que necesitas para una organización simple y eficiente.",
         "items": [
-          { "icon": "📋", "label": "Cronograma", "detail": "Cada paso desde 12 meses antes hasta el gran día, en orden." },
-          { "icon": "💌", "label": "Invitaciones y RSVP", "detail": "Enlace personal por invitado, respuestas llegan en tiempo real." },
-          { "icon": "🪑", "label": "Asignación de mesas", "detail": "Arrastra y suelta, ajustable hasta la noche anterior." },
-          { "icon": "💰", "label": "Presupuesto total", "detail": "Presupuestos, gastos, proveedores — todo de un vistazo." },
-          { "icon": "🤝", "label": "Proveedores", "detail": "Contactos, contratos, pagos — sin más búsquedas por email." },
-          { "icon": "📅", "label": "Programa del día", "detail": "El flujo del día. Tus testigos pueden respirar." },
-          { "icon": "🎵", "label": "Playlist e ideas", "detail": "Construye la banda sonora, ideas para animar la noche." }
+          {
+            "icon": "📋",
+            "label": "Cronograma",
+            "detail": "Cada paso desde 12 meses antes hasta el gran día, en orden."
+          },
+          {
+            "icon": "💌",
+            "label": "Invitaciones y RSVP",
+            "detail": "Enlace personal por invitado, respuestas llegan en tiempo real."
+          },
+          {
+            "icon": "🪑",
+            "label": "Asignación de mesas",
+            "detail": "Arrastra y suelta, ajustable hasta la noche anterior."
+          },
+          {
+            "icon": "💰",
+            "label": "Presupuesto total",
+            "detail": "Presupuestos, gastos, proveedores — todo de un vistazo."
+          },
+          {
+            "icon": "🤝",
+            "label": "Proveedores",
+            "detail": "Contactos, contratos, pagos — sin más búsquedas por email."
+          },
+          {
+            "icon": "📅",
+            "label": "Programa del día",
+            "detail": "El flujo del día. Tus testigos pueden respirar."
+          },
+          {
+            "icon": "🎵",
+            "label": "Playlist e ideas",
+            "detail": "Construye la banda sonora, ideas para animar la noche."
+          }
         ]
       },
       "scene": {
@@ -52,12 +91,36 @@
         "title": "Un enlace en la invitación. Y están contigo.",
         "desc": "Sin cuenta necesaria. Tus invitados clic en su enlace personal — papel o digital, tú eliges — y acceden a todo.",
         "items": [
-          { "icon": "🔗", "label": "Enlace mágico", "detail": "Sin cuenta que crear. El enlace en la invitación, y están contigo." },
-          { "icon": "📅", "label": "Programa del día", "detail": "Sin tener que molestar a nadie." },
-          { "icon": "📝", "label": "Libro de firmas", "detail": "Palabras amables, videos, recuerdos — todo desde su teléfono." },
-          { "icon": "🏠", "label": "Alojamientos", "detail": "Tus sugerencias de hospedaje, a un clic." },
-          { "icon": "💬", "label": "Mensajería", "detail": "Chat directo entre invitados." },
-          { "icon": "📸", "label": "Álbum compartido", "detail": "Todas las fotos, en un lugar, para todos." }
+          {
+            "icon": "🔗",
+            "label": "Enlace mágico",
+            "detail": "Sin cuenta que crear. El enlace en la invitación, y están contigo."
+          },
+          {
+            "icon": "📅",
+            "label": "Programa del día",
+            "detail": "Sin tener que molestar a nadie."
+          },
+          {
+            "icon": "📝",
+            "label": "Libro de firmas",
+            "detail": "Palabras amables, videos, recuerdos — todo desde su teléfono."
+          },
+          {
+            "icon": "🏠",
+            "label": "Alojamientos",
+            "detail": "Tus sugerencias de hospedaje, a un clic."
+          },
+          {
+            "icon": "💬",
+            "label": "Mensajería",
+            "detail": "Chat directo entre invitados."
+          },
+          {
+            "icon": "📸",
+            "label": "Álbum compartido",
+            "detail": "Todas las fotos, en un lugar, para todos."
+          }
         ],
         "footerNote": "¿Prefieres una invitación de papel? Sin problema — el enlace de Kaatch puede ir también."
       }
@@ -140,24 +203,75 @@
       "subtitle": "creada automáticamente.",
       "desc": "Elige un estilo, nosotros generamos tus invitaciones, menús, tarjetas de lugar y asignación de mesas. Impreso y entregado. No tienes que hacer nada más.",
       "steps": [
-        { "n": "01", "title": "Elige tu estilo", "desc": "Boho, clásico, rústico, art déco… 5 universos de diseño creados por nuestros diseñadores." },
-        { "n": "02", "title": "Generamos todo", "desc": "Invitación, menú, tarjeta de lugar, asignación de mesas — generado automáticamente desde tu lista de invitados." },
-        { "n": "03", "title": "Impreso y entregado", "desc": "Impresión profesional, papel premium, entrega en 5–7 días hábiles." }
+        {
+          "n": "01",
+          "title": "Elige tu estilo",
+          "desc": "Boho, clásico, rústico, art déco… 5 universos de diseño creados por nuestros diseñadores."
+        },
+        {
+          "n": "02",
+          "title": "Generamos todo",
+          "desc": "Invitación, menú, tarjeta de lugar, asignación de mesas — generado automáticamente desde tu lista de invitados."
+        },
+        {
+          "n": "03",
+          "title": "Impreso y entregado",
+          "desc": "Impresión profesional, papel premium, entrega en 5–7 días hábiles."
+        }
       ],
       "ambiances": [
-        { "name": "Boho", "tag": "Naturaleza y libertad" },
-        { "name": "Clásico", "tag": "Elegancia atemporal" },
-        { "name": "Rústico", "tag": "Suavidad y flores" },
-        { "name": "Art Déco", "tag": "Glamour de los años 20" },
-        { "name": "Minimalista", "tag": "Limpio y moderno" }
+        {
+          "name": "Boho",
+          "tag": "Naturaleza y libertad"
+        },
+        {
+          "name": "Clásico",
+          "tag": "Elegancia atemporal"
+        },
+        {
+          "name": "Rústico",
+          "tag": "Suavidad y flores"
+        },
+        {
+          "name": "Art Déco",
+          "tag": "Glamour de los años 20"
+        },
+        {
+          "name": "Minimalista",
+          "tag": "Limpio y moderno"
+        }
       ],
       "products": [
-        { "icon": "💌", "name": "Invitación", "desc": "Animada + PDF de alta resolución. Enlace compartible o imprimible." },
-        { "icon": "🍽️", "name": "Menú", "desc": "Formato A5, generado desde tu programa y opciones de comida." },
-        { "icon": "📋", "name": "Programa del día", "desc": "Flujo completo, automáticamente diseñado desde tu cronograma." },
-        { "icon": "🪧", "name": "Tarjetas de lugar", "desc": "Una por invitado, generadas en lote desde tu lista. Cero entrada manual." },
-        { "icon": "🗺️", "name": "Asignación de mesas", "desc": "Todas tus mesas e invitados, ordenadamente dispuestos." },
-        { "icon": "🔢", "name": "Números de mesa", "desc": "Caballete A5 con cada número de mesa. Impreso, listo para colocar." }
+        {
+          "icon": "💌",
+          "name": "Invitación",
+          "desc": "Animada + PDF de alta resolución. Enlace compartible o imprimible."
+        },
+        {
+          "icon": "🍽️",
+          "name": "Menú",
+          "desc": "Formato A5, generado desde tu programa y opciones de comida."
+        },
+        {
+          "icon": "📋",
+          "name": "Programa del día",
+          "desc": "Flujo completo, automáticamente diseñado desde tu cronograma."
+        },
+        {
+          "icon": "🪧",
+          "name": "Tarjetas de lugar",
+          "desc": "Una por invitado, generadas en lote desde tu lista. Cero entrada manual."
+        },
+        {
+          "icon": "🗺️",
+          "name": "Asignación de mesas",
+          "desc": "Todas tus mesas e invitados, ordenadamente dispuestos."
+        },
+        {
+          "icon": "🔢",
+          "name": "Números de mesa",
+          "desc": "Caballete A5 con cada número de mesa. Impreso, listo para colocar."
+        }
       ],
       "ctaSection": {
         "tagline": "Precios de lanzamiento",
@@ -284,26 +398,67 @@
   "footer": {
     "description": "La app que reemplaza hojas de cálculo, caos de WhatsApp e infinitas listas. Para parejas que quieren enfocarse en su boda, no en organizarla.",
     "linksNav": [
-      { "label": "Cómo funciona", "href": "#comment-ca-marche" },
-      { "label": "Studio Creativo", "href": "#studio" },
-      { "label": "Planes", "href": "#offres" },
-      { "label": "Inspiración", "href": "/inspirations" },
-      { "label": "Espacio de invitados", "href": "/rejoindre" }
+      {
+        "label": "Cómo funciona",
+        "href": "#comment-ca-marche"
+      },
+      {
+        "label": "Studio Creativo",
+        "href": "#studio"
+      },
+      {
+        "label": "Planes",
+        "href": "#offres"
+      },
+      {
+        "label": "Inspiración",
+        "href": "/inspirations"
+      },
+      {
+        "label": "Espacio de invitados",
+        "href": "/rejoindre"
+      }
     ],
     "linksBottom": [
-      { "label": "Inicio", "href": "/" },
-      { "label": "Precios", "href": "/pricing" },
-      { "label": "Términos", "href": "/cgv" },
-      { "label": "Espacio de invitados", "href": "/rejoindre" }
+      {
+        "label": "Inicio",
+        "href": "/"
+      },
+      {
+        "label": "Precios",
+        "href": "/pricing"
+      },
+      {
+        "label": "Términos",
+        "href": "/cgv"
+      },
+      {
+        "label": "Espacio de invitados",
+        "href": "/rejoindre"
+      }
     ],
     "legalLinks": [
-      { "label": "Aviso legal", "href": "/mentions-legales" },
-      { "label": "Términos", "href": "/cgv" },
-      { "label": "Privacidad", "href": "/politique-de-confidentialite" }
+      {
+        "label": "Aviso legal",
+        "href": "/mentions-legales"
+      },
+      {
+        "label": "Términos",
+        "href": "/cgv"
+      },
+      {
+        "label": "Privacidad",
+        "href": "/politique-de-confidentialite"
+      }
     ],
     "copyright": "© 2026 Kaatch",
     "copyrightDesktop": "Ningún grupo de WhatsApp fue dañado en la creación de este sitio.",
     "productHunt": "Encuentra Kaatch en Product Hunt",
     "email": "hello@kaatch.fr"
+  },
+  "cookies": {
+    "message": "Este sitio utiliza únicamente cookies técnicas necesarias para su funcionamiento.",
+    "learnMore": "Más información",
+    "accept": "Entendido"
   }
 }

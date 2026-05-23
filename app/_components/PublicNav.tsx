@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState, useRef, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import LanguageSwitcher from './LanguageSwitcher'
 
 const DISPLAY = 'var(--font-display)'
@@ -19,14 +20,15 @@ const features = [
   { icon: '📝', label: "Livre d'or",             desc: 'Mots doux et souvenirs pour toujours',         href: '/fonctionnalites/livre-dor' },
 ]
 
-const navLinks = [
-  { label: 'Studio',       sub: 'Créatif',  href: '/studio' },
-  { label: 'Calculette',   sub: 'Budget',   href: '/budget-mariage' },
-  { label: 'Inspirations', sub: 'Le Blog',  href: '/inspirations' },
-  { label: 'Entre nous',   sub: 'Le Forum', href: '/entre-nous' },
+const navLinksConfig = [
+  { labelKey: 'nav.studio',       subKey: 'nav.studioSub',  href: '/studio' },
+  { labelKey: 'nav.calculator',   subKey: 'nav.calculatorSub',   href: '/budget-mariage' },
+  { labelKey: 'nav.inspirations', subKey: 'nav.inspirationsSub',  href: '/inspirations' },
+  { labelKey: 'nav.forum',   subKey: 'nav.forumSub', href: '/entre-nous' },
 ]
 
 export default function PublicNav({ active }: { active?: string }) {
+  const t = useTranslations()
   const [open, setOpen] = useState(false)
   const [dropOpen, setDropOpen] = useState(false)
   const [mobileFeatsOpen, setMobileFeatsOpen] = useState(false)
@@ -72,7 +74,7 @@ export default function PublicNav({ active }: { active?: string }) {
             >
               <span className="flex items-center gap-1">
                 <span className="text-sm leading-tight" style={{ fontFamily: BODY, fontWeight: 600, color: '#44403c' }}>
-                  Découvrir
+                  {t('nav.discover')}
                 </span>
                 <svg
                 width="10" height="10" viewBox="0 0 10 10" fill="none"
@@ -83,7 +85,7 @@ export default function PublicNav({ active }: { active?: string }) {
               </svg>
               </span>
               <span className="text-[10px] leading-tight text-stone-400" style={{ fontFamily: BODY, fontWeight: 300 }}>
-                Kaatch
+                {t('nav.discoverSub')}
               </span>
             </button>
 
@@ -122,7 +124,7 @@ export default function PublicNav({ active }: { active?: string }) {
             )}
           </div>
 
-          {navLinks.map(l => {
+          {navLinksConfig.map(l => {
             const isCalculator = l.href === '/budget-mariage'
             const linkClass = `flex flex-col items-center px-3 py-1.5 rounded-lg transition hover:bg-stone-100 ${active === l.href.slice(1) ? 'bg-stone-100' : ''}`
 
@@ -135,11 +137,11 @@ export default function PublicNav({ active }: { active?: string }) {
                 className={linkClass}
               >
                 <span className="text-sm leading-tight" style={{ fontFamily: BODY, fontWeight: 600, color: '#44403c' }}>
-                  {l.label}
+                  {t(l.labelKey)}
                 </span>
-                {l.sub && (
+                {l.subKey && (
                   <span className="text-[10px] leading-tight text-stone-400" style={{ fontFamily: BODY, fontWeight: 300 }}>
-                    {l.sub}
+                    {t(l.subKey)}
                   </span>
                 )}
               </a>
@@ -150,11 +152,11 @@ export default function PublicNav({ active }: { active?: string }) {
                 className={linkClass}
               >
                 <span className="text-sm leading-tight" style={{ fontFamily: BODY, fontWeight: 600, color: '#44403c' }}>
-                  {l.label}
+                  {t(l.labelKey)}
                 </span>
-                {l.sub && (
+                {l.subKey && (
                   <span className="text-[10px] leading-tight text-stone-400" style={{ fontFamily: BODY, fontWeight: 300 }}>
-                    {l.sub}
+                    {t(l.subKey)}
                   </span>
                 )}
               </Link>
@@ -173,14 +175,14 @@ export default function PublicNav({ active }: { active?: string }) {
             className="text-sm border border-stone-300 text-stone-600 px-4 py-2 rounded-full hover:border-[#2C3B2E] hover:text-[#2C3B2E] transition hidden md:block"
             style={{ fontFamily: BODY, fontWeight: 400 }}
           >
-            Invité ?
+            {t('nav.invite')}
           </Link>
           <Link
             href="/auth"
             className="text-sm bg-[#2C3B2E] text-white px-4 py-2 rounded-full hover:bg-[#1a2419] transition hidden md:block"
             style={{ fontFamily: BODY, fontWeight: 500 }}
           >
-            Connexion
+            {t('nav.connexion')}
           </Link>
 
           {/* Mobile primary CTA */}
@@ -189,7 +191,7 @@ export default function PublicNav({ active }: { active?: string }) {
             className="md:hidden text-sm bg-[#2C3B2E] text-white px-4 py-2 rounded-full hover:bg-[#1a2419] transition"
             style={{ fontFamily: BODY, fontWeight: 500 }}
           >
-            Commencer →
+            {t('nav.commencer')}
           </Link>
 
           {/* Hamburger */}
@@ -215,7 +217,7 @@ export default function PublicNav({ active }: { active?: string }) {
               onClick={() => setMobileFeatsOpen(o => !o)}
               className="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-stone-100 transition"
             >
-              <span style={{ fontFamily: BODY, fontWeight: 400, fontSize: '0.95rem', color: GREEN }}>Découvrir Kaatch</span>
+              <span style={{ fontFamily: BODY, fontWeight: 400, fontSize: '0.95rem', color: GREEN }}>{t('nav.discoverKaatch')}</span>
               <svg
                 width="12" height="12" viewBox="0 0 12 12" fill="none"
                 className={`transition-transform duration-200 ${mobileFeatsOpen ? 'rotate-180' : ''}`}
@@ -240,7 +242,7 @@ export default function PublicNav({ active }: { active?: string }) {
               </div>
             )}
 
-            {navLinks.map(l => {
+            {navLinksConfig.map(l => {
               const isCalculator = l.href === '/budget-mariage'
               const linkClass = "flex items-center justify-between px-4 py-3 rounded-xl hover:bg-stone-100 transition"
 
@@ -253,10 +255,10 @@ export default function PublicNav({ active }: { active?: string }) {
                   onClick={() => setOpen(false)}
                   className={linkClass}
                 >
-                  <span style={{ fontFamily: BODY, fontWeight: 400, fontSize: '0.95rem', color: GREEN }}>{l.label}</span>
-                  {l.sub && (
+                  <span style={{ fontFamily: BODY, fontWeight: 400, fontSize: '0.95rem', color: GREEN }}>{t(l.labelKey)}</span>
+                  {l.subKey && (
                     <span className="text-xs text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full" style={{ fontFamily: BODY, fontWeight: 300 }}>
-                      {l.sub}
+                      {t(l.subKey)}
                     </span>
                   )}
                 </a>
@@ -267,10 +269,10 @@ export default function PublicNav({ active }: { active?: string }) {
                   onClick={() => setOpen(false)}
                   className={linkClass}
                 >
-                  <span style={{ fontFamily: BODY, fontWeight: 400, fontSize: '0.95rem', color: GREEN }}>{l.label}</span>
-                  {l.sub && (
+                  <span style={{ fontFamily: BODY, fontWeight: 400, fontSize: '0.95rem', color: GREEN }}>{t(l.labelKey)}</span>
+                  {l.subKey && (
                     <span className="text-xs text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full" style={{ fontFamily: BODY, fontWeight: 300 }}>
-                      {l.sub}
+                      {t(l.subKey)}
                     </span>
                   )}
                 </Link>
@@ -284,7 +286,7 @@ export default function PublicNav({ active }: { active?: string }) {
                 className="flex-1 text-center text-sm border border-stone-300 text-stone-600 py-2.5 rounded-full hover:border-[#2C3B2E] hover:text-[#2C3B2E] transition"
                 style={{ fontFamily: BODY, fontWeight: 400 }}
               >
-                Invité ?
+                {t('nav.invite')}
               </Link>
               <Link
                 href="/auth"
@@ -292,7 +294,7 @@ export default function PublicNav({ active }: { active?: string }) {
                 className="flex-1 text-center text-sm bg-[#2C3B2E] text-white py-2.5 rounded-full hover:bg-[#1a2419] transition"
                 style={{ fontFamily: BODY, fontWeight: 500 }}
               >
-                Connexion
+                {t('nav.connexion')}
               </Link>
             </div>
           </div>

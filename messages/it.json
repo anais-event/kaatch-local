@@ -1,12 +1,23 @@
 {
   "nav": {
+    "discover": "Scopri",
+    "discoverSub": "Kaatch",
     "commentCaMarche": "Come funziona",
-    "studio": "Studio Creativo",
+    "studio": "Studio",
+    "studioSub": "Creativo",
+    "calculator": "Calcolatrice",
+    "calculatorSub": "Budget",
+    "inspirations": "Ispirazione",
+    "inspirationsSub": "Blog",
+    "forum": "Comunità",
+    "forumSub": "Forum",
     "offres": "Piani",
     "tarifs": "Prezzi",
     "connexion": "Accedi",
     "monEspace": "Il mio spazio",
-    "invite": "Invitato a un matrimonio?"
+    "invite": "Invitato?",
+    "commencer": "Inizia →",
+    "discoverKaatch": "Scopri Kaatch"
   },
   "landing": {
     "hero": {
@@ -37,13 +48,41 @@
         "sublabel": "per gli sposi",
         "title": "Tutto quello che ti serve per un'organizzazione semplice ed efficiente.",
         "items": [
-          { "icon": "📋", "label": "Timeline", "detail": "Ogni passo da 12 mesi prima al grande giorno, in ordine." },
-          { "icon": "💌", "label": "Inviti e RSVP", "detail": "Link personale per ogni ospite, le risposte arrivano in tempo reale." },
-          { "icon": "🪑", "label": "Seating plan", "detail": "Drag-and-drop, modificabile fino alla vigilia." },
-          { "icon": "💰", "label": "Budget totale", "detail": "Preventivi, spese, fornitori — tutto a colpo d'occhio." },
-          { "icon": "🤝", "label": "Fornitori", "detail": "Contatti, contratti, pagamenti — basta cercare nelle email." },
-          { "icon": "📅", "label": "Programma del giorno", "detail": "Il flusso della giornata. I vostri testimoni possono respirare." },
-          { "icon": "🎵", "label": "Playlist e idee", "detail": "Costruisci la colonna sonora, idee per animare la serata." }
+          {
+            "icon": "📋",
+            "label": "Timeline",
+            "detail": "Ogni passo da 12 mesi prima al grande giorno, in ordine."
+          },
+          {
+            "icon": "💌",
+            "label": "Inviti e RSVP",
+            "detail": "Link personale per ogni ospite, le risposte arrivano in tempo reale."
+          },
+          {
+            "icon": "🪑",
+            "label": "Seating plan",
+            "detail": "Drag-and-drop, modificabile fino alla vigilia."
+          },
+          {
+            "icon": "💰",
+            "label": "Budget totale",
+            "detail": "Preventivi, spese, fornitori — tutto a colpo d'occhio."
+          },
+          {
+            "icon": "🤝",
+            "label": "Fornitori",
+            "detail": "Contatti, contratti, pagamenti — basta cercare nelle email."
+          },
+          {
+            "icon": "📅",
+            "label": "Programma del giorno",
+            "detail": "Il flusso della giornata. I vostri testimoni possono respirare."
+          },
+          {
+            "icon": "🎵",
+            "label": "Playlist e idee",
+            "detail": "Costruisci la colonna sonora, idee per animare la serata."
+          }
         ]
       },
       "scene": {
@@ -52,12 +91,36 @@
         "title": "Un link nell'invito. E sono con te.",
         "desc": "Nessun account necessario. I tuoi ospiti cliccano il loro link personale — cartaceo o digitale, tu scegli — e hanno accesso a tutto.",
         "items": [
-          { "icon": "🔗", "label": "Link magico", "detail": "Nessun account da creare. Il link nell'invito, e sono con te." },
-          { "icon": "📅", "label": "Programma del giorno", "detail": "Senza dover infastidire nessuno." },
-          { "icon": "📝", "label": "Libro degli ospiti", "detail": "Parole gentili, video, ricordi — tutto dal loro telefono." },
-          { "icon": "🏠", "label": "Alloggi", "detail": "I tuoi suggerimenti di alloggio, a un click." },
-          { "icon": "💬", "label": "Messaggistica", "detail": "Chat diretta tra gli ospiti." },
-          { "icon": "📸", "label": "Album condiviso", "detail": "Tutte le foto, in un posto, per tutti." }
+          {
+            "icon": "🔗",
+            "label": "Link magico",
+            "detail": "Nessun account da creare. Il link nell'invito, e sono con te."
+          },
+          {
+            "icon": "📅",
+            "label": "Programma del giorno",
+            "detail": "Senza dover infastidire nessuno."
+          },
+          {
+            "icon": "📝",
+            "label": "Libro degli ospiti",
+            "detail": "Parole gentili, video, ricordi — tutto dal loro telefono."
+          },
+          {
+            "icon": "🏠",
+            "label": "Alloggi",
+            "detail": "I tuoi suggerimenti di alloggio, a un click."
+          },
+          {
+            "icon": "💬",
+            "label": "Messaggistica",
+            "detail": "Chat diretta tra gli ospiti."
+          },
+          {
+            "icon": "📸",
+            "label": "Album condiviso",
+            "detail": "Tutte le foto, in un posto, per tutti."
+          }
         ],
         "footerNote": "Preferisci un invito cartaceo? Nessun problema — il link di Kaatch può andare anche su quello."
       }
@@ -140,24 +203,75 @@
       "subtitle": "creata automaticamente.",
       "desc": "Scegli uno stile, noi generiamo i tuoi inviti, menu, segnaposti e seating plan. Stampato e consegnato. Non devi fare nient'altro.",
       "steps": [
-        { "n": "01", "title": "Scegli il tuo stile", "desc": "Boho, classico, rustico, art déco… 5 universi di design creati dai nostri designer." },
-        { "n": "02", "title": "Generiamo tutto", "desc": "Invito, menu, segnaposto, seating plan — generato automaticamente dalla tua lista ospiti." },
-        { "n": "03", "title": "Stampato e consegnato", "desc": "Stampa professionale, carta premium, consegna in 5–7 giorni lavorativi." }
+        {
+          "n": "01",
+          "title": "Scegli il tuo stile",
+          "desc": "Boho, classico, rustico, art déco… 5 universi di design creati dai nostri designer."
+        },
+        {
+          "n": "02",
+          "title": "Generiamo tutto",
+          "desc": "Invito, menu, segnaposto, seating plan — generato automaticamente dalla tua lista ospiti."
+        },
+        {
+          "n": "03",
+          "title": "Stampato e consegnato",
+          "desc": "Stampa professionale, carta premium, consegna in 5–7 giorni lavorativi."
+        }
       ],
       "ambiances": [
-        { "name": "Boho", "tag": "Natura e libertà" },
-        { "name": "Classico", "tag": "Eleganza senza tempo" },
-        { "name": "Rustico", "tag": "Morbidezza e fiori" },
-        { "name": "Art Déco", "tag": "Glamour degli anni 20" },
-        { "name": "Minimalista", "tag": "Pulito e moderno" }
+        {
+          "name": "Boho",
+          "tag": "Natura e libertà"
+        },
+        {
+          "name": "Classico",
+          "tag": "Eleganza senza tempo"
+        },
+        {
+          "name": "Rustico",
+          "tag": "Morbidezza e fiori"
+        },
+        {
+          "name": "Art Déco",
+          "tag": "Glamour degli anni 20"
+        },
+        {
+          "name": "Minimalista",
+          "tag": "Pulito e moderno"
+        }
       ],
       "products": [
-        { "icon": "💌", "name": "Invito", "desc": "Animato + PDF ad alta risoluzione. Link condivisibile o stampabile." },
-        { "icon": "🍽️", "name": "Menu", "desc": "Formato A5, generato dal tuo programma e scelte culinarie." },
-        { "icon": "📋", "name": "Programma del giorno", "desc": "Flusso completo, automaticamente impaginato dalla tua timeline." },
-        { "icon": "🪧", "name": "Segnaposti", "desc": "Uno per ospite, generati in batch dalla tua lista. Zero inserimento manuale." },
-        { "icon": "🗺️", "name": "Seating plan", "detail": "Tutti i tuoi tavoli e ospiti, ordinatamente disposti." },
-        { "icon": "🔢", "name": "Numeri tavolo", "desc": "Cavalletto A5 con ogni numero tavolo. Stampato, pronto da posizionare." }
+        {
+          "icon": "💌",
+          "name": "Invito",
+          "desc": "Animato + PDF ad alta risoluzione. Link condivisibile o stampabile."
+        },
+        {
+          "icon": "🍽️",
+          "name": "Menu",
+          "desc": "Formato A5, generato dal tuo programma e scelte culinarie."
+        },
+        {
+          "icon": "📋",
+          "name": "Programma del giorno",
+          "desc": "Flusso completo, automaticamente impaginato dalla tua timeline."
+        },
+        {
+          "icon": "🪧",
+          "name": "Segnaposti",
+          "desc": "Uno per ospite, generati in batch dalla tua lista. Zero inserimento manuale."
+        },
+        {
+          "icon": "🗺️",
+          "name": "Seating plan",
+          "detail": "Tutti i tuoi tavoli e ospiti, ordinatamente disposti."
+        },
+        {
+          "icon": "🔢",
+          "name": "Numeri tavolo",
+          "desc": "Cavalletto A5 con ogni numero tavolo. Stampato, pronto da posizionare."
+        }
       ],
       "ctaSection": {
         "tagline": "Prezzi di lancio",
@@ -284,26 +398,67 @@
   "footer": {
     "description": "L'app che sostituisce fogli di calcolo, caos WhatsApp e liste infinite. Per coppie che vogliono concentrarsi sul matrimonio, non organizzarlo.",
     "linksNav": [
-      { "label": "Come funziona", "href": "#comment-ca-marche" },
-      { "label": "Studio Creativo", "href": "#studio" },
-      { "label": "Piani", "href": "#offres" },
-      { "label": "Ispirazione", "href": "/inspirations" },
-      { "label": "Spazio ospiti", "href": "/rejoindre" }
+      {
+        "label": "Come funziona",
+        "href": "#comment-ca-marche"
+      },
+      {
+        "label": "Studio Creativo",
+        "href": "#studio"
+      },
+      {
+        "label": "Piani",
+        "href": "#offres"
+      },
+      {
+        "label": "Ispirazione",
+        "href": "/inspirations"
+      },
+      {
+        "label": "Spazio ospiti",
+        "href": "/rejoindre"
+      }
     ],
     "linksBottom": [
-      { "label": "Home", "href": "/" },
-      { "label": "Prezzi", "href": "/pricing" },
-      { "label": "Termini", "href": "/cgv" },
-      { "label": "Spazio ospiti", "href": "/rejoindre" }
+      {
+        "label": "Home",
+        "href": "/"
+      },
+      {
+        "label": "Prezzi",
+        "href": "/pricing"
+      },
+      {
+        "label": "Termini",
+        "href": "/cgv"
+      },
+      {
+        "label": "Spazio ospiti",
+        "href": "/rejoindre"
+      }
     ],
     "legalLinks": [
-      { "label": "Avviso legale", "href": "/mentions-legales" },
-      { "label": "Termini", "href": "/cgv" },
-      { "label": "Privacy", "href": "/politique-de-confidentialite" }
+      {
+        "label": "Avviso legale",
+        "href": "/mentions-legales"
+      },
+      {
+        "label": "Termini",
+        "href": "/cgv"
+      },
+      {
+        "label": "Privacy",
+        "href": "/politique-de-confidentialite"
+      }
     ],
     "copyright": "© 2026 Kaatch",
     "copyrightDesktop": "Nessun gruppo WhatsApp è stato danneggiato nella realizzazione di questo sito.",
     "productHunt": "Trova Kaatch su Product Hunt",
     "email": "hello@kaatch.fr"
+  },
+  "cookies": {
+    "message": "Questo sito utilizza solo cookie tecnici necessari per il suo funzionamento.",
+    "learnMore": "Saperne di più",
+    "accept": "Ho capito"
   }
 }

@@ -172,7 +172,7 @@ export default function PublicNav({ active }: { active?: string }) {
 
           {/* Desktop CTAs */}
           <Link
-            href="/gestion-prestataires"
+            href="/prestataire/rejoindre"
             className="text-sm border border-stone-300 text-stone-600 px-4 py-2 rounded-full hover:border-[#2C3B2E] hover:text-[#2C3B2E] transition hidden md:block"
             style={{ fontFamily: BODY, fontWeight: 400 }}
           >
@@ -290,7 +290,7 @@ export default function PublicNav({ active }: { active?: string }) {
             <div className="pt-3 border-t border-stone-200 space-y-2">
               <div className="flex gap-2">
               <Link
-                href="/gestion-prestataires"
+                href="/prestataire/rejoindre"
                 onClick={() => setOpen(false)}
                 className="flex-1 text-center text-sm border border-stone-300 text-stone-600 py-2.5 rounded-full hover:border-[#2C3B2E] hover:text-[#2C3B2E] transition"
                 style={{ fontFamily: BODY, fontWeight: 400 }}

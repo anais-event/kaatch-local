@@ -12,6 +12,7 @@ type Vendor = {
   phone: string | null
   permissions: VendorPermissions
   inviteToken: string
+  vendorCode: string
   isSuspended: boolean
 }
 
@@ -234,10 +235,27 @@ export default function PrestatairesClient({ slug, weddingId, vendors, budgetSug
                         </div>
                       )}
 
+                      {/* Vendor code */}
+                      <div>
+                        <p className="text-[10px] text-stone-400 uppercase tracking-wider mb-2" style={{ fontWeight: 400 }}>
+                          Code prestataire
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <div className="bg-[#f5f0e8] border border-stone-200 rounded-lg px-4 py-2.5 text-lg tracking-[0.3em] text-[#2C3B2E] text-center select-all"
+                               style={{ fontWeight: 600, fontFamily: ‘monospace’ }}>
+                            {v.vendorCode}
+                          </div>
+                          <p className="text-[10px] text-stone-400" style={{ fontWeight: 300, lineHeight: 1.4 }}>
+                            Communiquez ce code au prestataire.<br />
+                            Il le saisit sur <strong>kaatch.fr/prestataire/rejoindre</strong>
+                          </p>
+                        </div>
+                      </div>
+
                       {/* Invite link */}
                       <div>
                         <p className="text-[10px] text-stone-400 uppercase tracking-wider mb-2" style={{ fontWeight: 400 }}>
-                          {"Lien d’accès"}
+                          {"Ou lien d’accès direct"}
                         </p>
                         <div className="flex items-center gap-2">
                           <div className="flex-1 bg-white border border-stone-200 rounded-lg px-3 py-2 text-xs text-stone-500 truncate"

@@ -16,7 +16,7 @@ export default async function PrestatairesPage({ params }: { params: Promise<{ s
 
   const { data: vendors } = await supabase
     .from('wedding_vendors')
-    .select('id, name, category, email, phone, permissions, invite_token, is_suspended, created_at')
+    .select('id, name, category, email, phone, permissions, invite_token, vendor_code, is_suspended, created_at')
     .eq('wedding_id', wedding.id)
     .order('created_at', { ascending: true })
 
@@ -121,6 +121,7 @@ export default async function PrestatairesPage({ params }: { params: Promise<{ s
         phone: v.phone,
         permissions: v.permissions ?? {},
         inviteToken: v.invite_token,
+        vendorCode: v.vendor_code ?? '',
         isSuspended: v.is_suspended,
       }))}
       budgetSuggestions={budgetSuggestions}

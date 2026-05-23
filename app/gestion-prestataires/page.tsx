@@ -126,10 +126,10 @@ export default function GestionPrestatairesPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link href="/auth"
+            <Link href="/prestataire/rejoindre"
                   className="inline-flex items-center gap-2 text-white rounded-xl px-7 py-3.5 hover:opacity-90 transition"
                   style={{ background: GREEN, fontWeight: 500, fontSize: '0.95rem' }}>
-              Essayer gratuitement
+              Vous êtes prestataire ? Rejoindre
               <ChevronRight className="w-4 h-4" />
             </Link>
             <Link href="/#fonctionnalites"
@@ -334,10 +334,10 @@ export default function GestionPrestatairesPage() {
           <p style={{ fontWeight: 300, fontSize: '0.95rem', lineHeight: 1.6 }} className="text-stone-500 mb-8">
             Créez votre espace mariage gratuitement et invitez vos prestataires en quelques clics.
           </p>
-          <Link href="/auth"
+          <Link href="/prestataire/rejoindre"
                 className="inline-flex items-center gap-2 text-white rounded-xl px-8 py-4 hover:opacity-90 transition"
                 style={{ background: GREEN, fontWeight: 500, fontSize: '1rem' }}>
-            Commencer gratuitement
+            Vous êtes prestataire ? Rejoindre
             <ChevronRight className="w-4 h-4" />
           </Link>
         </div>

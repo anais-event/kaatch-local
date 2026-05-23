@@ -46,7 +46,7 @@ export default function CreateModal({ slug }: { slug: string }) {
       items: [
         { label: 'Partage & QR', href: `/mariage/${slug}/partager` },
         { label: 'Galerie photos', href: `/mariage/${slug}/photos` },
-        { label: 'Livre d'or', href: `/mariage/${slug}/livre-dor` },
+        { label: "Livre d'or", href: `/mariage/${slug}/livre-dor` },
       ],
     },
   ]

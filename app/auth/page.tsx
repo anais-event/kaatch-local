@@ -110,7 +110,7 @@ function AuthInner() {
             className="text-[#2C3B2E]">Kaatch</a>
           <p style={{ ...fontLato, fontSize: '0.8rem', letterSpacing: '0.1em' }}
             className="text-stone-400 uppercase mt-1">
-            Espace organisateurs
+            Votre espace mariage
           </p>
         </div>
 
@@ -163,10 +163,18 @@ function AuthInner() {
                 Mot de passe oublié ?
               </button>
             </p>
-            <p className="text-center text-sm" style={fontLato}>
-              <span className="text-stone-400">Vous êtes invité(e) ? </span>
-              <a href="/rejoindre" className="text-[#2C3B2E] hover:underline">Rejoindre un mariage</a>
-            </p>
+            <div className="flex items-center gap-3 mt-2">
+              <a href="/rejoindre"
+                className="flex-1 text-center text-xs border border-stone-200 text-stone-500 py-2.5 rounded-xl hover:border-[#2C3B2E] hover:text-[#2C3B2E] transition"
+                style={fontLato}>
+                Invité(e) ?
+              </a>
+              <a href="/prestataire/rejoindre"
+                className="flex-1 text-center text-xs border border-stone-200 text-stone-500 py-2.5 rounded-xl hover:border-[#2C3B2E] hover:text-[#2C3B2E] transition"
+                style={fontLato}>
+                Prestataire ?
+              </a>
+            </div>
             <p className="text-center">
               <a href="/" className="text-stone-400 hover:text-stone-600 text-sm" style={fontLato}>← Retour</a>
             </p>

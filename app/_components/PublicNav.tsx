@@ -172,20 +172,6 @@ export default function PublicNav({ active }: { active?: string }) {
 
           {/* Desktop CTAs */}
           <Link
-            href="/prestataire/rejoindre"
-            className="text-sm border border-stone-300 text-stone-600 px-4 py-2 rounded-full hover:border-[#2C3B2E] hover:text-[#2C3B2E] transition hidden md:block"
-            style={{ fontFamily: BODY, fontWeight: 400 }}
-          >
-            Prestataire
-          </Link>
-          <Link
-            href="/rejoindre"
-            className="text-sm border border-stone-300 text-stone-600 px-4 py-2 rounded-full hover:border-[#2C3B2E] hover:text-[#2C3B2E] transition hidden md:block"
-            style={{ fontFamily: BODY, fontWeight: 400 }}
-          >
-            {t('nav.invite')}
-          </Link>
-          <Link
             href="/auth"
             className="text-sm bg-[#2C3B2E] text-white px-4 py-2 rounded-full hover:bg-[#1a2419] transition hidden md:block"
             style={{ fontFamily: BODY, fontWeight: 500 }}

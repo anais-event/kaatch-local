@@ -1,37 +1,49 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
-import { Clock, Palette, CheckCircle2, Zap, Sparkles } from 'lucide-react'
+import { Clock, Users, CheckCircle2, AlertCircle, Zap } from 'lucide-react'
 import Link from 'next/link'
 
-export default async function StudioPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function InviterPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const supabase = await createSupabaseServerClient()
 
   const { data: wedding } = await supabase.from('weddings').select('*').eq('slug', slug).single()
   if (!wedding) return <div className="p-8">Mariage introuvable</div>
 
+  const [
+    { count: totalGuests },
+    { count: confirmedCount },
+    { count: pendingCount },
+    { data: recentRsvps },
+  ] = await Promise.all([
+    supabase.from('guests').select('*', { count: 'exact', head: true }).eq('wedding_id', wedding.id),
+    supabase.from('guests').select('*', { count: 'exact', head: true }).eq('wedding_id', wedding.id).eq('rsvp_status', 'confirme'),
+    supabase.from('guests').select('*', { count: 'exact', head: true }).eq('wedding_id', wedding.id).eq('rsvp_status', 'en attente'),
+    supabase.from('guests').select('first_name, last_name, rsvp_status, invited_at').eq('wedding_id', wedding.id).order('invited_at', { ascending: false }).limit(5),
+  ])
+
+  const noReplyCount = (totalGuests ?? 0) - (confirmedCount ?? 0) - (pendingCount ?? 0)
+
   return (
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
       {/* Header */}
       <div className="max-w-5xl mx-auto px-4 py-8">
-        <div className="flex items-center gap-3 mb-6">
-          <Sparkles className="w-8 h-8 text-[#4a5240]" strokeWidth={1.5} />
-          <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '2.5rem' }} className="text-[#4a5240]">
-            Studio créatif
-          </h1>
-        </div>
+        <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '2.5rem' }} className="text-[#4a5240] mb-6">
+          Inviter
+        </h1>
 
         {/* Stats bar */}
         <div className="grid grid-cols-4 gap-3 mb-8">
           {[
-            { value: 0, label: 'Designs créés' },
-            { value: 0, label: 'Versions validées' },
-            { value: 0, label: 'Impressions prêtes' },
-            { value: 0, label: 'Stocks restants' },
+            { value: totalGuests ?? 0, label: 'Invités', href: 'guests' },
+            { value: confirmedCount ?? 0, label: 'Confirmés', href: 'guests' },
+            { value: pendingCount ?? 0, label: 'En attente', href: 'guests' },
+            { value: noReplyCount, label: 'Pas répondu', href: 'guests' },
           ].map(s => (
-            <div key={s.label} className="bg-white rounded-2xl border border-stone-100 p-4">
+            <Link key={s.label} href={`/mariage/${slug}/${s.href}`}
+              className="bg-white rounded-2xl border border-stone-100 p-4 hover:shadow-md transition group">
               <p style={{ fontWeight: 600, fontSize: '1.75rem', lineHeight: 1 }} className="text-[#4a5240] mb-1">{s.value}</p>
               <p style={{ fontWeight: 400, fontSize: '0.75rem' }} className="text-stone-500">{s.label}</p>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
@@ -51,10 +63,10 @@ export default async function StudioPage({ params }: { params: Promise<{ slug: s
               </div>
               <div className="space-y-3">
                 {[
-                  { label: 'Créer les faire-parts', done: false },
-                  { label: 'Valider la palette avec imprimeur', done: false },
-                  { label: 'Définir plan de table à imprimer', done: false },
-                  { label: 'Réserver les ressources d"impression', done: false },
+                  { label: `Relancer ${noReplyCount} invités sans réponse`, done: false },
+                  { label: 'Vérifier les allergies et régimes', done: false },
+                  { label: 'Finaliser le plan de table', done: false },
+                  { label: 'Confirmer le nombre final avec traiteur', done: false },
                 ].map((task, i) => (
                   <div key={i} className="flex items-start gap-3">
                     <div className={`mt-1 w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${task.done ? 'bg-[#4a5240] border-[#4a5240]' : 'border-stone-300'}`}>
@@ -73,21 +85,22 @@ export default async function StudioPage({ params }: { params: Promise<{ slug: s
                 <Clock className="w-5 h-5 text-[#4a5240]" strokeWidth={2} />
               </div>
               <div className="space-y-2.5">
-                <div>
-                  <p style={{ fontWeight: 500, fontSize: '0.8rem' }} className="text-stone-500 mb-2">Création</p>
-                  <ul className="space-y-2">
-                    <li style={{ fontWeight: 400, fontSize: '0.9rem' }} className="text-stone-700">• Palette couleurs finalisée</li>
-                    <li style={{ fontWeight: 400, fontSize: '0.9rem' }} className="text-stone-700">• Typographies approuvées</li>
-                    <li style={{ fontWeight: 400, fontSize: '0.9rem' }} className="text-stone-700">• Template faire-part créé</li>
-                  </ul>
-                </div>
-                <div>
-                  <p style={{ fontWeight: 500, fontSize: '0.8rem' }} className="text-stone-500 mb-2">Impression</p>
-                  <ul className="space-y-2">
-                    <li style={{ fontWeight: 400, fontSize: '0.9rem' }} className="text-stone-700">• Devis imprimeur reçu</li>
-                    <li style={{ fontWeight: 400, fontSize: '0.9rem' }} className="text-stone-700">• Quantités validées</li>
-                  </ul>
-                </div>
+                {recentRsvps && recentRsvps.length > 0 ? (
+                  recentRsvps.map((guest, i) => (
+                    <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-stone-50">
+                      <p style={{ fontWeight: 400, fontSize: '0.9rem' }} className="text-stone-700">
+                        {guest.first_name} {guest.last_name}
+                      </p>
+                      <span style={{ fontWeight: 400, fontSize: '0.8rem' }} className={`px-2.5 py-1 rounded-full ${
+                        guest.rsvp_status === 'confirme' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                      }`}>
+                        {guest.rsvp_status === 'confirme' ? 'Confirmé' : 'En attente'}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <p style={{ fontWeight: 400, fontSize: '0.9rem' }} className="text-stone-400">Aucun mouvement récent</p>
+                )}
               </div>
             </div>
 
@@ -101,12 +114,12 @@ export default async function StudioPage({ params }: { params: Promise<{ slug: s
               <h2 style={{ fontWeight: 600, fontSize: '1.1rem' }} className="text-stone-800 mb-4">Accès rapides</h2>
               <div className="space-y-2.5">
                 {[
-                  { label: 'Faire-parts', sub: 'Design & envoi', href: 'invitations' },
-                  { label: 'Direction artistique', sub: 'Concept visuel', href: 'studio' },
-                  { label: 'Palettes & typos', sub: 'Charte design', href: 'studio' },
-                  { label: 'Signalétique', sub: 'Plan de table & menus', href: 'studio' },
-                  { label: 'Ressources', sub: 'Fichiers & assets', href: 'studio' },
-                  { label: 'Imprimeur', sub: 'Devis & contact', href: 'prestataires' },
+                  { label: 'Invités', sub: 'Gestion complète', href: 'guests' },
+                  { label: 'Invitations', sub: 'Faire-parts & envois', href: 'invitations' },
+                  { label: 'Réponses RSVP', sub: 'Statuts & relances', href: 'guests' },
+                  { label: 'Plan de table', sub: 'Assignation tables', href: 'tables' },
+                  { label: 'Menus & allergies', sub: 'Régimes spéciaux', href: 'guests' },
+                  { label: 'Groupes', sub: 'Messagerie invités', href: 'messagerie' },
                 ].map(link => (
                   <Link key={link.href} href={`/mariage/${slug}/${link.href}`}
                     className="flex items-center justify-between p-3 rounded-xl bg-stone-50 hover:bg-[#4a5240]/5 transition group">

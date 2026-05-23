@@ -1,37 +1,50 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
-import { Clock, Palette, CheckCircle2, Zap, Sparkles } from 'lucide-react'
+import { Clock, Wallet, CheckCircle2, Zap } from 'lucide-react'
 import Link from 'next/link'
 
-export default async function StudioPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function CoordonnnerPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const supabase = await createSupabaseServerClient()
 
   const { data: wedding } = await supabase.from('weddings').select('*').eq('slug', slug).single()
   if (!wedding) return <div className="p-8">Mariage introuvable</div>
 
+  const [
+    { count: vendorCount },
+    { count: budgetCount },
+  ] = await Promise.all([
+    supabase.from('wedding_vendors').select('*', { count: 'exact', head: true }).eq('wedding_id', wedding.id),
+    supabase.from('budget_items').select('*', { count: 'exact', head: true }).eq('wedding_id', wedding.id),
+  ])
+
   return (
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
       {/* Header */}
       <div className="max-w-5xl mx-auto px-4 py-8">
-        <div className="flex items-center gap-3 mb-6">
-          <Sparkles className="w-8 h-8 text-[#4a5240]" strokeWidth={1.5} />
-          <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '2.5rem' }} className="text-[#4a5240]">
-            Studio créatif
-          </h1>
-        </div>
+        <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '2.5rem' }} className="text-[#4a5240] mb-6">
+          Coordonner
+        </h1>
 
         {/* Stats bar */}
         <div className="grid grid-cols-4 gap-3 mb-8">
           {[
-            { value: 0, label: 'Designs créés' },
-            { value: 0, label: 'Versions validées' },
-            { value: 0, label: 'Impressions prêtes' },
-            { value: 0, label: 'Stocks restants' },
+            { value: vendorCount ?? 0, label: 'Prestataires', href: 'prestataires' },
+            { value: budgetCount ?? 0, label: 'Lignes budget', href: 'budget' },
+            { value: 0, label: 'Devis reçus', href: null },
+            { value: 0, label: 'Paiements', href: null },
           ].map(s => (
-            <div key={s.label} className="bg-white rounded-2xl border border-stone-100 p-4">
-              <p style={{ fontWeight: 600, fontSize: '1.75rem', lineHeight: 1 }} className="text-[#4a5240] mb-1">{s.value}</p>
-              <p style={{ fontWeight: 400, fontSize: '0.75rem' }} className="text-stone-500">{s.label}</p>
-            </div>
+            s.href ? (
+              <Link key={s.label} href={`/mariage/${slug}/${s.href}`}
+                className="bg-white rounded-2xl border border-stone-100 p-4 hover:shadow-md transition group">
+                <p style={{ fontWeight: 600, fontSize: '1.75rem', lineHeight: 1 }} className="text-[#4a5240] mb-1">{s.value}</p>
+                <p style={{ fontWeight: 400, fontSize: '0.75rem' }} className="text-stone-500">{s.label}</p>
+              </Link>
+            ) : (
+              <div key={s.label} className="bg-white rounded-2xl border border-stone-100 p-4">
+                <p style={{ fontWeight: 600, fontSize: '1.75rem', lineHeight: 1 }} className="text-[#4a5240] mb-1">{s.value}</p>
+                <p style={{ fontWeight: 400, fontSize: '0.75rem' }} className="text-stone-500">{s.label}</p>
+              </div>
+            )
           ))}
         </div>
       </div>
@@ -51,10 +64,10 @@ export default async function StudioPage({ params }: { params: Promise<{ slug: s
               </div>
               <div className="space-y-3">
                 {[
-                  { label: 'Créer les faire-parts', done: false },
-                  { label: 'Valider la palette avec imprimeur', done: false },
-                  { label: 'Définir plan de table à imprimer', done: false },
-                  { label: 'Réserver les ressources d"impression', done: false },
+                  { label: 'Confirmer tous les prestataires', done: false },
+                  { label: 'Finaliser le budget', done: false },
+                  { label: 'Demander les devis manquants', done: false },
+                  { label: 'Planifier les paiements', done: false },
                 ].map((task, i) => (
                   <div key={i} className="flex items-start gap-3">
                     <div className={`mt-1 w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${task.done ? 'bg-[#4a5240] border-[#4a5240]' : 'border-stone-300'}`}>
@@ -74,18 +87,18 @@ export default async function StudioPage({ params }: { params: Promise<{ slug: s
               </div>
               <div className="space-y-2.5">
                 <div>
-                  <p style={{ fontWeight: 500, fontSize: '0.8rem' }} className="text-stone-500 mb-2">Création</p>
+                  <p style={{ fontWeight: 500, fontSize: '0.8rem' }} className="text-stone-500 mb-2">Prestataires</p>
                   <ul className="space-y-2">
-                    <li style={{ fontWeight: 400, fontSize: '0.9rem' }} className="text-stone-700">• Palette couleurs finalisée</li>
-                    <li style={{ fontWeight: 400, fontSize: '0.9rem' }} className="text-stone-700">• Typographies approuvées</li>
-                    <li style={{ fontWeight: 400, fontSize: '0.9rem' }} className="text-stone-700">• Template faire-part créé</li>
+                    <li style={{ fontWeight: 400, fontSize: '0.9rem' }} className="text-stone-700">• Traiteur contacté et devis reçu</li>
+                    <li style={{ fontWeight: 400, fontSize: '0.9rem' }} className="text-stone-700">• Photographe confirmé</li>
+                    <li style={{ fontWeight: 400, fontSize: '0.9rem' }} className="text-stone-700">• DJ demandé pour devis</li>
                   </ul>
                 </div>
                 <div>
-                  <p style={{ fontWeight: 500, fontSize: '0.8rem' }} className="text-stone-500 mb-2">Impression</p>
+                  <p style={{ fontWeight: 500, fontSize: '0.8rem' }} className="text-stone-500 mb-2">Budget</p>
                   <ul className="space-y-2">
-                    <li style={{ fontWeight: 400, fontSize: '0.9rem' }} className="text-stone-700">• Devis imprimeur reçu</li>
-                    <li style={{ fontWeight: 400, fontSize: '0.9rem' }} className="text-stone-700">• Quantités validées</li>
+                    <li style={{ fontWeight: 400, fontSize: '0.9rem' }} className="text-stone-700">• Budget global approuvé</li>
+                    <li style={{ fontWeight: 400, fontSize: '0.9rem' }} className="text-stone-700">• 40% du budget réservé</li>
                   </ul>
                 </div>
               </div>
@@ -101,12 +114,12 @@ export default async function StudioPage({ params }: { params: Promise<{ slug: s
               <h2 style={{ fontWeight: 600, fontSize: '1.1rem' }} className="text-stone-800 mb-4">Accès rapides</h2>
               <div className="space-y-2.5">
                 {[
-                  { label: 'Faire-parts', sub: 'Design & envoi', href: 'invitations' },
-                  { label: 'Direction artistique', sub: 'Concept visuel', href: 'studio' },
-                  { label: 'Palettes & typos', sub: 'Charte design', href: 'studio' },
-                  { label: 'Signalétique', sub: 'Plan de table & menus', href: 'studio' },
-                  { label: 'Ressources', sub: 'Fichiers & assets', href: 'studio' },
-                  { label: 'Imprimeur', sub: 'Devis & contact', href: 'prestataires' },
+                  { label: 'Prestataires', sub: 'Tous les contacts', href: 'prestataires' },
+                  { label: 'Budget', sub: 'Suivi des dépenses', href: 'budget' },
+                  { label: 'Devis', sub: 'Comparaison & validation', href: 'budget' },
+                  { label: 'Contrats', sub: 'Documents signés', href: 'prestataires' },
+                  { label: 'Paiements', sub: 'Calendrier & versements', href: 'budget' },
+                  { label: 'Notes', sub: 'Rappels & détails', href: 'prestataires' },
                 ].map(link => (
                   <Link key={link.href} href={`/mariage/${slug}/${link.href}`}
                     className="flex items-center justify-between p-3 rounded-xl bg-stone-50 hover:bg-[#4a5240]/5 transition group">

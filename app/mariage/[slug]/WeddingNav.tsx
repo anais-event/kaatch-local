@@ -44,43 +44,86 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
   const mounted = useRef(false)
 
   const sections: NavSection[] = [
-    { label: '🏠 Accueil', href: `/mariage/${slug}` },
+    { label: 'Aujourd"hui', href: `/mariage/${slug}` },
     {
-      label: '🗓️ Organisation',
+      label: 'Imaginer',
+      href: `/mariage/${slug}/imaginer`,
       items: [
-        { label: 'Rétro-planning', sub: 'Checklist avant le mariage', href: `/mariage/${slug}/retro-planning` },
-        { label: 'Budget', sub: 'Suivi des dépenses', href: `/mariage/${slug}/budget` },
-        { label: 'Checklist Jour J', sub: 'Qui fait quoi', href: `/mariage/${slug}/checklist` },
-        { label: 'Boîte à outils', sub: 'QR code, PDF & impressions', href: `/mariage/${slug}/partager` },
-        { label: 'Studio créatif', sub: 'Papeterie & univers visuel', href: `/mariage/${slug}/studio` },
-        { label: 'Prestataires', sub: 'Gestion & accès prestas', href: `/mariage/${slug}/prestataires` },
+        { label: 'Direction artistique', sub: 'Univers visuel', href: `/mariage/${slug}/imaginer/direction` },
+        { label: 'Moodboards', sub: 'Inspirations & idées', href: `/mariage/${slug}/imaginer/moodboards` },
+        { label: 'Tenues & dress code', sub: 'Suggestions vestimentaires', href: `/mariage/${slug}/imaginer/tenues` },
+        { label: 'Palette couleurs', sub: 'Chromatique du mariage', href: `/mariage/${slug}/imaginer/palette` },
+        { label: 'Typographies', sub: 'Choix des polices', href: `/mariage/${slug}/imaginer/typographies` },
       ],
     },
     {
-      label: '💌 Invités',
+      label: 'Préparer',
+      href: `/mariage/${slug}/preparer`,
       items: [
-        { label: 'Invités & RSVP', sub: 'Liste, RSVP & faire-part', href: `/mariage/${slug}/guests` },
-        { label: 'Plan de table', sub: 'Placement & récap', href: `/mariage/${slug}/tables` },
-        { label: 'Hébergements', sub: 'Options aux alentours', href: `/mariage/${slug}/hebergements` },
-      ],
-    },
-    {
-      label: '✨ Le Grand Jour',
-      items: [
+        { label: 'Rétroplanning', sub: 'Avant le jour J', href: `/mariage/${slug}/retro-planning` },
+        { label: 'Checklist', sub: 'Tâches & responsabilités', href: `/mariage/${slug}/checklist` },
         { label: 'Programme', sub: 'Déroulé de la journée', href: `/mariage/${slug}/programme` },
-        { label: 'Musique', sub: 'Playlist & suggestions', href: `/mariage/${slug}/musique` },
-        { label: 'Jeux & animations', sub: 'Idées pour la fête', href: `/mariage/${slug}/jeux` },
-        { label: 'Inspirations', sub: 'Moodboard & tenues', href: `/mariage/${slug}/inspirations` },
+        { label: 'Hébergements', sub: 'Options logement', href: `/mariage/${slug}/hebergements` },
+        { label: 'Playlist', sub: 'Musique & ambiance', href: `/mariage/${slug}/musique` },
+        { label: 'Documents', sub: 'Fichiers utiles', href: `/mariage/${slug}/documents` },
       ],
     },
     {
-      label: '📸 Souvenirs',
+      label: 'Inviter',
+      href: `/mariage/${slug}/inviter`,
       items: [
-        { label: 'Photos', sub: 'Galerie partagée', href: `/mariage/${slug}/photos` },
-        { label: "Livre d'Or", sub: 'Messages des invités', href: `/mariage/${slug}/livre-dor` },
+        { label: 'Invités', sub: 'Liste complète', href: `/mariage/${slug}/guests` },
+        { label: 'Invitations', sub: 'Faire-parts & envois', href: `/mariage/${slug}/invitations` },
+        { label: 'Réponses RSVP', sub: 'Confirmations & refus', href: `/mariage/${slug}/rsvp` },
+        { label: 'Plan de table', sub: 'Placement des invités', href: `/mariage/${slug}/tables` },
+        { label: 'Menus & allergies', sub: 'Choix culinaires', href: `/mariage/${slug}/menus` },
+        { label: 'Groupes', sub: 'Discussions par groupe', href: `/mariage/${slug}/groupes` },
       ],
     },
-    { label: '💬 Messagerie', href: `/mariage/${slug}/messagerie` },
+    {
+      label: 'Coordonner',
+      href: `/mariage/${slug}/coordonner`,
+      items: [
+        { label: 'Prestataires', sub: 'Contacts & suivi', href: `/mariage/${slug}/prestataires` },
+        { label: 'Budget', sub: 'Dépenses & trésorerie', href: `/mariage/${slug}/budget` },
+        { label: 'Devis', sub: 'Documents commerciaux', href: `/mariage/${slug}/devis` },
+        { label: 'Contrats', sub: 'Engagement & conditions', href: `/mariage/${slug}/contrats` },
+        { label: 'Paiements', sub: 'Factures & virements', href: `/mariage/${slug}/paiements` },
+        { label: 'Notes', sub: 'Décisions & remarques', href: `/mariage/${slug}/notes` },
+      ],
+    },
+    {
+      label: 'Échanger',
+      href: `/mariage/${slug}/echanger`,
+      items: [
+        { label: 'Messagerie invités', sub: 'Discussions', href: `/mariage/${slug}/messagerie/invites` },
+        { label: 'Messagerie prestataires', sub: 'Échanges', href: `/mariage/${slug}/messagerie/prestataires` },
+        { label: 'Annonces', sub: 'Communications', href: `/mariage/${slug}/annonces` },
+        { label: 'Questions FAQ', sub: 'Réponses fréquentes', href: `/mariage/${slug}/faq` },
+      ],
+    },
+    {
+      label: 'Se souvenir',
+      href: `/mariage/${slug}/sesouvenir`,
+      items: [
+        { label: 'Galerie photos', sub: 'Albums partagés', href: `/mariage/${slug}/photos` },
+        { label: 'Livre d"or', sub: 'Messages & vœux', href: `/mariage/${slug}/livre-dor` },
+        { label: 'Zone surprise', sub: 'Éléments secrets', href: `/mariage/${slug}/surprise` },
+        { label: 'Exports', sub: 'Téléchargements', href: `/mariage/${slug}/exports` },
+      ],
+    },
+    {
+      label: 'Studio créatif',
+      href: `/mariage/${slug}/studio`,
+      items: [
+        { label: 'Faire-parts', sub: 'Designs & impression', href: `/mariage/${slug}/studio/faire-parts` },
+        { label: 'Direction artistique', sub: 'Univers visuel', href: `/mariage/${slug}/studio/direction` },
+        { label: 'Palettes & typos', sub: 'Charte chromatique', href: `/mariage/${slug}/studio/palettes` },
+        { label: 'Signalétique', sub: 'Panneaux & décor', href: `/mariage/${slug}/studio/signaletique` },
+        { label: 'Ressources', sub: 'Fichiers & assets', href: `/mariage/${slug}/studio/ressources` },
+        { label: 'Imprimeur', sub: 'Contacts & devis', href: `/mariage/${slug}/studio/imprimeur` },
+      ],
+    },
   ]
 
   // Auto-expand the active section in sidebar

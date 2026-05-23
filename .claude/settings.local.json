@@ -180,7 +180,10 @@
       "Bash(Select-String -Pattern '\\(ready|error|Error|WARN\\)')",
       "Bash(Select-Object -First 10)",
       "Bash(curl -s http://localhost:3000/mariage/test/imaginer)",
-      "Bash(curl -s http://localhost:3000/mariage/test-slug)"
+      "Bash(curl -s http://localhost:3000/mariage/test-slug)",
+      "Bash(Start-Sleep -Seconds 3)",
+      "Bash(Write-Host \"Serveur en cours de démarrage...\")",
+      "Bash(Select-Object -Last 30)"
     ]
   }
 }

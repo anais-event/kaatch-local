@@ -45,40 +45,34 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
   const mounted = useRef(false)
 
   const sections: NavSection[] = [
-    { label: 'Aujourd"hui', href: `/mariage/${slug}` },
+    { label: "Aujourd'hui", href: `/mariage/${slug}` },
     {
       label: 'Imaginer',
       href: `/mariage/${slug}/imaginer`,
       items: [
-        { label: 'Direction artistique', sub: 'Univers visuel', href: `/mariage/${slug}/imaginer/direction` },
-        { label: 'Moodboards', sub: 'Inspirations & idées', href: `/mariage/${slug}/imaginer/moodboards` },
-        { label: 'Tenues & dress code', sub: 'Suggestions vestimentaires', href: `/mariage/${slug}/imaginer/tenues` },
-        { label: 'Palette couleurs', sub: 'Chromatique du mariage', href: `/mariage/${slug}/imaginer/palette` },
-        { label: 'Typographies', sub: 'Choix des polices', href: `/mariage/${slug}/imaginer/typographies` },
+        { label: 'Inspirations', sub: "Déco, menus, tenues...", href: `/mariage/${slug}/inspirations` },
+        { label: 'Rétroplanning', sub: 'Avant le jour J', href: `/mariage/${slug}/retro-planning` },
+        { label: 'Playlist', sub: 'Musique & ambiance', href: `/mariage/${slug}/musique` },
       ],
     },
     {
       label: 'Préparer',
       href: `/mariage/${slug}/preparer`,
       items: [
-        { label: 'Rétroplanning', sub: 'Avant le jour J', href: `/mariage/${slug}/retro-planning` },
-        { label: 'Checklist', sub: 'Tâches & responsabilités', href: `/mariage/${slug}/checklist` },
+        { label: 'Checklist du jour J', sub: "Tâches & responsabilités", href: `/mariage/${slug}/checklist` },
         { label: 'Programme', sub: 'Déroulé de la journée', href: `/mariage/${slug}/programme` },
-        { label: 'Hébergements', sub: 'Options logement', href: `/mariage/${slug}/hebergements` },
-        { label: 'Playlist', sub: 'Musique & ambiance', href: `/mariage/${slug}/musique` },
-        { label: 'Documents', sub: 'Fichiers utiles', href: `/mariage/${slug}/documents` },
+        { label: 'Plan de table', sub: 'Placement des invités', href: `/mariage/${slug}/tables` },
+        { label: 'Hébergements', sub: 'Suggestions logements', href: `/mariage/${slug}/hebergements` },
+        { label: 'Documents & QR codes', sub: 'Liens & partage', href: `/mariage/${slug}/partager` },
       ],
     },
     {
       label: 'Inviter',
       href: `/mariage/${slug}/inviter`,
       items: [
-        { label: 'Invités', sub: 'Liste complète', href: `/mariage/${slug}/guests` },
-        { label: 'Invitations', sub: 'Faire-parts & envois', href: `/mariage/${slug}/invitations` },
-        { label: 'Réponses RSVP', sub: 'Confirmations & refus', href: `/mariage/${slug}/rsvp` },
+        { label: 'Invités & réponses', sub: 'Liste, invitations, RSVP', href: `/mariage/${slug}/guests` },
         { label: 'Plan de table', sub: 'Placement des invités', href: `/mariage/${slug}/tables` },
-        { label: 'Menus & allergies', sub: 'Choix culinaires', href: `/mariage/${slug}/menus` },
-        { label: 'Groupes', sub: 'Discussions par groupe', href: `/mariage/${slug}/groupes` },
+        { label: 'Vue invités', sub: "Voir comme un invité", href: `/invite/${slug}`, target: '_blank' },
       ],
     },
     {
@@ -86,46 +80,31 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
       href: `/mariage/${slug}/coordonner`,
       items: [
         { label: 'Prestataires', sub: 'Contacts & suivi', href: `/mariage/${slug}/prestataires` },
-        { label: 'Budget', sub: 'Dépenses & trésorerie', href: `/mariage/${slug}/budget` },
-        { label: 'Devis', sub: 'Documents commerciaux', href: `/mariage/${slug}/devis` },
-        { label: 'Contrats', sub: 'Engagement & conditions', href: `/mariage/${slug}/contrats` },
-        { label: 'Paiements', sub: 'Factures & virements', href: `/mariage/${slug}/paiements` },
-        { label: 'Notes', sub: 'Décisions & remarques', href: `/mariage/${slug}/notes` },
+        { label: 'Programme du jour J', sub: 'Vue prestataires', href: `/mariage/${slug}/programme` },
+        { label: 'Budget', sub: 'Devis, contrats, paiements', href: `/mariage/${slug}/budget` },
       ],
     },
     {
-      label: 'Échanger',
+      label: 'Échanger et Se souvenir',
       href: `/mariage/${slug}/echanger`,
       items: [
-        { label: 'Messagerie invités', sub: 'Discussions', href: `/mariage/${slug}/messagerie/invites` },
-        { label: 'Messagerie prestataires', sub: 'Échanges', href: `/mariage/${slug}/messagerie/prestataires` },
-        { label: 'Annonces', sub: 'Communications', href: `/mariage/${slug}/annonces` },
-        { label: 'Questions FAQ', sub: 'Réponses fréquentes', href: `/mariage/${slug}/faq` },
-      ],
-    },
-    {
-      label: 'Se souvenir',
-      href: `/mariage/${slug}/sesouvenir`,
-      items: [
+        { label: 'Messagerie', sub: 'Groupes de discussion', href: `/mariage/${slug}/messagerie` },
         { label: 'Galerie photos', sub: 'Albums partagés', href: `/mariage/${slug}/photos` },
-        { label: 'Livre d"or', sub: 'Messages & vœux', href: `/mariage/${slug}/livre-dor` },
-        { label: 'Zone surprise', sub: 'Éléments secrets', href: `/mariage/${slug}/surprise` },
-        { label: 'Exports', sub: 'Téléchargements', href: `/mariage/${slug}/exports` },
-      ],
-    },
-    {
-      label: 'Studio créatif',
-      href: `/mariage/${slug}/studio`,
-      items: [
-        { label: 'Faire-parts', sub: 'Designs & impression', href: `/mariage/${slug}/studio/faire-parts` },
-        { label: 'Direction artistique', sub: 'Univers visuel', href: `/mariage/${slug}/studio/direction` },
-        { label: 'Palettes & typos', sub: 'Charte chromatique', href: `/mariage/${slug}/studio/palettes` },
-        { label: 'Signalétique', sub: 'Panneaux & décor', href: `/mariage/${slug}/studio/signaletique` },
-        { label: 'Ressources', sub: 'Fichiers & assets', href: `/mariage/${slug}/studio/ressources` },
-        { label: 'Imprimeur', sub: 'Contacts & devis', href: `/mariage/${slug}/studio/imprimeur` },
+        { label: "Livre d'or", sub: 'Messages & voeux', href: `/mariage/${slug}/livre-dor` },
+        { label: 'Exports & partage', sub: 'Liens, QR, PDF', href: `/mariage/${slug}/partager` },
       ],
     },
   ]
+
+  const studioSection: NavSection = {
+    label: 'Studio créatif',
+    href: `/mariage/${slug}/studio`,
+    items: [
+      { label: 'Faire-part', sub: 'Design & envoi', href: `/mariage/${slug}/studio` },
+      { label: 'Collection', sub: 'Vos créations', href: `/mariage/${slug}/studio/collection` },
+      { label: 'Univers visuel', sub: 'Votre identité', href: `/mariage/${slug}/studio/univers` },
+    ],
+  }
 
   // Auto-expand the active section in sidebar
   const activeSection = sections.find(s =>
@@ -210,7 +189,10 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
 
         {/* Nav items */}
         <nav className="flex-1 overflow-y-auto py-3 px-2">
-          {sections.map(section => {
+          {[...sections, null, studioSection].map((section, idx) => {
+            if (!section) {
+              return <div key="sep" className="my-2 mx-3 border-t border-stone-100" />
+            }
             const active = isSectionActive(section)
 
             if (!section.items) {
@@ -253,7 +235,7 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
                     {section.items.map(item => {
                       const itemActive = isItemActive(item.href)
                       return (
-                        <a key={item.href} href={item.href}
+                        <a key={item.href} href={item.href} {...(item.target ? { target: item.target } : {})}
                           className={`flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm transition ${
                             itemActive
                               ? 'bg-[#4a5240] text-white'
@@ -261,6 +243,11 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
                           }`}
                           style={{ fontFamily: 'var(--font-lato)', fontWeight: itemActive ? 500 : 400 }}>
                           {item.label}
+                          {item.target === '_blank' && (
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3 h-3 ml-auto opacity-40">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                            </svg>
+                          )}
                         </a>
                       )
                     })}
@@ -376,47 +363,49 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
         {/* Mobile drawer */}
         {mobileOpen && (
           <div className="bg-white border-t border-stone-100 shadow-lg max-h-[80vh] overflow-y-auto">
-            {sections.map(section => (
-              <div key={section.label}>
-                {!section.items ? (
-                  <a href={section.href}
-                    className={`flex items-center px-5 py-3 text-sm border-b border-stone-50 ${
-                      isSectionActive(section) ? 'text-[#4a5240] bg-[#f5f0e8]' : 'text-stone-600'
-                    }`}
-                    style={{ fontWeight: isSectionActive(section) ? 400 : 300 }}>
-                    {section.label}
-                  </a>
-                ) : (
-                  <>
-                    <button
-                      onClick={() => setMobileExpanded(mobileExpanded === section.label ? null : section.label)}
-                      className={`w-full flex items-center justify-between px-5 py-3 text-sm border-b border-stone-50 cursor-pointer transition ${
+            {[...sections, null, studioSection].map((section, idx) => {
+              if (!section) {
+                return <div key="sep" className="border-t-2 border-stone-100 my-1" />
+              }
+              return (
+                <div key={section.label}>
+                  {!section.items ? (
+                    <a href={section.href}
+                      className={`flex items-center px-5 py-3 text-sm border-b border-stone-50 ${
                         isSectionActive(section) ? 'text-[#4a5240] bg-[#f5f0e8]' : 'text-stone-600'
                       }`}
                       style={{ fontWeight: isSectionActive(section) ? 400 : 300 }}>
-                      <span>{section.label}</span>
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
-                        className={`w-3.5 h-3.5 text-stone-300 transition-transform ${mobileExpanded === section.label ? 'rotate-180' : ''}`}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-                    {mobileExpanded === section.label && section.items.map(item => (
-                      <a key={item.href} href={item.href}
-                        className={`flex flex-col px-6 py-2.5 border-b border-stone-50 ${
-                          isItemActive(item.href) ? 'bg-[#f5f0e8] text-[#4a5240]' : 'text-stone-600'
-                        }`}>
-                        <span style={{ fontWeight: 300, fontSize: '0.85rem' }}>{item.label}</span>
-                        {item.sub && <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400">{item.sub}</span>}
-                      </a>
-                    ))}
-                  </>
-                )}
-              </div>
-            ))}
+                      {section.label}
+                    </a>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => setMobileExpanded(mobileExpanded === section.label ? null : section.label)}
+                        className={`w-full flex items-center justify-between px-5 py-3 text-sm border-b border-stone-50 cursor-pointer transition ${
+                          isSectionActive(section) ? 'text-[#4a5240] bg-[#f5f0e8]' : 'text-stone-600'
+                        }`}
+                        style={{ fontWeight: isSectionActive(section) ? 400 : 300 }}>
+                        <span>{section.label}</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
+                          className={`w-3.5 h-3.5 text-stone-300 transition-transform ${mobileExpanded === section.label ? 'rotate-180' : ''}`}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      {mobileExpanded === section.label && section.items.map(item => (
+                        <a key={item.href} href={item.href} {...(item.target ? { target: item.target } : {})}
+                          className={`flex flex-col px-6 py-2.5 border-b border-stone-50 ${
+                            isItemActive(item.href) ? 'bg-[#f5f0e8] text-[#4a5240]' : 'text-stone-600'
+                          }`}>
+                          <span style={{ fontWeight: 300, fontSize: '0.85rem' }}>{item.label}</span>
+                          {item.sub && <span style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400">{item.sub}</span>}
+                        </a>
+                      ))}
+                    </>
+                  )}
+                </div>
+              )
+            })}
             <div className="border-t border-stone-100">
-              <a href={`/invite/${slug}`} target="_blank" className="flex flex-col px-6 py-2.5 border-b border-stone-50 text-stone-600">
-                <span style={{ fontWeight: 300, fontSize: '0.85rem' }}>Vue invités</span>
-              </a>
               <a href={`/mariage/${slug}/edit`} className="flex flex-col px-6 py-2.5 border-b border-stone-50 text-stone-600">
                 <span style={{ fontWeight: 300, fontSize: '0.85rem' }}>Paramètres</span>
               </a>

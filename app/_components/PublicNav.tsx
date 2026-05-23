@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState, useRef, useEffect } from 'react'
+import LanguageSwitcher from './LanguageSwitcher'
 
 const DISPLAY = 'var(--font-display)'
 const BODY = 'var(--font-body)'
@@ -163,6 +164,9 @@ export default function PublicNav({ active }: { active?: string }) {
 
         {/* Right side */}
         <div className="flex items-center gap-2">
+          {/* Language switcher */}
+          <LanguageSwitcher />
+
           {/* Desktop CTAs */}
           <Link
             href="/rejoindre"

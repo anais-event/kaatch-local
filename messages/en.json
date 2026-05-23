@@ -1,0 +1,309 @@
+{
+  "nav": {
+    "commentCaMarche": "How it works",
+    "studio": "Creative Studio",
+    "offres": "Offers",
+    "tarifs": "Pricing",
+    "connexion": "Sign in",
+    "monEspace": "My space",
+    "invite": "Guest at a wedding?"
+  },
+  "landing": {
+    "hero": {
+      "tagline": "The solution that simplifies your life",
+      "title": "Everything for your wedding organization. In one place.",
+      "titleAccent": "In one place.",
+      "body1": "Planning a wedding isn't winging it. It's 1,000 decisions, 20 vendors, dozens of guests, a bit of stress, and a lot of money. You're afraid of forgetting something. You have to think about every detail. And you can quickly feel overwhelmed.",
+      "body2": "Kaatch centralizes everything — it's like tidying your room. Once you can see clearly, your mind eases, the celebration approaches, and you can refocus on what matters: You.",
+      "ctaSignup": "Sign in to my space →",
+      "ctaGuest": "Guest at a wedding? →"
+    },
+    "whyKaatch": {
+      "tagline": "Why \"Kaatch\"?",
+      "title": "Good catch. Catch up.",
+      "intro": "In English, \"catch\" means two things.",
+      "goodCatch": "Good catch :",
+      "goodCatchDesc": "The right person. The one you don't let go.",
+      "catchUp": "Catch up :",
+      "catchUpDesc": "Reunite. Finally all in one place.",
+      "body": "A wedding is exactly that. The moment everyone gets together to celebrate your good catch. Now we help you catch up with all your guests, every detail, every memory — without forgetting anything."
+    },
+    "twoAccess": {
+      "tagline": "1 wedding · 2 access",
+      "title": "Backstage and stage. Each their own space, same wedding.",
+      "desc": "One wedding. Two doors: one for you (the directors), one for your guests (the thrilled audience).",
+      "backstage": {
+        "label": "Backstage",
+        "sublabel": "for the couple",
+        "title": "Everything you need for simple, efficient organization.",
+        "items": [
+          { "icon": "📋", "label": "Timeline", "detail": "Every step from 12 months before to the big day, in order." },
+          { "icon": "💌", "label": "Invitations & RSVP", "detail": "Personal link per guest, responses come in real-time." },
+          { "icon": "🪑", "label": "Seating chart", "detail": "Drag-and-drop, adjustable until the night before." },
+          { "icon": "💰", "label": "Total budget", "detail": "Quotes, expenses, vendors — everything at a glance." },
+          { "icon": "🤝", "label": "Vendors", "detail": "Contacts, contracts, payments — no more email digging." },
+          { "icon": "📅", "label": "Day-of schedule", "detail": "The flow of the day. Your witnesses can breathe." },
+          { "icon": "🎵", "label": "Playlist & ideas", "detail": "Build the soundtrack, ideas to animate the evening." }
+        ]
+      },
+      "scene": {
+        "label": "The stage",
+        "sublabel": "for guests",
+        "title": "A link in the invitation. And they're with you.",
+        "desc": "No account needed. Your guests click their personal link — paper or digital, you choose — and have access to everything.",
+        "items": [
+          { "icon": "🔗", "label": "Magic link", "detail": "No account to create. The link in the invitation, and they're with you." },
+          { "icon": "📅", "label": "Day schedule", "detail": "Without having to bother anyone." },
+          { "icon": "📝", "label": "Guestbook", "detail": "Kind words, videos, memories — all from their phone." },
+          { "icon": "🏠", "label": "Accommodations", "detail": "Your lodging suggestions, one click away." },
+          { "icon": "💬", "label": "Messaging", "detail": "Direct chat between guests." },
+          { "icon": "📸", "label": "Shared album", "detail": "All photos, in one place, for everyone." }
+        ],
+        "footerNote": "Prefer a paper invitation? No problem — the Kaatch link can go on it too."
+      }
+    },
+    "album": {
+      "tagline": "The best part",
+      "title": "Photo album shared by everyone.",
+      "body1": "No lost Google Drives, no saturated Facebook groups, no hundreds of WhatsApp messages asking \"will you send me the photos?\".",
+      "body2": "A QR code on the tables. Guests upload photos in two clicks. Everything lands in one place. You decide what you keep. In ten years, it's still there.",
+      "badges": [
+        "No Facebook group",
+        "No Google Drive",
+        "No WhatsApp chaos",
+        "No reminding people"
+      ]
+    },
+    "offers": {
+      "tagline": "Offers",
+      "title": "No surprises.",
+      "desc": "One price, one payment. No hidden subscriptions. Price in euros.",
+      "launchBanner": "🚀 Product Hunt launch — Code KAATCH2026 : Wedding plan free · Limited to 100 spots",
+      "discovery": {
+        "label": "Discovery",
+        "subtitle": "To start organizing",
+        "price": "0",
+        "priceNote": "Included · free",
+        "features": [
+          "1 wedding",
+          "30 guests",
+          "20 photos",
+          "3 months access",
+          "Day-of schedule",
+          "Digital invitation",
+          "Basic RSVP",
+          "1 chat group"
+        ],
+        "cta": "Get started"
+      },
+      "wedding": {
+        "label": "💍 Wedding",
+        "subtitle": "Everything for your wedding",
+        "price": "45",
+        "priceNote": "One-time payment · in euros · 1 wedding",
+        "badge": "✦ Recommended",
+        "features": [
+          "Unlimited guests",
+          "200 photos included",
+          "Custom animated invitation",
+          "Complete RSVP",
+          "Seating chart",
+          "Budget and vendors",
+          "Music / playlist",
+          "Guestbook",
+          "Export & import guests",
+          "Download photo ZIP"
+        ],
+        "cta": "Create my space →"
+      },
+      "premium": {
+        "label": "👑 Premium",
+        "subtitle": "The complete experience",
+        "price": "99",
+        "priceNote": "One-time payment · in euros",
+        "badge": "Coming soon",
+        "features": [
+          "Everything in Wedding",
+          "Exclusive invitation templates",
+          "Printable stationery",
+          "Custom design",
+          "Enhanced memory space",
+          "Priority support"
+        ],
+        "cta": "Learn more →"
+      },
+      "footer": "Discovery plan free without credit card · Secure payment · Instant access · Price in euros"
+    },
+    "creativeStudio": {
+      "tagline": "Creative Studio",
+      "title": "Your wedding stationery, created automatically.",
+      "subtitle": "created automatically.",
+      "desc": "Choose a style, we generate your invitations, menus, place cards, and seating chart. Printed and delivered. You don't have to do anything else.",
+      "steps": [
+        { "n": "01", "title": "Choose your style", "desc": "Bohemian, classic, rustic, art deco… 5 design universes created by our designers." },
+        { "n": "02", "title": "We generate everything", "desc": "Invitation, menu, place card, seating chart — generated automatically from your guest list." },
+        { "n": "03", "title": "Printed and delivered to you", "desc": "Professional printing, premium paper, delivery in 5–7 business days." }
+      ],
+      "ambiances": [
+        { "name": "Bohemian", "tag": "Nature & freedom" },
+        { "name": "Classic", "tag": "Timeless elegance" },
+        { "name": "Rustic", "tag": "Softness & flowers" },
+        { "name": "Art Deco", "tag": "1920s glamour" },
+        { "name": "Minimalist", "tag": "Clean & modern" }
+      ],
+      "products": [
+        { "icon": "💌", "name": "Invitation", "desc": "Animated + high-res PDF. Shareable link or print." },
+        { "icon": "🍽️", "name": "Menu", "desc": "A5 format, generated from your schedule and meal choices." },
+        { "icon": "📋", "name": "Day-of program", "desc": "Complete flow, automatically laid out from your timeline." },
+        { "icon": "🪧", "name": "Place cards", "desc": "One per guest, batch-generated from your list. Zero manual entry." },
+        { "icon": "🗺️", "name": "Seating chart", "desc": "All your tables and guests, neatly laid out." },
+        { "icon": "🔢", "name": "Table numbers", "desc": "A5 easel with each table number. Printed, ready to place." }
+      ],
+      "ctaSection": {
+        "tagline": "Launch pricing",
+        "title": "Your stationery collection, the price of a menu.",
+        "desc": "Professional printing included · Delivery 5–7 days · 300g/m² premium paper",
+        "cta": "Create my stationery →"
+      }
+    },
+    "faq": {
+      "tagline": "FAQ",
+      "title": "Questions we're asked often.",
+      "items": [
+        {
+          "q": "Do my guests need to create an account?",
+          "a": "Never. Each guest gets a unique link with their name. They go straight to their space — RSVP, schedule, photo album — no sign-up, no password."
+        },
+        {
+          "q": "What happens after the wedding? Is my data saved?",
+          "a": "Your data (photos, messages, guest list) stays accessible as long as your space is active. You can download everything anytime."
+        },
+        {
+          "q": "Can I upgrade from free to the Wedding plan later?",
+          "a": "Yes, anytime from your wedding's Account page. Your data and space are fully preserved. You don't start over."
+        },
+        {
+          "q": "Is my data secure?",
+          "a": "Kaatch is secure. Data is encrypted and never resold or shared. You own everything you publish."
+        },
+        {
+          "q": "Does Kaatch work on mobile?",
+          "a": "Completely. Both the couple's space and guest space are designed mobile-first. No app to download — everything works in your browser."
+        }
+      ]
+    },
+    "ctaFinal": {
+      "tagline": "Built with love",
+      "title": "To simplify the most beautiful day of your life.",
+      "desc": "You celebrate your good catch. We handle the rest — so you, your witnesses, and your guests stay together, present, and actually enjoy it.",
+      "cta": "Sign in to my space →",
+      "ctaGuest": "Guest at a wedding? Join →"
+    },
+    "contact": {
+      "tagline": "Contact",
+      "title": "A question? An idea? A comment? A suggestion?",
+      "desc": "We'll get back to you the same day."
+    }
+  },
+  "pricing": {
+    "banner": "🚀 Product Hunt launch — Code KAATCH2026 : your Wedding plan free · Limited to 100 spots",
+    "header": {
+      "tagline": "Pricing",
+      "title": "Simple. Transparent. No surprises.",
+      "desc": "Costs less than a bridal bouquet — and replaces 12 WhatsApp groups 💐",
+      "footer": "45 in euros. One-time payment. No subscription, no surprises."
+    },
+    "discovery": {
+      "label": "Discovery",
+      "subtitle": "To start organizing",
+      "price": "0",
+      "priceNote": "Included · Free",
+      "features": [
+        "1 wedding",
+        "30 guests",
+        "20 photos",
+        "3 months access",
+        "Day-of schedule",
+        "Digital invitation",
+        "RSVP (yes/no, headcount)",
+        "1 chat group",
+        "Guest welcome page"
+      ],
+      "cta": "Get started"
+    },
+    "wedding": {
+      "label": "💍 Wedding",
+      "subtitle": "Everything for your wedding",
+      "price": "45",
+      "priceNote": "One-time payment · in euros",
+      "badge": "Recommended",
+      "features": [
+        "Unlimited guests",
+        "200 photos included",
+        "Custom animated invitation",
+        "Complete RSVP (allergies, +1, transport)",
+        "Drag-and-drop seating chart",
+        "Budget and vendors",
+        "Export & import Excel/CSV guests",
+        "Music / playlist by moment",
+        "Guestbook",
+        "Unlimited chat groups",
+        "Lodging, surprises, contacts",
+        "Download photo ZIP",
+        "Custom guest QR codes"
+      ],
+      "cta": "Choose this offer →"
+    },
+    "premium": {
+      "label": "👑 Premium",
+      "subtitle": "The complete experience",
+      "price": "99",
+      "priceNote": "One-time payment · in euros",
+      "badge": "Coming soon",
+      "features": [
+        "Everything in Wedding",
+        "Exclusive invitation templates",
+        "Printable stationery (menus, place cards)",
+        "Custom design",
+        "Enhanced memory space",
+        "Priority support"
+      ],
+      "notifyPlaceholder": "your@email.com",
+      "notifyLabel": "Notify me when it opens :",
+      "notifyBtn": "Notify me"
+    },
+    "footer": "Discovery plan free without credit card · Secure payment · Instant access · Your wedding deserves better than a spreadsheet 💚",
+    "questionsSection": {
+      "tagline": "Questions",
+      "title": "Have a question?",
+      "desc": "We'll get back to you the same day. Contact us via the form or email.",
+      "contactForm": "Contact form",
+      "email": "hello@kaatch.fr →"
+    }
+  },
+  "footer": {
+    "description": "The app that replaces spreadsheets, WhatsApp chaos, and endless lists. For couples who want to focus on their wedding, not organizing it.",
+    "linksNav": [
+      { "label": "How it works", "href": "#comment-ca-marche" },
+      { "label": "Creative Studio", "href": "#studio" },
+      { "label": "Offers", "href": "#offres" },
+      { "label": "Inspiration", "href": "/inspirations" },
+      { "label": "Guest space", "href": "/rejoindre" }
+    ],
+    "linksBottom": [
+      { "label": "Home", "href": "/" },
+      { "label": "Pricing", "href": "/pricing" },
+      { "label": "Terms", "href": "/cgv" },
+      { "label": "Guest space", "href": "/rejoindre" }
+    ],
+    "legalLinks": [
+      { "label": "Legal notice", "href": "/mentions-legales" },
+      { "label": "Terms", "href": "/cgv" },
+      { "label": "Privacy", "href": "/politique-de-confidentialite" }
+    ],
+    "copyright": "© 2026 Kaatch",
+    "copyrightDesktop": "No WhatsApp groups were harmed in the making of this site.",
+    "productHunt": "Find Kaatch on Product Hunt",
+    "email": "hello@kaatch.fr"
+  }
+}

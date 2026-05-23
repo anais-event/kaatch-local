@@ -55,7 +55,21 @@ export default function RootLayout({
     <html
       lang="fr"
       className={`${outfit.variable} ${jakarta.variable} ${cormorant.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{__html: `
+          (function() {
+            const path = window.location.pathname;
+            let lang = 'fr';
+            if (path.startsWith('/en')) lang = 'en';
+            else if (path.startsWith('/es')) lang = 'es';
+            else if (path.startsWith('/it')) lang = 'it';
+            else if (path.startsWith('/de')) lang = 'de';
+            document.documentElement.lang = lang;
+          })();
+        `}} />
+      </head>
       <body className="min-h-full flex flex-col">
         {children}
         <CookieBanner />

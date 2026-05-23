@@ -1,0 +1,309 @@
+{
+  "nav": {
+    "commentCaMarche": "Come funziona",
+    "studio": "Studio Creativo",
+    "offres": "Piani",
+    "tarifs": "Prezzi",
+    "connexion": "Accedi",
+    "monEspace": "Il mio spazio",
+    "invite": "Invitato a un matrimonio?"
+  },
+  "landing": {
+    "hero": {
+      "tagline": "La soluzione che semplifica la tua vita",
+      "title": "Tutto per organizzare il tuo matrimonio. In un unico posto.",
+      "titleAccent": "In un unico posto.",
+      "body1": "Organizzare un matrimonio non è improvvisazione. Sono 1.000 decisioni, 20 fornitori, decine di ospiti, un po' di stress e tantissimi soldi. Hai paura di dimenticare qualcosa. Devi pensare a ogni dettaglio. E velocemente ti senti sopraffatto.",
+      "body2": "Kaatch centralizza tutto — è come riordinare la tua stanza. Una volta che vedi chiaro, la tua mente si rilassa, la celebrazione si avvicina, e puoi concentrarti su ciò che conta: Voi.",
+      "ctaSignup": "Accedi al mio spazio →",
+      "ctaGuest": "Sei un invitato? →"
+    },
+    "whyKaatch": {
+      "tagline": "Perché \"Kaatch\"?",
+      "title": "Una bella scoperta. Riuniamoci.",
+      "intro": "In inglese, \"catch\" ha due significati.",
+      "goodCatch": "Una bella scoperta:",
+      "goodCatchDesc": "La persona giusta. Quella che non lasci andare.",
+      "catchUp": "Riuniamoci:",
+      "catchUpDesc": "Stare insieme. Finalmente in un unico posto.",
+      "body": "Un matrimonio è esattamente questo. Il momento in cui tutti si riuniscono per celebrare la tua bella scoperta. Ora ti aiutiamo a riunirti con tutti i tuoi ospiti, ogni dettaglio, ogni ricordo — senza dimenticare nulla."
+    },
+    "twoAccess": {
+      "tagline": "1 matrimonio · 2 accessi",
+      "title": "Dietro le quinte e il palcoscenico. Ognuno il suo spazio, stesso matrimonio.",
+      "desc": "Un matrimonio. Due porte: una per voi (i registi), una per i vostri ospiti (il pubblico entusiasta).",
+      "backstage": {
+        "label": "Dietro le quinte",
+        "sublabel": "per gli sposi",
+        "title": "Tutto quello che ti serve per un'organizzazione semplice ed efficiente.",
+        "items": [
+          { "icon": "📋", "label": "Timeline", "detail": "Ogni passo da 12 mesi prima al grande giorno, in ordine." },
+          { "icon": "💌", "label": "Inviti e RSVP", "detail": "Link personale per ogni ospite, le risposte arrivano in tempo reale." },
+          { "icon": "🪑", "label": "Seating plan", "detail": "Drag-and-drop, modificabile fino alla vigilia." },
+          { "icon": "💰", "label": "Budget totale", "detail": "Preventivi, spese, fornitori — tutto a colpo d'occhio." },
+          { "icon": "🤝", "label": "Fornitori", "detail": "Contatti, contratti, pagamenti — basta cercare nelle email." },
+          { "icon": "📅", "label": "Programma del giorno", "detail": "Il flusso della giornata. I vostri testimoni possono respirare." },
+          { "icon": "🎵", "label": "Playlist e idee", "detail": "Costruisci la colonna sonora, idee per animare la serata." }
+        ]
+      },
+      "scene": {
+        "label": "Il palcoscenico",
+        "sublabel": "per gli ospiti",
+        "title": "Un link nell'invito. E sono con te.",
+        "desc": "Nessun account necessario. I tuoi ospiti cliccano il loro link personale — cartaceo o digitale, tu scegli — e hanno accesso a tutto.",
+        "items": [
+          { "icon": "🔗", "label": "Link magico", "detail": "Nessun account da creare. Il link nell'invito, e sono con te." },
+          { "icon": "📅", "label": "Programma del giorno", "detail": "Senza dover infastidire nessuno." },
+          { "icon": "📝", "label": "Libro degli ospiti", "detail": "Parole gentili, video, ricordi — tutto dal loro telefono." },
+          { "icon": "🏠", "label": "Alloggi", "detail": "I tuoi suggerimenti di alloggio, a un click." },
+          { "icon": "💬", "label": "Messaggistica", "detail": "Chat diretta tra gli ospiti." },
+          { "icon": "📸", "label": "Album condiviso", "detail": "Tutte le foto, in un posto, per tutti." }
+        ],
+        "footerNote": "Preferisci un invito cartaceo? Nessun problema — il link di Kaatch può andare anche su quello."
+      }
+    },
+    "album": {
+      "tagline": "La parte migliore",
+      "title": "Album fotografico condiviso da tutti.",
+      "body1": "Niente Google Drive persi, niente gruppi Facebook saturi, niente centinaia di messaggi WhatsApp che chiedono \"mi mandi le foto?\".",
+      "body2": "Un codice QR sui tavoli. Gli ospiti caricano foto in due click. Tutto finisce in un unico posto. Tu decidi cosa tenere. Tra dieci anni, è ancora lì.",
+      "badges": [
+        "Niente gruppo Facebook",
+        "Niente Google Drive",
+        "Niente caos WhatsApp",
+        "Niente promemoria alla gente"
+      ]
+    },
+    "offers": {
+      "tagline": "Piani",
+      "title": "Senza sorprese.",
+      "desc": "Un prezzo, un pagamento. Niente abbonamenti nascosti. Prezzo in euro.",
+      "launchBanner": "🚀 Lancio su Product Hunt — Codice KAATCH2026 : piano matrimonio gratuito · Limitato a 100 posti",
+      "discovery": {
+        "label": "Scoperta",
+        "subtitle": "Per iniziare a organizzare",
+        "price": "0",
+        "priceNote": "Incluso · gratuito",
+        "features": [
+          "1 matrimonio",
+          "30 ospiti",
+          "20 foto",
+          "3 mesi di accesso",
+          "Programma del giorno",
+          "Invito digitale",
+          "RSVP di base",
+          "1 gruppo chat"
+        ],
+        "cta": "Inizia"
+      },
+      "wedding": {
+        "label": "💍 Matrimonio",
+        "subtitle": "Tutto per il tuo matrimonio",
+        "price": "45",
+        "priceNote": "Pagamento unico · in euro · 1 matrimonio",
+        "badge": "✦ Consigliato",
+        "features": [
+          "Ospiti illimitati",
+          "200 foto incluse",
+          "Invito animato personalizzato",
+          "RSVP completo",
+          "Seating plan drag-and-drop",
+          "Budget e fornitori",
+          "Musica / playlist",
+          "Libro degli ospiti",
+          "Esporta e importa ospiti",
+          "Scarica ZIP delle foto"
+        ],
+        "cta": "Crea il mio spazio →"
+      },
+      "premium": {
+        "label": "👑 Premium",
+        "subtitle": "L'esperienza completa",
+        "price": "99",
+        "priceNote": "Pagamento unico · in euro",
+        "badge": "Prossimamente",
+        "features": [
+          "Tutto in Matrimonio",
+          "Modelli di invito esclusivi",
+          "Cancelleria stampabile",
+          "Design personalizzato",
+          "Spazio ricordi migliorato",
+          "Supporto prioritario"
+        ],
+        "cta": "Scopri di più →"
+      },
+      "footer": "Piano Scoperta gratuito senza carta di credito · Pagamento sicuro · Accesso istantaneo · Prezzo in euro"
+    },
+    "creativeStudio": {
+      "tagline": "Studio Creativo",
+      "title": "La tua cancelleria nuziale, creata automaticamente.",
+      "subtitle": "creata automaticamente.",
+      "desc": "Scegli uno stile, noi generiamo i tuoi inviti, menu, segnaposti e seating plan. Stampato e consegnato. Non devi fare nient'altro.",
+      "steps": [
+        { "n": "01", "title": "Scegli il tuo stile", "desc": "Boho, classico, rustico, art déco… 5 universi di design creati dai nostri designer." },
+        { "n": "02", "title": "Generiamo tutto", "desc": "Invito, menu, segnaposto, seating plan — generato automaticamente dalla tua lista ospiti." },
+        { "n": "03", "title": "Stampato e consegnato", "desc": "Stampa professionale, carta premium, consegna in 5–7 giorni lavorativi." }
+      ],
+      "ambiances": [
+        { "name": "Boho", "tag": "Natura e libertà" },
+        { "name": "Classico", "tag": "Eleganza senza tempo" },
+        { "name": "Rustico", "tag": "Morbidezza e fiori" },
+        { "name": "Art Déco", "tag": "Glamour degli anni 20" },
+        { "name": "Minimalista", "tag": "Pulito e moderno" }
+      ],
+      "products": [
+        { "icon": "💌", "name": "Invito", "desc": "Animato + PDF ad alta risoluzione. Link condivisibile o stampabile." },
+        { "icon": "🍽️", "name": "Menu", "desc": "Formato A5, generato dal tuo programma e scelte culinarie." },
+        { "icon": "📋", "name": "Programma del giorno", "desc": "Flusso completo, automaticamente impaginato dalla tua timeline." },
+        { "icon": "🪧", "name": "Segnaposti", "desc": "Uno per ospite, generati in batch dalla tua lista. Zero inserimento manuale." },
+        { "icon": "🗺️", "name": "Seating plan", "detail": "Tutti i tuoi tavoli e ospiti, ordinatamente disposti." },
+        { "icon": "🔢", "name": "Numeri tavolo", "desc": "Cavalletto A5 con ogni numero tavolo. Stampato, pronto da posizionare." }
+      ],
+      "ctaSection": {
+        "tagline": "Prezzi di lancio",
+        "title": "La tua collezione di cancelleria, al prezzo di un menu.",
+        "desc": "Stampa professionale inclusa · Consegna 5–7 giorni · Carta premium 300g/m²",
+        "cta": "Crea la mia cancelleria →"
+      }
+    },
+    "faq": {
+      "tagline": "Domande frequenti",
+      "title": "Domande che ci fanno spesso.",
+      "items": [
+        {
+          "q": "I miei ospiti devono creare un account?",
+          "a": "Mai. Ogni ospite riceve un link univoco con il suo nome. Vanno direttamente al loro spazio — RSVP, programma, album foto — senza iscriversi, senza password."
+        },
+        {
+          "q": "Cosa succede dopo il matrimonio? I miei dati sono salvati?",
+          "a": "I tuoi dati (foto, messaggi, lista ospiti) rimangono accessibili finché il tuo spazio è attivo. Puoi scaricare tutto in qualsiasi momento."
+        },
+        {
+          "q": "Posso passare da gratuito al piano Matrimonio dopo?",
+          "a": "Sì, in qualsiasi momento dalla pagina Account del tuo matrimonio. I tuoi dati e spazio sono completamente preservati. Non ricomincia da zero."
+        },
+        {
+          "q": "I miei dati sono al sicuro?",
+          "a": "Kaatch è sicuro. I dati sono crittografati e mai rivenduti o condivisi. Possiedi tutto ciò che pubblichi."
+        },
+        {
+          "q": "Kaatch funziona su mobile?",
+          "a": "Completamente. Sia lo spazio degli sposi che quello degli ospiti sono progettati mobile-first. Niente app da scaricare — tutto funziona nel tuo browser."
+        }
+      ]
+    },
+    "ctaFinal": {
+      "tagline": "Fatto con amore",
+      "title": "Per semplificare il giorno più bello della tua vita.",
+      "desc": "Tu celebri la tua bella scoperta. Noi facciamo il resto — per te, i tuoi testimoni e i tuoi ospiti stiano insieme, presenti, e lo godano davvero.",
+      "cta": "Accedi al mio spazio →",
+      "ctaGuest": "Sei un invitato? Unisciti →"
+    },
+    "contact": {
+      "tagline": "Contatti",
+      "title": "Una domanda? Un'idea? Un commento? Un suggerimento?",
+      "desc": "Ti risponderemo lo stesso giorno."
+    }
+  },
+  "pricing": {
+    "banner": "🚀 Lancio su Product Hunt — Codice KAATCH2026 : tuo piano matrimonio gratuito · Limitato a 100 posti",
+    "header": {
+      "tagline": "Prezzi",
+      "title": "Semplice. Trasparente. Senza sorprese.",
+      "desc": "Costa meno di un bouquet da sposa — e sostituisce 12 gruppi WhatsApp 💐",
+      "footer": "45 in euro. Pagamento unico. Niente abbonamento, niente sorprese."
+    },
+    "discovery": {
+      "label": "Scoperta",
+      "subtitle": "Per iniziare a organizzare",
+      "price": "0",
+      "priceNote": "Incluso · Gratuito",
+      "features": [
+        "1 matrimonio",
+        "30 ospiti",
+        "20 foto",
+        "3 mesi di accesso",
+        "Programma del giorno",
+        "Invito digitale",
+        "RSVP (sì/no, numero commensali)",
+        "1 gruppo chat",
+        "Pagina di benvenuto ospiti"
+      ],
+      "cta": "Inizia"
+    },
+    "wedding": {
+      "label": "💍 Matrimonio",
+      "subtitle": "Tutto per il tuo matrimonio",
+      "price": "45",
+      "priceNote": "Pagamento unico · in euro",
+      "badge": "Consigliato",
+      "features": [
+        "Ospiti illimitati",
+        "200 foto incluse",
+        "Invito animato personalizzato",
+        "RSVP completo (allergie, +1, trasporto)",
+        "Seating plan drag-and-drop",
+        "Budget e fornitori",
+        "Esporta e importa ospiti Excel/CSV",
+        "Musica / playlist per momento",
+        "Libro degli ospiti",
+        "Gruppi chat illimitati",
+        "Alloggi, sorprese, contatti",
+        "Scarica ZIP delle foto",
+        "Codici QR personalizzati per ospiti"
+      ],
+      "cta": "Scegli questo piano →"
+    },
+    "premium": {
+      "label": "👑 Premium",
+      "subtitle": "L'esperienza completa",
+      "price": "99",
+      "priceNote": "Pagamento unico · in euro",
+      "badge": "Prossimamente",
+      "features": [
+        "Tutto in Matrimonio",
+        "Modelli di invito esclusivi",
+        "Cancelleria stampabile (menu, segnaposti)",
+        "Design personalizzato",
+        "Spazio ricordi migliorato",
+        "Supporto prioritario"
+      ],
+      "notifyPlaceholder": "tua@email.com",
+      "notifyLabel": "Notificami quando apre:",
+      "notifyBtn": "Notificami"
+    },
+    "footer": "Piano Scoperta gratuito senza carta di credito · Pagamento sicuro · Accesso istantaneo · Il tuo matrimonio merita di meglio che un foglio di calcolo 💚",
+    "questionsSection": {
+      "tagline": "Domande",
+      "title": "Hai una domanda?",
+      "desc": "Ti risponderemo lo stesso giorno. Contattaci via modulo o email.",
+      "contactForm": "Modulo di contatto",
+      "email": "hello@kaatch.fr →"
+    }
+  },
+  "footer": {
+    "description": "L'app che sostituisce fogli di calcolo, caos WhatsApp e liste infinite. Per coppie che vogliono concentrarsi sul matrimonio, non organizzarlo.",
+    "linksNav": [
+      { "label": "Come funziona", "href": "#comment-ca-marche" },
+      { "label": "Studio Creativo", "href": "#studio" },
+      { "label": "Piani", "href": "#offres" },
+      { "label": "Ispirazione", "href": "/inspirations" },
+      { "label": "Spazio ospiti", "href": "/rejoindre" }
+    ],
+    "linksBottom": [
+      { "label": "Home", "href": "/" },
+      { "label": "Prezzi", "href": "/pricing" },
+      { "label": "Termini", "href": "/cgv" },
+      { "label": "Spazio ospiti", "href": "/rejoindre" }
+    ],
+    "legalLinks": [
+      { "label": "Avviso legale", "href": "/mentions-legales" },
+      { "label": "Termini", "href": "/cgv" },
+      { "label": "Privacy", "href": "/politique-de-confidentialite" }
+    ],
+    "copyright": "© 2026 Kaatch",
+    "copyrightDesktop": "Nessun gruppo WhatsApp è stato danneggiato nella realizzazione di questo sito.",
+    "productHunt": "Trova Kaatch su Product Hunt",
+    "email": "hello@kaatch.fr"
+  }
+}

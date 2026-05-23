@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from '@/lib/supabase-server'
 import Countdown from './Countdown'
 import EcheancesWidget from './EcheancesWidget'
 import CreateModal from './CreateModal'
+import OnboardingTour from './OnboardingTour'
 import { isPaid } from '@/lib/plan'
 import Link from 'next/link'
 import {
@@ -105,6 +106,9 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
 
       {/* Main content */}
       <div className="max-w-5xl mx-auto px-4 py-6">
+
+        {/* Onboarding tour */}
+        <OnboardingTour slug={slug} guestCount={guestCount ?? 0} vendorCount={vendors?.length ?? 0} />
 
         {/* Quick stats bar */}
         <div className="grid grid-cols-4 gap-3 mb-8">

@@ -14,8 +14,8 @@ export default function CreateModal({ slug }: { slug: string }) {
       color: 'text-blue-600',
       items: [
         { label: 'Ajouter un invité', href: `/mariage/${slug}/guests` },
-        { label: 'Créer un groupe', href: `/mariage/${slug}/echanger` },
-        { label: 'Assigner une table', href: `/mariage/${slug}/tables` },
+        { label: 'Messagerie', href: `/mariage/${slug}/messagerie` },
+        { label: 'Plan de table', href: `/mariage/${slug}/tables` },
       ],
     },
     {
@@ -23,10 +23,10 @@ export default function CreateModal({ slug }: { slug: string }) {
       label: 'Organisation',
       color: 'text-green-600',
       items: [
-        { label: 'Étape du programme', href: `/mariage/${slug}/programme` },
-        { label: 'Tâche checklist', href: `/mariage/${slug}/checklist` },
-        { label: 'Ligne budget', href: `/mariage/${slug}/budget` },
-        { label: 'Ajouter un prestataire', href: `/mariage/${slug}/prestataires` },
+        { label: 'Programme', href: `/mariage/${slug}/programme` },
+        { label: 'Checklist', href: `/mariage/${slug}/checklist` },
+        { label: 'Budget', href: `/mariage/${slug}/budget` },
+        { label: 'Prestataires', href: `/mariage/${slug}/prestataires` },
       ],
     },
     {
@@ -34,9 +34,9 @@ export default function CreateModal({ slug }: { slug: string }) {
       label: 'Créatif',
       color: 'text-purple-600',
       items: [
-        { label: 'Moodboard', href: `/mariage/${slug}/imaginer/moodboards` },
-        { label: 'Faire-part', href: `/mariage/${slug}/studio/faire-parts` },
-        { label: 'Direction artistique', href: `/mariage/${slug}/imaginer/direction` },
+        { label: 'Studio créatif', href: `/mariage/${slug}/studio` },
+        { label: 'Inspiration', href: `/mariage/${slug}/inspirations` },
+        { label: 'Hébergements', href: `/mariage/${slug}/hebergements` },
       ],
     },
     {
@@ -44,9 +44,9 @@ export default function CreateModal({ slug }: { slug: string }) {
       label: 'Partage',
       color: 'text-orange-600',
       items: [
-        { label: 'Code de partage', href: `/mariage/${slug}/partager` },
-        { label: 'Envoyer faire-part', href: `/mariage/${slug}/invitations` },
-        { label: 'Partager galerie photos', href: `/mariage/${slug}/photos` },
+        { label: 'Partage & QR', href: `/mariage/${slug}/partager` },
+        { label: 'Galerie photos', href: `/mariage/${slug}/photos` },
+        { label: 'Livre d'or', href: `/mariage/${slug}/livre-dor` },
       ],
     },
   ]

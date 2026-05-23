@@ -2,163 +2,135 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { X, ChevronDown } from 'lucide-react'
+import { X, ChevronUp, ChevronDown } from 'lucide-react'
 
-interface OnboardingStep {
+interface Step {
   id: string
   label: string
   description: string
   href: string
-  done?: boolean
 }
 
-export default function OnboardingTour({ slug, guestCount, vendorCount }: { slug: string; guestCount: number; vendorCount: number }) {
-  const [open, setOpen] = useState(false)
-  const [completedSteps, setCompletedSteps] = useState<Set<string>>(new Set())
+export default function OnboardingTour({ slug, guestCount, vendorCount }: {
+  slug: string
+  guestCount: number
+  vendorCount: number
+}) {
+  const [visible, setVisible] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
+  const [completed, setCompleted] = useState<Set<string>>(new Set())
 
-  const steps: OnboardingStep[] = [
-    {
-      id: 'imagine',
-      label: 'Imaginez',
-      description: 'Renseigner date, lieu et message couple',
-      href: `/mariage/${slug}/edit`,
-    },
-    {
-      id: 'prepare',
-      label: 'Préparez',
-      description: 'Ajouter vos prestataires clés',
-      href: `/mariage/${slug}/prestataires`,
-    },
-    {
-      id: 'invite',
-      label: 'Invitez',
-      description: `Importer et lister vos invités`,
-      href: `/mariage/${slug}/guests`,
-    },
-    {
-      id: 'coordinate',
-      label: 'Coordonnez',
-      description: 'Valider les confirmations',
-      href: `/mariage/${slug}/guests`,
-    },
+  const steps: Step[] = [
+    { id: 'imagine',     label: 'Imaginer',    description: 'Renseigner date, lieu et message couple',  href: `/mariage/${slug}/edit` },
+    { id: 'prepare',     label: 'Préparer',    description: 'Ajouter vos prestataires clés',             href: `/mariage/${slug}/prestataires` },
+    { id: 'invite',      label: 'Inviter',     description: 'Importer et lister vos invités',             href: `/mariage/${slug}/guests` },
+    { id: 'coordinate',  label: 'Coordonner',  description: 'Valider les premières confirmations',        href: `/mariage/${slug}/guests` },
   ]
 
-  // Init from localStorage
   useEffect(() => {
-    const storageKey = `onboarding_${slug}`
-    const stored = localStorage.getItem(storageKey)
-    if (stored) {
-      setCompletedSteps(new Set(JSON.parse(stored)))
-    } else {
-      // First visit
-      setOpen(true)
-    }
-  }, [slug])
+    const key = `onboarding_done_${slug}`
+    if (localStorage.getItem(key) === 'true') return
+    const storedCompleted = localStorage.getItem(`onboarding_completed_${slug}`)
+    const init = storedCompleted ? new Set<string>(JSON.parse(storedCompleted)) : new Set<string>()
+    if (vendorCount > 0) init.add('prepare')
+    if (guestCount > 0) init.add('invite')
+    setCompleted(init)
+    setVisible(true)
+  }, [slug, guestCount, vendorCount])
 
-  // Auto-mark steps based on data
-  useEffect(() => {
-    const newCompleted = new Set(completedSteps)
+  function markDone(id: string) {
+    const next = new Set(completed)
+    next.add(id)
+    setCompleted(next)
+    localStorage.setItem(`onboarding_completed_${slug}`, JSON.stringify(Array.from(next)))
+  }
 
-    // Mark "Prepare" done if vendors exist
-    if (vendorCount > 0) newCompleted.add('prepare')
-    // Mark "Invite" done if guests exist
-    if (guestCount > 0) newCompleted.add('invite')
+  function close() {
+    localStorage.setItem(`onboarding_done_${slug}`, 'true')
+    setVisible(false)
+  }
 
-    if (newCompleted.size > completedSteps.size) {
-      setCompletedSteps(newCompleted)
-      localStorage.setItem(`onboarding_${slug}`, JSON.stringify(Array.from(newCompleted)))
-    }
-  }, [guestCount, vendorCount, slug, completedSteps])
+  if (!visible) return null
 
-  const progress = Math.round((completedSteps.size / steps.length) * 100)
-  const allDone = completedSteps.size === steps.length
-
-  if (!open) return null
+  const progress = Math.round((completed.size / steps.length) * 100)
 
   return (
-    <div className="bg-green-50 border border-green-200 rounded-2xl p-6 mb-8">
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-2xl">🚀</span>
-            <h2 style={{ fontWeight: 600, fontSize: '1rem' }} className="text-green-900">
-              Premiers pas — Gagnez des crédits !
-            </h2>
-          </div>
-          <p style={{ fontWeight: 400, fontSize: '0.85rem' }} className="text-green-700 mb-4">
-            Complétez ces étapes pour démarrer votre mariage
-          </p>
-
-          {/* Progress bar */}
-          <div className="w-full bg-green-200 rounded-full h-2 mb-4 overflow-hidden">
-            <div
-              className="bg-green-600 h-full transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-
-          <p style={{ fontWeight: 500, fontSize: '0.8rem' }} className="text-green-700 mb-4">
-            {completedSteps.size}/{steps.length} étapes • {progress}% complété
-          </p>
+    <div className="fixed bottom-6 right-6 z-[90] w-72 bg-white rounded-2xl shadow-xl border border-stone-100 overflow-hidden">
+      {/* Header */}
+      <div
+        className="flex items-center justify-between px-4 py-3 bg-[#4a5240] cursor-pointer select-none"
+        onClick={() => setCollapsed(c => !c)}
+      >
+        <div className="flex items-center gap-2.5 flex-1 min-w-0">
+          <span className="text-base">🚀</span>
+          <span style={{ fontFamily: 'var(--font-lato)', fontWeight: 500, fontSize: '0.85rem' }} className="text-white truncate">
+            Premiers pas
+          </span>
+          <span style={{ fontWeight: 400, fontSize: '0.75rem' }} className="text-white/70 shrink-0">
+            {progress}%
+          </span>
         </div>
-
-        <button
-          onClick={() => setOpen(false)}
-          className="p-2 hover:bg-green-100 rounded-lg transition shrink-0"
-        >
-          <X className="w-5 h-5 text-green-700" />
-        </button>
+        <div className="flex items-center gap-1 shrink-0 ml-2">
+          {collapsed
+            ? <ChevronUp className="w-4 h-4 text-white/70" />
+            : <ChevronDown className="w-4 h-4 text-white/70" />
+          }
+          <button
+            onClick={e => { e.stopPropagation(); close() }}
+            className="ml-1 p-0.5 hover:bg-white/20 rounded transition"
+          >
+            <X className="w-3.5 h-3.5 text-white/70" />
+          </button>
+        </div>
       </div>
 
+      {/* Progress bar */}
+      {!collapsed && (
+        <div className="h-1 bg-stone-100">
+          <div
+            className="h-full bg-[#4a5240] transition-all duration-300"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      )}
+
       {/* Steps */}
-      <div className="space-y-2">
-        {steps.map((step) => {
-          const isDone = completedSteps.has(step.id)
-          return (
-            <Link
-              key={step.id}
-              href={step.href}
-              className={`block p-4 rounded-xl border transition ${
-                isDone
-                  ? 'bg-white border-green-200 opacity-60'
-                  : 'bg-white border-green-100 hover:border-green-300 hover:shadow-sm'
-              }`}
-            >
-              <div className="flex items-start gap-3">
-                <div
-                  className={`mt-0.5 w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
-                    isDone
-                      ? 'bg-green-600 border-green-600'
-                      : 'border-2 border-green-300'
-                  }`}
-                >
-                  {isDone && <span className="text-white text-xs">✓</span>}
+      {!collapsed && (
+        <div className="p-3 space-y-1.5">
+          {steps.map(step => {
+            const done = completed.has(step.id)
+            return (
+              <Link
+                key={step.id}
+                href={step.href}
+                onClick={() => markDone(step.id)}
+                className={`flex items-start gap-3 p-2.5 rounded-xl transition ${
+                  done
+                    ? 'opacity-50'
+                    : 'hover:bg-stone-50'
+                }`}
+              >
+                <div className={`mt-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                  done ? 'bg-[#4a5240] border-[#4a5240]' : 'border-stone-300'
+                }`}>
+                  {done && (
+                    <svg viewBox="0 0 10 8" fill="none" className="w-2.5 h-2">
+                      <path d="M1 4l3 3 5-6" stroke="white" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
                 </div>
-                <div className="flex-1">
-                  <p
-                    style={{ fontWeight: 600, fontSize: '0.9rem' }}
-                    className={isDone ? 'text-green-600 line-through' : 'text-green-900'}
-                  >
+                <div>
+                  <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 500, fontSize: '0.82rem' }}
+                    className={done ? 'text-stone-400 line-through' : 'text-stone-800'}>
                     {step.label}
                   </p>
-                  <p
-                    style={{ fontWeight: 400, fontSize: '0.8rem' }}
-                    className="text-green-700 opacity-75"
-                  >
+                  <p style={{ fontWeight: 300, fontSize: '0.73rem' }} className="text-stone-400">
                     {step.description}
                   </p>
                 </div>
-              </div>
-            </Link>
-          )
-        })}
-      </div>
-
-      {allDone && (
-        <div className="mt-4 p-3 bg-green-100 rounded-xl">
-          <p style={{ fontWeight: 500, fontSize: '0.9rem' }} className="text-green-900">
-            ✨ Bien joué ! Vous pouvez explorer tous les autres outils maintenant.
-          </p>
+              </Link>
+            )
+          })}
         </div>
       )}
     </div>

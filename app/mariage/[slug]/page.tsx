@@ -27,6 +27,11 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
     { count: budgetCount },
     { data: todosData },
     { data: vendors },
+    { count: programCount },
+    { count: tablesCount },
+    { data: recentPhotos },
+    { data: recentConfirmed },
+    { data: recentGuestbook },
   ] = await Promise.all([
     supabase.from('guests').select('*', { count: 'exact', head: true }).eq('wedding_id', wedding.id),
     supabase.from('guests').select('*', { count: 'exact', head: true }).eq('wedding_id', wedding.id).eq('rsvp_status', 'confirme'),
@@ -34,6 +39,11 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
     supabase.from('budget_items').select('*', { count: 'exact', head: true }).eq('wedding_id', wedding.id),
     supabase.from('wedding_todos').select('*').eq('wedding_id', wedding.id).order('created_at'),
     supabase.from('wedding_vendors').select('id, name, category').eq('wedding_id', wedding.id).limit(5),
+    supabase.from('program_steps').select('*', { count: 'exact', head: true }).eq('wedding_id', wedding.id),
+    supabase.from('tables').select('*', { count: 'exact', head: true }).eq('wedding_id', wedding.id),
+    supabase.from('photos').select('uploaded_by_name, created_at').eq('wedding_id', wedding.id).order('created_at', { ascending: false }).limit(3),
+    supabase.from('guests').select('first_name, last_name, created_at').eq('wedding_id', wedding.id).eq('rsvp_status', 'confirme').order('created_at', { ascending: false }).limit(3),
+    supabase.from('guestbook_entries').select('author_name, created_at').eq('wedding_id', wedding.id).order('created_at', { ascending: false }).limit(2),
   ])
 
   const dateFormatted = wedding.date
@@ -83,6 +93,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
   ]
 
   return (
+    <>
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
 
       {/* Cover banner */}
@@ -107,9 +118,6 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
       {/* Main content */}
       <div className="max-w-5xl mx-auto px-4 py-6">
 
-        {/* Onboarding tour */}
-        <OnboardingTour slug={slug} guestCount={guestCount ?? 0} vendorCount={vendors?.length ?? 0} />
-
         {/* Quick stats bar */}
         <div className="grid grid-cols-4 gap-3 mb-8">
           {[
@@ -133,52 +141,73 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
           <div className="lg:col-span-2 space-y-6">
 
             {/* À faire maintenant */}
-            <div className="bg-white rounded-3xl border border-stone-100 p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 style={{ fontWeight: 600, fontSize: '1.1rem' }} className="text-stone-800">À faire maintenant</h2>
-                <Zap className="w-5 h-5 text-[#4a5240]" strokeWidth={2} />
-              </div>
-              <div className="space-y-3">
-                {[
-                  { label: `Relancer ${Math.max(0, (guestCount ?? 0) - (confirmedCount ?? 0))} invités sans réponse`, done: false },
-                  { label: 'Valider le programme du jour J', done: false },
-                  { label: 'Finaliser le plan de table', done: false },
-                  { label: 'Confirmer les prestataires', done: false },
-                ].map((task, i) => (
-                  <div key={i} className="flex items-start gap-3">
-                    <div className={`mt-1 w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${task.done ? 'bg-[#4a5240] border-[#4a5240]' : 'border-stone-300'}`}>
-                      {task.done && <CheckCircle2 className="w-3 h-3 text-white" strokeWidth={3} />}
-                    </div>
-                    <p style={{ fontWeight: 400, fontSize: '0.95rem' }} className={task.done ? 'text-stone-400 line-through' : 'text-stone-700'}>{task.label}</p>
+            {(() => {
+              const pending = (guestCount ?? 0) - (confirmedCount ?? 0)
+              const tasks = [
+                { label: `Relancer ${Math.max(0, pending)} invité${pending > 1 ? 's' : ''} sans réponse`, done: pending === 0 && (guestCount ?? 0) > 0, href: `/mariage/${slug}/guests` },
+                { label: 'Créer le programme du jour J', done: (programCount ?? 0) > 0, href: `/mariage/${slug}/programme` },
+                { label: 'Finaliser le plan de table', done: (tablesCount ?? 0) > 0, href: `/mariage/${slug}/tables` },
+                { label: 'Renseigner vos prestataires', done: (vendors?.length ?? 0) > 0, href: `/mariage/${slug}/prestataires` },
+              ]
+              return (
+                <div className="bg-white rounded-3xl border border-stone-100 p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 style={{ fontWeight: 600, fontSize: '1.1rem' }} className="text-stone-800">À faire maintenant</h2>
+                    <Zap className="w-5 h-5 text-[#4a5240]" strokeWidth={2} />
                   </div>
-                ))}
-              </div>
-            </div>
+                  <div className="space-y-3">
+                    {tasks.map((task, i) => (
+                      <Link key={i} href={task.href} className="flex items-start gap-3 group">
+                        <div className={`mt-1 w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${task.done ? 'bg-[#4a5240] border-[#4a5240]' : 'border-stone-300 group-hover:border-[#4a5240]'}`}>
+                          {task.done && <CheckCircle2 className="w-3 h-3 text-white" strokeWidth={3} />}
+                        </div>
+                        <p style={{ fontWeight: 400, fontSize: '0.95rem' }} className={task.done ? 'text-stone-400 line-through' : 'text-stone-700 group-hover:text-[#4a5240]'}>{task.label}</p>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )
+            })()}
 
             {/* Derniers mouvements */}
-            <div className="bg-white rounded-3xl border border-stone-100 p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 style={{ fontWeight: 600, fontSize: '1.1rem' }} className="text-stone-800">Derniers mouvements</h2>
-                <Clock className="w-5 h-5 text-[#4a5240]" strokeWidth={2} />
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <p style={{ fontWeight: 500, fontSize: '0.8rem' }} className="text-stone-500 mb-2">Côté invités</p>
-                  <ul className="space-y-2">
-                    <li style={{ fontWeight: 400, fontSize: '0.9rem' }} className="text-stone-700">• Léa a confirmé sa présence</li>
-                    <li style={{ fontWeight: 400, fontSize: '0.9rem' }} className="text-stone-700">• Camille a ajouté 8 photos</li>
-                    <li style={{ fontWeight: 400, fontSize: '0.9rem' }} className="text-stone-700">• Jules a laissé un message</li>
-                  </ul>
+            {(() => {
+              const activity: { text: string; time: string }[] = []
+              recentConfirmed?.forEach(g => {
+                const name = [g.first_name, g.last_name].filter(Boolean).join(' ')
+                activity.push({ text: `${name} a confirmé sa présence`, time: g.created_at })
+              })
+              recentPhotos?.forEach(p => {
+                const name = p.uploaded_by_name || 'Quelqu\'un'
+                activity.push({ text: `${name} a ajouté une photo`, time: p.created_at })
+              })
+              recentGuestbook?.forEach(e => {
+                activity.push({ text: `${e.author_name} a laissé un message dans le livre d\'or`, time: e.created_at })
+              })
+              activity.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+              const top = activity.slice(0, 5)
+              return (
+                <div className="bg-white rounded-3xl border border-stone-100 p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 style={{ fontWeight: 600, fontSize: '1.1rem' }} className="text-stone-800">Derniers mouvements</h2>
+                    <Clock className="w-5 h-5 text-[#4a5240]" strokeWidth={2} />
+                  </div>
+                  {top.length === 0 ? (
+                    <p style={{ fontWeight: 300, fontSize: '0.88rem' }} className="text-stone-400 italic">
+                      Aucune activité récente — invitez vos premiers invités !
+                    </p>
+                  ) : (
+                    <ul className="space-y-2.5">
+                      {top.map((item, i) => (
+                        <li key={i} className="flex items-start gap-2.5">
+                          <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[#4a5240]/30 shrink-0" />
+                          <p style={{ fontWeight: 400, fontSize: '0.88rem' }} className="text-stone-700">{item.text}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
-                <div>
-                  <p style={{ fontWeight: 500, fontSize: '0.8rem' }} className="text-stone-500 mb-2">Côté prestataires</p>
-                  <ul className="space-y-2">
-                    <li style={{ fontWeight: 400, fontSize: '0.9rem' }} className="text-stone-700">• Le traiteur a envoyé son devis</li>
-                    <li style={{ fontWeight: 400, fontSize: '0.9rem' }} className="text-stone-700">• Le photographe a validé l"horaire</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
+              )
+            })()}
 
           </div>
 
@@ -224,5 +253,9 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
         </div>
       </div>
     </div>
+
+    {/* Onboarding tour — fixed bottom-right widget */}
+    <OnboardingTour slug={slug} guestCount={guestCount ?? 0} vendorCount={vendors?.length ?? 0} />
+    </>
   )
 }

@@ -18,6 +18,7 @@ const features = [
   { icon: '📅', label: 'Programme jour J',       desc: 'Le déroulé complet pour vos invités',          href: '/fonctionnalites/programme-jour-j' },
   { icon: '🔗', label: 'Espace invités',         desc: 'Sans compte, sans friction',                   href: '/fonctionnalites/espace-invites' },
   { icon: '📝', label: "Livre d'or",             desc: 'Mots doux et souvenirs pour toujours',         href: '/fonctionnalites/livre-dor' },
+  { icon: '🤝', label: 'Gestion prestataires',   desc: 'Invitez-les, choisissez ce qu\'ils voient',    href: '/gestion-prestataires' },
 ]
 
 const navLinksConfig = [
@@ -171,6 +172,13 @@ export default function PublicNav({ active }: { active?: string }) {
 
           {/* Desktop CTAs */}
           <Link
+            href="/gestion-prestataires"
+            className="text-sm border border-stone-300 text-stone-600 px-4 py-2 rounded-full hover:border-[#2C3B2E] hover:text-[#2C3B2E] transition hidden md:block"
+            style={{ fontFamily: BODY, fontWeight: 400 }}
+          >
+            Prestataire
+          </Link>
+          <Link
             href="/rejoindre"
             className="text-sm border border-stone-300 text-stone-600 px-4 py-2 rounded-full hover:border-[#2C3B2E] hover:text-[#2C3B2E] transition hidden md:block"
             style={{ fontFamily: BODY, fontWeight: 400 }}
@@ -279,7 +287,16 @@ export default function PublicNav({ active }: { active?: string }) {
               )
             })}
 
-            <div className="pt-3 border-t border-stone-200 flex gap-2">
+            <div className="pt-3 border-t border-stone-200 space-y-2">
+              <div className="flex gap-2">
+              <Link
+                href="/gestion-prestataires"
+                onClick={() => setOpen(false)}
+                className="flex-1 text-center text-sm border border-stone-300 text-stone-600 py-2.5 rounded-full hover:border-[#2C3B2E] hover:text-[#2C3B2E] transition"
+                style={{ fontFamily: BODY, fontWeight: 400 }}
+              >
+                Prestataire
+              </Link>
               <Link
                 href="/rejoindre"
                 onClick={() => setOpen(false)}
@@ -288,15 +305,15 @@ export default function PublicNav({ active }: { active?: string }) {
               >
                 {t('nav.invite')}
               </Link>
+              </div>
               <Link
                 href="/auth"
                 onClick={() => setOpen(false)}
-                className="flex-1 text-center text-sm bg-[#2C3B2E] text-white py-2.5 rounded-full hover:bg-[#1a2419] transition"
+                className="w-full text-center text-sm bg-[#2C3B2E] text-white py-2.5 rounded-full hover:bg-[#1a2419] transition"
                 style={{ fontFamily: BODY, fontWeight: 500 }}
               >
                 {t('nav.connexion')}
               </Link>
-            </div>
           </div>
         </div>
       )}

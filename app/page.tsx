@@ -66,7 +66,7 @@ export default function Home() {
     { icon: '💌', label: "Faire-parts & RSVP", detail: "Lien personnel par invité, réponses qui tombent en direct." },
     { icon: '🪑', label: "Plan de table", detail: "Glisser-déposer, ajusté jusqu'à la veille." },
     { icon: '💰', label: "Budget global", detail: "Devis, dépenses, prestataires — tout sous les yeux." },
-    { icon: '🤝', label: "Prestataires", detail: "Coordonnées, contrats, paiements — finis les mails fouillés." },
+    { icon: '🤝', label: "Prestataires", detail: "Invitez-les, choisissez ce qu'ils voient. Finis les mails.", href: '/gestion-prestataires' },
     { icon: '📅', label: "Programme jour J", detail: "Le déroulé de la journée. Vos témoins respirent." },
     { icon: '🎵', label: "Playlist & animations", detail: "Construire la bande-son, des idées pour animer la soirée." },
   ]
@@ -130,7 +130,7 @@ export default function Home() {
       "screenshot": "https://kaatch.fr/og-image.png",
       "creator": {
         "@type": "Organization",
-        "name": "Cogitium",
+        "name": "Ana",
         "url": "https://kaatch.fr",
         "email": "bonjour@kaatch.fr"
       }
@@ -418,15 +418,18 @@ export default function Home() {
                   Tout ce qu&apos;il faut pour une organisation simple et efficace.
                 </h3>
                 <div className="grid grid-cols-2 gap-2.5">
-                  {backstage.map(b => (
-                    <div key={b.label} className="flex items-start gap-2.5 bg-[#f5f0e8] rounded-xl px-3.5 py-3">
-                      <span className="text-base mt-0.5 shrink-0">{b.icon}</span>
-                      <div>
-                        <p style={{ fontWeight: 600, fontSize: '0.78rem', fontFamily: DISPLAY }} className="text-[#2C3B2E]">{b.label}</p>
-                        <p style={{ fontWeight: 300, fontSize: '0.7rem', lineHeight: 1.5 }} className="text-stone-500 mt-0.5">{b.detail}</p>
-                      </div>
-                    </div>
-                  ))}
+                  {backstage.map(b => {
+                    const Tag = b.href ? 'a' : 'div'
+                    return (
+                      <Tag key={b.label} {...(b.href ? { href: b.href } : {})} className={`flex items-start gap-2.5 bg-[#f5f0e8] rounded-xl px-3.5 py-3${b.href ? ' hover:bg-[#ece7dd] transition cursor-pointer' : ''}`}>
+                        <span className="text-base mt-0.5 shrink-0">{b.icon}</span>
+                        <div>
+                          <p style={{ fontWeight: 600, fontSize: '0.78rem', fontFamily: DISPLAY }} className="text-[#2C3B2E]">{b.label}{b.href ? ' →' : ''}</p>
+                          <p style={{ fontWeight: 300, fontSize: '0.7rem', lineHeight: 1.5 }} className="text-stone-500 mt-0.5">{b.detail}</p>
+                        </div>
+                      </Tag>
+                    )
+                  })}
                 </div>
               </div>
             </div>

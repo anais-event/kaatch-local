@@ -315,6 +315,7 @@ export default function PublicNav({ active }: { active?: string }) {
                 {t('nav.connexion')}
               </Link>
           </div>
+          </div>
         </div>
       )}
     </nav>

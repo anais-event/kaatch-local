@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import Countdown from './Countdown'
 import EcheancesWidget from './EcheancesWidget'
+import CreateModal from './CreateModal'
 import { isPaid } from '@/lib/plan'
 import Link from 'next/link'
 import {
@@ -211,11 +212,8 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
               </div>
             )}
 
-            {/* Créer button — floating action */}
-            <button className="w-full bg-[#4a5240] hover:bg-[#2d3228] text-white rounded-3xl py-3.5 transition font-medium flex items-center justify-center gap-2">
-              <Plus className="w-5 h-5" strokeWidth={2} />
-              Créer
-            </button>
+            {/* Créer button — opens modal */}
+            <CreateModal slug={slug} />
 
           </div>
 

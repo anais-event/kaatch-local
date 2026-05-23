@@ -163,7 +163,24 @@
       "Bash(echo \"\" > \"app/v/[token]/route.ts\")",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/)",
       "Bash(node -e \"const matter = require\\('gray-matter'\\); const fs = require\\('fs'\\); const files = ['budget-3fbi','budget-moyen-mariage-france','photographe-mariage-questions-a-poser','liste-invites-sans-prise-de-tete']; files.forEach\\(f => { const {data} = matter\\(fs.readFileSync\\('content/inspirations/'+f+'.mdx','utf-8'\\)\\); console.log\\(f, data.date\\); }\\)\")",
-      "Bash(git mv *)"
+      "Bash(git mv *)",
+      "Bash(taskkill /PID 27380 /F)",
+      "Bash(pwsh -Command \"Stop-Process -Id 27380 -Force -ErrorAction SilentlyContinue; Start-Sleep -Seconds 2\")",
+      "Bash(lsof -ti:3000)",
+      "Bash(xargs kill -9)",
+      "Bash(rm -rf .next)",
+      "Read(//tmp/**)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\anais\\\\Desktop\\\\kaatch\" -Name \"*FeatureTicker*\" -Recurse)",
+      "Bash(taskkill /PID 31704 /F)",
+      "Bash(taskkill /F /IM node.exe)",
+      "Bash(New-Item -ItemType Directory -Path \"C:\\\\Users\\\\anais\\\\Desktop\\\\kaatch\\\\app\\\\mariage\\\\[slug]\\\\studio\" -Force)",
+      "Bash(Out-Null)",
+      "Bash(Write-Host \"Directory created\")",
+      "Bash(mkdir -p \"C:\\\\Users\\\\anais\\\\Desktop\\\\kaatch\\\\app\\\\mariage\\\\[slug]\\\\studio\" && echo \"Directory exists\")",
+      "Bash(Select-String -Pattern '\\(ready|error|Error|WARN\\)')",
+      "Bash(Select-Object -First 10)",
+      "Bash(curl -s http://localhost:3000/mariage/test/imaginer)",
+      "Bash(curl -s http://localhost:3000/mariage/test-slug)"
     ]
   }
 }

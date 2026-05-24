@@ -26,11 +26,9 @@ const RSVP_LABEL: Record<string, string> = {
 
 export default function SyntheseParMoment({
   guests,
-  total,
   partsLabels,
 }: {
   guests: Guest[]
-  total: number
   partsLabels: Record<string, string>
 }) {
   const [openPart, setOpenPart] = useState<string | null>(null)
@@ -47,7 +45,8 @@ export default function SyntheseParMoment({
             const parts = g.invited_parts
             return !parts || parts.includes(part)
           })
-          const count = forPart.length
+          const totalForPart = forPart.length
+          const confirmedForPart = forPart.filter(g => g.rsvp_status === 'confirme').length
           const isOpen = openPart === part
 
           return (
@@ -62,11 +61,13 @@ export default function SyntheseParMoment({
                 </span>
                 <div className="flex-1 h-1.5 bg-stone-100 rounded-full overflow-hidden">
                   <div className="h-full bg-[#4a5240] rounded-full transition-all"
-                       style={{ width: `${total > 0 ? (count / total) * 100 : 0}%` }} />
+                       style={{ width: `${totalForPart > 0 ? (confirmedForPart / totalForPart) * 100 : 0}%` }} />
                 </div>
                 <span style={{ fontWeight: 300, fontSize: '0.75rem' }}
-                      className="text-stone-400 tabular-nums w-6 text-right shrink-0">
-                  {count}
+                      className="text-stone-400 tabular-nums shrink-0 text-right"
+                      title={`${confirmedForPart} confirmés sur ${totalForPart} invités`}>
+                  <span className="text-stone-600">{confirmedForPart}</span>
+                  <span className="text-stone-300">/{totalForPart}</span>
                 </span>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
                      className={`w-3 h-3 text-stone-300 shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`}>

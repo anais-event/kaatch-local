@@ -350,7 +350,7 @@ export default async function GuestsPage({
 
             {/* Par moment */}
             {total > 0 && (
-              <SyntheseParMoment guests={guestList} total={total} partsLabels={PARTS_LABELS} />
+              <SyntheseParMoment guests={guestList} partsLabels={PARTS_LABELS} />
             )}
 
             {/* Envoi groupé */}

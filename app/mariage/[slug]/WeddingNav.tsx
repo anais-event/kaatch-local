@@ -85,7 +85,7 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
       ],
     },
     {
-      label: 'Échanger et Se souvenir',
+      label: 'Échanges & Souvenirs',
       href: `/mariage/${slug}/echanger`,
       items: [
         { label: 'Messagerie', sub: 'Groupes de discussion', href: `/mariage/${slug}/messagerie` },

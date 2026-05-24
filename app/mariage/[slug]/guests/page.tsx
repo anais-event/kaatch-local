@@ -185,38 +185,52 @@ export default async function GuestsPage({
     <div className="min-h-screen bg-[#f5f0e8] p-4 md:p-8" style={{ fontFamily: 'var(--font-lato)' }}>
       <div className="max-w-3xl mx-auto">
 
-        {/* Standard header */}
-        <div className="mb-6">
-          <a href={`/mariage/${slug}`} className="text-sm text-[#4a5240] hover:underline mb-4 block" style={{ fontWeight: 300 }}>
-            ← Retour aux préparatifs
-          </a>
-          <div className="flex items-start justify-between gap-4">
+        {/* Header épuré */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <a href={`/mariage/${slug}`}
+               className="flex items-center justify-center w-8 h-8 rounded-full text-stone-400 hover:bg-stone-200/60 transition"
+               title="Retour">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+              </svg>
+            </a>
             <div>
-              <p style={{ fontWeight: 300, fontSize: '0.68rem', letterSpacing: '0.2em' }}
-                 className="text-stone-400 uppercase mb-1">Invités</p>
-              <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.4rem' }}
-                  className="text-[#2d3228] leading-none">{wedding.name}</h1>
-              <p style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-stone-400 mt-1">
+              <h1 style={{ fontWeight: 600, fontSize: '1.1rem' }} className="text-[#2d3228] leading-none">
+                Invités
+              </h1>
+              <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400 mt-0.5">
                 {total} invité{total > 1 ? 's' : ''}
               </p>
             </div>
+          </div>
+          <div className="flex items-center gap-2">
             {tab === 'liste' && total > 0 && (
               <ExportGuestsButton guests={guestList} weddingName={wedding.name} />
+            )}
+            {tab === 'liste' && (
+              <AddGuestForm
+                weddingId={wedding.id}
+                slug={slug}
+                addGuest={addGuest}
+                guestCount={total}
+                paid={paid}
+              />
             )}
           </div>
         </div>
 
         {/* Tab navigation */}
-        <div className="flex border-b-2 border-stone-200 mb-7 gap-1">
+        <div className="flex gap-1 bg-stone-200/40 p-1 rounded-xl w-fit mb-6">
           {TABS.map(t => (
             <a key={t.key}
                href={`?tab=${t.key}`}
-               className={`px-6 py-3 text-sm rounded-t-lg border-b-2 -mb-0.5 transition-all ${
+               className={`px-4 py-1.5 rounded-lg text-sm transition-all ${
                  tab === t.key
-                   ? 'bg-white border-[#4a5240] text-[#2d3228] shadow-sm'
-                   : 'border-transparent text-stone-400 hover:text-stone-600 hover:bg-white/60'
+                   ? 'bg-white text-[#2d3228] shadow-sm'
+                   : 'text-stone-400 hover:text-stone-600'
                }`}
-               style={{ fontWeight: tab === t.key ? 600 : 300, fontSize: '0.92rem' }}>
+               style={{ fontWeight: tab === t.key ? 500 : 300 }}>
               {t.label}
             </a>
           ))}
@@ -241,14 +255,6 @@ export default async function GuestsPage({
                 </form>
               </div>
             )}
-
-            <AddGuestForm
-              weddingId={wedding.id}
-              slug={slug}
-              addGuest={addGuest}
-              guestCount={total}
-              paid={paid}
-            />
 
             <GuestList
               guests={guestList}

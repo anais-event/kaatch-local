@@ -74,6 +74,7 @@ async function updateGuest(formData: FormData) {
     telephone: (formData.get('telephone') as string) || null,
     relation: (formData.get('relation') as string) || null,
     gender: (formData.get('gender') as string) || null,
+    guest_type: (formData.get('guest_type') as string) || 'adulte',
     invited_parts: parts.length > 0 ? parts : ['ceremonie', 'vin_honneur', 'reception'],
     dietary_notes: (formData.get('dietary_notes') as string) || null,
   }).eq('id', id)

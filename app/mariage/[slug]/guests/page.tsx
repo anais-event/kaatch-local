@@ -96,15 +96,6 @@ async function toggleGuestPart(formData: FormData) {
   revalidatePath(`/mariage/${slug}/guests`)
 }
 
-async function updateFairePartTheme(formData: FormData) {
-  'use server'
-  const supabase = await createSupabaseServerClient()
-  const slug = formData.get('slug') as string
-  const theme = formData.get('theme') as string
-  await supabase.from('weddings').update({ faire_part_theme: theme }).eq('slug', slug)
-  revalidatePath(`/mariage/${slug}/guests`)
-}
-
 async function generateTokens(formData: FormData) {
   'use server'
   const supabase = await createSupabaseServerClient()
@@ -278,47 +269,65 @@ export default async function GuestsPage({
 
         {/* ── TAB SYNTHÈSE ── */}
         {tab === 'synthese' && (
-          <div className="space-y-5">
+          <div className="space-y-4">
 
-            {/* Thème faire-part */}
-            <div className="bg-white rounded-2xl border border-stone-100 p-5">
-              <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
-                 className="text-stone-400 uppercase mb-4">Thème du faire-part</p>
-              <div className="flex gap-4">
-                {([
-                  { key: 'classique',  label: 'Classique',  night: '#0b1209', bg: '#4a5639', accent: '#c9a96e' },
-                  { key: 'champetre',  label: 'Champêtre',  night: '#ebeee4', bg: '#c5d4b0', accent: '#5a7040' },
-                  { key: 'romantique', label: 'Romantique', night: '#1a0a14', bg: '#6b3a4a', accent: '#d4a0b0' },
-                ] as const).map(th => {
-                  const active = (wedding.faire_part_theme ?? 'classique') === th.key
-                  return (
-                    <form key={th.key} action={updateFairePartTheme}>
-                      <input type="hidden" name="slug" value={slug} />
-                      <input type="hidden" name="theme" value={th.key} />
-                      <button type="submit" className="flex flex-col items-center gap-2 cursor-pointer" style={{ background: 'transparent', border: 'none', padding: 0 }}>
-                        <div style={{
-                          width: 56, height: 76, borderRadius: 4, background: th.night,
-                          border: `2px solid ${active ? '#4a5240' : 'transparent'}`,
-                          overflow: 'hidden', position: 'relative',
-                          boxShadow: active ? '0 0 0 1px #4a5240' : '0 1px 4px rgba(0,0,0,0.12)',
-                        }}>
-                          <div style={{
-                            position: 'absolute', top: '15%', bottom: '15%', left: '12%', right: '12%',
-                            background: th.bg, borderRadius: 2,
-                            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3,
-                          }}>
-                            <div style={{ width: 20, height: 0.8, background: th.accent, opacity: 0.8 }} />
-                            <div style={{ width: 8, height: 8, borderRadius: '50%', border: `1px solid ${th.accent}`, opacity: 0.7 }} />
-                            <div style={{ width: 14, height: 0.8, background: th.accent, opacity: 0.5 }} />
-                          </div>
-                        </div>
-                        <p style={{ fontWeight: active ? 500 : 300, fontSize: '0.7rem' }} className={active ? 'text-[#4a5240]' : 'text-stone-500'}>{th.label}</p>
-                      </button>
-                    </form>
-                  )
-                })}
+            {/* Studio créatif CTA */}
+            <StudioBanner slug={slug} context="guests" />
+
+            {/* RSVP + composition — côte à côte */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white rounded-2xl border border-stone-100 p-5">
+                <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
+                   className="text-stone-400 uppercase mb-4">RSVP</p>
+                <div className="space-y-3">
+                  {[
+                    { label: 'Confirmés',  value: confirmed, color: '#4ade80' },
+                    { label: 'En attente', value: pending,   color: '#d6d3d1' },
+                    { label: 'Déclinés',   value: declined,  color: '#fca5a5' },
+                  ].map(s => (
+                    <div key={s.label}>
+                      <div className="flex justify-between mb-1">
+                        <span style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-stone-600">{s.label}</span>
+                        <span style={{ fontWeight: 400, fontSize: '0.75rem' }} className="text-stone-500 tabular-nums">{s.value}</span>
+                      </div>
+                      <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden">
+                        <div className="h-full rounded-full transition-all"
+                             style={{ width: `${total > 0 ? (s.value / total) * 100 : 0}%`, backgroundColor: s.color }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
+
+              {total > 0 && (() => {
+                const adultes = guestList.filter(g => (g as { guest_type?: string }).guest_type !== 'enfant' && (g as { guest_type?: string }).guest_type !== 'animal').length
+                const enfants = guestList.filter(g => (g as { guest_type?: string }).guest_type === 'enfant').length
+                const animaux = guestList.filter(g => (g as { guest_type?: string }).guest_type === 'animal').length
+                return (
+                  <div className="bg-white rounded-2xl border border-stone-100 p-5">
+                    <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
+                       className="text-stone-400 uppercase mb-4">Composition</p>
+                    <div className="space-y-3">
+                      {[
+                        { label: 'Adultes', value: adultes },
+                        { label: 'Enfants', value: enfants },
+                        ...(animaux > 0 ? [{ label: 'Animaux', value: animaux }] : []),
+                      ].map(s => (
+                        <div key={s.label} className="flex items-baseline justify-between">
+                          <span style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-stone-600">{s.label}</span>
+                          <span style={{ fontWeight: 600, fontSize: '1.3rem', lineHeight: 1 }} className="text-[#2d3228]">{s.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })()}
             </div>
+
+            {/* Par moment */}
+            {total > 0 && (
+              <SyntheseParMoment guests={guestList} total={total} partsLabels={PARTS_LABELS} />
+            )}
 
             {/* Envoi groupé */}
             <div className="bg-white rounded-2xl border border-stone-100 p-5">
@@ -327,100 +336,39 @@ export default async function GuestsPage({
               <PublipostagePanel guests={guestList} weddingId={wedding.id} slug={slug} />
             </div>
 
-            {/* RSVP */}
-            <div className="bg-white rounded-2xl border border-stone-100 p-5">
-              <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
-                 className="text-stone-400 uppercase mb-4">
-                RSVP
-              </p>
-              <div className="space-y-3">
-                {[
-                  { label: 'Confirmés',  value: confirmed, total, color: '#4ade80' },
-                  { label: 'En attente', value: pending,   total, color: '#d6d3d1' },
-                  { label: 'Déclinés',   value: declined,  total, color: '#fca5a5' },
-                ].map(s => (
-                  <div key={s.label}>
-                    <div className="flex justify-between mb-1">
-                      <span style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-600">{s.label}</span>
-                      <span style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-400 tabular-nums">
-                        {s.value} / {s.total}
-                      </span>
-                    </div>
-                    <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden">
-                      <div className="h-full rounded-full transition-all"
-                           style={{ width: `${s.total > 0 ? (s.value / s.total) * 100 : 0}%`, backgroundColor: s.color }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Type invités */}
-            {total > 0 && (() => {
-              const adultes = guestList.filter(g => (g as { guest_type?: string }).guest_type !== 'enfant' && (g as { guest_type?: string }).guest_type !== 'animal').length
-              const enfants = guestList.filter(g => (g as { guest_type?: string }).guest_type === 'enfant').length
-              const animaux = guestList.filter(g => (g as { guest_type?: string }).guest_type === 'animal').length
-              return (
-                <div className="bg-white rounded-2xl border border-stone-100 p-5">
-                  <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
-                     className="text-stone-400 uppercase mb-4">
-                    Composition
-                  </p>
-                  <div className="flex gap-6">
-                    {[
-                      { label: 'Adultes', value: adultes },
-                      { label: 'Enfants', value: enfants },
-                      ...(animaux > 0 ? [{ label: 'Animaux', value: animaux }] : []),
-                    ].map(s => (
-                      <div key={s.label}>
-                        <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '2rem', lineHeight: 1 }}
-                           className="text-[#2d3228]">
-                          {s.value}
-                        </p>
-                        <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mt-0.5">{s.label}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )
-            })()}
-
-            {/* Parts invitées — cliquable pour voir la liste */}
-            {total > 0 && (
-              <SyntheseParMoment guests={guestList} total={total} partsLabels={PARTS_LABELS} />
-            )}
-
-            {/* Régimes & attentions particulières */}
+            {/* Régimes & allergies */}
             {total > 0 && (() => {
               const withDietary = guestList.filter(g => (g as { dietary_notes?: string | null }).dietary_notes)
+              if (withDietary.length === 0) return null
               return (
                 <div className="bg-white rounded-2xl border border-stone-100 p-5">
                   <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
-                     className="text-stone-400 uppercase mb-4">
-                    Régimes & attentions particulières
-                  </p>
-                  {withDietary.length === 0 ? (
-                    <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-300">
-                      Aucune attention particulière renseignée.
-                    </p>
-                  ) : (
-                    <div className="space-y-2">
-                      {withDietary.map(g => {
-                        const name = [g.first_name, g.last_name].filter(Boolean).join(' ')
-                        return (
-                          <div key={g.id} className="flex items-start gap-3 bg-orange-50/50 border border-orange-100 rounded-xl px-3 py-2.5">
-                            <span className="text-orange-400 text-xs leading-none mt-0.5 shrink-0">⚠</span>
-                            <div>
+                     className="text-stone-400 uppercase mb-4">Régimes & allergies</p>
+                  <div className="space-y-2">
+                    {withDietary.map(g => {
+                      const name = [g.first_name, g.last_name].filter(Boolean).join(' ')
+                      const table = (tables ?? []).find(t => t.id === (g as { table_id?: string | null }).table_id)
+                      return (
+                        <div key={g.id} className="flex items-start gap-3 bg-orange-50/50 border border-orange-100 rounded-xl px-3 py-2.5">
+                          <span className="text-orange-400 text-xs leading-none mt-0.5 shrink-0">⚠</span>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
                               <p style={{ fontWeight: 500, fontSize: '0.82rem' }} className="text-stone-700">{name}</p>
-                              <p style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-orange-700">
-                                {(g as { dietary_notes?: string | null }).dietary_notes}
-                              </p>
+                              {table && (
+                                <span style={{ fontWeight: 300, fontSize: '0.68rem' }}
+                                      className="text-stone-400 bg-stone-100 px-1.5 py-px rounded-md shrink-0">
+                                  {table.name}
+                                </span>
+                              )}
                             </div>
+                            <p style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-orange-700">
+                              {(g as { dietary_notes?: string | null }).dietary_notes}
+                            </p>
                           </div>
-                        )
-                      })}
-                    </div>
-                  )}
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
               )
             })()}
@@ -429,18 +377,11 @@ export default async function GuestsPage({
             {total > 0 && (
               <div className="bg-white rounded-2xl border border-stone-100 p-5">
                 <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
-                   className="text-stone-400 uppercase mb-4">
-                  Export
-                </p>
+                   className="text-stone-400 uppercase mb-4">Export</p>
                 <div className="space-y-3">
-                  <GuestPdfExport
-                    guests={guestList}
-                    weddingName={wedding.name}
-                    weddingDate={wedding.date ?? null}
-                  />
-                  <div className="pt-1 border-t border-stone-50">
-                    <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mb-2">Excel / CSV</p>
-                    <ExportGuestsButton guests={guestList} weddingName={wedding.name} />
+                  <GuestPdfExport guests={guestList} weddingName={wedding.name} weddingDate={wedding.date ?? null} />
+                  <div className="pt-2 border-t border-stone-50">
+                    <ExportGuestsButton guests={guestList} weddingName={wedding.name} tables={tables ?? []} />
                   </div>
                 </div>
               </div>
@@ -448,10 +389,6 @@ export default async function GuestsPage({
 
           </div>
         )}
-
-        <div className="mt-6">
-          <StudioBanner slug={slug} context="guests" />
-        </div>
 
       </div>
     </div>

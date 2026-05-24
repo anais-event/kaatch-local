@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
   openGraph: {
-    title: "Kaatch — Organiser son mariage en ligne",
+    title: "Kaatch — Toute l'organisation de votre mariage, au même endroit",
     description: "Invitations personnalisées, RSVP, plan de table, album photo partagé. Tout pour votre mariage, au même endroit.",
     url: "https://kaatch.fr",
     siteName: "Kaatch",

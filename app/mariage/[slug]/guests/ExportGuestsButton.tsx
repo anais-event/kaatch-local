@@ -12,11 +12,16 @@ type Guest = {
   guest_type?: string | null
   rsvp_status?: string | null
   invite_sent_at?: string | null
+  table_id?: string | null
+  dietary_notes?: string | null
 }
+
+type Table = { id: string; name: string }
 
 type Props = {
   guests: Guest[]
   weddingName: string
+  tables?: Table[]
 }
 
 const RSVP_LABELS: Record<string, string> = {
@@ -25,9 +30,9 @@ const RSVP_LABELS: Record<string, string> = {
   en_attente: 'En attente',
 }
 
-export default function ExportGuestsButton({ guests, weddingName }: Props) {
+export default function ExportGuestsButton({ guests, weddingName, tables = [] }: Props) {
   const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState<'excel' | 'csv' | null>(null)
+  const [loading, setLoading] = useState<'excel' | 'csv' | 'traiteur' | null>(null)
 
   async function exportExcel() {
     setLoading('excel')
@@ -53,6 +58,36 @@ export default function ExportGuestsButton({ guests, weddingName }: Props) {
       const wb = XLSX.utils.book_new()
       XLSX.utils.book_append_sheet(wb, ws, 'Invités')
       XLSX.writeFile(wb, `invites-${weddingName.toLowerCase().replace(/\s+/g, '-')}.xlsx`)
+    } finally {
+      setLoading(null)
+    }
+  }
+
+  async function exportTraiteur() {
+    setLoading('traiteur')
+    setOpen(false)
+    try {
+      const XLSX = await import('xlsx')
+      const confirmed = guests.filter(g => g.rsvp_status === 'confirme')
+      const rows = confirmed.map(g => {
+        const table = tables.find(t => t.id === g.table_id)
+        const isEnfant = g.guest_type === 'enfant'
+        const hasDietary = !!g.dietary_notes
+        return {
+          Prénom: g.first_name,
+          Nom: g.last_name ?? '',
+          Table: table?.name ?? '—',
+          Type: isEnfant ? 'Enfant' : 'Adulte',
+          'Menu enfant': isEnfant ? 'Oui' : '',
+          'Régime / Allergie': g.dietary_notes ?? '',
+          'Sans alcool': (isEnfant || hasDietary) ? 'À vérifier' : '',
+        }
+      })
+      const ws = XLSX.utils.json_to_sheet(rows)
+      ws['!cols'] = [14, 14, 16, 8, 12, 30, 12].map(w => ({ wch: w }))
+      const wb = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(wb, ws, 'Traiteur')
+      XLSX.writeFile(wb, `traiteur-${weddingName.toLowerCase().replace(/\s+/g, '-')}.xlsx`)
     } finally {
       setLoading(null)
     }
@@ -120,6 +155,13 @@ export default function ExportGuestsButton({ guests, weddingName }: Props) {
             style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}
           >
             <span>📄</span> CSV
+          </button>
+          <button
+            onClick={exportTraiteur}
+            className="w-full text-left px-4 py-2.5 text-xs text-stone-700 hover:bg-stone-50 flex items-center gap-2 transition cursor-pointer border-t border-stone-50"
+            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}
+          >
+            <span>🍽️</span> Export traiteur
           </button>
         </div>
       )}

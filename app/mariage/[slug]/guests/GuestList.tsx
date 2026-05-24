@@ -31,6 +31,8 @@ type Guest = {
   invite_sent_at: string | null
   invited_parts: string[] | null
   dietary_notes: string | null
+  notes: string | null
+  family_name: string | null
 }
 
 type Table = { id: string; name: string }
@@ -54,6 +56,8 @@ type Props = {
   deleteGuest: (fd: FormData) => Promise<void>
   updateGuest: (fd: FormData) => Promise<void>
   toggleGuestPart: (fd: FormData) => Promise<void>
+  updateGuestNotes: (fd: FormData) => Promise<void>
+  setGuestFamily: (fd: FormData) => Promise<void>
   paid?: boolean
   weddingId?: string
 }
@@ -102,7 +106,9 @@ function CheckCircle({ checked, onChange }: { checked: boolean; onChange: () => 
 
 export default function GuestList({
   guests: initialGuests, tables, slug, baseUrl, wedding,
-  setRsvp, deleteGuest, updateGuest, toggleGuestPart, paid = true, weddingId,
+  setRsvp, deleteGuest, updateGuest, toggleGuestPart,
+  updateGuestNotes, setGuestFamily,
+  paid = true, weddingId,
 }: Props) {
   const [guests, setGuests] = useState(initialGuests)
   const [search, setSearch] = useState('')
@@ -110,9 +116,48 @@ export default function GuestList({
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [familyModal, setFamilyModal] = useState(false)
+  const [familyInput, setFamilyInput] = useState('')
+  const [savingNotes, setSavingNotes] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
   const resolvedWeddingId = weddingId ?? guests[0]?.wedding_id ?? ''
+
+  async function saveNotes(guestId: string, notes: string) {
+    setSavingNotes(guestId)
+    setGuests(prev => prev.map(g => g.id === guestId ? { ...g, notes: notes || null } : g))
+    const fd = new FormData()
+    fd.set('id', guestId)
+    fd.set('slug', slug)
+    fd.set('notes', notes)
+    await updateGuestNotes(fd)
+    setSavingNotes(null)
+  }
+
+  async function createFamily() {
+    if (!familyInput.trim()) return
+    const ids = Array.from(selected)
+    const fd = new FormData()
+    fd.set('slug', slug)
+    fd.set('family_name', familyInput.trim())
+    fd.set('ids', ids.join(','))
+    setGuests(prev => prev.map(g => selected.has(g.id) ? { ...g, family_name: familyInput.trim() } : g))
+    await setGuestFamily(fd)
+    setFamilyModal(false)
+    setFamilyInput('')
+    setSelected(new Set())
+  }
+
+  async function removeFamily() {
+    const ids = Array.from(selected)
+    const fd = new FormData()
+    fd.set('slug', slug)
+    fd.set('family_name', '')
+    fd.set('ids', ids.join(','))
+    setGuests(prev => prev.map(g => selected.has(g.id) ? { ...g, family_name: null } : g))
+    await setGuestFamily(fd)
+    setSelected(new Set())
+  }
 
   function toggleSelect(id: string) {
     setSelected(prev => {
@@ -294,6 +339,12 @@ export default function GuestList({
                         )}
                       </p>
                       <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                        {guest.family_name && (
+                          <span style={{ fontWeight: 300, fontSize: '0.68rem' }}
+                                className="text-[#4a5240] bg-[#4a5240]/10 px-1.5 py-px rounded-md">
+                            {guest.family_name}
+                          </span>
+                        )}
                         {guest.relation && (
                           <span style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400">{guest.relation}</span>
                         )}
@@ -311,6 +362,24 @@ export default function GuestList({
                           </span>
                         )}
                       </div>
+                    </div>
+
+                    {/* Notes inline */}
+                    <div onClick={e => e.stopPropagation()} className="shrink-0 hidden sm:block">
+                      <input
+                        type="text"
+                        defaultValue={guest.notes ?? ''}
+                        placeholder="Notes…"
+                        onBlur={e => {
+                          const val = e.target.value.trim()
+                          if (val !== (guest.notes ?? '')) saveNotes(guest.id, val)
+                        }}
+                        className="w-32 px-2.5 py-1.5 text-xs border border-stone-150 rounded-lg bg-stone-50 text-stone-600 outline-none focus:border-[#4a5240]/40 focus:bg-white transition placeholder:text-stone-300"
+                        style={{ fontWeight: 300 }}
+                      />
+                      {savingNotes === guest.id && (
+                        <span className="absolute text-[10px] text-stone-300 mt-0.5 ml-1">✓</span>
+                      )}
                     </div>
 
                     {/* Share */}
@@ -518,8 +587,18 @@ export default function GuestList({
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-[#2d3228] text-white px-5 py-3 rounded-2xl shadow-xl"
              style={{ fontFamily: 'var(--font-lato)' }}>
           <span style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-300">
-            {selected.size} invité{selected.size > 1 ? 's' : ''} sélectionné{selected.size > 1 ? 's' : ''}
+            {selected.size} invité{selected.size > 1 ? 's' : ''}
           </span>
+          <span className="w-px h-4 bg-stone-600" />
+          <button
+            onClick={() => { setFamilyInput(''); setFamilyModal(true) }}
+            className="flex items-center gap-1.5 text-sm text-white hover:text-stone-300 transition cursor-pointer"
+            style={{ fontWeight: 300 }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+            </svg>
+            Famille
+          </button>
           <span className="w-px h-4 bg-stone-600" />
           <button
             onClick={exportSelection}
@@ -532,12 +611,61 @@ export default function GuestList({
           </button>
           <button
             onClick={() => setSelected(new Set())}
-            className="ml-1 text-stone-500 hover:text-stone-300 transition cursor-pointer"
-            title="Annuler la sélection">
+            className="ml-1 text-stone-500 hover:text-stone-300 transition cursor-pointer">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
+        </div>
+      )}
+
+      {/* ── Modal création famille ── */}
+      {familyModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center"
+             onClick={e => { if (e.target === e.currentTarget) setFamilyModal(false) }}>
+          <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px]" />
+          <div className="relative bg-[#f5f0e8] rounded-2xl w-full max-w-sm mx-4 p-6 shadow-xl"
+               style={{ fontFamily: 'var(--font-lato)' }}>
+            <p style={{ fontWeight: 500, fontSize: '0.95rem' }} className="text-[#2d3228] mb-1">
+              Nommer cette famille
+            </p>
+            <p style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-400 mb-4">
+              {selected.size} invité{selected.size > 1 ? 's' : ''} sélectionné{selected.size > 1 ? 's' : ''}
+            </p>
+            <input
+              type="text"
+              value={familyInput}
+              onChange={e => setFamilyInput(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') createFamily() }}
+              placeholder="Ex : Famille Dupont, Amis de Paris…"
+              autoFocus
+              className="w-full border border-stone-200 rounded-xl px-3 py-2.5 text-sm bg-white outline-none focus:border-[#4a5240]/50 text-stone-700 mb-3"
+              style={{ fontWeight: 300 }}
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={createFamily}
+                disabled={!familyInput.trim()}
+                className="flex-1 bg-[#4a5240] text-white rounded-xl py-2.5 text-sm hover:bg-[#2d3228] transition disabled:opacity-40 cursor-pointer"
+                style={{ fontWeight: 300 }}>
+                Créer la famille
+              </button>
+              <button
+                onClick={() => setFamilyModal(false)}
+                className="px-4 border border-stone-200 text-stone-400 rounded-xl py-2.5 text-sm hover:border-stone-300 transition cursor-pointer"
+                style={{ fontWeight: 300 }}>
+                Annuler
+              </button>
+            </div>
+            {selectedGuests.some(g => g.family_name) && (
+              <button
+                onClick={removeFamily}
+                className="w-full mt-2 text-xs text-red-400 hover:text-red-500 transition cursor-pointer py-1"
+                style={{ fontWeight: 300 }}>
+                Retirer de leur famille actuelle
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>

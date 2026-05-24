@@ -96,6 +96,28 @@ async function toggleGuestPart(formData: FormData) {
   revalidatePath(`/mariage/${slug}/guests`)
 }
 
+async function updateGuestNotes(formData: FormData) {
+  'use server'
+  const supabase = await createSupabaseServerClient()
+  const id = formData.get('id') as string
+  const slug = formData.get('slug') as string
+  const notes = (formData.get('notes') as string) || null
+  await supabase.from('guests').update({ notes }).eq('id', id)
+  revalidatePath(`/mariage/${slug}/guests`)
+}
+
+async function setGuestFamily(formData: FormData) {
+  'use server'
+  const supabase = await createSupabaseServerClient()
+  const slug = formData.get('slug') as string
+  const family_name = (formData.get('family_name') as string) || null
+  const ids = (formData.get('ids') as string).split(',').filter(Boolean)
+  for (const id of ids) {
+    await supabase.from('guests').update({ family_name }).eq('id', id)
+  }
+  revalidatePath(`/mariage/${slug}/guests`)
+}
+
 async function generateTokens(formData: FormData) {
   'use server'
   const supabase = await createSupabaseServerClient()
@@ -257,6 +279,8 @@ export default async function GuestsPage({
               deleteGuest={deleteGuest}
               updateGuest={updateGuest}
               toggleGuestPart={toggleGuestPart}
+              updateGuestNotes={updateGuestNotes}
+              setGuestFamily={setGuestFamily}
               paid={paid}
               weddingId={wedding.id}
             />

@@ -158,12 +158,14 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
 
             {/* À faire maintenant */}
             {(() => {
-              const pending = (guestCount ?? 0) - (confirmedCount ?? 0)
               const tasks = [
-                { label: `Relancer ${Math.max(0, pending)} invité${pending > 1 ? 's' : ''} sans réponse`, done: pending === 0 && (guestCount ?? 0) > 0, href: `/mariage/${slug}/guests` },
-                { label: 'Créer le programme du jour J', done: (programCount ?? 0) > 0, href: `/mariage/${slug}/programme` },
-                { label: 'Finaliser le plan de table', done: (tablesCount ?? 0) > 0, href: `/mariage/${slug}/tables` },
-                { label: 'Renseigner vos prestataires', done: (vendors?.length ?? 0) > 0, href: `/mariage/${slug}/prestataires` },
+                { label: 'Invitez votre moitié', sub: 'Pour organiser le mariage à deux', done: false, href: `/mariage/${slug}/partager` },
+                { label: 'Ajoutez une photo de vous', sub: 'Pour personnaliser votre espace', done: !!wedding.cover_image_url, href: `/mariage/${slug}/edit` },
+                { label: 'Complétez les infos du Jour J', sub: 'Date, lieu, horaires, ambiance', done: !!wedding.date && !!wedding.location, href: `/mariage/${slug}/edit` },
+                { label: "Créez votre liste d'invités", sub: 'Commencez à poser les bases', done: (guestCount ?? 0) > 0, href: `/mariage/${slug}/guests` },
+                { label: 'Préparez votre plan de table', sub: "Même en brouillon, ça aide vite", done: (tablesCount ?? 0) > 0, href: `/mariage/${slug}/tables` },
+                { label: 'Ajoutez vos premiers prestataires', sub: 'Lieu, traiteur, photographe, DJ…', done: (vendors?.length ?? 0) > 0, href: `/mariage/${slug}/prestataires` },
+                { label: 'Notez vos premières tâches importantes', sub: "Ce qu'il ne faut surtout pas oublier", done: (todosData?.length ?? 0) > 0, href: `/mariage/${slug}/retro-planning` },
               ]
               return (
                 <div className="bg-white rounded-3xl border border-stone-100 p-6">
@@ -177,7 +179,12 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
                         <div className={`mt-1 w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${task.done ? 'bg-[#4a5240] border-[#4a5240]' : 'border-stone-300 group-hover:border-[#4a5240]'}`}>
                           {task.done && <CheckCircle2 className="w-3 h-3 text-white" strokeWidth={3} />}
                         </div>
-                        <p style={{ fontWeight: 400, fontSize: '0.95rem' }} className={task.done ? 'text-stone-400 line-through' : 'text-stone-700 group-hover:text-[#4a5240]'}>{task.label}</p>
+                        <div>
+                          <p style={{ fontWeight: 400, fontSize: '0.92rem' }} className={task.done ? 'text-stone-400 line-through' : 'text-stone-700 group-hover:text-[#4a5240]'}>{task.label}</p>
+                          {!task.done && task.sub && (
+                            <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400 mt-0.5">{task.sub}</p>
+                          )}
+                        </div>
                       </Link>
                     ))}
                   </div>

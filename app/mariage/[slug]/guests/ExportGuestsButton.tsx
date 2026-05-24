@@ -65,13 +65,17 @@ export default function ExportGuestsButton({ guests, weddingName, tables = [] }:
     try {
       const XLSX = await import('xlsx')
       const confirmed = guests.filter(g => g.rsvp_status === 'confirme')
-      const adultes = confirmed.filter(g => g.guest_type !== 'enfant').length
+      const adultes = confirmed.filter(g => !g.guest_type || g.guest_type === 'adulte').length
+      const ados = confirmed.filter(g => g.guest_type === 'ado').length
       const enfants = confirmed.filter(g => g.guest_type === 'enfant').length
+      const animaux = confirmed.filter(g => g.guest_type === 'animal').length
       const avecRegime = confirmed.filter(g => !!g.dietary_notes)
 
       const synthese = [
-        { Catégorie: 'Adultes confirmés', Nombre: adultes },
-        { Catégorie: 'Enfants confirmés', Nombre: enfants },
+        { Catégorie: 'Adultes confirmés (18+)', Nombre: adultes },
+        { Catégorie: 'Ados confirmés (12-18 ans, sans alcool)', Nombre: ados },
+        { Catégorie: 'Enfants confirmés (≤12 ans)', Nombre: enfants },
+        { Catégorie: 'Animaux', Nombre: animaux },
         { Catégorie: 'Total confirmés', Nombre: confirmed.length },
         { Catégorie: '', Nombre: '' },
         { Catégorie: 'Menus spéciaux', Nombre: avecRegime.length },
@@ -86,7 +90,7 @@ export default function ExportGuestsButton({ guests, weddingName, tables = [] }:
         const regimes = avecRegime.map(g => ({
           Prénom: g.first_name,
           Nom: g.last_name ?? '',
-          Type: g.guest_type === 'enfant' ? 'Enfant' : 'Adulte',
+          Type: g.guest_type === 'enfant' ? 'Enfant' : g.guest_type === 'ado' ? 'Ado' : g.guest_type === 'animal' ? 'Animal' : 'Adulte',
           'Régime / Allergie': g.dietary_notes ?? '',
         }))
         const ws2 = XLSX.utils.json_to_sheet(regimes)

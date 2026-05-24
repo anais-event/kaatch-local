@@ -19,7 +19,7 @@ const KAATCH_FIELDS = [
   { key: 'email', label: 'Email', required: false },
   { key: 'telephone', label: 'Téléphone', required: false },
   { key: 'relation', label: 'Lien de parenté', required: false },
-  { key: 'guest_type', label: 'Type (adulte/enfant/animal)', required: false },
+  { key: 'guest_type', label: 'Type (adulte/ado/enfant/animal)', required: false },
   { key: 'gender', label: 'Genre (homme/femme)', required: false },
 ]
 

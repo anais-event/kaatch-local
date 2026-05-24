@@ -121,6 +121,15 @@ export default function GuestList({
   const [savingNotes, setSavingNotes] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const [viewMode, setViewMode] = useState<'list' | 'family'>('list')
+  const [expandedFamilies, setExpandedFamilies] = useState<Set<string>>(new Set())
+
+  function toggleFamily(key: string) {
+    setExpandedFamilies(prev => {
+      const next = new Set(prev)
+      next.has(key) ? next.delete(key) : next.add(key)
+      return next
+    })
+  }
 
   const resolvedWeddingId = weddingId ?? guests[0]?.wedding_id ?? ''
 
@@ -237,7 +246,7 @@ export default function GuestList({
         Prénom: g.first_name,
         Nom: g.last_name ?? '',
         Table: table?.name ?? '',
-        Type: g.guest_type === 'enfant' ? 'Enfant' : g.guest_type === 'animal' ? 'Animal' : 'Adulte',
+        Type: g.guest_type === 'enfant' ? 'Enfant' : g.guest_type === 'ado' ? 'Ado' : g.guest_type === 'animal' ? 'Animal' : 'Adulte',
         RSVP: RSVP_LABELS[g.rsvp_status] ?? '',
         'Régime / Allergie': g.dietary_notes ?? '',
         Relation: g.relation ?? '',
@@ -293,6 +302,7 @@ export default function GuestList({
             <p style={{ fontWeight: 400, fontSize: '0.88rem' }} className="text-stone-800 truncate leading-snug">
               {fullName}
               {guest.guest_type === 'enfant' && <span className="ml-1 text-xs" title="Enfant">👶</span>}
+              {guest.guest_type === 'ado' && <span className="ml-1 text-xs" title="Ado">🧑</span>}
               {guest.guest_type === 'animal' && <span className="ml-1 text-xs" title="Animal de compagnie">🐶</span>}
             </p>
             <div className="flex items-center gap-2 mt-0.5 flex-wrap">
@@ -456,8 +466,9 @@ export default function GuestList({
               <select name="guest_type" defaultValue={guest.guest_type ?? 'adulte'}
                 className="border border-stone-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#4a5240]/50 bg-white text-stone-500"
                 style={{ fontWeight: 300 }}>
-                <option value="adulte">Adulte</option>
-                <option value="enfant">👶 Enfant</option>
+                <option value="adulte">Adulte (18+)</option>
+                <option value="ado">🧑 Ado (12-18, sans alcool)</option>
+                <option value="enfant">👶 Enfant (≤12 ans)</option>
                 <option value="animal">🐶 Animal</option>
               </select>
             </div>
@@ -499,6 +510,7 @@ export default function GuestList({
   // Count by guest_type
   const typeCountsInFiltered = {
     adulte: filtered.filter(g => !g.guest_type || g.guest_type === 'adulte').length,
+    ado: filtered.filter(g => g.guest_type === 'ado').length,
     enfant: filtered.filter(g => g.guest_type === 'enfant').length,
     animal: filtered.filter(g => g.guest_type === 'animal').length,
   }
@@ -536,8 +548,11 @@ export default function GuestList({
           Par famille
         </button>
         {/* Type counters */}
-        {(typeCountsInFiltered.enfant > 0 || typeCountsInFiltered.animal > 0) && (
+        {(typeCountsInFiltered.enfant > 0 || typeCountsInFiltered.ado > 0 || typeCountsInFiltered.animal > 0) && (
           <div className="flex items-center gap-2 text-xs text-stone-400 ml-auto" style={{ fontWeight: 300 }}>
+            {typeCountsInFiltered.ado > 0 && (
+              <span>🧑 {typeCountsInFiltered.ado}</span>
+            )}
             {typeCountsInFiltered.enfant > 0 && (
               <span>👶 {typeCountsInFiltered.enfant}</span>
             )}
@@ -570,12 +585,22 @@ export default function GuestList({
           {familyGroups.map(([familyKey, members]) => {
             const isSansFamille = familyKey === '__sans_famille__'
             const familyLabel = isSansFamille ? 'Sans famille' : familyKey
+            const ados = members.filter(g => g.guest_type === 'ado').length
             const enfants = members.filter(g => g.guest_type === 'enfant').length
             const animaux = members.filter(g => g.guest_type === 'animal').length
+            const confirmes = members.filter(g => g.rsvp_status === 'confirme').length
+            const isOpen = expandedFamilies.has(familyKey)
             return (
               <div key={familyKey} className="bg-white rounded-2xl border border-stone-100 overflow-hidden">
-                {/* Family header */}
-                <div className="flex items-center gap-3 px-4 py-3 bg-stone-50/50 border-b border-stone-50">
+                {/* Family header (click to toggle) */}
+                <button
+                  type="button"
+                  onClick={() => toggleFamily(familyKey)}
+                  className={`w-full flex items-center gap-3 px-4 py-3 bg-stone-50/50 ${isOpen ? 'border-b border-stone-50' : ''} hover:bg-stone-100/60 transition cursor-pointer text-left`}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}
+                       className={`w-4 h-4 shrink-0 text-stone-300 transition-transform ${isOpen ? 'rotate-90' : ''}`}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                  </svg>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}
                        className={`w-4 h-4 shrink-0 ${isSansFamille ? 'text-stone-300' : 'text-[#4a5240]'}`}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
@@ -587,13 +612,27 @@ export default function GuestList({
                   <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">
                     {members.length} membre{members.length > 1 ? 's' : ''}
                   </span>
+                  {confirmes > 0 && (
+                    <span className="flex items-center gap-1 text-xs text-emerald-500" style={{ fontWeight: 300 }}>
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                      {confirmes}
+                    </span>
+                  )}
+                  {ados > 0 && <span className="text-xs text-stone-400" style={{ fontWeight: 300 }}>🧑 {ados}</span>}
                   {enfants > 0 && <span className="text-xs text-stone-400" style={{ fontWeight: 300 }}>👶 {enfants}</span>}
                   {animaux > 0 && <span className="text-xs text-stone-400" style={{ fontWeight: 300 }}>🐶 {animaux}</span>}
-                </div>
-                {/* Members */}
-                <div className="divide-y divide-stone-50">
-                  {members.map(guest => renderGuestRow(guest))}
-                </div>
+                  {!isOpen && (
+                    <span className="ml-auto truncate text-xs text-stone-400" style={{ fontWeight: 300 }}>
+                      {members.map(m => m.first_name).join(', ')}
+                    </span>
+                  )}
+                </button>
+                {/* Members (collapsible) */}
+                {isOpen && (
+                  <div className="divide-y divide-stone-50">
+                    {members.map(guest => renderGuestRow(guest))}
+                  </div>
+                )}
               </div>
             )
           })}

@@ -32,7 +32,8 @@ export default function GuestPdfExport({ guests, weddingName, weddingDate }: Pro
   const confirmed  = guests.filter(g => g.rsvp_status === 'confirme').length
   const pending    = guests.filter(g => g.rsvp_status === 'en_attente').length
   const declined   = guests.filter(g => g.rsvp_status === 'decline').length
-  const adultes    = guests.filter(g => g.guest_type !== 'enfant' && g.guest_type !== 'animal').length
+  const adultes    = guests.filter(g => !g.guest_type || g.guest_type === 'adulte').length
+  const ados       = guests.filter(g => g.guest_type === 'ado').length
   const enfants    = guests.filter(g => g.guest_type === 'enfant').length
   const animaux    = guests.filter(g => g.guest_type === 'animal').length
   const withDietary = guests.filter(g => g.dietary_notes)
@@ -136,6 +137,7 @@ export default function GuestPdfExport({ guests, weddingName, weddingDate }: Pro
         pdf.text(RSVP_LABELS[g.rsvp_status ?? 'en_attente'] ?? 'En attente', MARGIN + 80, y)
         pdf.setTextColor(120, 113, 108)
         if (g.guest_type === 'enfant') pdf.text('Enfant', MARGIN + 105, y)
+        else if (g.guest_type === 'ado') pdf.text('Ado', MARGIN + 105, y)
         else if (g.guest_type === 'animal') pdf.text('Animal', MARGIN + 105, y)
         if (g.dietary_notes) {
           pdf.setTextColor(180, 83, 9)
@@ -190,12 +192,13 @@ export default function GuestPdfExport({ guests, weddingName, weddingDate }: Pro
           </div>
 
           {/* Stats */}
-          <div style={{ display: 'grid', gridTemplateColumns: `repeat(${animaux > 0 ? 5 : 4}, 1fr)`, gap: 12, marginBottom: 20 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: `repeat(${4 + (ados > 0 ? 1 : 0) + (animaux > 0 ? 1 : 0)}, 1fr)`, gap: 12, marginBottom: 20 }}>
             {[
               { label: 'Total invités',  value: guests.length, color: '#2d3228' },
               { label: 'Confirmés',      value: confirmed,     color: '#16a34a' },
-              { label: 'Adultes',        value: adultes,       color: '#4a5240' },
-              { label: 'Enfants',        value: enfants,       color: '#e07b39' },
+              { label: 'Adultes (18+)',  value: adultes,       color: '#4a5240' },
+              ...(ados > 0 ? [{ label: 'Ados (12-18, sans alcool)', value: ados, color: '#b45309' }] : []),
+              { label: 'Enfants (≤12)',  value: enfants,       color: '#e07b39' },
               ...(animaux > 0 ? [{ label: 'Animaux', value: animaux, color: '#a16207' }] : []),
             ].map(s => (
               <div key={s.label} style={{ backgroundColor: 'white', borderRadius: 10, padding: '16px 20px', border: '1px solid #e7e5e4' }}>
@@ -242,6 +245,9 @@ export default function GuestPdfExport({ guests, weddingName, weddingDate }: Pro
                         {[g.first_name, g.last_name].filter(Boolean).join(' ')}
                         {g.guest_type === 'enfant' && (
                           <span style={{ fontSize: 10, fontWeight: 300, color: '#a8a29e', marginLeft: 8 }}>🧒 enfant</span>
+                        )}
+                        {g.guest_type === 'ado' && (
+                          <span style={{ fontSize: 10, fontWeight: 300, color: '#a8a29e', marginLeft: 8 }}>🧑 ado (sans alcool)</span>
                         )}
                         {g.guest_type === 'animal' && (
                           <span style={{ fontSize: 10, fontWeight: 300, color: '#a8a29e', marginLeft: 8 }}>🐾 animal</span>

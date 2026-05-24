@@ -325,7 +325,8 @@ export default async function GuestsPage({
               </div>
 
               {total > 0 && (() => {
-                const adultes = guestList.filter(g => (g as { guest_type?: string }).guest_type !== 'enfant' && (g as { guest_type?: string }).guest_type !== 'animal').length
+                const adultes = guestList.filter(g => { const t = (g as { guest_type?: string }).guest_type; return !t || t === 'adulte' }).length
+                const ados = guestList.filter(g => (g as { guest_type?: string }).guest_type === 'ado').length
                 const enfants = guestList.filter(g => (g as { guest_type?: string }).guest_type === 'enfant').length
                 const animaux = guestList.filter(g => (g as { guest_type?: string }).guest_type === 'animal').length
                 return (
@@ -334,8 +335,9 @@ export default async function GuestsPage({
                        className="text-stone-400 uppercase mb-4">Composition</p>
                     <div className="space-y-3">
                       {[
-                        { label: 'Adultes', value: adultes },
-                        { label: 'Enfants', value: enfants },
+                        { label: 'Adultes (18+)', value: adultes },
+                        ...(ados > 0 ? [{ label: 'Ados (12-18, sans alcool)', value: ados }] : []),
+                        { label: 'Enfants (≤12 ans)', value: enfants },
                         ...(animaux > 0 ? [{ label: 'Animaux', value: animaux }] : []),
                       ].map(s => (
                         <div key={s.label} className="flex items-baseline justify-between">

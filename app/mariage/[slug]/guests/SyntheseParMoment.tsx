@@ -91,6 +91,8 @@ export default function SyntheseParMoment({
                           <span style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-700 flex-1 truncate">
                             {name}
                             {g.guest_type === 'enfant' && <span className="text-stone-300 ml-1 text-[10px]">enfant</span>}
+                            {g.guest_type === 'ado' && <span className="text-stone-300 ml-1 text-[10px]">ado</span>}
+                            {g.guest_type === 'animal' && <span className="text-stone-300 ml-1 text-[10px]">animal</span>}
                           </span>
                           <span style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400 shrink-0">
                             {RSVP_LABEL[rsvp] ?? rsvp}

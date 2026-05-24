@@ -113,8 +113,9 @@ export default function AddGuestForm({ weddingId, slug, addGuest, guestCount, pa
                 <select name="guest_type"
                   className="border border-stone-200 rounded-xl px-3 py-2.5 bg-white text-stone-500 outline-none focus:border-[#4a5240]/50 transition text-sm"
                   style={{ fontWeight: 300 }}>
-                  <option value="adulte">Adulte</option>
-                  <option value="enfant">Enfant</option>
+                  <option value="adulte">Adulte (18+)</option>
+                  <option value="ado">Ado (12-18, sans alcool)</option>
+                  <option value="enfant">Enfant (≤12 ans)</option>
                   <option value="animal">Animal</option>
                 </select>
                 <input name="nickname" type="text" placeholder="Surnom (optionnel)"

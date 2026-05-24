@@ -1,7 +1,9 @@
 import Link from 'next/link'
 import { getAllInspirations, categoryLabel, categoryColor, categoryBg, type InspirationCategory } from '@/lib/inspirations'
 import type { Metadata } from 'next'
+import { NextIntlClientProvider } from 'next-intl'
 import PublicNav from '@/app/_components/PublicNav'
+import messages from '@/messages/fr.json'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,6 +26,7 @@ export default function InspirationsPage() {
   const shorts = all.filter(i => i.category !== 'article')
 
   return (
+    <NextIntlClientProvider locale="fr" messages={messages}>
     <main style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, color: '#2d3228', background: CREAM, minHeight: '100vh' }}>
 
       <PublicNav active="inspirations" />
@@ -107,5 +110,6 @@ export default function InspirationsPage() {
 
       </div>
     </main>
+    </NextIntlClientProvider>
   )
 }

@@ -22,7 +22,7 @@
   "landing": {
     "hero": {
       "tagline": "La solución que simplifica tu vida",
-      "title": "Todo para organizar tu boda.",
+      "title": "Toda la organización de tu boda.",
       "titleAccent": "En un solo lugar.",
       "body1": "Organizar una boda no es cosa de improvisación. Son 1.000 decisiones, 20 proveedores, decenas de invitados, un poco de estrés y mucho dinero. Tienes miedo de olvidarte algo. Hay que pensar en cada detalle. Y rápidamente te sientes abrumado.",
       "body2": "Kaatch centraliza todo — es como ordenar tu habitación. Una vez que ves claro, tu mente se relaja, la celebración se acerca, y puedes enfocarte en lo que importa: Ustedes.",
@@ -66,12 +66,14 @@
           {
             "icon": "💰",
             "label": "Presupuesto total",
-            "detail": "Presupuestos, gastos, proveedores — todo de un vistazo."
+            "detail": "Presupuestos, gastos, proveedores — todo de un vistazo.",
+            "href": "/budget-mariage"
           },
           {
             "icon": "🤝",
             "label": "Proveedores",
-            "detail": "Contactos, contratos, pagos — sin más búsquedas por email."
+            "detail": "Contactos, contratos, pagos — sin más búsquedas por email.",
+            "href": "/gestion-prestataires"
           },
           {
             "icon": "📅",
@@ -199,7 +201,7 @@
     },
     "creativeStudio": {
       "tagline": "Studio Creativo",
-      "title": "Tu papelería de boda, creada automáticamente.",
+      "title": "Tu papelería de boda,",
       "subtitle": "creada automáticamente.",
       "desc": "Elige un estilo, nosotros generamos tus invitaciones, menús, tarjetas de lugar y asignación de mesas. Impreso y entregado. No tienes que hacer nada más.",
       "steps": [
@@ -274,10 +276,14 @@
         }
       ],
       "ctaSection": {
+        "badge": "Próximamente",
         "tagline": "Precios de lanzamiento",
         "title": "Tu colección de papelería, al precio de un menú.",
         "desc": "Impresión profesional incluida · Entrega 5–7 días · Papel premium 300g/m²",
-        "cta": "Crear mi papelería →"
+        "cta": "Crear mi papelería →",
+        "notifyLabel": "Recibe una notificación cuando el estudio esté listo:",
+        "notifyPlaceholder": "tu@email.com",
+        "notifyBtn": "Notificarme"
       }
     },
     "faq": {

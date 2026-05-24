@@ -65,7 +65,7 @@ export default function Home() {
     { icon: '📋', label: "Rétro-planning", detail: "Toutes les étapes de J-12 mois au jour J, dans l'ordre." },
     { icon: '💌', label: "Faire-parts & RSVP", detail: "Lien personnel par invité, réponses qui tombent en direct." },
     { icon: '🪑', label: "Plan de table", detail: "Glisser-déposer, ajusté jusqu'à la veille." },
-    { icon: '💰', label: "Budget global", detail: "Devis, dépenses, prestataires — tout sous les yeux." },
+    { icon: '💰', label: "Budget global", detail: "Devis, dépenses, prestataires — tout sous les yeux.", href: '/budget-mariage' },
     { icon: '🤝', label: "Prestataires", detail: "Invitez-les, choisissez ce qu'ils voient. Finis les mails.", href: '/gestion-prestataires' },
     { icon: '📅', label: "Programme jour J", detail: "Le déroulé de la journée. Vos témoins respirent." },
     { icon: '🎵', label: "Playlist & animations", detail: "Construire la bande-son, des idées pour animer la soirée." },
@@ -272,7 +272,7 @@ export default function Home() {
           </p>
           <h1 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(2.2rem, 4vw, 3.4rem)', lineHeight: 1.08, letterSpacing: '-0.02em' }}
               className="text-[#2C3B2E] mb-7">
-            Tout pour l&apos;organisation de votre mariage.{' '}
+            Toute l&apos;organisation de votre mariage.{' '}
             <span style={{ color: '#4a5240' }}>Au même endroit.</span>
           </h1>
           <div className="text-stone-600 mb-10" style={{ fontSize: '1.05rem', lineHeight: 1.85 }}>
@@ -750,25 +750,48 @@ export default function Home() {
 
           {/* CTA */}
           <ScrollReveal delay={250}>
-          <div className="rounded-[28px] overflow-hidden"
+          <div className="rounded-[28px] overflow-hidden relative"
                style={{ background: 'linear-gradient(135deg, #4a5240 0%, #2d3228 100%)', boxShadow: '0 8px 40px rgba(44,59,46,0.25)' }}>
-            <div className="p-10 md:p-14 flex flex-col md:flex-row items-center justify-between gap-8">
-              <div>
-                <p className="text-white/60 text-xs tracking-[0.2em] uppercase mb-3" style={{ fontWeight: 500 }}>Prix de lancement</p>
-                <p style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', letterSpacing: '-0.02em', lineHeight: 1.1 }}
-                   className="text-white mb-3">
-                  Votre collection de papeterie,{' '}
-                  <span style={{ fontWeight: 300, fontSize: '1.1rem', opacity: 0.8 }}>au prix d&apos;un menu.</span>
-                </p>
-                <p className="text-white/65 text-sm" style={{ fontWeight: 300, lineHeight: 1.7 }}>
-                  Impression professionnelle incluse · Livraison 5–7 jours · Papier premium 300g/m²
-                </p>
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+              <span className="bg-[#c4a87c] text-white text-xs px-4 py-1.5 rounded-full whitespace-nowrap" style={{ fontWeight: 600 }}>
+                Bientôt disponible
+              </span>
+            </div>
+            <div className="p-10 md:p-14">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-8">
+                <div>
+                  <p className="text-white/60 text-xs tracking-[0.2em] uppercase mb-3" style={{ fontWeight: 500 }}>Prix de lancement</p>
+                  <p style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', letterSpacing: '-0.02em', lineHeight: 1.1 }}
+                     className="text-white mb-3">
+                    Votre collection de papeterie,{' '}
+                    <span style={{ fontWeight: 300, fontSize: '1.1rem', opacity: 0.8 }}>au prix d&apos;un menu.</span>
+                  </p>
+                  <p className="text-white/65 text-sm" style={{ fontWeight: 300, lineHeight: 1.7 }}>
+                    Impression professionnelle incluse · Livraison 5–7 jours · Papier premium 300g/m²
+                  </p>
+                </div>
               </div>
-              <a href="/auth"
-                 className="shrink-0 bg-white text-[#2C3B2E] px-8 py-4 rounded-2xl hover:bg-[#f5f0e8] transition text-sm text-center whitespace-nowrap"
-                 style={{ fontWeight: 600, minWidth: 200 }}>
-                Créer ma papeterie →
-              </a>
+              <div className="border-t border-white/10 pt-6">
+                <p className="text-white/50 text-xs mb-3" style={{ fontWeight: 300 }}>
+                  Être informé(e) dès que le studio est prêt :
+                </p>
+                <form action="mailto:bonjour@kaatch.fr" method="GET" className="flex gap-2 max-w-sm">
+                  <input
+                    type="email"
+                    name="subject"
+                    placeholder="votre@email.fr"
+                    className="flex-1 text-sm border border-white/20 rounded-xl px-3 py-2.5 bg-white/10 text-white placeholder:text-white/30 outline-none focus:border-white/40"
+                    style={{ fontWeight: 300 }}
+                  />
+                  <button
+                    type="submit"
+                    className="text-sm bg-white text-[#2C3B2E] px-4 py-2.5 rounded-xl hover:bg-[#f5f0e8] transition shrink-0"
+                    style={{ fontWeight: 500 }}
+                  >
+                    Me prévenir
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
           </ScrollReveal>

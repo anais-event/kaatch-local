@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
+import { NextIntlClientProvider } from 'next-intl'
 import BudgetCalculator from './BudgetCalculator'
 import PublicNav from '@/app/_components/PublicNav'
+import messages from '@/messages/fr.json'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,6 +36,7 @@ export const metadata: Metadata = {
 
 export default function BudgetCalculatorPage() {
   return (
+    <NextIntlClientProvider locale="fr" messages={messages}>
     <main className="min-h-screen bg-[#f5f0e8]">
       <PublicNav active="budget-mariage" />
 
@@ -69,5 +72,6 @@ export default function BudgetCalculatorPage() {
         <BudgetCalculator />
       </div>
     </main>
+    </NextIntlClientProvider>
   )
 }

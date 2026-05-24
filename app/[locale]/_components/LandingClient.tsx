@@ -169,19 +169,24 @@ export default function LandingClient() {
                   {t('landing.twoAccess.backstage.title')}
                 </h3>
                 <ul className="space-y-4">
-                  {(t.raw('landing.twoAccess.backstage.items') as any[]).map((item, i) => (
-                    <li key={i} className="flex gap-3">
+                  {(t.raw('landing.twoAccess.backstage.items') as any[]).map((item, i) => {
+                    const Tag = item.href ? 'a' : 'div'
+                    return (
+                    <li key={i}>
+                      <Tag {...(item.href ? { href: item.href } : {})} className={`flex gap-3${item.href ? ' hover:bg-stone-50 rounded-lg p-1 -m-1 transition cursor-pointer' : ''}`}>
                       <span className="text-xl shrink-0">{item.icon}</span>
                       <div>
                         <p style={{ fontFamily: DISPLAY, fontWeight: 600, fontSize: '0.9rem' }} className="text-[#2d3228] mb-1">
-                          {item.label}
+                          {item.label}{item.href ? ' →' : ''}
                         </p>
                         <p className="text-stone-500 text-sm" style={{ fontWeight: 300 }}>
                           {item.detail}
                         </p>
                       </div>
+                      </Tag>
                     </li>
-                  ))}
+                    )
+                  })}
                 </ul>
               </div>
             </ScrollReveal>
@@ -418,7 +423,12 @@ export default function LandingClient() {
           </ScrollReveal>
 
           <ScrollReveal delay={0.4}>
-            <div className="mt-24 bg-[#f5f0e8] rounded-2xl p-12 text-center">
+            <div className="mt-24 bg-[#f5f0e8] rounded-2xl p-12 text-center relative">
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                <span className="bg-[#c4a87c] text-white text-xs px-4 py-1.5 rounded-full whitespace-nowrap" style={{ fontWeight: 600 }}>
+                  {t('landing.creativeStudio.ctaSection.badge')}
+                </span>
+              </div>
               <p className="text-xs tracking-[0.25em] uppercase text-[#4a5240] mb-3" style={{ fontFamily: DISPLAY, fontWeight: 500 }}>
                 {t('landing.creativeStudio.ctaSection.tagline')}
               </p>
@@ -428,9 +438,29 @@ export default function LandingClient() {
               <p className="text-stone-500 mb-8 max-w-lg mx-auto" style={{ fontSize: '0.95rem', lineHeight: 1.8 }}>
                 {t('landing.creativeStudio.ctaSection.desc')}
               </p>
-              <a href="#" className="inline-block bg-[#4a5240] text-white px-8 py-4 rounded-2xl hover:bg-[#2d3228] transition text-sm" style={{ fontWeight: 500 }}>
-                {t('landing.creativeStudio.ctaSection.cta')}
-              </a>
+              <p className="text-xs text-stone-400 mb-3" style={{ fontWeight: 300 }}>
+                {t('landing.creativeStudio.ctaSection.notifyLabel')}
+              </p>
+              <form
+                action="mailto:bonjour@kaatch.fr"
+                method="GET"
+                className="flex gap-2 max-w-sm mx-auto"
+              >
+                <input
+                  type="email"
+                  name="subject"
+                  placeholder={t('landing.creativeStudio.ctaSection.notifyPlaceholder')}
+                  className="flex-1 text-sm border border-stone-200 rounded-xl px-3 py-2.5 bg-white text-stone-600 placeholder:text-stone-300 outline-none focus:border-[#4a5240]"
+                  style={{ fontWeight: 300 }}
+                />
+                <button
+                  type="submit"
+                  className="text-sm bg-[#4a5240] text-white px-4 py-2.5 rounded-xl hover:bg-[#2d3228] transition shrink-0"
+                  style={{ fontWeight: 500 }}
+                >
+                  {t('landing.creativeStudio.ctaSection.notifyBtn')}
+                </button>
+              </form>
             </div>
           </ScrollReveal>
         </div>

@@ -5,7 +5,7 @@
     "commentCaMarche": "Comment ça marche",
     "studio": "Studio",
     "studioSub": "Créatif",
-    "calculator": "Calculette",
+    "calculator": "Calcul",
     "calculatorSub": "Budget",
     "inspirations": "Inspirations",
     "inspirationsSub": "Le Blog",
@@ -22,7 +22,7 @@
   "landing": {
     "hero": {
       "tagline": "La solution qui vous simplifie la vie",
-      "title": "Tout pour l'organisation de votre mariage.",
+      "title": "Toute l'organisation de votre mariage.",
       "titleAccent": "Au même endroit.",
       "body1": "Préparer un mariage, c'est pas de l'impro. C'est 1000 décisions, 20 prestataires, des dizaines d'invités, un peu de stress et beaucoup d'argent. On a peur d'oublier quelque chose, il faut penser à chaque détail, et l'on peut vite se sentir dépassé.",
       "body2": "Kaatch centralise tout — c'est un peu comme ranger sa chambre. Une fois qu'on y voit plus clair, l'esprit s'apaise, la fête approche, et vous pouvez vous reconcentrer sur l'essentiel : Vous.",
@@ -51,8 +51,8 @@
           { "icon": "📋", "label": "Rétro-planning", "detail": "Toutes les étapes de J-12 mois au jour J, dans l'ordre." },
           { "icon": "💌", "label": "Faire-parts & RSVP", "detail": "Lien personnel par invité, réponses qui tombent en direct." },
           { "icon": "🪑", "label": "Plan de table", "detail": "Glisser-déposer, ajusté jusqu'à la veille." },
-          { "icon": "💰", "label": "Budget global", "detail": "Devis, dépenses, prestataires — tout sous les yeux." },
-          { "icon": "🤝", "label": "Prestataires", "detail": "Coordonnées, contrats, paiements — finis les mails fouillés." },
+          { "icon": "💰", "label": "Budget global", "detail": "Devis, dépenses, prestataires — tout sous les yeux.", "href": "/budget-mariage" },
+          { "icon": "🤝", "label": "Prestataires", "detail": "Coordonnées, contrats, paiements — finis les mails fouillés.", "href": "/gestion-prestataires" },
           { "icon": "📅", "label": "Programme jour J", "detail": "Le déroulé de la journée. Vos témoins respirent." },
           { "icon": "🎵", "label": "Playlist & animations", "detail": "Construire la bande-son, des idées pour animer la soirée." }
         ]
@@ -146,7 +146,7 @@
     },
     "creativeStudio": {
       "tagline": "Studio Créatif",
-      "title": "La papeterie de votre mariage, créée automatiquement.",
+      "title": "La papeterie de votre mariage,",
       "subtitle": "créée automatiquement.",
       "desc": "Choisissez une ambiance, on génère vos faire-parts, menus, marque-places et plan de table. Imprimés et livrés. Vous n'avez rien d'autre à faire.",
       "steps": [
@@ -170,10 +170,14 @@
         { "icon": "🔢", "name": "Numéros de table", "desc": "Chevalet A5 avec le numéro de chaque table. Imprimé, prêt à poser." }
       ],
       "ctaSection": {
+        "badge": "Bientôt disponible",
         "tagline": "Prix de lancement",
         "title": "Votre collection de papeterie, au prix d'un menu.",
         "desc": "Impression professionnelle incluse · Livraison 5–7 jours · Papier premium 300g/m²",
-        "cta": "Créer ma papeterie →"
+        "cta": "Créer ma papeterie →",
+        "notifyLabel": "Être informé(e) dès que le studio est prêt :",
+        "notifyPlaceholder": "votre@email.fr",
+        "notifyBtn": "Me prévenir"
       }
     },
     "faq": {

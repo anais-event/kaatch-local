@@ -22,7 +22,7 @@
   "landing": {
     "hero": {
       "tagline": "La soluzione che semplifica la tua vita",
-      "title": "Tutto per organizzare il tuo matrimonio.",
+      "title": "Tutta l'organizzazione del tuo matrimonio.",
       "titleAccent": "In un unico posto.",
       "body1": "Organizzare un matrimonio non è improvvisazione. Sono 1.000 decisioni, 20 fornitori, decine di ospiti, un po' di stress e tantissimi soldi. Hai paura di dimenticare qualcosa. Devi pensare a ogni dettaglio. E velocemente ti senti sopraffatto.",
       "body2": "Kaatch centralizza tutto — è come riordinare la tua stanza. Una volta che vedi chiaro, la tua mente si rilassa, la celebrazione si avvicina, e puoi concentrarti su ciò che conta: Voi.",
@@ -66,12 +66,14 @@
           {
             "icon": "💰",
             "label": "Budget totale",
-            "detail": "Preventivi, spese, fornitori — tutto a colpo d'occhio."
+            "detail": "Preventivi, spese, fornitori — tutto a colpo d'occhio.",
+            "href": "/budget-mariage"
           },
           {
             "icon": "🤝",
             "label": "Fornitori",
-            "detail": "Contatti, contratti, pagamenti — basta cercare nelle email."
+            "detail": "Contatti, contratti, pagamenti — basta cercare nelle email.",
+            "href": "/gestion-prestataires"
           },
           {
             "icon": "📅",
@@ -199,7 +201,7 @@
     },
     "creativeStudio": {
       "tagline": "Studio Creativo",
-      "title": "La tua cancelleria nuziale, creata automaticamente.",
+      "title": "La tua cancelleria nuziale,",
       "subtitle": "creata automaticamente.",
       "desc": "Scegli uno stile, noi generiamo i tuoi inviti, menu, segnaposti e seating plan. Stampato e consegnato. Non devi fare nient'altro.",
       "steps": [
@@ -274,10 +276,14 @@
         }
       ],
       "ctaSection": {
+        "badge": "Prossimamente",
         "tagline": "Prezzi di lancio",
         "title": "La tua collezione di cancelleria, al prezzo di un menu.",
         "desc": "Stampa professionale inclusa · Consegna 5–7 giorni · Carta premium 300g/m²",
-        "cta": "Crea la mia cancelleria →"
+        "cta": "Crea la mia cancelleria →",
+        "notifyLabel": "Ricevi una notifica quando lo studio è pronto:",
+        "notifyPlaceholder": "la-tua@email.it",
+        "notifyBtn": "Avvisami"
       }
     },
     "faq": {

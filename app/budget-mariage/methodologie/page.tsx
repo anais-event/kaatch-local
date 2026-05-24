@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { NextIntlClientProvider } from 'next-intl'
 import PublicNav from '@/app/_components/PublicNav'
+import messages from '@/messages/fr.json'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,6 +15,7 @@ export const metadata: Metadata = {
 
 export default function MethodologiePage() {
   return (
+    <NextIntlClientProvider locale="fr" messages={messages}>
     <main className="min-h-screen bg-[#f5f0e8]">
       <PublicNav active="budget-mariage" />
 
@@ -269,5 +272,6 @@ export default function MethodologiePage() {
         </article>
       </div>
     </main>
+    </NextIntlClientProvider>
   )
 }

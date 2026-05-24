@@ -22,7 +22,7 @@
   "landing": {
     "hero": {
       "tagline": "The solution that simplifies your life",
-      "title": "Everything for your wedding organization.",
+      "title": "All your wedding planning.",
       "titleAccent": "In one place.",
       "body1": "Planning a wedding isn't winging it. It's 1,000 decisions, 20 vendors, dozens of guests, a bit of stress, and a lot of money. You're afraid of forgetting something. You have to think about every detail. And you can quickly feel overwhelmed.",
       "body2": "Kaatch centralizes everything — it's like tidying your room. Once you can see clearly, your mind eases, the celebration approaches, and you can refocus on what matters: You.",
@@ -51,8 +51,8 @@
           { "icon": "📋", "label": "Timeline", "detail": "Every step from 12 months before to the big day, in order." },
           { "icon": "💌", "label": "Invitations & RSVP", "detail": "Personal link per guest, responses come in real-time." },
           { "icon": "🪑", "label": "Seating chart", "detail": "Drag-and-drop, adjustable until the night before." },
-          { "icon": "💰", "label": "Total budget", "detail": "Quotes, expenses, vendors — everything at a glance." },
-          { "icon": "🤝", "label": "Vendors", "detail": "Contacts, contracts, payments — no more email digging." },
+          { "icon": "💰", "label": "Total budget", "detail": "Quotes, expenses, vendors — everything at a glance.", "href": "/budget-mariage" },
+          { "icon": "🤝", "label": "Vendors", "detail": "Contacts, contracts, payments — no more email digging.", "href": "/gestion-prestataires" },
           { "icon": "📅", "label": "Day-of schedule", "detail": "The flow of the day. Your witnesses can breathe." },
           { "icon": "🎵", "label": "Playlist & ideas", "detail": "Build the soundtrack, ideas to animate the evening." }
         ]
@@ -147,7 +147,7 @@
     },
     "creativeStudio": {
       "tagline": "Creative Studio",
-      "title": "Your wedding stationery, created automatically.",
+      "title": "Your wedding stationery,",
       "subtitle": "created automatically.",
       "desc": "Choose a style, we generate your invitations, menus, place cards, and seating chart. Printed and delivered. You don't have to do anything else.",
       "steps": [
@@ -171,10 +171,14 @@
         { "icon": "🔢", "name": "Table numbers", "desc": "A5 easel with each table number. Printed, ready to place." }
       ],
       "ctaSection": {
+        "badge": "Coming soon",
         "tagline": "Launch pricing",
         "title": "Your stationery collection, the price of a menu.",
         "desc": "Professional printing included · Delivery 5–7 days · 300g/m² premium paper",
-        "cta": "Create my stationery →"
+        "cta": "Create my stationery →",
+        "notifyLabel": "Get notified when the studio is ready:",
+        "notifyPlaceholder": "your@email.com",
+        "notifyBtn": "Notify me"
       }
     },
     "faq": {

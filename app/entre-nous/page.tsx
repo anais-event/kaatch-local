@@ -1,8 +1,10 @@
 import { redirect } from 'next/navigation'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
+import { NextIntlClientProvider } from 'next-intl'
 import ForumFeed from './ForumFeed'
 import type { ForumCategory } from './types'
+import messages from '@/messages/fr.json'
 
 async function createPost(formData: FormData) {
   'use server'
@@ -88,6 +90,7 @@ export default async function EntreNousPage() {
   const likedPostIds = new Set((myLikes ?? []).map(l => l.post_id))
 
   return (
+    <NextIntlClientProvider locale="fr" messages={messages}>
     <ForumFeed
       posts={posts ?? []}
       likedPostIds={likedPostIds}
@@ -97,5 +100,6 @@ export default async function EntreNousPage() {
       editPost={editPost}
       reportPost={reportPost}
     />
+    </NextIntlClientProvider>
   )
 }

@@ -10,7 +10,7 @@ import {
   Plus, Settings, Eye, LayoutGrid, Wallet, ListChecks, Music,
   BedDouble, Contact, CheckSquare, Palette, PartyPopper,
   BookOpen, QrCode, Share2, ChefHat, Flower2, Hourglass,
-  UserPlus, StickyNote
+  UserPlus, StickyNote, FileText
 } from 'lucide-react'
 
 export default async function WeddingPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -80,8 +80,9 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
   ]
 
   const outilsModules = [
-    { href: 'partager',     icon: QrCode,  label: "QR Code et partage",   sub: "Lien invités" },
-    { href: 'invitations',  icon: Share2,  label: "Exports documents",    sub: "PDF, Excel" },
+    { href: 'partager',      icon: QrCode,   label: "QR Code et partage",   sub: "Lien invités" },
+    { href: 'invitations',   icon: Share2,   label: "Exports documents",    sub: "PDF, Excel" },
+    { href: 'prestataires',  icon: FileText, label: "Contrats prestataires", sub: "PDF par catégorie" },
   ]
 
   const systemChecklist = [

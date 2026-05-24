@@ -8,7 +8,7 @@ export default async function PrestatairesPage({ params }: { params: Promise<{ s
 
   const { data: wedding } = await supabase
     .from('weddings')
-    .select('id')
+    .select('id, name, date, location')
     .eq('slug', slug)
     .single()
 
@@ -38,7 +38,7 @@ export default async function PrestatairesPage({ params }: { params: Promise<{ s
   const { data: retainedQuotes } = itemIds.length > 0
     ? await supabase
         .from('budget_quotes')
-        .select('vendor_name, item_id')
+        .select('vendor_name, item_id, amount')
         .eq('status', 'retenu')
         .in('item_id', itemIds)
         .not('vendor_name', 'is', null)
@@ -51,6 +51,14 @@ export default async function PrestatairesPage({ params }: { params: Promise<{ s
       category: categoryByItemId[q.item_id] ?? 'Autre',
     }))
     .filter((s, i, arr) => arr.findIndex(x => x.name.toLowerCase() === s.name.toLowerCase()) === i)
+
+  // Montant retenu par vendor name (pour pré-remplir le contrat)
+  const amountByVendorName: Record<string, number> = {}
+  for (const q of retainedQuotes ?? []) {
+    if (q.vendor_name && q.amount) {
+      amountByVendorName[q.vendor_name.toLowerCase()] = (amountByVendorName[q.vendor_name.toLowerCase()] ?? 0) + Number(q.amount)
+    }
+  }
 
   async function addVendor(formData: FormData) {
     'use server'
@@ -113,6 +121,7 @@ export default async function PrestatairesPage({ params }: { params: Promise<{ s
     <PrestatairesClient
       slug={slug}
       weddingId={wedding.id}
+      wedding={{ name: wedding.name ?? '', date: wedding.date ?? null, location: wedding.location ?? null }}
       vendors={(vendors ?? []).map(v => ({
         id: v.id,
         name: v.name,
@@ -123,6 +132,7 @@ export default async function PrestatairesPage({ params }: { params: Promise<{ s
         inviteToken: v.invite_token,
         vendorCode: v.vendor_code ?? '',
         isSuspended: v.is_suspended,
+        budgetAmount: amountByVendorName[v.name.toLowerCase()] ?? 0,
       }))}
       budgetSuggestions={budgetSuggestions}
       addAction={addVendor}

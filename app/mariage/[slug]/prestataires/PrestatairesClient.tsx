@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { ALL_PERMISSIONS, PERMISSION_LABELS, PERMISSION_ICONS, DEFAULT_TYPE_PERMISSIONS } from '@/lib/vendor-permissions'
 import type { VendorPermissions, VendorPermissionKey } from '@/lib/vendor-permissions'
+import ContractModal from './ContractModal'
 
 type Vendor = {
   id: string
@@ -14,6 +15,13 @@ type Vendor = {
   inviteToken: string
   vendorCode: string
   isSuspended: boolean
+  budgetAmount: number
+}
+
+type WeddingInfo = {
+  name: string
+  date: string | null
+  location: string | null
 }
 
 const CATEGORIES = Object.keys(DEFAULT_TYPE_PERMISSIONS).concat(['Autre'])
@@ -23,6 +31,7 @@ type BudgetSuggestion = { name: string; category: string }
 type Props = {
   slug: string
   weddingId: string
+  wedding: WeddingInfo
   vendors: Vendor[]
   budgetSuggestions: BudgetSuggestion[]
   addAction: (fd: FormData) => Promise<void>
@@ -30,13 +39,14 @@ type Props = {
   deleteAction: (fd: FormData) => Promise<void>
 }
 
-export default function PrestatairesClient({ slug, weddingId, vendors, budgetSuggestions, addAction, updateAction, deleteAction }: Props) {
+export default function PrestatairesClient({ slug, weddingId, wedding, vendors, budgetSuggestions, addAction, updateAction, deleteAction }: Props) {
   const [showAdd, setShowAdd] = useState(false)
   const [expanded, setExpanded] = useState<string | null>(null)
   const [copied, setCopied] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
   const [savedVendor, setSavedVendor] = useState<string | null>(null)
+  const [contractVendor, setContractVendor] = useState<Vendor | null>(null)
 
   function copyLink(token: string, vendorId: string) {
     const url = `${window.location.origin}/v/${token}`
@@ -317,17 +327,29 @@ export default function PrestatairesClient({ slug, weddingId, vendors, budgetSug
 
                       {/* Actions */}
                       <div className="flex items-center justify-between pt-2 border-t border-stone-100">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); toggleSuspend(v) }}
-                          className={`text-xs px-3 py-1.5 rounded-lg transition cursor-pointer ${
-                            v.isSuspended
-                              ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
-                              : 'bg-amber-50 text-amber-600 hover:bg-amber-100'
-                          }`}
-                          style={{ fontWeight: 300 }}
-                        >
-                          {v.isSuspended ? "Réactiver" : "Suspendre"}
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setContractVendor(v) }}
+                            className="text-xs px-3 py-1.5 rounded-lg bg-[#4a5240]/10 text-[#4a5240] hover:bg-[#4a5240]/20 transition cursor-pointer flex items-center gap-1.5"
+                            style={{ fontWeight: 300 }}
+                          >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3.5 h-3.5">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                            </svg>
+                            Contrat
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); toggleSuspend(v) }}
+                            className={`text-xs px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                              v.isSuspended
+                                ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
+                                : 'bg-amber-50 text-amber-600 hover:bg-amber-100'
+                            }`}
+                            style={{ fontWeight: 300 }}
+                          >
+                            {v.isSuspended ? "Réactiver" : "Suspendre"}
+                          </button>
+                        </div>
 
                         {confirmDelete === v.id ? (
                           <div className="flex items-center gap-2">
@@ -365,6 +387,15 @@ export default function PrestatairesClient({ slug, weddingId, vendors, budgetSug
           </div>
         )}
       </div>
+
+      {contractVendor && (
+        <ContractModal
+          wedding={wedding}
+          vendor={contractVendor}
+          defaultAmount={contractVendor.budgetAmount || undefined}
+          onClose={() => setContractVendor(null)}
+        />
+      )}
     </div>
   )
 }

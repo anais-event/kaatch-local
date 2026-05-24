@@ -324,5 +324,16 @@
     "copyrightDesktop": "Aucun groupe WhatsApp n'a été maltraité dans la fabrication de ce site.",
     "productHunt": "Retrouvez Kaatch sur Product Hunt",
     "email": "bonjour@kaatch.fr"
+  },
+  "studioPage": {
+    "tagline": "Kaatch Studio",
+    "title": "Bientôt disponible",
+    "desc": "Faire-parts, menus, marque-places, plan de table — votre papeterie de mariage sur-mesure arrive très bientôt.",
+    "notifyLabel": "Être informé(e) dès que le studio est prêt :",
+    "notifyPlaceholder": "votre@email.fr",
+    "notifyBtn": "Me prévenir",
+    "budgetCta": "Estimer mon budget mariage →",
+    "backCta": "Retour à l'accueil",
+    "back": "Retour"
   }
 }

@@ -466,5 +466,16 @@
     "message": "Questo sito utilizza solo cookie tecnici necessari per il suo funzionamento.",
     "learnMore": "Saperne di più",
     "accept": "Ho capito"
+  },
+  "studioPage": {
+    "tagline": "Kaatch Studio",
+    "title": "Prossimamente",
+    "desc": "Inviti, menu, segnaposti, seating plan — la tua cancelleria nuziale personalizzata arriverà molto presto.",
+    "notifyLabel": "Ricevi una notifica quando lo studio sarà disponibile in italiano:",
+    "notifyPlaceholder": "la-tua@email.it",
+    "notifyBtn": "Avvisami",
+    "budgetCta": "Stima il mio budget matrimonio →",
+    "backCta": "Torna alla home",
+    "back": "Indietro"
   }
 }

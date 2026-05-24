@@ -466,5 +466,16 @@
     "message": "Este sitio utiliza únicamente cookies técnicas necesarias para su funcionamiento.",
     "learnMore": "Más información",
     "accept": "Entendido"
+  },
+  "studioPage": {
+    "tagline": "Kaatch Studio",
+    "title": "Próximamente",
+    "desc": "Invitaciones, menús, tarjetas de lugar, asignación de mesas — tu papelería de boda personalizada llegará muy pronto.",
+    "notifyLabel": "Recibe una notificación cuando el estudio esté disponible en español:",
+    "notifyPlaceholder": "tu@email.com",
+    "notifyBtn": "Notificarme",
+    "budgetCta": "Estimar mi presupuesto de boda →",
+    "backCta": "Volver al inicio",
+    "back": "Volver"
   }
 }

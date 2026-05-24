@@ -1,15 +1,14 @@
-import type { Metadata } from 'next'
-import Link from 'next/link'
+'use client'
 
-export const metadata: Metadata = {
-  title: 'Studio Créatif — Bientôt disponible | Kaatch',
-  description: "Le Studio Créatif Kaatch arrive bientôt. Créez votre collection de papeterie de mariage personnalisée.",
-}
+import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 
 const DISPLAY = 'var(--font-display)'
 const BODY = 'var(--font-lato)'
 
 export default function StudioPage() {
+  const t = useTranslations('studioPage')
+
   return (
     <main className="min-h-screen bg-[#f5f0e8] flex flex-col items-center justify-center px-6">
       <div className="fixed top-5 left-5">
@@ -18,7 +17,7 @@ export default function StudioPage() {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
-          Retour
+          {t('back')}
         </Link>
       </div>
 
@@ -30,25 +29,25 @@ export default function StudioPage() {
         </div>
 
         <p className="text-xs uppercase tracking-[0.25em] text-stone-400 mb-4" style={{ fontFamily: BODY, fontWeight: 300 }}>
-          Kaatch Studio
+          {t('tagline')}
         </p>
         <h1 className="text-stone-800 mb-6" style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: 'clamp(2rem, 5vw, 3rem)', lineHeight: 1.08, letterSpacing: '-0.02em' }}>
-          Bientôt disponible
+          {t('title')}
         </h1>
         <div className="w-12 h-px bg-stone-300 mx-auto mb-6" />
         <p className="text-stone-500 leading-relaxed mb-10" style={{ fontFamily: BODY, fontWeight: 300 }}>
-          Faire-parts, menus, marque-places, plan de table&nbsp;— votre papeterie de mariage sur-mesure arrive très bientôt.
+          {t('desc')}
         </p>
 
         <div className="mb-10">
           <p className="text-xs text-stone-400 mb-3" style={{ fontWeight: 300 }}>
-            Être informé(e) dès que le studio est prêt :
+            {t('notifyLabel')}
           </p>
           <form action="mailto:bonjour@kaatch.fr" method="GET" className="flex gap-2 max-w-sm mx-auto">
             <input
               type="email"
               name="subject"
-              placeholder="votre@email.fr"
+              placeholder={t('notifyPlaceholder')}
               className="flex-1 text-sm border border-stone-200 rounded-xl px-3 py-2.5 bg-white text-stone-600 placeholder:text-stone-300 outline-none focus:border-[#4a5240]"
               style={{ fontWeight: 300 }}
             />
@@ -57,7 +56,7 @@ export default function StudioPage() {
               className="text-sm bg-[#4a5240] text-white px-4 py-2.5 rounded-xl hover:bg-[#2d3228] transition shrink-0"
               style={{ fontWeight: 500 }}
             >
-              Me prévenir
+              {t('notifyBtn')}
             </button>
           </form>
         </div>
@@ -68,14 +67,14 @@ export default function StudioPage() {
             className="inline-block px-6 py-3 rounded-full text-sm text-white"
             style={{ background: '#4a5240', fontFamily: BODY, fontWeight: 300 }}
           >
-            Estimer mon budget mariage →
+            {t('budgetCta')}
           </Link>
           <Link
             href="/"
             className="text-sm text-stone-400 hover:text-[#4a5240] transition"
             style={{ fontFamily: BODY, fontWeight: 300 }}
           >
-            Retour à l&apos;accueil
+            {t('backCta')}
           </Link>
         </div>
       </div>

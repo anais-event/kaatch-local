@@ -325,5 +325,16 @@
     "copyrightDesktop": "No WhatsApp groups were harmed in the making of this site.",
     "productHunt": "Find Kaatch on Product Hunt",
     "email": "hello@kaatch.fr"
+  },
+  "studioPage": {
+    "tagline": "Kaatch Studio",
+    "title": "Coming soon",
+    "desc": "Invitations, menus, place cards, seating charts — your custom wedding stationery is coming very soon.",
+    "notifyLabel": "Get notified when the studio launches in English:",
+    "notifyPlaceholder": "your@email.com",
+    "notifyBtn": "Notify me",
+    "budgetCta": "Estimate my wedding budget →",
+    "backCta": "Back to home",
+    "back": "Back"
   }
 }

@@ -466,5 +466,16 @@
     "message": "Diese Website verwendet nur technische Cookies, die für den Betrieb erforderlich sind.",
     "learnMore": "Mehr erfahren",
     "accept": "Verstanden"
+  },
+  "studioPage": {
+    "tagline": "Kaatch Studio",
+    "title": "Bald verfügbar",
+    "desc": "Einladungen, Menüs, Platzkarten, Sitzplan — deine individuelle Hochzeitspapeterie kommt sehr bald.",
+    "notifyLabel": "Benachrichtigt werden, wenn das Studio auf Deutsch verfügbar ist:",
+    "notifyPlaceholder": "deine@email.de",
+    "notifyBtn": "Benachrichtigen",
+    "budgetCta": "Mein Hochzeitsbudget schätzen →",
+    "backCta": "Zurück zur Startseite",
+    "back": "Zurück"
   }
 }

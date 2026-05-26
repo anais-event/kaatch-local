@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import type { SearchResult } from '@/app/api/search/route'
 
 export default function SearchModal({ slug }: { slug: string }) {
@@ -42,6 +42,17 @@ export default function SearchModal({ slug }: { slug: string }) {
   }, [slug])
 
   useEffect(() => { search(query) }, [query, search])
+
+  // Highlight query tokens in text
+  function highlight(text: string): React.ReactNode {
+    const tokens = query.trim().split(/\s+/).filter(t => t.length >= 2)
+    if (!tokens.length) return text
+    const regex = new RegExp(`(${tokens.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'gi')
+    const parts = text.split(regex)
+    return parts.map((p, i) =>
+      regex.test(p) ? <mark key={i} className="bg-[#4a5240]/15 text-[#2d3228] rounded px-0.5 not-italic">{p}</mark> : p
+    )
+  }
 
   // Group results by type
   const grouped = results.reduce<Record<string, SearchResult[]>>((acc, r) => {
@@ -134,8 +145,8 @@ export default function SearchModal({ slug }: { slug: string }) {
                      onMouseEnter={() => setActiveIdx(idx)}>
                     <span className="text-base shrink-0">{r.icon}</span>
                     <div className="flex-1 min-w-0">
-                      <p style={{ fontWeight: 400, fontSize: '0.85rem' }} className="text-stone-800 truncate">{r.label}</p>
-                      {r.sub && <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400 truncate">{r.sub}</p>}
+                      <p style={{ fontWeight: 400, fontSize: '0.85rem' }} className="text-stone-800 truncate">{highlight(r.label)}</p>
+                      {r.sub && <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400 truncate">{highlight(r.sub)}</p>}
                     </div>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
                          className="w-3.5 h-3.5 text-stone-200 shrink-0">

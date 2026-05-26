@@ -31,97 +31,116 @@ export async function GET(req: NextRequest) {
   const wid = wedding.id
   const like = `%${q}%`
 
+  // Multi-word search: each word must match at least one field
+  const tokens = q.split(/\s+/).filter(t => t.length >= 2)
+  const likes = tokens.length > 0 ? tokens : [q]
+
+  // Build OR filter for multiple tokens across multiple fields
+  function orFilter(...fields: string[]) {
+    return likes.flatMap(t => fields.map(f => `${f}.ilike.%${t}%`)).join(',')
+  }
+
   const settled = await Promise.allSettled([
     // guests — nom, prénom, email, téléphone, surnom, relation
-    supabase.from('guests').select('id,first_name,last_name,email,phone,nickname,rsvp_status')
+    supabase.from('guests').select('id,first_name,last_name,email,phone,nickname,rsvp_status,relation,guest_type')
       .eq('wedding_id', wid)
-      .or(`first_name.ilike.${like},last_name.ilike.${like},email.ilike.${like},phone.ilike.${like},nickname.ilike.${like}`)
+      .or(orFilter('first_name','last_name','email','phone','nickname','relation'))
       .limit(MAX),
 
-    // musique — titre, artiste, notes
-    supabase.from('playlist_songs').select('id,title,artist,moment,notes')
+    // musique — titre, artiste, notes, suggested_by
+    supabase.from('playlist_songs').select('id,title,artist,moment,notes,suggested_by')
       .eq('wedding_id', wid)
-      .or(`title.ilike.${like},artist.ilike.${like},notes.ilike.${like}`)
+      .or(orFilter('title','artist','notes','suggested_by'))
       .limit(MAX),
 
     // inspirations — titre
     supabase.from('inspiration_items').select('id,title,category')
-      .eq('wedding_id', wid).ilike('title', like).limit(MAX),
+      .eq('wedding_id', wid)
+      .or(orFilter('title','category'))
+      .limit(MAX),
 
     // programme — titre, description, lieu
     supabase.from('program_steps').select('id,title,description,time,location')
       .eq('wedding_id', wid)
-      .or(`title.ilike.${like},description.ilike.${like},location.ilike.${like}`)
+      .or(orFilter('title','description','location'))
       .limit(MAX),
 
     // budget items — label, notes
     supabase.from('budget_items').select('id,label,notes')
       .eq('wedding_id', wid)
-      .or(`label.ilike.${like},notes.ilike.${like}`)
+      .or(orFilter('label','notes'))
       .limit(MAX),
 
     // devis — prestataire, notes
     supabase.from('budget_quotes').select('id,vendor_name,notes')
       .eq('wedding_id', wid)
-      .or(`vendor_name.ilike.${like},notes.ilike.${like}`)
+      .or(orFilter('vendor_name','notes'))
       .limit(MAX),
 
-    // contacts — nom, rôle, email, téléphone
-    supabase.from('wedding_contacts').select('id,name,role,email,phone')
+    // contacts — nom, rôle, email, téléphone, notes
+    supabase.from('wedding_contacts').select('id,name,role,email,phone,notes')
       .eq('wedding_id', wid)
-      .or(`name.ilike.${like},role.ilike.${like},email.ilike.${like},phone.ilike.${like}`)
+      .or(orFilter('name','role','email','phone','notes'))
       .limit(MAX),
 
     // hébergements — nom, adresse, notes
     supabase.from('accommodations').select('id,name,address,notes')
       .eq('wedding_id', wid)
-      .or(`name.ilike.${like},address.ilike.${like},notes.ilike.${like}`)
+      .or(orFilter('name','address','notes'))
       .limit(MAX),
 
-    // prestataires — nom, catégorie
-    supabase.from('vendors').select('id,name,category')
+    // prestataires — nom, catégorie, email, téléphone
+    supabase.from('wedding_vendors').select('id,name,category,email,phone')
       .eq('wedding_id', wid)
-      .or(`name.ilike.${like},category.ilike.${like}`)
+      .or(orFilter('name','category','email','phone'))
       .limit(MAX),
 
     // livre d'or — auteur, contenu
     supabase.from('guestbook_entries').select('id,author_name,content')
       .eq('wedding_id', wid)
-      .or(`author_name.ilike.${like},content.ilike.${like}`)
+      .or(orFilter('author_name','content'))
       .limit(MAX),
 
     // checklist jour J — titre, assigné
     supabase.from('day_tasks').select('id,title,assigned_to,moment')
       .eq('wedding_id', wid)
-      .or(`title.ilike.${like},assigned_to.ilike.${like}`)
+      .or(orFilter('title','assigned_to'))
       .limit(MAX),
 
     // rétro-planning custom — titre, assigné
     supabase.from('retro_custom_tasks').select('id,title,assigned_to')
       .eq('wedding_id', wid)
-      .or(`title.ilike.${like},assigned_to.ilike.${like}`)
+      .or(orFilter('title','assigned_to'))
       .limit(MAX),
 
     // photos — uploadé par, tag moment
     supabase.from('photos').select('id,uploaded_by_name,moment_tag')
       .eq('wedding_id', wid)
-      .or(`uploaded_by_name.ilike.${like},moment_tag.ilike.${like}`)
+      .or(orFilter('uploaded_by_name','moment_tag'))
       .limit(MAX),
 
     // commentaires photos — auteur, contenu
     supabase.from('photo_comments').select('id,author_name,content,photo_id')
-      .ilike('author_name', like)
+      .or(orFilter('author_name','content'))
       .limit(MAX),
 
     // budget catégories — nom
     supabase.from('budget_categories').select('id,name')
-      .eq('wedding_id', wid).ilike('name', like).limit(MAX),
+      .eq('wedding_id', wid)
+      .or(orFilter('name'))
+      .limit(MAX),
+
+    // messages — auteur, contenu
+    supabase.from('messages').select('id,author_name,content,group_id')
+      .eq('wedding_id', wid)
+      .or(orFilter('author_name','content'))
+      .limit(MAX),
   ])
 
   const [
     guests, songs, inspirations, steps, budgetItems, budgetQuotes,
     contacts, accommodations, vendors, guestbook,
-    dayTasks, retroTasks, photos, photoComments, budgetCats,
+    dayTasks, retroTasks, photos, photoComments, budgetCats, messages,
   ] = settled.map(r => r.status === 'fulfilled' ? r.value : { data: [] })
 
   const MOMENT_LABELS: Record<string, string> = {
@@ -139,7 +158,7 @@ export async function GET(req: NextRequest) {
     ...(guests.data ?? []).map((g: any) => ({
       id: `guest-${g.id}`, type: 'Invités', icon: '👤',
       label: [g.first_name, g.last_name].filter(v => v && v !== 'null').join(' '),
-      sub: g.email ?? g.phone ?? RSVP_LABELS[g.rsvp_status] ?? g.rsvp_status,
+      sub: [g.email ?? g.phone, g.relation, RSVP_LABELS[g.rsvp_status]].filter(Boolean).join(' · ') || undefined,
       href: `/mariage/${slug}/guests`,
     })),
     ...(songs.data ?? []).map((s: any) => ({
@@ -192,7 +211,7 @@ export async function GET(req: NextRequest) {
     ...(vendors.data ?? []).map((v: any) => ({
       id: `vendor-${v.id}`, type: 'Prestataires', icon: '🤝',
       label: v.name,
-      sub: v.category ?? undefined,
+      sub: [v.category, v.email ?? v.phone].filter(Boolean).join(' · ') || undefined,
       href: `/mariage/${slug}/prestataires`,
     })),
     ...(guestbook.data ?? []).map((g: any) => ({
@@ -224,6 +243,12 @@ export async function GET(req: NextRequest) {
       label: c.author_name,
       sub: (c.content as string)?.slice(0, 60),
       href: `/mariage/${slug}/photos`,
+    })),
+    ...(messages.data ?? []).map((m: any) => ({
+      id: `msg-${m.id}`, type: 'Messagerie', icon: '💬',
+      label: m.author_name,
+      sub: (m.content as string)?.slice(0, 60),
+      href: `/mariage/${slug}/messagerie`,
     })),
   ]
 

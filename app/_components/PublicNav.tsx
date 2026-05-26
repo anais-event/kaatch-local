@@ -19,6 +19,7 @@ const features = [
   { icon: '🔗', label: 'Espace invités',         desc: 'Sans compte, sans friction',                   href: '/fonctionnalites/espace-invites' },
   { icon: '📝', label: "Livre d'or",             desc: 'Mots doux et souvenirs pour toujours',         href: '/fonctionnalites/livre-dor' },
   { icon: '🤝', label: 'Gestion prestataires',   desc: 'Invitez-les, choisissez ce qu\'ils voient',    href: '/gestion-prestataires' },
+  { icon: '💍', label: 'Wedding planners',       desc: 'Un espace pro, complémentaire',                href: '/wedding-planner' },
 ]
 
 const navLinksConfig = [

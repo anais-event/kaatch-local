@@ -1,10 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { NextIntlClientProvider } from 'next-intl'
+import PublicNav from '../_components/PublicNav'
+import messages from '@/messages/fr.json'
 import {
   Shield, Eye, EyeOff, Users, UtensilsCrossed, Camera, Music,
   Flower2, MapPin, ListChecks, Armchair, ClipboardList, Lock,
   Send, UserPlus, ToggleRight, Bell, ChevronRight, Sparkles,
-  CheckCircle2,
+  CheckCircle2, Heart, Handshake, CalendarHeart, NotebookPen, FileText,
 } from 'lucide-react'
 
 export const metadata: Metadata = {
@@ -16,8 +19,8 @@ export const metadata: Metadata = {
   },
 }
 
-const DISPLAY = 'var(--font-cormorant)'
-const BODY = 'var(--font-lato)'
+const DISPLAY = 'var(--font-display)'
+const BODY = 'var(--font-body)'
 const GREEN = '#2C3B2E'
 const SAGE = '#4a5240'
 const CREAM = '#f5f0e8'
@@ -79,30 +82,10 @@ const steps = [
 
 export default function GestionPrestatairesPage() {
   return (
+    <NextIntlClientProvider locale="fr" messages={messages}>
     <main style={{ fontFamily: BODY, fontWeight: 300, color: '#2d3228', background: CREAM, minHeight: '100vh' }}>
 
-      {/* Nav */}
-      <nav style={{ background: `${CREAM}f2`, backdropFilter: 'blur(12px)' }}
-           className="fixed top-0 left-0 right-0 z-50 border-b border-stone-200/60">
-        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/"
-                style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '1.3rem', letterSpacing: '-0.02em', color: GREEN }}>
-            Kaatch
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/auth"
-                  className="text-sm hover:opacity-70 transition"
-                  style={{ fontWeight: 400, color: SAGE }}>
-              Connexion
-            </Link>
-            <Link href="/auth"
-                  className="text-sm px-5 py-2.5 rounded-xl hover:opacity-90 transition text-white"
-                  style={{ background: GREEN, fontWeight: 500 }}>
-              Commencer gratuitement
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <PublicNav />
 
       {/* Hero */}
       <section className="pt-32 pb-20 px-6">
@@ -114,9 +97,9 @@ export default function GestionPrestatairesPage() {
             </span>
           </div>
 
-          <h1 style={{ fontFamily: DISPLAY, fontWeight: 600, fontSize: 'clamp(2rem, 5vw, 3.2rem)', lineHeight: 1.1, color: GREEN }} className="mb-5">
+          <h1 style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: 'clamp(2rem, 5vw, 3.2rem)', lineHeight: 1.1, letterSpacing: '-0.02em', color: GREEN }} className="mb-5">
             Partagez les bonnes infos<br />
-            <span className="italic" style={{ fontWeight: 400, color: SAGE }}>avec les bonnes personnes</span>
+            <span style={{ fontWeight: 400, color: SAGE }}>avec les bonnes personnes</span>
           </h1>
 
           <p style={{ fontWeight: 300, fontSize: '1.1rem', lineHeight: 1.7 }} className="text-stone-500 max-w-xl mx-auto mb-10">
@@ -197,7 +180,7 @@ export default function GestionPrestatairesPage() {
       {/* Comment ça marche */}
       <section className="py-20 px-6" style={{ background: 'white' }}>
         <div className="max-w-4xl mx-auto">
-          <h2 style={{ fontFamily: DISPLAY, fontWeight: 600, fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', color: GREEN }}
+          <h2 style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', letterSpacing: '-0.02em', color: GREEN }}
               className="text-center mb-4">
             Comment ça marche
           </h2>
@@ -224,10 +207,64 @@ export default function GestionPrestatairesPage() {
         </div>
       </section>
 
+      {/* Modèles de contrats */}
+      <section className="py-20 px-6" style={{ background: CREAM }}>
+        <div className="max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 bg-white/80 border border-stone-200/60 rounded-full px-4 py-1.5 mb-6">
+                <FileText className="w-3.5 h-3.5 text-[#4a5240]" strokeWidth={1.5} />
+                <span style={{ fontSize: '0.7rem', fontWeight: 600, color: SAGE, letterSpacing: '0.05em' }} className="uppercase">
+                  Contrats inclus
+                </span>
+              </div>
+              <h2 style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: 'clamp(1.4rem, 3vw, 2rem)', letterSpacing: '-0.02em', color: GREEN }}
+                  className="mb-4">
+                Un modèle de contrat par prestataire
+              </h2>
+              <p style={{ fontWeight: 300, fontSize: '0.95rem', lineHeight: 1.8 }} className="text-stone-500 mb-4">
+                Traiteur, photographe, DJ, fleuriste, vidéaste, décorateur — chaque
+                type de prestataire a ses spécificités. Kaatch propose un modèle
+                de contrat adapté à chaque métier.
+              </p>
+              <p style={{ fontWeight: 300, fontSize: '0.95rem', lineHeight: 1.8 }} className="text-stone-500">
+                Les clauses essentielles sont déjà rédigées. Vous personnalisez,
+                vous envoyez. Plus besoin de partir d&apos;une page blanche.
+              </p>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-stone-100 p-6 shadow-sm">
+              <p style={{ fontWeight: 600, fontSize: '0.7rem', letterSpacing: '0.1em' }} className="text-stone-400 uppercase mb-4">
+                Modèles disponibles
+              </p>
+              <div className="space-y-3">
+                {[
+                  { emoji: '🍽️', label: 'Contrat traiteur', detail: 'Menu, allergies, nombre de couverts, acompte' },
+                  { emoji: '📸', label: 'Contrat photographe', detail: 'Durée, livrables, droits, délai de retouche' },
+                  { emoji: '🎵', label: 'Contrat DJ / musiciens', detail: 'Horaires, matériel, playlist, pauses' },
+                  { emoji: '💐', label: 'Contrat fleuriste', detail: 'Compositions, livraison, montage, récupération' },
+                  { emoji: '🎥', label: 'Contrat vidéaste', detail: 'Durée, format, délai de livraison, rushes' },
+                  { emoji: '🏰', label: 'Contrat lieu de réception', detail: 'Horaires, capacité, état des lieux, caution' },
+                ].map(item => (
+                  <div key={item.label} className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-[#f5f0e8]/50 border border-stone-100">
+                    <span className="text-base shrink-0">{item.emoji}</span>
+                    <div className="flex-1 min-w-0">
+                      <p style={{ fontWeight: 500, fontSize: '0.82rem' }} className="text-stone-700">{item.label}</p>
+                      <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400">{item.detail}</p>
+                    </div>
+                    <FileText className="w-3.5 h-3.5 text-stone-300 shrink-0" strokeWidth={1.5} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Chaque prestataire voit ce qui le concerne */}
       <section className="py-20 px-6">
         <div className="max-w-4xl mx-auto">
-          <h2 style={{ fontFamily: DISPLAY, fontWeight: 600, fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', color: GREEN }}
+          <h2 style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', letterSpacing: '-0.02em', color: GREEN }}
               className="text-center mb-4">
             Chaque prestataire voit ce qui le concerne
           </h2>
@@ -265,7 +302,7 @@ export default function GestionPrestatairesPage() {
       <section className="py-20 px-6" style={{ background: GREEN }}>
         <div className="max-w-3xl mx-auto text-center">
           <Lock className="w-8 h-8 text-white/40 mx-auto mb-6" strokeWidth={1.5} />
-          <h2 style={{ fontFamily: DISPLAY, fontWeight: 600, fontSize: 'clamp(1.5rem, 3vw, 2rem)' }}
+          <h2 style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: 'clamp(1.5rem, 3vw, 2rem)', letterSpacing: '-0.02em' }}
               className="text-white mb-5">
             Vos données restent les vôtres
           </h2>
@@ -288,7 +325,7 @@ export default function GestionPrestatairesPage() {
       {/* FAQ */}
       <section className="py-20 px-6">
         <div className="max-w-2xl mx-auto">
-          <h2 style={{ fontFamily: DISPLAY, fontWeight: 600, fontSize: '1.8rem', color: GREEN }}
+          <h2 style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1.8rem', letterSpacing: '-0.02em', color: GREEN }}
               className="text-center mb-12">
             Questions fréquentes
           </h2>
@@ -323,35 +360,138 @@ export default function GestionPrestatairesPage() {
         </div>
       </section>
 
+      {/* Wedding Planners & Coordinatrices */}
+      <section className="py-24 px-6" style={{ background: 'white' }}>
+        <div className="max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+
+            {/* Left — text */}
+            <div>
+              <div className="inline-flex items-center gap-2 bg-[#f5f0e8] rounded-full px-4 py-1.5 mb-6">
+                <Heart className="w-3.5 h-3.5 text-[#4a5240]" strokeWidth={1.5} />
+                <span style={{ fontSize: '0.7rem', fontWeight: 600, color: SAGE, letterSpacing: '0.05em' }} className="uppercase">
+                  Pour les pros du mariage
+                </span>
+              </div>
+
+              <h2 style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', lineHeight: 1.15, letterSpacing: '-0.02em', color: GREEN }}
+                  className="mb-3">
+                Wedding planners,<br />
+                <span style={{ fontWeight: 400, color: SAGE }}>
+                  coordinatrices jour J
+                </span>
+              </h2>
+
+              <p style={{ fontWeight: 300, fontSize: '1rem', lineHeight: 1.8 }} className="text-stone-500 mb-6">
+                Vous avez vos outils, vos habitudes, votre façon de travailler — et
+                c&apos;est très bien comme ça. Kaatch ne remplace rien de tout ça.
+              </p>
+
+              <p style={{ fontWeight: 300, fontSize: '0.95rem', lineHeight: 1.8 }} className="text-stone-500 mb-6">
+                En revanche, si vos couples utilisent Kaatch pour gérer leur mariage,
+                vous pouvez accéder aux infos qui vous concernent — programme, nombre
+                d&apos;invités, plan de table, contacts — sans passer par 14 mails et un
+                fichier Excel de 47 onglets.
+              </p>
+
+              <p style={{ fontWeight: 400, fontSize: '0.95rem', lineHeight: 1.8 }} className="text-stone-600">
+                Si ça vous parle, on serait ravis de collaborer.
+                Si vous préférez vos carnets et vos tableaux, aucun souci — on
+                comprend tout à fait.
+              </p>
+            </div>
+
+            {/* Right — benefits cards */}
+            <div className="space-y-4">
+              {[
+                {
+                  icon: CalendarHeart,
+                  title: "Un accès dédié, sans compte",
+                  desc: "Vos couples vous ajoutent en un clic. Vous recevez un lien sécurisé, vous consultez ce qui vous concerne. Terminé.",
+                },
+                {
+                  icon: Handshake,
+                  title: "Complémentaire, pas concurrent",
+                  desc: "Kaatch gère la logistique côté couple. Vous gardez la main sur la coordination, la créa, les prestataires. Chacun son métier.",
+                },
+                {
+                  icon: NotebookPen,
+                  title: "Toujours à jour, en temps réel",
+                  desc: "Si le nombre d'invités change à J-3, vous le voyez immédiatement. Plus besoin de demander.",
+                },
+                {
+                  icon: Eye,
+                  title: "Lecture seule, zéro risque",
+                  desc: "Vous consultez, vous ne modifiez pas. Les mariés gardent le contrôle total de leur espace.",
+                },
+              ].map(item => (
+                <div key={item.title} className="flex items-start gap-4 bg-[#f5f0e8]/60 rounded-2xl p-5 border border-stone-100">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'white' }}>
+                    <item.icon className="w-5 h-5 text-[#4a5240]" strokeWidth={1.5} />
+                  </div>
+                  <div>
+                    <h3 style={{ fontWeight: 600, fontSize: '0.9rem' }} className="text-stone-800 mb-1">{item.title}</h3>
+                    <p style={{ fontWeight: 300, fontSize: '0.82rem', lineHeight: 1.6 }} className="text-stone-500">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+
+              <div className="pt-2 flex flex-wrap gap-3">
+                <Link href="/prestataire/rejoindre"
+                      className="inline-flex items-center gap-2 rounded-xl px-6 py-3 hover:opacity-90 transition text-white"
+                      style={{ background: SAGE, fontWeight: 500, fontSize: '0.88rem' }}>
+                  Tester en tant que pro
+                  <ChevronRight className="w-4 h-4" />
+                </Link>
+                <Link href="/wedding-planner"
+                      className="inline-flex items-center gap-2 rounded-xl px-6 py-3 hover:bg-white/60 transition border border-stone-200"
+                      style={{ fontWeight: 400, fontSize: '0.85rem', color: SAGE }}>
+                  En savoir plus
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA final */}
-      <section className="py-20 px-6 text-center" style={{ background: 'white' }}>
+      <section className="py-20 px-6 text-center" style={{ background: CREAM }}>
         <div className="max-w-xl mx-auto">
           <Sparkles className="w-6 h-6 text-[#4a5240]/40 mx-auto mb-4" strokeWidth={1.5} />
-          <h2 style={{ fontFamily: DISPLAY, fontWeight: 600, fontSize: 'clamp(1.5rem, 3vw, 2rem)', color: GREEN }}
+          <h2 style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: 'clamp(1.5rem, 3vw, 2rem)', letterSpacing: '-0.02em', color: GREEN }}
               className="mb-4">
             Prêts à simplifier la coordination ?
           </h2>
           <p style={{ fontWeight: 300, fontSize: '0.95rem', lineHeight: 1.6 }} className="text-stone-500 mb-8">
             Créez votre espace mariage gratuitement et invitez vos prestataires en quelques clics.
           </p>
-          <Link href="/prestataire/rejoindre"
-                className="inline-flex items-center gap-2 text-white rounded-xl px-8 py-4 hover:opacity-90 transition"
-                style={{ background: GREEN, fontWeight: 500, fontSize: '1rem' }}>
-            Vous êtes prestataire ? Rejoindre
-            <ChevronRight className="w-4 h-4" />
-          </Link>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link href="/auth"
+                  className="inline-flex items-center gap-2 text-white rounded-xl px-8 py-4 hover:opacity-90 transition"
+                  style={{ background: GREEN, fontWeight: 500, fontSize: '0.95rem' }}>
+              Créer mon espace mariage
+              <ChevronRight className="w-4 h-4" />
+            </Link>
+            <Link href="/prestataire/rejoindre"
+                  className="inline-flex items-center gap-2 rounded-xl px-6 py-3.5 hover:bg-white/60 transition border border-stone-300"
+                  style={{ fontWeight: 400, fontSize: '0.88rem', color: SAGE }}>
+              Je suis prestataire
+            </Link>
+          </div>
         </div>
       </section>
 
       {/* Footer mini */}
       <footer className="py-8 px-6 border-t border-stone-200/60 text-center">
-        <Link href="/" style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1rem', color: SAGE }}>
+        <Link href="/" style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1rem', letterSpacing: '-0.02em', color: SAGE }}>
           Kaatch
         </Link>
-        <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mt-2">
+        <p style={{ fontFamily: BODY, fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-400 mt-2">
           L'app de mariage qui pense à tout
         </p>
       </footer>
     </main>
+    </NextIntlClientProvider>
   )
 }

@@ -21,12 +21,18 @@ export async function GET(req: NextRequest) {
 
   const supabase = await createSupabaseServerClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json([], { status: 401 })
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (!user) {
+    console.error('[search] no user', authError?.message)
+    return NextResponse.json([], { status: 401 })
+  }
 
-  const { data: wedding } = await supabase
+  const { data: wedding, error: weddingError } = await supabase
     .from('weddings').select('id').eq('slug', slug).eq('user_id', user.id).single()
-  if (!wedding) return NextResponse.json([], { status: 403 })
+  if (!wedding) {
+    console.error('[search] wedding not found for slug', slug, 'user', user.id, weddingError?.message)
+    return NextResponse.json([], { status: 403 })
+  }
 
   const wid = wedding.id
   const like = `%${q}%`

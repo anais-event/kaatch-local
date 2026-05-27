@@ -33,10 +33,18 @@ export default function SearchModal({ slug }: { slug: string }) {
     debounceRef.current = setTimeout(async () => {
       try {
         const res = await fetch(`/api/search?slug=${slug}&q=${encodeURIComponent(q)}`)
-        const data = await res.json()
-        setResults(data)
-        setActiveIdx(0)
-      } catch {}
+        if (!res.ok) {
+          console.error('[search] API error', res.status, await res.text())
+          setResults([])
+        } else {
+          const data = await res.json()
+          console.log('[search] results', data.length, 'for', q)
+          setResults(data)
+          setActiveIdx(0)
+        }
+      } catch (err) {
+        console.error('[search] fetch error', err)
+      }
       setLoading(false)
     }, 300)
   }, [slug])

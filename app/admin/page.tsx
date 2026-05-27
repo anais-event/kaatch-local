@@ -68,20 +68,71 @@ export default async function AdminPage() {
 
   if (user?.email !== ADMIN_EMAIL) redirect('/auth')
 
-  const { data: weddings } = await adminClient()
+  const admin = adminClient()
+
+  const { data: weddings } = await admin
     .from('weddings')
-    .select('id, slug, name, date, plan, couple_id, created_at')
+    .select('id, slug, name, date, location, plan, couple_id, co_owner_email, share_code, created_at')
     .order('created_at', { ascending: false })
 
   const weddingIds = (weddings ?? []).map(w => w.id)
 
-  const { data: guestCounts } = weddingIds.length > 0
-    ? await supabase.from('guests').select('wedding_id').in('wedding_id', weddingIds)
-    : { data: [] }
+  const [
+    { data: guestsRaw },
+    { data: photosRaw },
+    { data: messagesRaw },
+    { data: guestbookRaw },
+    { data: songsRaw },
+  ] = await Promise.all([
+    weddingIds.length > 0
+      ? admin.from('guests').select('wedding_id, rsvp_status').in('wedding_id', weddingIds)
+      : Promise.resolve({ data: [] as { wedding_id: string; rsvp_status: string }[] }),
+    weddingIds.length > 0
+      ? admin.from('photos').select('wedding_id').in('wedding_id', weddingIds)
+      : Promise.resolve({ data: [] as { wedding_id: string }[] }),
+    weddingIds.length > 0
+      ? admin.from('messages').select('wedding_id').in('wedding_id', weddingIds)
+      : Promise.resolve({ data: [] as { wedding_id: string }[] }),
+    weddingIds.length > 0
+      ? admin.from('guestbook_entries').select('wedding_id').in('wedding_id', weddingIds)
+      : Promise.resolve({ data: [] as { wedding_id: string }[] }),
+    weddingIds.length > 0
+      ? admin.from('playlist_songs').select('wedding_id').in('wedding_id', weddingIds)
+      : Promise.resolve({ data: [] as { wedding_id: string }[] }),
+  ])
 
   const countByWedding: Record<string, number> = {}
-  for (const g of guestCounts ?? []) {
+  const rsvpByWedding: Record<string, { oui: number; non: number; attente: number }> = {}
+  for (const g of guestsRaw ?? []) {
     countByWedding[g.wedding_id] = (countByWedding[g.wedding_id] ?? 0) + 1
+    if (!rsvpByWedding[g.wedding_id]) rsvpByWedding[g.wedding_id] = { oui: 0, non: 0, attente: 0 }
+    if (g.rsvp_status === 'confirmed') rsvpByWedding[g.wedding_id].oui++
+    else if (g.rsvp_status === 'declined') rsvpByWedding[g.wedding_id].non++
+    else rsvpByWedding[g.wedding_id].attente++
+  }
+
+  const photosByWedding: Record<string, number> = {}
+  for (const p of photosRaw ?? []) photosByWedding[p.wedding_id] = (photosByWedding[p.wedding_id] ?? 0) + 1
+
+  const messagesByWedding: Record<string, number> = {}
+  for (const m of messagesRaw ?? []) messagesByWedding[m.wedding_id] = (messagesByWedding[m.wedding_id] ?? 0) + 1
+
+  const guestbookByWedding: Record<string, number> = {}
+  for (const e of guestbookRaw ?? []) guestbookByWedding[e.wedding_id] = (guestbookByWedding[e.wedding_id] ?? 0) + 1
+
+  const songsByWedding: Record<string, number> = {}
+  for (const s of songsRaw ?? []) songsByWedding[s.wedding_id] = (songsByWedding[s.wedding_id] ?? 0) + 1
+
+  // Fetch creator emails
+  const coupleIds = [...new Set((weddings ?? []).map(w => w.couple_id).filter(Boolean))]
+  let userEmails: Record<string, string> = {}
+  if (coupleIds.length > 0) {
+    try {
+      const { data: usersData } = await admin.auth.admin.listUsers({ perPage: 1000 })
+      for (const u of usersData?.users ?? []) {
+        if (coupleIds.includes(u.id)) userEmails[u.id] = u.email ?? ''
+      }
+    } catch {}
   }
 
   const { data: promoCodes } = await adminClient()
@@ -92,6 +143,8 @@ export default async function AdminPage() {
   const total = weddings?.length ?? 0
   const paid = weddings?.filter(w => w.plan === 'mariage' || w.plan === 'pro' || w.plan === 'essential' || w.plan === 'premium').length ?? 0
   const free = total - paid
+  const totalGuests = Object.values(countByWedding).reduce((a, b) => a + b, 0)
+  const totalPhotos = Object.values(photosByWedding).reduce((a, b) => a + b, 0)
 
   const LATO = 'var(--font-lato)'
   const DISPLAY = 'var(--font-display)'
@@ -120,11 +173,13 @@ export default async function AdminPage() {
       <div className="max-w-5xl mx-auto px-6 py-8">
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-5 gap-4 mb-8">
           {[
-            { label: 'Mariages total', value: total, color: 'text-[#2d3228]' },
-            { label: 'Plan gratuit', value: free, color: 'text-stone-500' },
-            { label: 'Plan Mariage', value: paid, color: 'text-[#4a5240]' },
+            { label: 'Mariages', value: total, color: 'text-[#2d3228]' },
+            { label: 'Gratuit', value: free, color: 'text-stone-500' },
+            { label: 'Payant', value: paid, color: 'text-[#4a5240]' },
+            { label: 'Invités', value: totalGuests, color: 'text-stone-600' },
+            { label: 'Photos', value: totalPhotos, color: 'text-stone-600' },
           ].map(s => (
             <div key={s.label} className="bg-white rounded-2xl border border-stone-100 p-5 text-center shadow-sm">
               <p style={{ fontFamily: DISPLAY, fontWeight: 500, fontSize: '2.4rem', lineHeight: 1 }}
@@ -154,62 +209,96 @@ export default async function AdminPage() {
                 const dateStr = w.date
                   ? new Date(w.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
                   : '—'
+                const createdStr = w.created_at
+                  ? new Date(w.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+                  : '—'
+                const guests = countByWedding[w.id] ?? 0
+                const rsvp = rsvpByWedding[w.id] ?? { oui: 0, non: 0, attente: 0 }
+                const photos = photosByWedding[w.id] ?? 0
+                const msgs = messagesByWedding[w.id] ?? 0
+                const gbook = guestbookByWedding[w.id] ?? 0
+                const songs = songsByWedding[w.id] ?? 0
+                const email = userEmails[w.couple_id] ?? '—'
 
                 return (
-                  <div key={w.id} className="px-6 py-4 flex items-center gap-4 flex-wrap">
+                  <div key={w.id} className="px-6 py-4 hover:bg-stone-50/50 transition">
 
-                    {/* Info mariage */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p style={{ fontWeight: 600, fontSize: '0.9rem' }} className="text-[#2d3228]">
-                          {w.name || '—'}
-                        </p>
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full ${
-                          isPaidPlan
-                            ? 'bg-[#4a5240]/10 text-[#4a5240]'
-                            : 'bg-stone-100 text-stone-400'
-                        }`} style={{ fontWeight: 500 }}>
-                          {w.plan ?? 'gratuit'}
-                        </span>
+                    {/* Ligne 1 : nom + badges + actions */}
+                    <div className="flex items-center gap-4 flex-wrap">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <a href={`/admin/weddings/${w.id}`}
+                             className="hover:underline" style={{ fontWeight: 600, fontSize: '0.9rem', color: '#2d3228' }}>
+                            {w.name || '—'}
+                          </a>
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full ${
+                            isPaidPlan
+                              ? 'bg-[#4a5240]/10 text-[#4a5240]'
+                              : 'bg-stone-100 text-stone-400'
+                          }`} style={{ fontWeight: 500 }}>
+                            {w.plan ?? 'gratuit'}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+                          <span className="text-xs text-stone-400" title="Date du mariage">{dateStr}</span>
+                          <span className="text-xs text-stone-400">·</span>
+                          <a href={`/mariage/${w.slug}`}
+                             className="text-xs text-[#4a5240] hover:underline"
+                             target="_blank" rel="noopener noreferrer">
+                            /{w.slug}
+                          </a>
+                          <span className="text-xs text-stone-400">·</span>
+                          <span className="text-xs text-stone-400" title="Email créateur">{email}</span>
+                          <span className="text-xs text-stone-400">·</span>
+                          <span className="text-xs text-stone-300" title="Date de création">créé {createdStr}</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-3 mt-0.5 flex-wrap">
-                        <span className="text-xs text-stone-400">{dateStr}</span>
-                        <span className="text-xs text-stone-400">·</span>
-                        <a href={`/mariage/${w.slug}`}
-                           className="text-xs text-[#4a5240] hover:underline"
-                           target="_blank" rel="noopener noreferrer">
-                          /{w.slug}
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        <a href={`/admin/weddings/${w.id}`}
+                           className="text-xs border border-stone-200 text-stone-500 px-3 py-1.5 rounded-lg hover:border-[#4a5240] hover:text-[#4a5240] transition"
+                           style={{ fontWeight: 400 }}>
+                          Voir détail
                         </a>
-                        <span className="text-xs text-stone-400">·</span>
-                        <span className="text-xs text-stone-400">
-                          {countByWedding[w.id] ?? 0} invité{(countByWedding[w.id] ?? 0) > 1 ? 's' : ''}
-                        </span>
+                        {isPaidPlan ? (
+                          <form action={setPlan}>
+                            <input type="hidden" name="wedding_id" value={w.id} />
+                            <input type="hidden" name="plan" value="" />
+                            <button type="submit"
+                              className="text-xs border border-stone-200 text-stone-400 px-3 py-1.5 rounded-lg hover:border-red-200 hover:text-red-400 transition cursor-pointer"
+                              style={{ fontWeight: 400 }}>
+                              Repasser en gratuit
+                            </button>
+                          </form>
+                        ) : (
+                          <form action={setPlan}>
+                            <input type="hidden" name="wedding_id" value={w.id} />
+                            <input type="hidden" name="plan" value="mariage" />
+                            <button type="submit"
+                              className="text-xs bg-[#4a5240] text-white px-3 py-1.5 rounded-lg hover:bg-[#2d3228] transition cursor-pointer"
+                              style={{ fontWeight: 400 }}>
+                              ✓ Activer plan Mariage
+                            </button>
+                          </form>
+                        )}
                       </div>
                     </div>
 
-                    {/* Actions plan */}
-                    <div className="flex items-center gap-2 shrink-0">
-                      {isPaidPlan ? (
-                        <form action={setPlan}>
-                          <input type="hidden" name="wedding_id" value={w.id} />
-                          <input type="hidden" name="plan" value="" />
-                          <button type="submit"
-                            className="text-xs border border-stone-200 text-stone-400 px-3 py-1.5 rounded-lg hover:border-red-200 hover:text-red-400 transition cursor-pointer"
-                            style={{ fontWeight: 400 }}>
-                            Repasser en gratuit
-                          </button>
-                        </form>
-                      ) : (
-                        <form action={setPlan}>
-                          <input type="hidden" name="wedding_id" value={w.id} />
-                          <input type="hidden" name="plan" value="mariage" />
-                          <button type="submit"
-                            className="text-xs bg-[#4a5240] text-white px-3 py-1.5 rounded-lg hover:bg-[#2d3228] transition cursor-pointer"
-                            style={{ fontWeight: 400 }}>
-                            ✓ Activer plan Mariage
-                          </button>
-                        </form>
-                      )}
+                    {/* Ligne 2 : stats compactes */}
+                    <div className="flex items-center gap-4 mt-2 flex-wrap">
+                      <span className="text-xs text-stone-500" style={{ fontWeight: 400 }}>
+                        👥 {guests} invité{guests > 1 ? 's' : ''}
+                        {guests > 0 && (
+                          <span className="text-stone-400 ml-1" style={{ fontWeight: 300 }}>
+                            ({rsvp.oui} ✓ {rsvp.non} ✗ {rsvp.attente} ?)
+                          </span>
+                        )}
+                      </span>
+                      {photos > 0 && <span className="text-xs text-stone-400" style={{ fontWeight: 300 }}>📷 {photos}</span>}
+                      {msgs > 0 && <span className="text-xs text-stone-400" style={{ fontWeight: 300 }}>💬 {msgs}</span>}
+                      {gbook > 0 && <span className="text-xs text-stone-400" style={{ fontWeight: 300 }}>📖 {gbook}</span>}
+                      {songs > 0 && <span className="text-xs text-stone-400" style={{ fontWeight: 300 }}>🎵 {songs}</span>}
+                      {w.location && <span className="text-xs text-stone-300" style={{ fontWeight: 300 }}>📍 {w.location}</span>}
                     </div>
 
                   </div>

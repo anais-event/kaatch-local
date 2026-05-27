@@ -299,6 +299,11 @@ export default function Home() {
               Invité(e) à un mariage ? →
             </a>
           </div>
+          <div className="flex items-center gap-2.5 mt-8">
+            <span className="text-[#2C3B2E]" style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1.1rem' }}>4.9/5</span>
+            <span className="flex gap-0.5 text-amber-400" style={{ fontSize: '1rem' }}>{'★★★★★'}</span>
+            <span className="text-stone-400 text-xs" style={{ fontWeight: 300 }}>noté par nos couples</span>
+          </div>
         </div>
 
         <div className="hidden md:block relative">

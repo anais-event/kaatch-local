@@ -4,6 +4,21 @@ import { revalidatePath } from 'next/cache'
 import GuestbookForm from './GuestbookForm'
 import { notifyCouple } from '@/lib/email/notify-couple'
 
+const ALLOWED_TAGS = /<\/?(?:b|strong|i|em|u|br|p|ul|ol|li|span)(?:\s[^>]*)?>/gi
+
+function sanitizeHtml(input: string): string {
+  if (!input) return ''
+  // Strip everything but our whitelist
+  let out = input.replace(/<(?!\/?(?:b|strong|i|em|u|br|p|ul|ol|li|span)(?:\s|>|\/))/gi, '&lt;')
+  // Drop on* attributes and javascript: hrefs
+  out = out.replace(/\son\w+\s*=\s*"[^"]*"/gi, '')
+  out = out.replace(/\son\w+\s*=\s*'[^']*'/gi, '')
+  out = out.replace(/javascript:/gi, '')
+  // Limit size to avoid abuse
+  if (out.length > 8000) out = out.slice(0, 8000)
+  return out
+}
+
 async function submitEntry(formData: FormData) {
   'use server'
   const supabase = await createSupabaseServerClient()
@@ -11,8 +26,10 @@ async function submitEntry(formData: FormData) {
   const slug = formData.get('slug') as string
   const author_name = formData.get('author_name') as string
   const message = formData.get('message') as string
+  const message_html_raw = formData.get('message_html') as string | null
   const guest_id = (formData.get('guest_id') as string) || null
   const photo = formData.get('photo') as File | null
+  const audio = formData.get('audio') as File | null
 
   const { data: wedding } = await supabase
     .from('weddings').select('id').eq('slug', slug).single()
@@ -32,12 +49,30 @@ async function submitEntry(formData: FormData) {
     }
   }
 
+  let audio_url: string | null = null
+  if (audio && audio.size > 0) {
+    const ext = (audio.type.split('/')[1] || 'webm').split(';')[0]
+    const path = `${wedding.id}/guestbook/audio/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+    const bytes = await audio.arrayBuffer()
+    const { error } = await supabase.storage
+      .from('wedding-photos')
+      .upload(path, Buffer.from(bytes), { contentType: audio.type || 'audio/webm' })
+    if (!error) {
+      const { data: urlData } = supabase.storage.from('wedding-photos').getPublicUrl(path)
+      audio_url = urlData.publicUrl
+    }
+  }
+
+  const message_html = message_html_raw ? sanitizeHtml(message_html_raw) : null
+
   await supabase.from('guestbook_entries').insert({
     wedding_id: wedding.id,
     guest_id: guest_id || null,
     author_name,
     message,
+    message_html,
     photo_url,
+    audio_url,
   })
 
   revalidatePath(`/invite/${slug}/livre-dor`)
@@ -66,8 +101,6 @@ export default async function LivreDorPage({ params }: { params: Promise<{ slug:
   const guest = guestCookie ? JSON.parse(guestCookie.value) : { firstName: '', lastName: '', id: null }
   const guestName = [guest.firstName, guest.lastName].filter(v => v && v !== 'null').join(' ')
 
-  // Bind slug and guest_id into the action via hidden fields on the form side
-  // We wrap submitEntry to forward those via a bound action
   async function boundSubmit(formData: FormData) {
     'use server'
     formData.set('slug', slug)
@@ -76,22 +109,16 @@ export default async function LivreDorPage({ params }: { params: Promise<{ slug:
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f0e8] pt-20 pb-32 px-4">
-      <div className="max-w-lg mx-auto">
+    <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 pb-32">
 
-        {/* Header */}
-        <div className="text-center mb-8">
-          <p className="text-4xl mb-2">📖</p>
-          <h1
-            className="text-[#2d3228] mb-2"
-            style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.5rem' }}
-          >
-            Livre d&apos;Or
-          </h1>
-          <p className="text-stone-400 text-sm" style={{ fontWeight: 300 }}>
-            Laissez un mot aux mariés pour immortaliser ce jour
-          </p>
-        </div>
+        <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.5rem' }}
+            className="text-[#2d3228] mb-2">
+          Livre d&apos;Or
+        </h1>
+        <p style={{ fontWeight: 300, fontSize: '0.9rem' }} className="text-stone-400 mb-8">
+          Laissez un mot aux mariés pour immortaliser ce jour.
+        </p>
 
         <GuestbookForm submitEntry={boundSubmit} defaultName={guestName} />
       </div>

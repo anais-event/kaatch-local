@@ -74,7 +74,7 @@ export default function Home() {
   const scene = [
     { icon: '🔗', label: "Lien magique", detail: "Pas de compte à créer. Le lien dans le faire-part, et ils sont chez vous." },
     { icon: '📅', label: "Programme du jour", detail: "Sans avoir à déranger qui que ce soit." },
-    { icon: '📝', label: "Livre d'or", detail: "Mots doux, vidéos, souvenirs — le tout depuis leur téléphone." },
+    { icon: '📝', label: "Livre d'or", detail: "Mots doux, messages audio, souvenirs — le tout depuis leur téléphone." },
     { icon: '🏠', label: "Hébergements", detail: "Vos suggestions de logements, en un clic." },
     { icon: '💬', label: "Messagerie", detail: "Discussion directe entre invités." },
     { icon: '📸', label: "Album partagé", detail: "Toutes les photos, au même endroit, pour tout le monde." },

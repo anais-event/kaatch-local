@@ -129,9 +129,9 @@ export default async function GuestGroupesPage({ params }: { params: Promise<{ s
       <MarkMessagesSeen slug={slug} />
       <div className="max-w-2xl mx-auto px-6 pt-8 pb-24">
 
-        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '2.2rem' }}
-            className="text-[#2d3228] mb-1">Messagerie</h1>
-        <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-400 mb-6">
+        <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.5rem' }}
+            className="text-[#2d3228] mb-2">Messagerie</h1>
+        <p style={{ fontWeight: 300, fontSize: '0.9rem' }} className="text-stone-400 mb-6">
           Les groupes sont ouverts à tous les invités.
         </p>
 

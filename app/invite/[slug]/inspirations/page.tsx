@@ -103,7 +103,7 @@ export default async function GuestInspirationsPage({
       <div className="min-h-screen bg-[#f5f0e8] flex items-center justify-center p-6">
         <div className="bg-white rounded-2xl border border-stone-100 p-10 max-w-sm w-full text-center shadow-sm">
           <div className="text-4xl mb-4">✨</div>
-          <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.6rem' }}
+          <h2 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.5rem' }}
               className="text-[#2d3228] mb-3">Bientôt disponible</h2>
           <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem', lineHeight: 1.7 }}
              className="text-stone-500">
@@ -130,12 +130,13 @@ export default async function GuestInspirationsPage({
   return (
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-        <div className="mb-6">
-          <p style={{ fontWeight: 300, fontSize: '0.68rem', letterSpacing: '0.2em' }}
-             className="text-stone-400 uppercase mb-1">Inspirations des mariés</p>
-          <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.8rem', fontStyle: 'italic' }}
-              className="text-[#2d3228] leading-none">{wedding.name}</h1>
-        </div>
+        <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.5rem' }}
+            className="text-[#2d3228] mb-2">
+          Inspirations
+        </h1>
+        <p style={{ fontWeight: 300, fontSize: '0.9rem' }} className="text-stone-400 mb-8">
+          Les idées des mariés pour la décoration, les tenues et l'ambiance.
+        </p>
 
         {/* Tabs — only visible cats */}
         {visibleCats.length > 1 && (

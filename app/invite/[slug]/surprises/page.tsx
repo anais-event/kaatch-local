@@ -1,5 +1,7 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { cookies } from 'next/headers'
+import { revalidatePath } from 'next/cache'
+import LoveNotesSection from './LoveNotesSection'
 
 const IDEES_SURPRISES = [
   {
@@ -60,35 +62,59 @@ export default async function SurprisesPage({ params }: { params: Promise<{ slug
   const guestName = [guest.firstName, guest.lastName].filter(Boolean).join(' ') || 'Invité'
 
   const supabase = await createSupabaseServerClient()
-  const { data: wedding } = await supabase.from('weddings').select('name').eq('slug', slug).single()
+  const { data: wedding } = await supabase.from('weddings').select('id, name').eq('slug', slug).single()
+
+  const { data: myNotes } = wedding && guest.id
+    ? await supabase
+        .from('love_notes')
+        .select('id, author_name, message, open_at, created_at')
+        .eq('wedding_id', wedding.id)
+        .eq('guest_id', guest.id)
+        .order('created_at', { ascending: false })
+    : { data: [] }
+
+  async function submitLoveNote(formData: FormData) {
+    'use server'
+    const supa = await createSupabaseServerClient()
+    const { data: w } = await supa.from('weddings').select('id').eq('slug', slug).single()
+    if (!w) return
+    const author_name = String(formData.get('author_name') || '').trim() || 'Invité'
+    const message = String(formData.get('message') || '').trim()
+    const open_at = String(formData.get('open_at') || '')
+    if (!message || !open_at) return
+    await supa.from('love_notes').insert({
+      wedding_id: w.id,
+      guest_id: guest.id || null,
+      author_name,
+      message,
+      open_at,
+    })
+    revalidatePath(`/invite/${slug}/surprises`)
+  }
 
   return (
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
       <div className="max-w-2xl mx-auto px-6 pt-8 pb-28">
 
-        {/* Header secret */}
+        {/* Header */}
         <div className="mb-8">
-          <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-xs px-3 py-1.5 rounded-full mb-4"
-               style={{ fontWeight: 300 }}>
-            🔒 Zone privée — les mariés n'ont pas accès à cette page
-          </div>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '2.2rem' }}
-              className="text-[#2d3228] mb-1">Surprises pour le jour J</h1>
-          <p style={{ fontWeight: 300, fontSize: '0.85rem' }} className="text-stone-400">
+          <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.5rem' }}
+              className="text-[#2d3228] mb-2">Surprises pour le jour J</h1>
+          <p style={{ fontWeight: 300, fontSize: '0.9rem' }} className="text-stone-400">
             Des idées pour rendre ce mariage encore plus inoubliable.
-            Coordonnez-vous entre invités — {wedding?.name ?? 'les mariés'} n'y ont pas accès.
+            Coordonnez-vous entre invités pour préparer un moment magique à {wedding?.name ?? 'aux mariés'}.
           </p>
         </div>
 
-        {/* Messagerie secrète */}
+        {/* Messagerie */}
         <div className="bg-white rounded-2xl border border-stone-100 p-5 mb-8">
           <div className="flex items-center gap-2 mb-3">
             <span className="text-lg">💬</span>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.15rem' }}
+            <h2 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.15rem' }}
                 className="text-[#4a5240]">Se coordonner avec les autres invités</h2>
           </div>
           <p style={{ fontWeight: 300, fontSize: '0.82rem', lineHeight: 1.7 }} className="text-stone-400 mb-4">
-            Utilisez la messagerie pour vous organiser entre invités. Le groupe <strong>@Surprises</strong> est fait pour ça — les mariés n'y ont pas accès.
+            Utilisez la messagerie pour vous organiser entre invités. Le groupe <strong>@Surprises</strong> est fait pour ça.
           </p>
           <a href={`/invite/${slug}/groupes`}
              className="inline-block bg-[#4a5240] text-white px-5 py-2.5 rounded-xl hover:bg-[#2d3228] transition text-sm"
@@ -96,6 +122,13 @@ export default async function SurprisesPage({ params }: { params: Promise<{ slug
             Aller dans la messagerie →
           </a>
         </div>
+
+        {/* Love Notes */}
+        <LoveNotesSection
+          defaultAuthor={guestName === 'Invité' ? '' : guestName}
+          myNotes={myNotes ?? []}
+          submit={submitLoveNote}
+        />
 
         {/* Idées */}
         <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.3rem' }}
@@ -159,13 +192,6 @@ export default async function SurprisesPage({ params }: { params: Promise<{ slug
               </div>
             ))}
           </div>
-        </div>
-
-        {/* Rappel */}
-        <div className="mt-10 text-center">
-          <p style={{ fontSize: '0.8rem', fontWeight: 300 }} className="text-stone-300">
-            🔒 Cette page n'est visible que par les invités
-          </p>
         </div>
 
       </div>

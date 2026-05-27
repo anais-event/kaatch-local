@@ -677,7 +677,13 @@ export default function BudgetCalculator() {
       }
       localStorage.setItem('kaatch_budget_simulation', JSON.stringify(payload))
     } catch {}
-    window.location.href = '/dashboard?from=budget-simulation'
+    const params = new URLSearchParams(window.location.search)
+    const returnTo = params.get('return')
+    if (returnTo && returnTo.startsWith('/mariage/')) {
+      window.location.href = `${returnTo}?from=budget-simulation`
+    } else {
+      window.location.href = '/dashboard?from=budget-simulation'
+    }
   }
 
   function renderRow(item: LineItem) {

@@ -365,15 +365,24 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
         {actions.importFromSimulation && <ImportSimulationBanner slug={slug} importAction={actions.importFromSimulation} />}
         <div className="text-center py-14 bg-white rounded-2xl border border-stone-100">
           <p style={{ fontWeight: 300, fontSize: '1rem' }} className="text-stone-400 mb-2">Aucune catégorie</p>
-          <p style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-300 mb-6">Commencez avec nos suggestions ou créez les vôtres</p>
-          <button onClick={async () => { const fd = new FormData(); fd.set('slug', slug); await actions.initDefaultCategories(fd) }}
-            className="bg-[#4a5240] text-white px-6 py-2.5 rounded-xl text-sm hover:bg-[#2d3228] transition cursor-pointer mr-3" style={{ fontWeight: 300 }}>
-            Catégories suggérées
-          </button>
-          <button onClick={() => setAddingCat(true)}
-            className="border border-[#4a5240] text-[#4a5240] px-6 py-2.5 rounded-xl text-sm hover:bg-[#4a5240] hover:text-white transition cursor-pointer" style={{ fontWeight: 300 }}>
-            Créer manuellement
-          </button>
+          <p style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-300 mb-6">Choisissez par où commencer</p>
+          <div className="flex flex-wrap justify-center gap-2.5">
+            <a href={`/budget-mariage?return=/mariage/${slug}/budget`}
+              className="bg-[#4a5240] text-white px-6 py-2.5 rounded-xl text-sm hover:bg-[#2d3228] transition cursor-pointer" style={{ fontWeight: 300 }}>
+              ✨ Simuler mon budget
+            </a>
+            <button onClick={async () => { const fd = new FormData(); fd.set('slug', slug); await actions.initDefaultCategories(fd) }}
+              className="bg-stone-100 text-[#4a5240] px-6 py-2.5 rounded-xl text-sm hover:bg-stone-200 transition cursor-pointer" style={{ fontWeight: 300 }}>
+              Catégories suggérées
+            </button>
+            <button onClick={() => setAddingCat(true)}
+              className="border border-stone-200 text-stone-500 px-6 py-2.5 rounded-xl text-sm hover:border-[#4a5240] hover:text-[#4a5240] transition cursor-pointer" style={{ fontWeight: 300 }}>
+              Créer manuellement
+            </button>
+          </div>
+          <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-300 mt-5">
+            La simulation génère vos catégories personnalisées avec montants estimés.
+          </p>
         </div>
         </>
       ) : (

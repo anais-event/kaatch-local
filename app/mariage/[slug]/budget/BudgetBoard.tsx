@@ -1,7 +1,80 @@
 'use client'
 
-import { Fragment, useState, useMemo, useTransition } from 'react'
+import { Fragment, useState, useMemo, useTransition, useEffect } from 'react'
 import FileUploadButton from './FileUploadButton'
+
+type SimulationPayload = {
+  version: number
+  createdAt: string
+  guestCount: number
+  region: string
+  style: string
+  total: number
+  items: Array<{ id: string; nom: string; emoji: string; amount: number; horsTotal?: boolean }>
+}
+
+function ImportSimulationBanner({ slug, importAction }: { slug: string; importAction: (f: FormData) => Promise<void> }) {
+  const [sim, setSim] = useState<SimulationPayload | null>(null)
+  const [pending, startTransition] = useTransition()
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('kaatch_budget_simulation')
+      if (raw) setSim(JSON.parse(raw))
+    } catch {}
+  }, [])
+
+  if (!sim) return null
+
+  const fmtEUR = (n: number) => new Intl.NumberFormat('fr-FR').format(n) + ' €'
+  const date = new Date(sim.createdAt).toLocaleDateString('fr-FR')
+  const count = sim.items.filter(i => !i.horsTotal).length
+
+  return (
+    <div className="bg-[#f5f0e8] border border-[#4a5240]/20 rounded-2xl p-5 mb-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+      <div className="flex-1">
+        <div className="text-[0.65rem] uppercase tracking-wider text-[#4a5240] mb-1" style={{ fontWeight: 400 }}>
+          Simulation détectée
+        </div>
+        <div className="text-sm text-[#2d3228]" style={{ fontWeight: 400 }}>
+          Importer votre simulation du {date} : {count} postes · {fmtEUR(sim.total)}
+        </div>
+        <div className="text-xs text-stone-500 mt-1" style={{ fontWeight: 300 }}>
+          {sim.guestCount} invités · {sim.region} · Style {sim.style}
+        </div>
+      </div>
+      <div className="flex gap-2 flex-shrink-0">
+        <button
+          onClick={() => {
+            startTransition(async () => {
+              const fd = new FormData()
+              fd.set('slug', slug)
+              fd.set('payload', JSON.stringify(sim))
+              await importAction(fd)
+              try { localStorage.removeItem('kaatch_budget_simulation') } catch {}
+              setSim(null)
+            })
+          }}
+          disabled={pending}
+          className="bg-[#4a5240] text-white px-5 py-2 rounded-xl text-sm hover:bg-[#2d3228] transition disabled:opacity-50"
+          style={{ fontWeight: 400 }}
+        >
+          {pending ? 'Import...' : 'Importer'}
+        </button>
+        <button
+          onClick={() => {
+            try { localStorage.removeItem('kaatch_budget_simulation') } catch {}
+            setSim(null)
+          }}
+          className="text-stone-400 hover:text-stone-600 text-sm px-3"
+          style={{ fontWeight: 300 }}
+        >
+          Ignorer
+        </button>
+      </div>
+    </div>
+  )
+}
 
 type Category = { id: string; name: string; icon: string; color: string; budget_allocated: number }
 type Item = { id: string; category_id: string; label: string; estimated_amount: number; status: string; description: string | null }
@@ -288,6 +361,8 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
 
       {/* ── État vide ── */}
       {categories.length === 0 ? (
+        <>
+        {actions.importFromSimulation && <ImportSimulationBanner slug={slug} importAction={actions.importFromSimulation} />}
         <div className="text-center py-14 bg-white rounded-2xl border border-stone-100">
           <p style={{ fontWeight: 300, fontSize: '1rem' }} className="text-stone-400 mb-2">Aucune catégorie</p>
           <p style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-300 mb-6">Commencez avec nos suggestions ou créez les vôtres</p>
@@ -300,6 +375,7 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
             Créer manuellement
           </button>
         </div>
+        </>
       ) : (
         /* ── Tableau groupé par catégorie ── */
         <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden overflow-x-auto">

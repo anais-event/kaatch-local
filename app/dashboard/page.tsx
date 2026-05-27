@@ -2,8 +2,14 @@
 import { redirect } from 'next/navigation'
 import { isPaid, checkoutUrl } from '@/lib/plan'
 
-export default async function Dashboard() {
+export default async function Dashboard({
+  searchParams,
+}: {
+  searchParams: Promise<{ from?: string }>
+}) {
   const supabase = await createSupabaseServerClient()
+  const { from } = await searchParams
+  const fromBudgetSim = from === 'budget-simulation'
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth')
@@ -16,13 +22,29 @@ export default async function Dashboard() {
 
   // Si aucun mariage, on redirige vers la création
   if (!weddings || weddings.length === 0) {
-    redirect('/dashboard/new-wedding')
+    redirect(fromBudgetSim ? '/dashboard/new-wedding?from=budget-simulation' : '/dashboard/new-wedding')
+  }
+
+  // Coming from budget calculator + exactly one wedding → deep-link to its budget tab so the import banner is immediately visible
+  if (fromBudgetSim && weddings.length === 1) {
+    redirect(`/mariage/${weddings[0].slug}/budget?from=budget-simulation`)
   }
 
   // Afficher la liste
   return (
     <div className="min-h-screen bg-[#f5f0e8] p-8">
       <div className="max-w-3xl mx-auto">
+        {fromBudgetSim && (
+          <div className="bg-white border border-[#4a5240]/20 rounded-2xl p-5 mb-8 text-center"
+               style={{ boxShadow: '0 2px 12px rgba(44,59,46,0.07)' }}>
+            <p className="text-xs tracking-[0.2em] uppercase text-[#4a5240] mb-2" style={{ fontWeight: 400 }}>
+              Simulation prête à importer
+            </p>
+            <p className="text-sm text-stone-600" style={{ fontWeight: 300 }}>
+              Choisissez le mariage où importer votre simulation budget.
+            </p>
+          </div>
+        )}
 
         <div className="text-center mb-12">
           <p className="text-xs tracking-[0.4em] uppercase text-[#2C3B2E] mb-2"
@@ -46,7 +68,7 @@ export default async function Dashboard() {
                    style={{ boxShadow: '0 2px 12px rgba(44,59,46,0.07)' }}>
 
                 {/* Cover + infos */}
-                <a href={`/mariage/${wedding.slug}`}
+                <a href={fromBudgetSim ? `/mariage/${wedding.slug}/budget?from=budget-simulation` : `/mariage/${wedding.slug}`}
                    className="group block relative h-48 bg-[#2C3B2E]">
                   {wedding.cover_image_url && (
                     <img src={wedding.cover_image_url} alt={wedding.name}

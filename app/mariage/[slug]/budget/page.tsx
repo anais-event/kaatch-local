@@ -220,6 +220,58 @@ async function initDefaultCategories(formData: FormData) {
   revalidatePath(`/mariage/${slug}/budget`)
 }
 
+const SIM_PALETTE = ['#8b7355', '#4a5240', '#5c6bc0', '#c06b8b', '#e07b39', '#9c6bb5', '#3a8fa0', '#b5763a', '#3a6ea0', '#7c8572', '#a89f99', '#c9a877', '#6b7461', '#9c8e77', '#5a6350', '#8a7c6b', '#b5a48e', '#3d4536', '#607055']
+
+async function importFromSimulation(formData: FormData) {
+  'use server'
+  const supabase = await createSupabaseServerClient()
+  const slug = formData.get('slug') as string
+  const payloadRaw = formData.get('payload') as string
+  let payload: { items?: Array<{ nom: string; emoji: string; amount: number; horsTotal?: boolean }>; total?: number; honeymoon?: number } = {}
+  try { payload = JSON.parse(payloadRaw) } catch { return }
+  if (!payload.items?.length) return
+
+  const { data: wedding } = await supabase.from('weddings').select('id').eq('slug', slug).single()
+  if (!wedding) return
+
+  const mainItems = payload.items.filter(i => !i.horsTotal)
+  const honeymoonItems = payload.items.filter(i => i.horsTotal)
+
+  const categories = mainItems.map((it, i) => ({
+    wedding_id: wedding.id,
+    name: it.nom,
+    icon: it.emoji || '💰',
+    color: SIM_PALETTE[i % SIM_PALETTE.length],
+    budget_allocated: it.amount,
+    position: i,
+  }))
+
+  const { data: inserted } = await supabase
+    .from('budget_categories')
+    .insert(categories)
+    .select('id, name, position')
+    .order('position')
+
+  if (inserted?.length) {
+    const itemsToInsert = inserted.map(cat => {
+      const src = mainItems.find(m => m.nom === cat.name)
+      return {
+        wedding_id: wedding.id,
+        category_id: cat.id,
+        label: src?.nom ?? cat.name,
+        estimated_amount: src?.amount ?? 0,
+        status: 'devis',
+      }
+    })
+    await supabase.from('budget_items').insert(itemsToInsert)
+  }
+
+  const totalAllocated = mainItems.reduce((s, i) => s + (i.amount || 0), 0) + honeymoonItems.reduce((s, i) => s + (i.amount || 0), 0)
+  await supabase.from('weddings').update({ budget_total: totalAllocated }).eq('id', wedding.id)
+
+  revalidatePath(`/mariage/${slug}/budget`)
+}
+
 const BUDGET_TABS = [
   { key: 'devis',    label: 'Devis & prestataires' },
   { key: 'synthese', label: 'Synthèse' },
@@ -304,7 +356,7 @@ export default async function BudgetPage({
             files={files ?? []}
             currencies={CURRENCIES}
             contacts={contacts ?? []}
-            actions={{ setBudgetTotal, addCategory, deleteCategory, addItem, updateItem, deleteItem, updateItemStatus, addQuote, updateQuote, deleteQuote, retainQuote, refuseQuote, initDefaultCategories, saveBudgetFileMeta, deleteBudgetFile, updateCategoryAllocated }}
+            actions={{ setBudgetTotal, addCategory, deleteCategory, addItem, updateItem, deleteItem, updateItemStatus, addQuote, updateQuote, deleteQuote, retainQuote, refuseQuote, initDefaultCategories, saveBudgetFileMeta, deleteBudgetFile, updateCategoryAllocated, importFromSimulation }}
           />
         )}
 

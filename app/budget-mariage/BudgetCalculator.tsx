@@ -291,16 +291,16 @@ function styleToLevel(style: string): Level {
 }
 
 const levelLabels: Record<Level, string> = {
-  eco: 'Économique',
-  classique: 'Classique',
-  premium: 'Premium',
+  eco: '★',
+  classique: '★★',
+  premium: '★★★',
   skip: '—',
 }
 
 const levelIcons: Record<string, string> = {
-  eco: '€',
-  classique: '€€',
-  premium: '€€€',
+  eco: '★',
+  classique: '★★',
+  premium: '★★★',
 }
 
 const chartColors = ['#4a5240', '#78716c', '#d4cfc7', '#a89f99', '#c9a877', '#6b7461', '#9c8e77', '#5a6350', '#8a7c6b', '#b5a48e', '#3d4536', '#a8a29e', '#7c8572', '#c4b89c', '#505d44', '#8b8072', '#607055', '#b0a090', '#6a7560']
@@ -513,78 +513,171 @@ export default function BudgetCalculator() {
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
   }
 
+  const fmtEUR = (n: number) =>
+    new Intl.NumberFormat('fr-FR').format(Math.round(n)).replace(/ | /g, ' ') + ' €'
+
+  const styleLabel = { intimate: 'Intime', convivial: 'Convivial', grandiose: 'Grandiose' }[style] ?? style
+  const regionLabel = regions.find(r => r.value === city)?.label ?? 'Non précisée'
+
   const handlePDF = async () => {
     const { jsPDF } = await import('jspdf')
-    const doc = new jsPDF({ unit: 'mm', format: 'a4' })
-    const w = doc.internal.pageSize.getWidth()
-    let y = 20
+    const html2canvas = (await import('html2canvas')).default
 
-    doc.setFontSize(22)
-    doc.setTextColor(44, 59, 46)
-    doc.text('Budget Mariage', w / 2, y, { align: 'center' })
-    y += 12
+    const container = document.createElement('div')
+    container.style.position = 'fixed'
+    container.style.left = '-10000px'
+    container.style.top = '0'
+    container.style.width = '794px'
+    container.style.padding = '48px'
+    container.style.backgroundColor = '#ffffff'
+    container.style.fontFamily = 'Helvetica, Arial, sans-serif'
+    container.style.color = '#2d3228'
+    container.style.fontWeight = '300'
 
-    doc.setFontSize(11)
-    doc.setTextColor(120, 113, 108)
-    const region = regions.find(r => r.value === city)?.label ?? 'Non définie'
-    doc.text(`${guestCount} invités  •  ${region}  •  Style ${style}`, w / 2, y, { align: 'center' })
-    y += 14
-
-    doc.setFillColor(245, 240, 232)
-    doc.roundedRect(20, y, w - 40, 20, 3, 3, 'F')
-    doc.setFontSize(16)
-    doc.setTextColor(74, 82, 64)
-    doc.text(`Total : ${Math.round(total).toLocaleString()} €`, w / 2, y + 13, { align: 'center' })
-    y += 30
-
-    doc.setFontSize(9)
-    doc.setTextColor(120, 113, 108)
-    doc.text('Poste', 22, y)
-    doc.text('Niveau', 110, y)
-    doc.text('Montant', w - 22, y, { align: 'right' })
-    y += 2
-    doc.setDrawColor(212, 207, 199)
-    doc.line(20, y, w - 20, y)
-    y += 6
-
-    doc.setFontSize(10)
-    breakdown.forEach(b => {
+    const rows = breakdown.map(b => {
+      const item = [...lineItems, ...customItems].find(i => i.id === b.id)
       const sel = selections[b.id]
-      doc.setTextColor(45, 50, 40)
-      doc.text(b.label, 22, y)
-      doc.setTextColor(120, 113, 108)
-      doc.text(levelLabels[sel] || '', 110, y)
-      doc.setTextColor(74, 82, 64)
-      doc.text(`${Math.round(b.amount).toLocaleString()} €`, w - 22, y, { align: 'right' })
-      y += 7
-      if (y > 270) { doc.addPage(); y = 20 }
-    })
+      const lvl = customBudgets[b.id] !== null ? 'Devis' : (levelLabels[sel] || '—')
+      const name = item?.nom ?? b.label
+      return `
+        <tr>
+          <td style="padding:10px 8px;border-bottom:1px solid #eee5d8;font-size:13px;color:#2d3228;">${name}</td>
+          <td style="padding:10px 8px;border-bottom:1px solid #eee5d8;font-size:13px;color:#9c8e77;text-align:center;">${lvl}</td>
+          <td style="padding:10px 8px;border-bottom:1px solid #eee5d8;font-size:13px;color:#4a5240;text-align:right;font-variant-numeric:tabular-nums;">${fmtEUR(b.amount)}</td>
+        </tr>`
+    }).join('')
 
-    y += 4
-    doc.setDrawColor(74, 82, 64)
-    doc.setLineWidth(0.5)
-    doc.line(20, y, w - 20, y)
-    y += 8
-    doc.setFontSize(12)
-    doc.setTextColor(74, 82, 64)
-    doc.text(`Total : ${Math.round(total).toLocaleString()} €`, w - 22, y, { align: 'right' })
-    doc.setFontSize(10)
-    doc.setTextColor(120, 113, 108)
-    doc.text(`≈ ${Math.round(total / guestCount)} € par invité`, 22, y)
+    container.innerHTML = `
+      <div style="text-align:center;margin-bottom:32px;">
+        <div style="font-size:11px;letter-spacing:0.25em;color:#a8a29e;text-transform:uppercase;margin-bottom:8px;">Estimation budget</div>
+        <h1 style="font-size:30px;font-weight:300;margin:0;color:#2d3228;letter-spacing:-0.01em;">Mon mariage</h1>
+        <div style="font-size:13px;color:#78716c;margin-top:10px;">
+          ${guestCount} invités &nbsp;·&nbsp; ${regionLabel} &nbsp;·&nbsp; Style ${styleLabel}
+        </div>
+      </div>
 
-    if (honeymoonAmount > 0) {
-      y += 12
-      doc.setFontSize(9)
-      doc.setTextColor(168, 162, 153)
-      doc.text(`+ Voyage de noces (hors total) : ${Math.round(honeymoonAmount).toLocaleString()} €`, 22, y)
+      <div style="background:#f5f0e8;border-radius:14px;padding:28px;text-align:center;margin-bottom:28px;">
+        <div style="font-size:11px;letter-spacing:0.2em;color:#9c8e77;text-transform:uppercase;margin-bottom:8px;">Budget total estimé</div>
+        <div style="font-size:42px;font-weight:300;color:#4a5240;font-variant-numeric:tabular-nums;">${fmtEUR(total)}</div>
+        <div style="font-size:13px;color:#78716c;margin-top:6px;">≈ ${fmtEUR(total / Math.max(guestCount, 1))} par invité</div>
+      </div>
+
+      <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
+        <thead>
+          <tr>
+            <th style="text-align:left;padding:8px;font-size:10px;letter-spacing:0.18em;color:#a8a29e;text-transform:uppercase;font-weight:400;border-bottom:1.5px solid #d4cfc7;">Poste</th>
+            <th style="text-align:center;padding:8px;font-size:10px;letter-spacing:0.18em;color:#a8a29e;text-transform:uppercase;font-weight:400;border-bottom:1.5px solid #d4cfc7;width:90px;">Style</th>
+            <th style="text-align:right;padding:8px;font-size:10px;letter-spacing:0.18em;color:#a8a29e;text-transform:uppercase;font-weight:400;border-bottom:1.5px solid #d4cfc7;width:120px;">Montant</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+        <tfoot>
+          <tr>
+            <td colspan="2" style="padding:14px 8px 4px;font-size:13px;color:#78716c;border-top:1.5px solid #4a5240;">Total</td>
+            <td style="padding:14px 8px 4px;font-size:16px;color:#4a5240;text-align:right;font-variant-numeric:tabular-nums;border-top:1.5px solid #4a5240;">${fmtEUR(total)}</td>
+          </tr>
+        </tfoot>
+      </table>
+
+      ${honeymoonAmount > 0 ? `
+        <div style="font-size:12px;color:#a8a29e;margin-bottom:24px;padding:12px;background:#faf9f6;border-radius:8px;">
+          + Voyage de noces (hors total) : <span style="color:#78716c;">${fmtEUR(honeymoonAmount)}</span>
+        </div>` : ''}
+
+      <div style="border-top:1px solid #eee5d8;padding-top:16px;margin-top:32px;text-align:center;">
+        <div style="font-size:11px;color:#a8a29e;line-height:1.6;">
+          Estimation indicative — les prix réels varient selon vos prestataires et la saison.<br/>
+          Généré sur <span style="color:#4a5240;">kaatch.fr</span> le ${new Date().toLocaleDateString('fr-FR')}
+        </div>
+      </div>
+    `
+
+    document.body.appendChild(container)
+    try {
+      const canvas = await html2canvas(container, { scale: 2, backgroundColor: '#ffffff', useCORS: true })
+      const imgData = canvas.toDataURL('image/png')
+      const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' })
+      const pageW = pdf.internal.pageSize.getWidth()
+      const pageH = pdf.internal.pageSize.getHeight()
+      const imgW = pageW
+      const imgH = (canvas.height * imgW) / canvas.width
+      let heightLeft = imgH
+      let position = 0
+      pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH)
+      heightLeft -= pageH
+      while (heightLeft > 0) {
+        position -= pageH
+        pdf.addPage()
+        pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH)
+        heightLeft -= pageH
+      }
+      pdf.save('budget-mariage.pdf')
+    } finally {
+      document.body.removeChild(container)
     }
+  }
 
-    y += 16
-    doc.setFontSize(8)
-    doc.setTextColor(168, 162, 153)
-    doc.text('Estimation indicative — kaatch.fr', w / 2, y, { align: 'center' })
+  const handleExcel = async () => {
+    const XLSX = await import('xlsx')
+    const headerRows: (string | number)[][] = [
+      ['Budget Mariage'],
+      [`${guestCount} invités · ${regionLabel} · Style ${styleLabel}`],
+      [],
+      ['Poste', 'Style', 'Montant (€)'],
+    ]
+    const dataRows: (string | number)[][] = breakdown.map(b => {
+      const item = [...lineItems, ...customItems].find(i => i.id === b.id)
+      const sel = selections[b.id]
+      const lvl = customBudgets[b.id] !== null ? 'Devis' : (levelLabels[sel] || '—')
+      return [item?.nom ?? b.label, lvl, Math.round(b.amount)]
+    })
+    const totalRow: (string | number)[] = ['Total', '', Math.round(total)]
+    const perGuestRow: (string | number)[] = [`Par invité (≈ ${guestCount} pers.)`, '', Math.round(total / Math.max(guestCount, 1))]
+    const honeymoonRows: (string | number)[][] = honeymoonAmount > 0
+      ? [[], ['Voyage de noces (hors total)', '', Math.round(honeymoonAmount)]]
+      : []
 
-    doc.save('budget-mariage.pdf')
+    const aoa = [...headerRows, ...dataRows, [], totalRow, perGuestRow, ...honeymoonRows]
+    const ws = XLSX.utils.aoa_to_sheet(aoa)
+    ws['!cols'] = [{ wch: 36 }, { wch: 12 }, { wch: 16 }]
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, 'Budget')
+    XLSX.writeFile(wb, 'budget-mariage.xlsx')
+  }
+
+  const handleOrganiserKaatch = (e: React.MouseEvent) => {
+    e.preventDefault()
+    try {
+      const payload = {
+        version: 1,
+        createdAt: new Date().toISOString(),
+        guestCount,
+        region: regionLabel,
+        style: styleLabel,
+        total: Math.round(total),
+        honeymoon: Math.round(honeymoonAmount),
+        items: orderedItems
+          .filter(item => enabled[item.id] && selections[item.id] !== 'skip')
+          .map(item => {
+            const amount = item.type === 'pourcentage'
+              ? getAmount(item, subtotalBeforePercent)
+              : getAmount(item)
+            const sel = selections[item.id]
+            return {
+              id: item.id,
+              nom: item.nom,
+              emoji: item.emoji,
+              level: sel,
+              levelLabel: customBudgets[item.id] !== null ? 'Devis' : levelLabels[sel],
+              amount: Math.round(amount),
+              horsTotal: !!item.horsTotal,
+            }
+          })
+          .filter(x => x.amount > 0),
+      }
+      localStorage.setItem('kaatch_budget_simulation', JSON.stringify(payload))
+    } catch {}
+    window.location.href = '/dashboard?from=budget-simulation'
   }
 
   function renderRow(item: LineItem) {
@@ -699,8 +792,8 @@ export default function BudgetCalculator() {
                             : 'bg-white/50 hover:bg-white hover:shadow-sm'
                         }`}
                       >
-                        <div className="text-[0.65rem] uppercase tracking-wider mb-1" style={{ fontWeight: 400, color: active ? GREEN : '#a8a29e' }}>
-                          {levelIcons[level]} {levelLabels[level]}
+                        <div className="text-[0.8rem] tracking-wider mb-1" style={{ fontWeight: 400, color: active ? GREEN : '#a8a29e' }}>
+                          {levelLabels[level]}
                         </div>
                         <div className="text-[0.68rem] text-stone-400 leading-snug mb-2" style={{ fontWeight: 300 }}>{item.niveaux[level].label}</div>
                         <div className="text-[0.82rem] tabular-nums" style={{ fontWeight: 400, color: GREEN }}>
@@ -865,7 +958,8 @@ export default function BudgetCalculator() {
               <div className="text-[0.72rem] text-stone-400" style={{ fontWeight: 300 }}>Transformez cette estimation en plan d&apos;action</div>
             </div>
             <a
-              href="/dashboard"
+              href="/dashboard?from=budget-simulation"
+              onClick={handleOrganiserKaatch}
               className="px-5 py-2.5 bg-[#4a5240] text-white rounded-xl text-[0.75rem] hover:bg-[#2d3228] transition-all flex-shrink-0"
               style={{ fontWeight: 400 }}
             >
@@ -941,13 +1035,22 @@ export default function BudgetCalculator() {
                   Partager
                 </button>
               </div>
-              <button
-                onClick={handlePDF}
-                className="w-full py-2.5 bg-[#4a5240] text-white rounded-xl text-[0.75rem] hover:bg-[#2d3228] transition-all"
-                style={{ fontWeight: 400 }}
-              >
-                Télécharger PDF
-              </button>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={handlePDF}
+                  className="py-2.5 bg-[#4a5240] text-white rounded-xl text-[0.75rem] hover:bg-[#2d3228] transition-all"
+                  style={{ fontWeight: 400 }}
+                >
+                  PDF
+                </button>
+                <button
+                  onClick={handleExcel}
+                  className="py-2.5 bg-stone-100 text-[#4a5240] rounded-xl text-[0.75rem] hover:bg-stone-200 transition-all"
+                  style={{ fontWeight: 400 }}
+                >
+                  Excel
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -106,11 +106,11 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
     ],
   }
 
-  // Auto-expand the active section in sidebar
+  // Auto-expand the active section in sidebar, fallback to first section so the panel never arrives collapsed
   const activeSection = sections.find(s =>
     s.items?.some(item => pathname.startsWith(item.href))
   )?.label ?? null
-  const [sidebarExpanded, setSidebarExpanded] = useState<string | null>(activeSection)
+  const [sidebarExpanded, setSidebarExpanded] = useState<string | null>(activeSection ?? sections[0]?.label ?? null)
 
   const isItemActive = (href: string) =>
     href === `/mariage/${slug}` ? pathname === href : pathname.startsWith(href)

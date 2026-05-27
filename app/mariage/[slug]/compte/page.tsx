@@ -137,7 +137,7 @@ export default async function ComptePage({ params }: { params: Promise<{ slug: s
         </section>
 
         {/* Partenaire */}
-        <section className="bg-white rounded-2xl border border-stone-100 shadow-sm p-6 mb-4">
+        <section id="partenaire" className="bg-white rounded-2xl border border-stone-100 shadow-sm p-6 mb-4 scroll-mt-24">
           <h2 style={{ fontFamily: 'var(--font-lato)', fontWeight: 500, fontSize: '0.95rem' }}
               className="text-[#2d3228] mb-1">
             Mon partenaire
@@ -154,6 +154,7 @@ export default async function ComptePage({ params }: { params: Promise<{ slug: s
         </section>
 
         {/* Formule */}
+        <div id="formule" className="scroll-mt-24" />
         <PlanSection
           plan={wedding.plan ?? null}
           weddingId={wedding.id}

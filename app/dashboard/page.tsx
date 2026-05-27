@@ -34,6 +34,13 @@ export default async function Dashboard({
   return (
     <div className="min-h-screen bg-[#f5f0e8] p-8">
       <div className="max-w-3xl mx-auto">
+        <div className="mb-6">
+          <a href="/"
+             className="inline-flex items-center gap-1.5 text-xs text-stone-400 hover:text-[#4a5240] transition"
+             style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}>
+            ← Retour à l&apos;accueil
+          </a>
+        </div>
         {fromBudgetSim && (
           <div className="bg-white border border-[#4a5240]/20 rounded-2xl p-5 mb-8 text-center"
                style={{ boxShadow: '0 2px 12px rgba(44,59,46,0.07)' }}>

@@ -160,11 +160,11 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
             {/* À faire maintenant */}
             {(() => {
               const tasks = [
-                { label: 'Invitez votre moitié', sub: 'Pour organiser le mariage à deux', done: false, href: `/mariage/${slug}/partager` },
+                { label: 'Invitez votre moitié', sub: 'Pour organiser le mariage à deux', done: false, href: `/mariage/${slug}/compte#partenaire` },
                 { label: 'Ajoutez une photo de vous', sub: 'Pour personnaliser votre espace', done: !!wedding.cover_image_url, href: `/mariage/${slug}/edit` },
-                { label: 'Complétez les infos du Jour J', sub: 'Date, lieu, horaires, ambiance', done: !!wedding.date && !!wedding.location, href: `/mariage/${slug}/edit` },
+                { label: 'Complétez les infos du Jour J', sub: 'Date, lieu, horaires, ambiance', done: !!wedding.date && !!wedding.location, href: `/mariage/${slug}/programme` },
                 { label: "Créez votre liste d'invités", sub: 'Commencez à poser les bases', done: (guestCount ?? 0) > 0, href: `/mariage/${slug}/guests` },
-                { label: 'Préparez votre plan de table', sub: "Même en brouillon, ça aide vite", done: (tablesCount ?? 0) > 0, href: `/mariage/${slug}/tables` },
+                { label: 'Préparez votre plan de table', sub: "Même en brouillon, ça aide vite", done: (tablesCount ?? 0) > 0, href: paid ? `/mariage/${slug}/tables` : `/mariage/${slug}/compte#formule` },
                 { label: 'Ajoutez vos premiers prestataires', sub: 'Lieu, traiteur, photographe, DJ…', done: (vendors?.length ?? 0) > 0, href: `/mariage/${slug}/prestataires` },
                 { label: 'Notez vos premières tâches importantes', sub: "Ce qu'il ne faut surtout pas oublier", done: (todosData?.length ?? 0) > 0, href: `/mariage/${slug}/retro-planning` },
               ]

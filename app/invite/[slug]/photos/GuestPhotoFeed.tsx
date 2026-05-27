@@ -500,18 +500,16 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
               <div className="flex items-center justify-between">
                 <div>
                   {editingName ? (
-                    <form onSubmit={async e => {
+                    <form onSubmit={e => {
                       e.preventDefault()
                       if (!editNameValue.trim()) return
-                      setSavingName(true)
                       const fd = new FormData()
                       fd.append('photo_id', currentPhoto.id)
                       fd.append('slug', slug)
                       fd.append('new_name', editNameValue.trim())
                       setOptimisticName(editNameValue.trim())
-                      await claimPhoto(fd)
-                      setSavingName(false)
                       setEditingName(false)
+                      startTransition(() => claimPhoto(fd))
                     }} className="flex gap-2 items-center">
                       <input type="text" value={editNameValue} onChange={e => setEditNameValue(e.target.value)} autoFocus
                         placeholder="Votre prénom"
@@ -603,17 +601,16 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
               <div>
                 <p className="text-stone-400 text-xs mb-0.5" style={{ fontWeight: 300 }}>Publié par</p>
                 {editingName ? (
-                  <form onSubmit={async e => {
+                  <form onSubmit={e => {
                     e.preventDefault()
                     if (!editNameValue.trim()) return
-                    setSavingName(true)
                     const fd = new FormData()
                     fd.append('photo_id', currentPhoto.id)
                     fd.append('slug', slug)
                     fd.append('new_name', editNameValue.trim())
-                    await claimPhoto(fd)
-                    setSavingName(false)
+                    setOptimisticName(editNameValue.trim())
                     setEditingName(false)
+                    startTransition(() => claimPhoto(fd))
                   }} className="flex gap-2 items-center mt-1">
                     <input type="text" value={editNameValue} onChange={e => setEditNameValue(e.target.value)} autoFocus
                       placeholder="Votre prénom"
@@ -626,8 +623,8 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
                   </form>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <p className="text-stone-700 text-sm" style={{ fontWeight: 400 }}>{cleanName(currentPhoto.uploaded_by_name) || 'Anonyme'}</p>
-                    {(!currentPhoto.uploaded_by_name || currentPhoto.uploaded_by_name === 'Anonyme' || currentPhoto.uploaded_by_name === myName) && (
+                    <p className="text-stone-700 text-sm" style={{ fontWeight: 400 }}>{optimisticName || cleanName(currentPhoto.uploaded_by_name) || 'Anonyme'}</p>
+                    {(!optimisticName && (!currentPhoto.uploaded_by_name || currentPhoto.uploaded_by_name === 'Anonyme' || currentPhoto.uploaded_by_name === myName)) && (
                       <button onClick={() => { setEditingName(true); setEditNameValue(myName !== 'Anonyme' ? myName : '') }}
                         className="text-[10px] text-stone-400 hover:text-[#4a5240] transition cursor-pointer underline underline-offset-2"
                         style={{ fontWeight: 300 }}>

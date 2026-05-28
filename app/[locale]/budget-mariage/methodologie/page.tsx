@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { NextIntlClientProvider } from 'next-intl'
-import { getLocale, getMessages, getTranslations } from 'next-intl/server'
+import { getTranslations } from 'next-intl/server'
 import PublicNav from '@/app/_components/PublicNav'
 
 export const dynamic = 'force-dynamic'
@@ -16,12 +15,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function MethodologiePage() {
-  const locale = await getLocale()
-  const messages = await getMessages()
   const t = await getTranslations('budget.methodologie')
 
   return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
     <main className="min-h-screen bg-[#f5f0e8]">
       <PublicNav active="budget-mariage" />
 
@@ -45,20 +41,14 @@ export default async function MethodologiePage() {
         <article className="space-y-12">
           {/* Intro */}
           <section className="space-y-4 bg-white border border-stone-100 rounded-2xl p-6">
-            <p className="text-stone-700 text-lg leading-relaxed">
-              {t('introP1')}
-            </p>
-            <p className="text-stone-700 leading-relaxed">
-              {t('introP2')}
-            </p>
+            <p className="text-stone-700 text-lg leading-relaxed">{t('introP1')}</p>
+            <p className="text-stone-700 leading-relaxed">{t('introP2')}</p>
           </section>
 
           {/* 3 sources */}
           <section className="space-y-6">
             <h3 className="text-2xl font-light text-stone-800">{t('sourcesTitle')}</h3>
-            <p className="text-stone-700">
-              {t('sourcesIntro')}
-            </p>
+            <p className="text-stone-700">{t('sourcesIntro')}</p>
 
             <div className="space-y-6">
               <div className="bg-white border border-stone-100 rounded-xl p-6">
@@ -73,9 +63,7 @@ export default async function MethodologiePage() {
 
               <div className="bg-white border border-stone-100 rounded-xl p-6">
                 <h4 className="font-medium text-stone-800 mb-3 text-lg">{t('source2Title')}</h4>
-                <p className="text-stone-700 text-sm mb-4">
-                  {t('source2Intro')}
-                </p>
+                <p className="text-stone-700 text-sm mb-4">{t('source2Intro')}</p>
                 <ul className="space-y-1 text-stone-700 text-sm list-disc list-inside">
                   <li>{t('source2Item1')}</li>
                   <li>{t('source2Item2')}</li>
@@ -83,16 +71,12 @@ export default async function MethodologiePage() {
                   <li>{t('source2Item4')}</li>
                   <li>{t('source2Item5')}</li>
                 </ul>
-                <p className="text-stone-700 text-sm mt-4 italic">
-                  {t('source2Note')}
-                </p>
+                <p className="text-stone-700 text-sm mt-4 italic">{t('source2Note')}</p>
               </div>
 
               <div className="bg-white border border-stone-100 rounded-xl p-6">
                 <h4 className="font-medium text-stone-800 mb-3 text-lg">{t('source3Title')}</h4>
-                <p className="text-stone-700 text-sm">
-                  {t('source3Text')}
-                </p>
+                <p className="text-stone-700 text-sm">{t('source3Text')}</p>
               </div>
             </div>
           </section>
@@ -100,9 +84,7 @@ export default async function MethodologiePage() {
           {/* Architecture */}
           <section className="space-y-6">
             <h3 className="text-2xl font-light text-stone-800">{t('calcTitle')}</h3>
-            <p className="text-stone-700">
-              {t('calcIntro')}
-            </p>
+            <p className="text-stone-700">{t('calcIntro')}</p>
 
             <div className="overflow-x-auto">
               <table className="w-full text-sm border-collapse">
@@ -133,9 +115,7 @@ export default async function MethodologiePage() {
               </table>
             </div>
 
-            <p className="text-stone-700">
-              {t('calcNote')}
-            </p>
+            <p className="text-stone-700">{t('calcNote')}</p>
 
             <div className="bg-white border border-stone-100 rounded-xl p-6 space-y-4 mt-6">
               <h4 className="font-medium text-stone-800 text-lg">{t('featuresTitle')}</h4>
@@ -154,9 +134,7 @@ export default async function MethodologiePage() {
           {/* Régions */}
           <section className="space-y-6">
             <h3 className="text-2xl font-light text-stone-800">{t('regionsTitle')}</h3>
-            <p className="text-stone-700">
-              {t('regionsIntro')}
-            </p>
+            <p className="text-stone-700">{t('regionsIntro')}</p>
 
             <div className="grid md:grid-cols-2 gap-4">
               <div className="bg-white border border-stone-100 rounded-lg p-4">
@@ -181,29 +159,21 @@ export default async function MethodologiePage() {
               </div>
             </div>
 
-            <p className="text-stone-700 mt-4">
-              {t('regionsNote')}
-            </p>
+            <p className="text-stone-700 mt-4">{t('regionsNote')}</p>
           </section>
 
           {/* Updates */}
           <section className="space-y-6 bg-white border border-stone-100 rounded-xl p-6">
             <h3 className="text-2xl font-light text-stone-800">{t('updatesTitle')}</h3>
             <p className="text-stone-700 font-medium">{t('updatesFreq')}</p>
-            <p className="text-stone-700">
-              {t('updatesText')}
-            </p>
-            <p className="text-stone-700 text-sm text-stone-500 mt-4">
-              <em>{t('lastUpdate')}</em>
-            </p>
+            <p className="text-stone-700">{t('updatesText')}</p>
+            <p className="text-stone-700 text-sm text-stone-500 mt-4"><em>{t('lastUpdate')}</em></p>
           </section>
 
           {/* Limites */}
           <section className="space-y-6">
             <h3 className="text-2xl font-light text-stone-800">{t('limitsTitle')}</h3>
-            <p className="text-stone-700">
-              <strong>{t('limitsIntro')}</strong>
-            </p>
+            <p className="text-stone-700"><strong>{t('limitsIntro')}</strong></p>
 
             <div className="bg-stone-50 border border-stone-200 rounded-lg p-6 space-y-4">
               <p className="font-medium text-stone-800">{t('limitsWhy')}</p>
@@ -216,9 +186,7 @@ export default async function MethodologiePage() {
               </ul>
             </div>
 
-            <p className="text-stone-700 font-medium">
-              {t('limitsConclusion')}
-            </p>
+            <p className="text-stone-700 font-medium">{t('limitsConclusion')}</p>
           </section>
 
           {/* Pourquoi gratuit */}
@@ -226,45 +194,27 @@ export default async function MethodologiePage() {
             <h3 className="text-2xl font-light text-stone-800">{t('whyFreeTitle')}</h3>
             <p className="text-stone-700">
               {t('whyFreeP1')}{' '}
-              <Link href="/" className="text-[#4a5240] hover:underline font-medium">
-                {t('whyFreeLink')}
-              </Link>
+              <Link href="/" className="text-[#4a5240] hover:underline font-medium">{t('whyFreeLink')}</Link>
             </p>
-            <p className="text-stone-700">
-              {t('whyFreeP2')}
-            </p>
+            <p className="text-stone-700">{t('whyFreeP2')}</p>
           </section>
 
           {/* Feedback */}
           <section className="space-y-6 bg-white border border-stone-100 rounded-xl p-6">
             <h3 className="text-2xl font-light text-stone-800">{t('feedbackTitle')}</h3>
-            <p className="text-stone-700">
-              {t('feedbackP1')}
-            </p>
-            <p className="text-stone-700">
-              {t('feedbackP2')}
-            </p>
-            <p className="text-stone-700 text-sm mt-3">
-              {t('feedbackP3')}
-            </p>
+            <p className="text-stone-700">{t('feedbackP1')}</p>
+            <p className="text-stone-700">{t('feedbackP2')}</p>
+            <p className="text-stone-700 text-sm mt-3">{t('feedbackP3')}</p>
           </section>
 
           {/* Footer */}
           <div className="pt-12 border-t border-stone-200">
-            <p className="text-stone-600 text-sm">
-              <em>{t('lastUpdate')}</em>
-            </p>
+            <p className="text-stone-600 text-sm"><em>{t('lastUpdate')}</em></p>
             <div className="mt-8 flex gap-4 flex-wrap">
-              <Link
-                href="/budget-mariage"
-                className="px-6 py-3 bg-[#4a5240] text-white rounded-lg font-medium hover:bg-[#2d3228] transition-colors"
-              >
+              <Link href="/budget-mariage" className="px-6 py-3 bg-[#4a5240] text-white rounded-lg font-medium hover:bg-[#2d3228] transition-colors">
                 {t('goToCalculator')}
               </Link>
-              <Link
-                href="/dashboard"
-                className="px-6 py-3 bg-stone-100 text-stone-700 rounded-lg font-medium hover:bg-stone-200 transition-colors"
-              >
+              <Link href="/dashboard" className="px-6 py-3 bg-stone-100 text-stone-700 rounded-lg font-medium hover:bg-stone-200 transition-colors">
                 {t('goToKaatch')}
               </Link>
             </div>
@@ -272,6 +222,5 @@ export default async function MethodologiePage() {
         </article>
       </div>
     </main>
-    </NextIntlClientProvider>
   )
 }

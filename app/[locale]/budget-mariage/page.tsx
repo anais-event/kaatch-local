@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
-import { NextIntlClientProvider } from 'next-intl'
-import { getLocale, getMessages, getTranslations } from 'next-intl/server'
-import BudgetCalculator from './BudgetCalculator'
+import { getTranslations } from 'next-intl/server'
+import BudgetCalculator from '@/app/budget-mariage/BudgetCalculator'
 import PublicNav from '@/app/_components/PublicNav'
 
 export const dynamic = 'force-dynamic'
@@ -36,12 +35,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function BudgetCalculatorPage() {
-  const locale = await getLocale()
-  const messages = await getMessages()
   const t = await getTranslations('budget.page')
 
   return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
     <main className="min-h-screen bg-[#f5f0e8]">
       <PublicNav active="budget-mariage" />
 
@@ -77,6 +73,5 @@ export default async function BudgetCalculatorPage() {
         <BudgetCalculator />
       </div>
     </main>
-    </NextIntlClientProvider>
   )
 }

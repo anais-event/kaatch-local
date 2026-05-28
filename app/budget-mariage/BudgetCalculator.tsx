@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 
 const BODY = 'var(--font-lato)'
 const GREEN = '#4a5240'
@@ -8,6 +9,21 @@ const GREEN_DARK = '#2d3228'
 
 type ItemType = 'fixe' | 'par_invite' | 'pourcentage'
 type Level = 'eco' | 'classique' | 'premium' | 'skip'
+
+interface LineItemData {
+  id: string
+  emoji: string
+  type: ItemType
+  actif: boolean
+  featureHref?: string
+  horsTotal?: boolean
+}
+
+interface CountryRegion {
+  key: string
+  name: string
+  mult: number
+}
 
 interface LineItem {
   id: string
@@ -27,257 +43,49 @@ interface LineItem {
   horsTotal?: boolean
 }
 
-const lineItems: LineItem[] = [
-  {
-    id: 'venue', emoji: '🏛️', nom: 'Lieu de réception',
-    description: 'Location salle, château, domaine, parc',
-    type: 'fixe', actif: true,
-    conseil: "Vérifiez ce qui est inclus : tables, chaises, cuisine, sono... ça change tout au prix final !",
-    messageDesactivation: "Vous recevez chez vous ou dans la famille ? Parfait, ce poste passe à 0 € 🏡",
-    niveaux: {
-      eco: { label: 'Salle municipale / gîte', base: 800 },
-      classique: { label: 'Domaine / propriété', base: 4000 },
-      premium: { label: 'Château / lieu prestige', base: 10000 },
-    },
-    feature: { label: '✨ Plan de table sur Kaatch', href: '/fonctionnalites/plan-de-table' },
-  },
-  {
-    id: 'catering', emoji: '🍽️', nom: 'Traiteur & repas',
-    description: 'Cocktail, dîner, brunch lendemain',
-    type: 'par_invite', actif: true,
-    conseil: "En moyenne : 100 €/invité pour un repas assis classique. À Paris, comptez +20-30 %.",
-    messageDesactivation: "Vous gérez vous-même la restauration ? Chapeau ! 🙌",
-    niveaux: {
-      eco: { label: 'Buffet / food truck', base: 40 },
-      classique: { label: 'Repas assis traiteur', base: 100 },
-      premium: { label: 'Gastronomique / chef', base: 150 },
-    },
-  },
-  {
-    id: 'drinks', emoji: '🍾', nom: 'Boissons & alcool',
-    description: 'Vins, champagne, bar, softs',
-    type: 'par_invite', actif: true,
-    conseil: "Vérifiez si votre traiteur inclut les boissons. Sinon, achetez direct en cave pour économiser !",
-    messageDesactivation: "Inclus dans le traiteur ? Pensez à le vérifier dans votre contrat ✅",
-    niveaux: {
-      eco: { label: 'Vin & softs achat direct', base: 18 },
-      classique: { label: 'Bar classique (vin, bière, softs)', base: 28 },
-      premium: { label: 'Open bar + cocktails', base: 50 },
-    },
-  },
-  {
-    id: 'cake', emoji: '🎂', nom: 'Wedding cake & desserts',
-    description: 'Pièce montée, candy bar, dessert',
-    type: 'par_invite', actif: true,
-    conseil: "La pièce montée classique reste la plus économique. Le wedding cake sur mesure, c'est beau mais comptez 10-20 €/pers.",
-    messageDesactivation: "",
-    niveaux: {
-      eco: { label: 'Pièce montée boulangerie', base: 4 },
-      classique: { label: 'Wedding cake pâtissier', base: 8 },
-      premium: { label: 'Cake artiste + candy bar', base: 18 },
-    },
-  },
-  {
-    id: 'photographer', emoji: '📸', nom: 'Photo & vidéo',
-    description: 'Photographe, vidéaste, drone, album',
-    type: 'fixe', actif: true,
-    conseil: "Le photographe, c'est ce qui reste quand la fête est terminée. À ne pas sacrifier !",
-    messageDesactivation: "Un proche s'en charge ? Pensez quand même à briefer plusieurs personnes avec des smartphones 📱",
-    niveaux: {
-      eco: { label: 'Photographe junior / étudiant', base: 900 },
-      classique: { label: 'Photographe pro', base: 2000 },
-      premium: { label: 'Photo + vidéo + drone', base: 5500 },
-    },
-    feature: { label: '✨ Album partagé invités', href: '/fonctionnalites/album-photo' },
-  },
-  {
-    id: 'dj', emoji: '🎵', nom: 'Animation & musique',
-    description: 'DJ, groupe, cérémonie laïque, animations',
-    type: 'fixe', actif: true,
-    conseil: "N'oubliez pas la cérémonie laïque si vous en prévoyez une (officiant : 400-1 500 €)",
-    messageDesactivation: "Playlist Spotify et ambiance DIY, ça marche aussi très bien ! 🎶",
-    niveaux: {
-      eco: { label: 'DJ amateur / sono DIY', base: 400 },
-      classique: { label: 'DJ professionnel', base: 1200 },
-      premium: { label: 'Groupe live + DJ soirée', base: 4000 },
-    },
-    feature: { label: '✨ Playlist collaborative', href: '/fonctionnalites/playlist-collaborative' },
-  },
-  {
-    id: 'flowers', emoji: '💐', nom: 'Décoration & fleurs',
-    description: 'Bouquets, centres de table, scénographie',
-    type: 'fixe', actif: true,
-    conseil: "Pensez à : bouquet mariée, boutonnière, arche cérémonie, centres de table, chemin de table, pétales...",
-    messageDesactivation: "",
-    niveaux: {
-      eco: { label: 'DIY + fleurs marché', base: 500 },
-      classique: { label: 'Fleuriste classique', base: 1700 },
-      premium: { label: 'Scénographe floral', base: 5000 },
-    },
-  },
-  {
-    id: 'dress_bride', emoji: '👗', nom: 'Tenue de la mariée',
-    description: 'Robe, chaussures, accessoires, retouches',
-    type: 'fixe', actif: true,
-    conseil: "N'oubliez pas les retouches (+100-400 €) et les accessoires : voile, chaussures, bijoux...",
-    messageDesactivation: "",
-    niveaux: {
-      eco: { label: 'Robe seconde main / location', base: 400 },
-      classique: { label: 'Boutique mariage', base: 1800 },
-      premium: { label: 'Créateur / sur mesure', base: 4000 },
-    },
-  },
-  {
-    id: 'dress_groom', emoji: '🤵', nom: 'Tenue du marié',
-    description: 'Costume, chaussures, accessoires',
-    type: 'fixe', actif: true,
-    conseil: "Location = 150-400 €. Achat = conservez-le pour d'autres occasions !",
-    messageDesactivation: "",
-    niveaux: {
-      eco: { label: 'Location costume', base: 250 },
-      classique: { label: 'Costume prêt-à-porter', base: 600 },
-      premium: { label: 'Sur mesure / smoking', base: 2000 },
-    },
-  },
-  {
-    id: 'rings', emoji: '💍', nom: 'Alliances & bijoux',
-    description: 'Alliances, bijoux du jour J',
-    type: 'fixe', actif: true,
-    conseil: "Prix pour LA PAIRE d'alliances. Comptez 500-1 500 € pour de l'or classique.",
-    messageDesactivation: "",
-    niveaux: {
-      eco: { label: 'Argent / plaqué or', base: 350 },
-      classique: { label: 'Or classique', base: 1000 },
-      premium: { label: 'Or + diamants / sur mesure', base: 3000 },
-    },
-  },
-  {
-    id: 'beauty', emoji: '💄', nom: 'Beauté',
-    description: 'Coiffure, maquillage, manucure, essais',
-    type: 'fixe', actif: true,
-    conseil: "Prévoyez les essais (souvent payants) et le déplacement à domicile le jour J (supplément fréquent) !",
-    messageDesactivation: "",
-    niveaux: {
-      eco: { label: 'Coiffure OU maquillage', base: 220 },
-      classique: { label: 'Coiffure + maquillage + essais', base: 700 },
-      premium: { label: 'Équipe beauté complète', base: 1400 },
-    },
-  },
-  {
-    id: 'stationery', emoji: '✉️', nom: 'Papeterie & faire-part',
-    description: 'Faire-part, save the date, menus, plan de table',
-    type: 'par_invite', actif: true,
-    conseil: "Timbres : 1,16 €/lettre. N'oubliez pas menus, plan de table, marque-places, livre d'or !",
-    messageDesactivation: "Envoi digital uniquement ? Pratique et écolo ! 🌱",
-    niveaux: {
-      eco: { label: 'Digital + impressions simples', base: 2 },
-      classique: { label: 'Faire-part imprimé + menus', base: 6 },
-      premium: { label: 'Papeterie créateur sur mesure', base: 12 },
-    },
-    feature: { label: '✨ Faire-part animés Kaatch', href: '/fonctionnalites/faire-part-rsvp' },
-  },
-  {
-    id: 'gifts', emoji: '🎁', nom: 'Cadeaux & dragées',
-    description: 'Invités, témoins, parents',
-    type: 'par_invite', actif: true,
-    conseil: "Ajoutez ~300 € pour les cadeaux témoins (2-6 pers.) et parents (souvent oubliés dans le budget !)",
-    messageDesactivation: "",
-    niveaux: {
-      eco: { label: 'Dragées classiques', base: 3 },
-      classique: { label: 'Dragées + emballage soigné', base: 6 },
-      premium: { label: 'Cadeau personnalisé', base: 12 },
-    },
-  },
-  {
-    id: 'transport', emoji: '🚗', nom: 'Transport & logistique',
-    description: 'Voiture mariés, navettes invités, parking',
-    type: 'fixe', actif: true,
-    conseil: "Si votre lieu est isolé, les navettes invités sont souvent indispensables (et très appréciées !)",
-    messageDesactivation: "",
-    niveaux: {
-      eco: { label: 'Voiture décorée (proche)', base: 100 },
-      classique: { label: 'Location voiture + navettes', base: 1200 },
-      premium: { label: 'Voiture prestige + navettes', base: 2500 },
-    },
-  },
-  {
-    id: 'accommodation', emoji: '🏨', nom: 'Hébergement',
-    description: 'Nuit mariés, chambres invités/famille',
-    type: 'fixe', actif: true,
-    conseil: "Beaucoup de lieux incluent la nuit des mariés. Vérifiez votre contrat !",
-    messageDesactivation: "Nuit incluse dans le lieu ? Super, économie directe ! 🎉",
-    niveaux: {
-      eco: { label: "Chambre d'hôtel classique", base: 200 },
-      classique: { label: 'Suite + quelques chambres famille', base: 800 },
-      premium: { label: 'Bloc hôtel / gîte entier', base: 2000 },
-    },
-    feature: { label: '✨ Espace invités Kaatch', href: '/fonctionnalites/espace-invites' },
-  },
-  {
-    id: 'kids', emoji: '👶', nom: 'Enfants',
-    description: 'Vêtements, baby-sitter, menus spécifiques',
-    type: 'fixe', actif: false,
-    conseil: "Un espace kids bien pensé = des parents qui profitent vraiment de la soirée 🙌",
-    messageDesactivation: "Pas d'enfants invités ? Très bien aussi ! 😄",
-    niveaux: {
-      eco: { label: 'Menus enfants uniquement', base: 200 },
-      classique: { label: 'Menus + baby-sitter', base: 500 },
-      premium: { label: 'Menus + animateur + espace kids', base: 1000 },
-    },
-  },
-  {
-    id: 'admin', emoji: '📜', nom: 'Administratif & impressions',
-    description: 'Frais de dossier, impressions, officiant',
-    type: 'fixe', actif: true,
-    conseil: "Le dossier mairie est GRATUIT. La grosse dépense ici : l'officiant laïque si cérémonie civile + religieuse.",
-    messageDesactivation: "",
-    niveaux: {
-      eco: { label: 'Impressions basiques', base: 100 },
-      classique: { label: 'Impressions + signalétique', base: 300 },
-      premium: { label: 'Officiant laïque + tout compris', base: 1500 },
-    },
-  },
-  {
-    id: 'honeymoon', emoji: '🌴', nom: 'Voyage de noces',
-    description: 'Destination, hôtel, vols',
-    type: 'fixe', actif: false, horsTotal: true,
-    conseil: "Ce montant est HORS budget mariage. On l'affiche séparément pour votre vision globale.",
-    messageDesactivation: "Voyage reporté ? Vous avez toute la vie pour ça ! 💛",
-    niveaux: {
-      eco: { label: 'France / Europe 1 semaine', base: 2000 },
-      classique: { label: 'Long-courrier (Maroc, Thaïlande...)', base: 4000 },
-      premium: { label: 'Maldives / Bali / Caraïbes', base: 8000 },
-    },
-  },
-  {
-    id: 'contingency', emoji: '🎲', nom: 'Divers & imprévus',
-    description: 'Parapluies, médicaments, trousse de secours, imprévus divers',
-    type: 'pourcentage', actif: true,
-    conseil: "En moyenne, les mariés dépensent 7 % de plus que prévu. Mieux vaut l'anticiper que le subir !",
-    messageDesactivation: "",
-    niveaux: {
-      eco: { label: 'Je suis très organisé(e) 😎', base: 5 },
-      classique: { label: 'Soyons prudents 🙂', base: 8 },
-      premium: { label: 'Je préfère dormir tranquille 😅', base: 12 },
-    },
-  },
+const lineItemData: LineItemData[] = [
+  { id: 'venue', emoji: '🏛️', type: 'fixe', actif: true, featureHref: '/fonctionnalites/plan-de-table' },
+  { id: 'catering', emoji: '🍽️', type: 'par_invite', actif: true },
+  { id: 'drinks', emoji: '🍾', type: 'par_invite', actif: true },
+  { id: 'cake', emoji: '🎂', type: 'par_invite', actif: true },
+  { id: 'photographer', emoji: '📸', type: 'fixe', actif: true, featureHref: '/fonctionnalites/album-photo' },
+  { id: 'dj', emoji: '🎵', type: 'fixe', actif: true, featureHref: '/fonctionnalites/playlist-collaborative' },
+  { id: 'flowers', emoji: '💐', type: 'fixe', actif: true },
+  { id: 'dress_bride', emoji: '👗', type: 'fixe', actif: true },
+  { id: 'dress_groom', emoji: '🤵', type: 'fixe', actif: true },
+  { id: 'rings', emoji: '💍', type: 'fixe', actif: true },
+  { id: 'beauty', emoji: '💄', type: 'fixe', actif: true },
+  { id: 'stationery', emoji: '✉️', type: 'par_invite', actif: true, featureHref: '/fonctionnalites/faire-part-rsvp' },
+  { id: 'gifts', emoji: '🎁', type: 'par_invite', actif: true },
+  { id: 'transport', emoji: '🚗', type: 'fixe', actif: true },
+  { id: 'accommodation', emoji: '🏨', type: 'fixe', actif: true, featureHref: '/fonctionnalites/espace-invites' },
+  { id: 'kids', emoji: '👶', type: 'fixe', actif: false },
+  { id: 'admin', emoji: '📜', type: 'fixe', actif: true },
+  { id: 'honeymoon', emoji: '🌴', type: 'fixe', actif: false, horsTotal: true },
+  { id: 'contingency', emoji: '🎲', type: 'pourcentage', actif: true },
 ]
 
-const regions = [
-  { value: '', label: 'Choisir une région...' },
-  { value: 'paris', label: 'Paris & Île-de-France' },
-  { value: 'provence', label: "Provence & Côte d'Azur" },
-  { value: 'lyon', label: 'Lyon & Rhône-Alpes' },
-  { value: 'toulouse', label: 'Toulouse' },
-  { value: 'bordeaux', label: 'Bordeaux' },
-  { value: 'autres', label: 'Autres régions' },
-]
-
-function getRegionMult(city: string) {
-  if (city.includes('paris')) return 1.30
-  if (['provence', 'alpes', 'azur'].some(r => city.includes(r))) return 1.18
-  if (['lyon', 'toulouse', 'bordeaux'].some(c => city.includes(c))) return 1.12
-  return 1.00
+function buildLineItems(t: (key: string) => string, prices: Record<string, { eco: number; classique: number; premium: number }>): LineItem[] {
+  return lineItemData.map(d => {
+    const p = prices[d.id] || { eco: 0, classique: 0, premium: 0 }
+    return {
+      id: d.id,
+      emoji: d.emoji,
+      nom: t(`items.${d.id}.name`),
+      description: t(`items.${d.id}.desc`),
+      type: d.type,
+      actif: d.actif,
+      conseil: t(`items.${d.id}.tip`),
+      messageDesactivation: t(`items.${d.id}.off`),
+      niveaux: {
+        eco: { label: t(`items.${d.id}.eco`), base: p.eco },
+        classique: { label: t(`items.${d.id}.classique`), base: p.classique },
+        premium: { label: t(`items.${d.id}.premium`), base: p.premium },
+      },
+      ...(d.featureHref ? { feature: { label: t(`items.${d.id}.feature`), href: d.featureHref } } : {}),
+      ...(d.horsTotal ? { horsTotal: true } : {}),
+    }
+  })
 }
 
 function getStyleMult(style: string) {
@@ -297,30 +105,33 @@ const levelLabels: Record<Level, string> = {
   skip: '—',
 }
 
-const levelIcons: Record<string, string> = {
-  eco: '★',
-  classique: '★★',
-  premium: '★★★',
-}
-
 const chartColors = ['#4a5240', '#78716c', '#d4cfc7', '#a89f99', '#c9a877', '#6b7461', '#9c8e77', '#5a6350', '#8a7c6b', '#b5a48e', '#3d4536', '#a8a29e', '#7c8572', '#c4b89c', '#505d44', '#8b8072', '#607055', '#b0a090', '#6a7560']
 
 export default function BudgetCalculator() {
+  const t = useTranslations('budget')
+  const prices = t.raw('prices') as Record<string, { eco: number; classique: number; premium: number }>
+  const countryRegions = t.raw('countryRegions') as CountryRegion[]
+  const lineItems = useMemo(() => buildLineItems(k => t(k), prices), [t, prices])
+  const regions = useMemo(() => countryRegions.map(r => ({
+    value: r.key,
+    label: r.name,
+  })), [countryRegions])
+
   const [guestCount, setGuestCount] = useState(100)
   const [city, setCity] = useState('')
   const [style, setStyle] = useState('intimate')
   const [selections, setSelections] = useState<Record<string, Level>>(
-    Object.fromEntries(lineItems.map(i => [i.id, i.actif ? 'eco' : 'eco'])) as Record<string, Level>
+    Object.fromEntries(lineItemData.map(i => [i.id, 'eco'])) as Record<string, Level>
   )
   const [enabled, setEnabled] = useState<Record<string, boolean>>(
-    Object.fromEntries(lineItems.map(i => [i.id, i.actif])) as Record<string, boolean>
+    Object.fromEntries(lineItemData.map(i => [i.id, i.actif])) as Record<string, boolean>
   )
   const [customBudgets, setCustomBudgets] = useState<Record<string, number | null>>(
-    Object.fromEntries(lineItems.map(i => [i.id, null])) as Record<string, number | null>
+    Object.fromEntries(lineItemData.map(i => [i.id, null])) as Record<string, number | null>
   )
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
-  const [itemOrder, setItemOrder] = useState<string[]>(lineItems.map(i => i.id))
+  const [itemOrder, setItemOrder] = useState<string[]>(lineItemData.map(i => i.id))
   const [dragId, setDragId] = useState<string | null>(null)
   const [dragOverId, setDragOverId] = useState<string | null>(null)
   const [customItems, setCustomItems] = useState<LineItem[]>([])
@@ -329,7 +140,10 @@ export default function BudgetCalculator() {
   const [hoveredSlice, setHoveredSlice] = useState<number | null>(null)
   const segmentsRef = useRef<{ startAngle: number; endAngle: number }[]>([])
 
-  const regionMult = useMemo(() => getRegionMult(city), [city])
+  const regionMult = useMemo(() => {
+    const found = countryRegions.find(r => r.key === city)
+    return found ? found.mult : 1.0
+  }, [city, countryRegions])
   const styleMult = useMemo(() => getStyleMult(style), [style])
 
   const getAmount = useCallback((item: LineItem, subtotalForPercent?: number) => {
@@ -444,14 +258,14 @@ export default function BudgetCalculator() {
     const level = styleToLevel(newStyle)
     setSelections(prev => {
       const next = { ...prev }
-      for (const item of lineItems) {
+      for (const item of lineItemData) {
         if (prev[item.id] !== 'skip') {
           next[item.id] = level
         }
       }
       return next
     })
-    setCustomBudgets(Object.fromEntries(lineItems.map(i => [i.id, null])) as Record<string, number | null>)
+    setCustomBudgets(Object.fromEntries(lineItemData.map(i => [i.id, null])) as Record<string, number | null>)
   }
 
   const setLevel = (id: string, level: Level) => {
@@ -471,14 +285,14 @@ export default function BudgetCalculator() {
   const addCustomItem = () => {
     const id = `custom_${Date.now()}`
     const newItem: LineItem = {
-      id, emoji: '➕', nom: 'Nouveau poste',
-      description: 'Cliquez pour personnaliser',
+      id, emoji: '➕', nom: t('ui.newPost'),
+      description: t('ui.newPostDesc'),
       type: 'fixe', actif: true,
       conseil: '', messageDesactivation: '',
       niveaux: {
-        eco: { label: 'Budget mini', base: 200 },
-        classique: { label: 'Budget moyen', base: 500 },
-        premium: { label: 'Budget maxi', base: 1500 },
+        eco: { label: t('ui.budgetMin'), base: 200 },
+        classique: { label: t('ui.budgetMid'), base: 500 },
+        premium: { label: t('ui.budgetMax'), base: 1500 },
       },
     }
     setCustomItems(prev => [...prev, newItem])
@@ -502,22 +316,22 @@ export default function BudgetCalculator() {
   }
 
   const handleCopy = () => {
-    const text = `Mon mariage : ~${Math.round(total).toLocaleString()} € pour ${guestCount} invités (${Math.round(total / guestCount)} €/personne)`
+    const text = `${t('shareText.myWedding')} : ~${Math.round(total).toLocaleString()} € — ${guestCount} ${t('shareText.guests')} (${Math.round(total / guestCount)} €/${t('shareText.perPerson')})`
     navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
 
   const handleShare = () => {
-    const text = `Mon mariage : ~${Math.round(total).toLocaleString()} € pour ${guestCount} invités via le simulateur Kaatch`
+    const text = `${t('shareText.myWedding')} : ~${Math.round(total).toLocaleString()} € — ${guestCount} ${t('shareText.guests')} ${t('shareText.viaKaatch')}`
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
   }
 
   const fmtEUR = (n: number) =>
     new Intl.NumberFormat('fr-FR').format(Math.round(n)).replace(/ | /g, ' ') + ' €'
 
-  const styleLabel = { intimate: 'Intime', convivial: 'Convivial', grandiose: 'Grandiose' }[style] ?? style
-  const regionLabel = regions.find(r => r.value === city)?.label ?? 'Non précisée'
+  const styleLabel = { intimate: t('styles.intimate'), convivial: t('styles.convivial'), grandiose: t('styles.grandiose') }[style] ?? style
+  const regionLabel = regions.find(r => r.value === city)?.label ?? t('ui.notSpecified')
 
   const handlePDF = async () => {
     const { jsPDF } = await import('jspdf')
@@ -537,7 +351,7 @@ export default function BudgetCalculator() {
     const rows = breakdown.map(b => {
       const item = [...lineItems, ...customItems].find(i => i.id === b.id)
       const sel = selections[b.id]
-      const lvl = customBudgets[b.id] !== null ? 'Devis' : (levelLabels[sel] || '—')
+      const lvl = customBudgets[b.id] !== null ? t('ui.quote') : (levelLabels[sel] || '—')
       const name = item?.nom ?? b.label
       return `
         <tr>
@@ -549,31 +363,31 @@ export default function BudgetCalculator() {
 
     container.innerHTML = `
       <div style="text-align:center;margin-bottom:32px;">
-        <div style="font-size:11px;letter-spacing:0.25em;color:#a8a29e;text-transform:uppercase;margin-bottom:8px;">Estimation budget</div>
-        <h1 style="font-size:30px;font-weight:300;margin:0;color:#2d3228;letter-spacing:-0.01em;">Mon mariage</h1>
+        <div style="font-size:11px;letter-spacing:0.25em;color:#a8a29e;text-transform:uppercase;margin-bottom:8px;">${t('pdf.tagline')}</div>
+        <h1 style="font-size:30px;font-weight:300;margin:0;color:#2d3228;letter-spacing:-0.01em;">${t('pdf.title')}</h1>
         <div style="font-size:13px;color:#78716c;margin-top:10px;">
-          ${guestCount} invités &nbsp;·&nbsp; ${regionLabel} &nbsp;·&nbsp; Style ${styleLabel}
+          ${guestCount} ${t('inputs.guests').toLowerCase()} &nbsp;·&nbsp; ${regionLabel} &nbsp;·&nbsp; ${t('inputs.style')} ${styleLabel}
         </div>
       </div>
 
       <div style="background:#f5f0e8;border-radius:14px;padding:28px;text-align:center;margin-bottom:28px;">
-        <div style="font-size:11px;letter-spacing:0.2em;color:#9c8e77;text-transform:uppercase;margin-bottom:8px;">Budget total estimé</div>
+        <div style="font-size:11px;letter-spacing:0.2em;color:#9c8e77;text-transform:uppercase;margin-bottom:8px;">${t('pdf.totalEstimated')}</div>
         <div style="font-size:42px;font-weight:300;color:#4a5240;font-variant-numeric:tabular-nums;">${fmtEUR(total)}</div>
-        <div style="font-size:13px;color:#78716c;margin-top:6px;">≈ ${fmtEUR(total / Math.max(guestCount, 1))} par invité</div>
+        <div style="font-size:13px;color:#78716c;margin-top:6px;">≈ ${fmtEUR(total / Math.max(guestCount, 1))} ${t('pdf.perGuest')}</div>
       </div>
 
       <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
         <thead>
           <tr>
-            <th style="text-align:left;padding:8px;font-size:10px;letter-spacing:0.18em;color:#a8a29e;text-transform:uppercase;font-weight:400;border-bottom:1.5px solid #d4cfc7;">Poste</th>
-            <th style="text-align:center;padding:8px;font-size:10px;letter-spacing:0.18em;color:#a8a29e;text-transform:uppercase;font-weight:400;border-bottom:1.5px solid #d4cfc7;width:90px;">Style</th>
-            <th style="text-align:right;padding:8px;font-size:10px;letter-spacing:0.18em;color:#a8a29e;text-transform:uppercase;font-weight:400;border-bottom:1.5px solid #d4cfc7;width:120px;">Montant</th>
+            <th style="text-align:left;padding:8px;font-size:10px;letter-spacing:0.18em;color:#a8a29e;text-transform:uppercase;font-weight:400;border-bottom:1.5px solid #d4cfc7;">${t('pdf.post')}</th>
+            <th style="text-align:center;padding:8px;font-size:10px;letter-spacing:0.18em;color:#a8a29e;text-transform:uppercase;font-weight:400;border-bottom:1.5px solid #d4cfc7;width:90px;">${t('pdf.styleCol')}</th>
+            <th style="text-align:right;padding:8px;font-size:10px;letter-spacing:0.18em;color:#a8a29e;text-transform:uppercase;font-weight:400;border-bottom:1.5px solid #d4cfc7;width:120px;">${t('pdf.amount')}</th>
           </tr>
         </thead>
         <tbody>${rows}</tbody>
         <tfoot>
           <tr>
-            <td colspan="2" style="padding:14px 8px 4px;font-size:13px;color:#78716c;border-top:1.5px solid #4a5240;">Total</td>
+            <td colspan="2" style="padding:14px 8px 4px;font-size:13px;color:#78716c;border-top:1.5px solid #4a5240;">${t('pdf.total')}</td>
             <td style="padding:14px 8px 4px;font-size:16px;color:#4a5240;text-align:right;font-variant-numeric:tabular-nums;border-top:1.5px solid #4a5240;">${fmtEUR(total)}</td>
           </tr>
         </tfoot>
@@ -581,13 +395,13 @@ export default function BudgetCalculator() {
 
       ${honeymoonAmount > 0 ? `
         <div style="font-size:12px;color:#a8a29e;margin-bottom:24px;padding:12px;background:#faf9f6;border-radius:8px;">
-          + Voyage de noces (hors total) : <span style="color:#78716c;">${fmtEUR(honeymoonAmount)}</span>
+          ${t('pdf.honeymoon')} : <span style="color:#78716c;">${fmtEUR(honeymoonAmount)}</span>
         </div>` : ''}
 
       <div style="border-top:1px solid #eee5d8;padding-top:16px;margin-top:32px;text-align:center;">
         <div style="font-size:11px;color:#a8a29e;line-height:1.6;">
-          Estimation indicative — les prix réels varient selon vos prestataires et la saison.<br/>
-          Généré sur <span style="color:#4a5240;">kaatch.fr</span> le ${new Date().toLocaleDateString('fr-FR')}
+          ${t('pdf.disclaimer')}<br/>
+          ${t('pdf.generatedOn')} <span style="color:#4a5240;">kaatch.fr</span> ${t('pdf.the')} ${new Date().toLocaleDateString('fr-FR')}
         </div>
       </div>
     `
@@ -620,21 +434,21 @@ export default function BudgetCalculator() {
   const handleExcel = async () => {
     const XLSX = await import('xlsx')
     const headerRows: (string | number)[][] = [
-      ['Budget Mariage'],
-      [`${guestCount} invités · ${regionLabel} · Style ${styleLabel}`],
+      [t('excel.title')],
+      [`${guestCount} ${t('inputs.guests').toLowerCase()} · ${regionLabel} · ${t('inputs.style')} ${styleLabel}`],
       [],
-      ['Poste', 'Style', 'Montant (€)'],
+      [t('pdf.post'), t('pdf.styleCol'), `${t('pdf.amount')} (€)`],
     ]
     const dataRows: (string | number)[][] = breakdown.map(b => {
       const item = [...lineItems, ...customItems].find(i => i.id === b.id)
       const sel = selections[b.id]
-      const lvl = customBudgets[b.id] !== null ? 'Devis' : (levelLabels[sel] || '—')
+      const lvl = customBudgets[b.id] !== null ? t('ui.quote') : (levelLabels[sel] || '—')
       return [item?.nom ?? b.label, lvl, Math.round(b.amount)]
     })
-    const totalRow: (string | number)[] = ['Total', '', Math.round(total)]
-    const perGuestRow: (string | number)[] = [`Par invité (≈ ${guestCount} pers.)`, '', Math.round(total / Math.max(guestCount, 1))]
+    const totalRow: (string | number)[] = [t('pdf.total'), '', Math.round(total)]
+    const perGuestRow: (string | number)[] = [`${t('excel.perGuest')} (≈ ${guestCount})`, '', Math.round(total / Math.max(guestCount, 1))]
     const honeymoonRows: (string | number)[][] = honeymoonAmount > 0
-      ? [[], ['Voyage de noces (hors total)', '', Math.round(honeymoonAmount)]]
+      ? [[], [t('pdf.honeymoon'), '', Math.round(honeymoonAmount)]]
       : []
 
     const aoa = [...headerRows, ...dataRows, [], totalRow, perGuestRow, ...honeymoonRows]
@@ -668,7 +482,7 @@ export default function BudgetCalculator() {
               nom: item.nom,
               emoji: item.emoji,
               level: sel,
-              levelLabel: customBudgets[item.id] !== null ? 'Devis' : levelLabels[sel],
+              levelLabel: customBudgets[item.id] !== null ? t('ui.quote') : levelLabels[sel],
               amount: Math.round(amount),
               horsTotal: !!item.horsTotal,
             }
@@ -752,12 +566,12 @@ export default function BudgetCalculator() {
           {showInfoId === item.id && !isExpanded && (
             <div className="absolute left-16 right-16 mt-12 z-10 bg-white border border-stone-100 rounded-lg px-3 py-2 shadow-md text-[0.72rem] text-stone-500" style={{ fontWeight: 300 }}>
               {item.description}
-              {item.horsTotal && <span className="block text-stone-400 mt-1 text-[0.65rem]">⚠️ Non inclus dans le total principal</span>}
+              {item.horsTotal && <span className="block text-stone-400 mt-1 text-[0.65rem]">⚠️ {t('ui.notIncludedMain')}</span>}
             </div>
           )}
           {!isExpanded && isEnabled && sel !== 'skip' && (
             <span className="text-[0.65rem] tracking-wide uppercase text-stone-400 hidden sm:inline" style={{ fontWeight: 300 }}>
-              {hasCustom ? 'devis' : levelLabels[sel]}
+              {hasCustom ? t('ui.quote').toLowerCase() : levelLabels[sel]}
             </span>
           )}
           <span className="text-[0.82rem] tabular-nums min-w-[72px] text-right tracking-tight" style={{ fontFamily: BODY, fontWeight: 300, color: isEnabled && sel !== 'skip' ? GREEN : '#c4b8a8' }}>
@@ -817,11 +631,11 @@ export default function BudgetCalculator() {
 
                 {item.type !== 'pourcentage' && (
                   <div className="flex items-center gap-2">
-                    <span className="text-[0.65rem] text-stone-300 uppercase tracking-wider">ou</span>
+                    <span className="text-[0.65rem] text-stone-300 uppercase tracking-wider">{t('ui.or')}</span>
                     <div className="flex items-center gap-1.5 flex-1">
                       <input
                         type="number"
-                        placeholder="Mon devis"
+                        placeholder={t('ui.myQuote')}
                         value={customBudgets[item.id] !== null ? customBudgets[item.id]! : ''}
                         onChange={e => setCustom(item.id, e.target.value)}
                         className="w-full max-w-[140px] px-3 py-2 bg-white rounded-lg text-[0.82rem] text-right tabular-nums placeholder:text-stone-300 focus:outline-none focus:ring-1 focus:ring-[#4a5240]/40 transition"
@@ -840,9 +654,9 @@ export default function BudgetCalculator() {
 
                 <div className="flex items-center justify-between pt-1">
                   <span className="text-[0.65rem] text-stone-300 tracking-wide" style={{ fontWeight: 300 }}>
-                    {item.type === 'par_invite' && 'par invité'}
-                    {item.type === 'fixe' && 'forfait'}
-                    {item.type === 'pourcentage' && '% du total'}
+                    {item.type === 'par_invite' && t('ui.perInvite')}
+                    {item.type === 'fixe' && t('ui.flat')}
+                    {item.type === 'pourcentage' && t('ui.percentTotal')}
                   </span>
                   {item.feature && (
                     <a
@@ -869,7 +683,7 @@ export default function BudgetCalculator() {
         <div className="grid md:grid-cols-3 gap-6">
           <div>
             <label className="block text-[0.65rem] uppercase tracking-wider text-stone-400 mb-3" style={{ fontWeight: 300 }}>
-              Invités
+              {t('inputs.guests')}
             </label>
             <input
               type="number"
@@ -895,7 +709,7 @@ export default function BudgetCalculator() {
 
           <div>
             <label className="block text-[0.65rem] uppercase tracking-wider text-stone-400 mb-3" style={{ fontWeight: 300 }}>
-              Région
+              {t('inputs.region')}
             </label>
             <select
               value={city}
@@ -909,13 +723,13 @@ export default function BudgetCalculator() {
 
           <div>
             <label className="block text-[0.65rem] uppercase tracking-wider text-stone-400 mb-3" style={{ fontWeight: 300 }}>
-              Style
+              {t('inputs.style')}
             </label>
             <div className="grid grid-cols-3 gap-2">
               {[
-                { id: 'intimate', emoji: '🌱', label: 'Intime' },
-                { id: 'convivial', emoji: '💚', label: 'Convivial' },
-                { id: 'grandiose', emoji: '✨', label: 'Grandiose' },
+                { id: 'intimate', emoji: '🌱', label: t('styles.intimate') },
+                { id: 'convivial', emoji: '💚', label: t('styles.convivial') },
+                { id: 'grandiose', emoji: '✨', label: t('styles.grandiose') },
               ].map(s => (
                 <button
                   key={s.id}
@@ -942,7 +756,7 @@ export default function BudgetCalculator() {
           <div className="bg-white rounded-2xl border border-stone-100 py-2" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
             <div className="px-5 pt-4 pb-2">
               <h2 className="text-[0.82rem] tracking-[-0.01em]" style={{ fontFamily: BODY, fontWeight: 400, color: GREEN_DARK }}>
-                Détail des postes
+                {t('ui.detailPosts')}
               </h2>
             </div>
             {mainItems.map(item => renderRow(item))}
@@ -952,7 +766,7 @@ export default function BudgetCalculator() {
                 className="w-full py-2.5 rounded-xl border border-dashed border-stone-200 text-[0.75rem] text-stone-400 hover:border-stone-300 hover:text-stone-500 transition-all"
                 style={{ fontWeight: 300 }}
               >
-                + Ajouter un poste
+                {t('ui.addPost')}
               </button>
             </div>
           </div>
@@ -960,8 +774,8 @@ export default function BudgetCalculator() {
           {/* CTA */}
           <div className="mt-6 bg-white rounded-2xl border border-stone-100 p-6 flex items-center justify-between" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
             <div>
-              <div className="text-[0.82rem]" style={{ fontWeight: 400, color: GREEN_DARK }}>Prêt à organiser ?</div>
-              <div className="text-[0.72rem] text-stone-400" style={{ fontWeight: 300 }}>Transformez cette estimation en plan d&apos;action</div>
+              <div className="text-[0.82rem]" style={{ fontWeight: 400, color: GREEN_DARK }}>{t('ui.readyToOrganize')}</div>
+              <div className="text-[0.72rem] text-stone-400" style={{ fontWeight: 300 }}>{t('ui.turnIntoAction')}</div>
             </div>
             <a
               href="/dashboard?from=budget-simulation"
@@ -969,7 +783,7 @@ export default function BudgetCalculator() {
               className="px-5 py-2.5 bg-[#4a5240] text-white rounded-xl text-[0.75rem] hover:bg-[#2d3228] transition-all flex-shrink-0"
               style={{ fontWeight: 400 }}
             >
-              ✨ Organiser sur Kaatch
+              {t('ui.organizeOnKaatch')}
             </a>
           </div>
         </div>
@@ -978,19 +792,19 @@ export default function BudgetCalculator() {
         <div className="lg:sticky lg:top-20 h-fit">
           <div className="bg-white rounded-2xl border border-stone-100 p-6 space-y-5" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
             <div>
-              <div className="text-[0.65rem] uppercase tracking-wider text-stone-400 mb-1" style={{ fontWeight: 300 }}>Budget estimé</div>
+              <div className="text-[0.65rem] uppercase tracking-wider text-stone-400 mb-1" style={{ fontWeight: 300 }}>{t('ui.estimatedBudget')}</div>
               <div className="text-3xl tabular-nums tracking-tight" style={{ fontFamily: BODY, fontWeight: 300, color: GREEN }}>
                 {Math.round(total).toLocaleString()} €
               </div>
               <div className="text-[0.72rem] text-stone-400 mt-0.5" style={{ fontWeight: 300 }}>
-                ≈ {guestCount > 0 ? Math.round(total / guestCount) : 0} € par invité
+                ≈ {guestCount > 0 ? Math.round(total / guestCount) : 0} {t('ui.perGuest')}
               </div>
             </div>
 
             {honeymoonAmount > 0 && (
               <div className="text-[0.72rem] text-stone-400 pt-3 border-t border-stone-100" style={{ fontWeight: 300 }}>
-                + Voyage de noces : <span className="text-stone-500">{Math.round(honeymoonAmount).toLocaleString()} €</span>
-                <span className="block text-stone-300 mt-0.5">non inclus dans le total</span>
+                {t('ui.honeymoonPlus')} <span className="text-stone-500">{Math.round(honeymoonAmount).toLocaleString()} €</span>
+                <span className="block text-stone-300 mt-0.5">{t('ui.honeymoonNote')}</span>
               </div>
             )}
 
@@ -1031,14 +845,14 @@ export default function BudgetCalculator() {
                   className={`py-2.5 rounded-xl text-[0.75rem] transition-all ${copied ? 'bg-[#4a5240]/5 text-[#4a5240]' : 'bg-stone-50 text-stone-500 hover:bg-stone-100'}`}
                   style={{ fontWeight: 300 }}
                 >
-                  {copied ? '✓ Copié' : 'Copier'}
+                  {copied ? t('ui.copied') : t('ui.copy')}
                 </button>
                 <button
                   onClick={handleShare}
                   className="py-2.5 rounded-xl text-[0.75rem] bg-stone-50 text-stone-500 hover:bg-stone-100 transition-all"
                   style={{ fontWeight: 300 }}
                 >
-                  Partager
+                  {t('ui.share')}
                 </button>
               </div>
               <div className="grid grid-cols-2 gap-2">

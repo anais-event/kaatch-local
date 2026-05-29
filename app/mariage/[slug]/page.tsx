@@ -12,6 +12,7 @@ import {
   BookOpen, QrCode, Share2, ChefHat, Flower2, Hourglass,
   UserPlus, StickyNote, FileText
 } from 'lucide-react'
+import TodoNow from './TodoNow'
 
 export default async function WeddingPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -158,40 +159,15 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
           <div className="lg:col-span-2 space-y-6">
 
             {/* À faire maintenant */}
-            {(() => {
-              const tasks = [
-                { label: 'Invitez votre moitié', sub: 'Pour organiser le mariage à deux', done: false, href: `/mariage/${slug}/compte#partenaire` },
-                { label: 'Ajoutez une photo de vous', sub: 'Pour personnaliser votre espace', done: !!wedding.cover_image_url, href: `/mariage/${slug}/edit` },
-                { label: 'Complétez les infos du Jour J', sub: 'Date, lieu, horaires, ambiance', done: !!wedding.date && !!wedding.location, href: `/mariage/${slug}/programme` },
-                { label: "Créez votre liste d'invités", sub: 'Commencez à poser les bases', done: (guestCount ?? 0) > 0, href: `/mariage/${slug}/guests` },
-                { label: 'Préparez votre plan de table', sub: "Même en brouillon, ça aide vite", done: (tablesCount ?? 0) > 0, href: paid ? `/mariage/${slug}/tables` : `/mariage/${slug}/compte#formule` },
-                { label: 'Ajoutez vos premiers prestataires', sub: 'Lieu, traiteur, photographe, DJ…', done: (vendors?.length ?? 0) > 0, href: `/mariage/${slug}/prestataires` },
-                { label: 'Notez vos premières tâches importantes', sub: "Ce qu'il ne faut surtout pas oublier", done: (todosData?.length ?? 0) > 0, href: `/mariage/${slug}/retro-planning` },
-              ]
-              return (
-                <div className="bg-white rounded-3xl border border-stone-100 p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 style={{ fontWeight: 600, fontSize: '1.1rem' }} className="text-stone-800">À faire maintenant</h2>
-                    <Zap className="w-5 h-5 text-[#4a5240]" strokeWidth={2} />
-                  </div>
-                  <div className="space-y-3">
-                    {tasks.map((task, i) => (
-                      <Link key={i} href={task.href} className="flex items-start gap-3 group">
-                        <div className={`mt-1 w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${task.done ? 'bg-[#4a5240] border-[#4a5240]' : 'border-stone-300 group-hover:border-[#4a5240]'}`}>
-                          {task.done && <CheckCircle2 className="w-3 h-3 text-white" strokeWidth={3} />}
-                        </div>
-                        <div>
-                          <p style={{ fontWeight: 400, fontSize: '0.92rem' }} className={task.done ? 'text-stone-400 line-through' : 'text-stone-700 group-hover:text-[#4a5240]'}>{task.label}</p>
-                          {!task.done && task.sub && (
-                            <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400 mt-0.5">{task.sub}</p>
-                          )}
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )
-            })()}
+            <TodoNow slug={slug} tasks={[
+              { label: 'Invitez votre moitié', sub: 'Pour organiser le mariage à deux', done: false, href: `/mariage/${slug}/compte#partenaire` },
+              { label: 'Ajoutez une photo de vous', sub: 'Pour personnaliser votre espace', done: !!wedding.cover_image_url, href: `/mariage/${slug}/edit` },
+              { label: 'Complétez les infos du Jour J', sub: 'Date, lieu, horaires, ambiance', done: !!wedding.date && !!wedding.location, href: `/mariage/${slug}/programme` },
+              { label: "Créez votre liste d'invités", sub: 'Commencez à poser les bases', done: (guestCount ?? 0) > 0, href: `/mariage/${slug}/guests` },
+              { label: 'Préparez votre plan de table', sub: "Même en brouillon, ça aide vite", done: (tablesCount ?? 0) > 0, href: paid ? `/mariage/${slug}/tables` : `/mariage/${slug}/compte#formule` },
+              { label: 'Ajoutez vos premiers prestataires', sub: 'Lieu, traiteur, photographe, DJ…', done: (vendors?.length ?? 0) > 0, href: `/mariage/${slug}/prestataires` },
+              { label: 'Notez vos premières tâches importantes', sub: "Ce qu'il ne faut surtout pas oublier", done: (todosData?.length ?? 0) > 0, href: `/mariage/${slug}/retro-planning` },
+            ]} />
 
             {/* Derniers mouvements */}
             {(() => {

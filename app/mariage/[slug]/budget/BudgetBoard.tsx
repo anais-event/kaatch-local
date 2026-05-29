@@ -161,6 +161,49 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
   const [paidOverrides, setPaidOverrides] = useState<Record<string, number>>({})
   const [, startTransition] = useTransition()
 
+  // Drag-and-drop category reorder
+  const [dragCatId, setDragCatId] = useState<string | null>(null)
+  const [dragOverCatId, setDragOverCatId] = useState<string | null>(null)
+  const [localCatOrder, setLocalCatOrder] = useState<string[]>(categories.map(c => c.id))
+
+  useEffect(() => {
+    setLocalCatOrder(categories.map(c => c.id))
+  }, [categories])
+
+  const orderedCategories = useMemo(() => {
+    return localCatOrder.map(id => categories.find(c => c.id === id)).filter(Boolean) as Category[]
+  }, [localCatOrder, categories])
+
+  function handleCatDragStart(catId: string) {
+    setDragCatId(catId)
+  }
+  function handleCatDragOver(e: React.DragEvent, catId: string) {
+    e.preventDefault()
+    if (catId !== dragCatId) setDragOverCatId(catId)
+  }
+  function handleCatDrop(targetCatId: string) {
+    if (!dragCatId || dragCatId === targetCatId) { setDragCatId(null); setDragOverCatId(null); return }
+    const newOrder = [...localCatOrder]
+    const fromIdx = newOrder.indexOf(dragCatId)
+    const toIdx = newOrder.indexOf(targetCatId)
+    newOrder.splice(fromIdx, 1)
+    newOrder.splice(toIdx, 0, dragCatId)
+    setLocalCatOrder(newOrder)
+    setDragCatId(null)
+    setDragOverCatId(null)
+    // Persist
+    startTransition(async () => {
+      const fd = new FormData()
+      fd.set('slug', slug)
+      fd.set('orderedIds', JSON.stringify(newOrder))
+      await actions.reorderCategories(fd)
+    })
+  }
+  function handleCatDragEnd() {
+    setDragCatId(null)
+    setDragOverCatId(null)
+  }
+
   const filteredItems = useMemo(() => {
     if (!search.trim()) return items
     const q = search.toLowerCase()
@@ -400,7 +443,7 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
               </tr>
             </thead>
             <tbody>
-              {categories.map(cat => {
+              {orderedCategories.map(cat => {
                 const catItems = filteredItems.filter(i => i.category_id === cat.id)
                 const catEngaged = catItems.reduce((s, i) => s + getEffective(i).amount, 0)
                 const catPaid    = catItems.reduce((s, i) => s + getEffective(i).paid, 0)
@@ -411,9 +454,18 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
                 return (
                   <Fragment key={cat.id}>
                     {/* ── Category header row ── */}
-                    <tr className="border-b border-stone-100 cursor-pointer select-none" style={{ background: cat.color + '0d' }} onClick={() => toggleCat(cat.id)}>
+                    <tr
+                      className={`border-b border-stone-100 cursor-pointer select-none transition-all ${dragCatId === cat.id ? 'opacity-40' : ''} ${dragOverCatId === cat.id ? 'ring-2 ring-[#4a5240]/30' : ''}`}
+                      style={{ background: cat.color + '0d' }}
+                      draggable
+                      onDragStart={() => handleCatDragStart(cat.id)}
+                      onDragOver={e => handleCatDragOver(e, cat.id)}
+                      onDrop={() => handleCatDrop(cat.id)}
+                      onDragEnd={handleCatDragEnd}
+                      onClick={() => toggleCat(cat.id)}>
                       <td className="px-4 py-2.5" colSpan={2}>
                         <div className="flex items-center gap-2">
+                          <span className="text-[10px] text-stone-300 cursor-grab active:cursor-grabbing hover:text-stone-500 transition" onMouseDown={e => e.stopPropagation()} title="Glisser pour réordonner">⠿</span>
                           <span className="text-[10px] text-stone-400 transition-transform" style={{ display: 'inline-block', transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)' }}>▾</span>
                           <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: cat.color }} />
                           <span style={{ fontWeight: 500, fontSize: '0.82rem', color: '#2d3228' }}>{cat.icon} {cat.name}</span>

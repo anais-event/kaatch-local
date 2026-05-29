@@ -7,16 +7,25 @@ import UpgradePrompt from '@/components/UpgradePrompt'
 import { normalizePlan, canAccess } from '@/lib/plan'
 
 export const DEFAULT_CATEGORIES = [
-  { name: 'Lieu & réception', icon: '🏛️', color: '#8b7355' },
-  { name: 'Traiteur', icon: '🍽️', color: '#4a5240' },
+  { name: 'Lieu de réception', icon: '🏛️', color: '#8b7355' },
+  { name: 'Traiteur & repas', icon: '🍽️', color: '#4a5240' },
+  { name: 'Boissons & alcool', icon: '🍾', color: '#7c8572' },
+  { name: 'Wedding cake & desserts', icon: '🎂', color: '#c9a877' },
   { name: 'Photo & vidéo', icon: '📸', color: '#5c6bc0' },
-  { name: 'Fleurs & déco', icon: '🌸', color: '#c06b8b' },
-  { name: 'Musique & DJ', icon: '🎵', color: '#e07b39' },
-  { name: 'Robe & costume', icon: '👗', color: '#9c6bb5' },
+  { name: 'Animation & musique', icon: '🎵', color: '#e07b39' },
+  { name: 'Décoration & fleurs', icon: '💐', color: '#c06b8b' },
+  { name: 'Tenue de la mariée', icon: '👗', color: '#9c6bb5' },
+  { name: 'Tenue du marié', icon: '🤵', color: '#6b7461' },
+  { name: 'Alliances', icon: '💍', color: '#a89f99' },
+  { name: 'Beauté & bien-être', icon: '💄', color: '#b5763a' },
+  { name: 'Faire-part & papeterie', icon: '✉️', color: '#9c8e77' },
+  { name: 'Cadeaux invités', icon: '🎁', color: '#5a6350' },
   { name: 'Transport', icon: '🚗', color: '#3a8fa0' },
-  { name: 'Faire-part', icon: '✉️', color: '#b5763a' },
-  { name: 'Lune de miel', icon: '✈️', color: '#3a6ea0' },
-  { name: 'Divers', icon: '📦', color: '#888888' },
+  { name: 'Hébergement', icon: '🏨', color: '#607055' },
+  { name: 'Enfants & baby-sitting', icon: '👶', color: '#8a7c6b' },
+  { name: 'Administratif & assurance', icon: '📜', color: '#b5a48e' },
+  { name: 'Lune de miel', icon: '🌴', color: '#3a6ea0' },
+  { name: 'Imprévus', icon: '🎲', color: '#3d4536' },
 ]
 
 export const CURRENCIES = ['EUR', 'USD', 'GBP', 'CHF', 'CAD', 'MAD', 'XOF']
@@ -272,6 +281,19 @@ async function importFromSimulation(formData: FormData) {
   revalidatePath(`/mariage/${slug}/budget`)
 }
 
+async function reorderCategories(formData: FormData) {
+  'use server'
+  const supabase = await createSupabaseServerClient()
+  const slug = formData.get('slug') as string
+  const orderedIds = JSON.parse(formData.get('orderedIds') as string) as string[]
+  await Promise.all(
+    orderedIds.map((id, i) =>
+      supabase.from('budget_categories').update({ position: i }).eq('id', id)
+    )
+  )
+  revalidatePath(`/mariage/${slug}/budget`)
+}
+
 const BUDGET_TABS = [
   { key: 'devis',    label: 'Devis & prestataires' },
   { key: 'synthese', label: 'Synthèse' },
@@ -316,32 +338,30 @@ export default async function BudgetPage({
   return (
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-        <div className="mb-6">
-          <a href={`/mariage/${slug}`} className="text-sm text-[#4a5240] hover:underline mb-4 block"
-             style={{ fontWeight: 300 }}>
-            ← Retour aux préparatifs
-          </a>
-          <div>
-            <p style={{ fontWeight: 300, fontSize: '0.68rem', letterSpacing: '0.2em' }}
-               className="text-stone-400 uppercase mb-1">Budget</p>
-            <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.4rem' }}
-                className="text-[#2d3228] leading-none">{wedding.name}</h1>
+        {/* Header compact: tabs left + calculator button right */}
+        <div className="flex items-center justify-between mb-7">
+          <div className="flex items-center border-b-2 border-stone-200 gap-1">
+            {BUDGET_TABS.map(t => (
+              <a key={t.key} href={`?tab=${t.key}`}
+                 className={`px-6 py-3 text-sm rounded-t-lg border-b-2 -mb-0.5 transition-all ${
+                   tab === t.key
+                     ? 'bg-white border-[#4a5240] text-[#2d3228] shadow-sm'
+                     : 'border-transparent text-stone-400 hover:text-stone-600 hover:bg-white/60'
+                 }`}
+                 style={{ fontWeight: tab === t.key ? 600 : 300, fontSize: '0.92rem' }}>
+                {t.label}
+              </a>
+            ))}
           </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="flex border-b-2 border-stone-200 mb-7 gap-1">
-          {BUDGET_TABS.map(t => (
-            <a key={t.key} href={`?tab=${t.key}`}
-               className={`px-6 py-3 text-sm rounded-t-lg border-b-2 -mb-0.5 transition-all ${
-                 tab === t.key
-                   ? 'bg-white border-[#4a5240] text-[#2d3228] shadow-sm'
-                   : 'border-transparent text-stone-400 hover:text-stone-600 hover:bg-white/60'
-               }`}
-               style={{ fontWeight: tab === t.key ? 600 : 300, fontSize: '0.92rem' }}>
-              {t.label}
-            </a>
-          ))}
+          <a
+            href={`/budget-mariage?return=/mariage/${slug}/budget`}
+            target="_blank"
+            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-stone-200 rounded-xl text-sm text-[#4a5240] hover:border-[#4a5240] hover:bg-[#4a5240]/5 transition-all"
+            style={{ fontWeight: 400 }}
+          >
+            <span>🧮</span>
+            Calculette budget
+          </a>
         </div>
 
         {tab === 'devis' && (
@@ -356,7 +376,7 @@ export default async function BudgetPage({
             files={files ?? []}
             currencies={CURRENCIES}
             contacts={contacts ?? []}
-            actions={{ setBudgetTotal, addCategory, deleteCategory, addItem, updateItem, deleteItem, updateItemStatus, addQuote, updateQuote, deleteQuote, retainQuote, refuseQuote, initDefaultCategories, saveBudgetFileMeta, deleteBudgetFile, updateCategoryAllocated, importFromSimulation }}
+            actions={{ setBudgetTotal, addCategory, deleteCategory, addItem, updateItem, deleteItem, updateItemStatus, addQuote, updateQuote, deleteQuote, retainQuote, refuseQuote, initDefaultCategories, saveBudgetFileMeta, deleteBudgetFile, updateCategoryAllocated, importFromSimulation, reorderCategories }}
           />
         )}
 

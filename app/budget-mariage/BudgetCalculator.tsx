@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
+import { track } from '@vercel/analytics'
 
 const BODY = 'var(--font-lato)'
 const GREEN = '#4a5240'
@@ -320,11 +321,13 @@ export default function BudgetCalculator() {
     navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+    track('budget_copy', { total: Math.round(total), guests: guestCount })
   }
 
   const handleShare = () => {
     const text = `${t('shareText.myWedding')} : ~${Math.round(total).toLocaleString()} € — ${guestCount} ${t('shareText.guests')} ${t('shareText.viaKaatch')}`
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
+    track('budget_share', { total: Math.round(total), guests: guestCount })
   }
 
   const fmtEUR = (n: number) =>
@@ -426,6 +429,7 @@ export default function BudgetCalculator() {
         heightLeft -= pageH
       }
       pdf.save('budget-mariage.pdf')
+      track('budget_pdf_download', { total: Math.round(total), guests: guestCount, style, region: city })
     } finally {
       document.body.removeChild(container)
     }
@@ -457,6 +461,7 @@ export default function BudgetCalculator() {
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, ws, 'Budget')
     XLSX.writeFile(wb, 'budget-mariage.xlsx')
+    track('budget_excel_download', { total: Math.round(total), guests: guestCount, style, region: city })
   }
 
   const handleOrganiserKaatch = (e: React.MouseEvent) => {
@@ -491,6 +496,7 @@ export default function BudgetCalculator() {
       }
       localStorage.setItem('kaatch_budget_simulation', JSON.stringify(payload))
     } catch {}
+    track('budget_organize_kaatch', { total: Math.round(total), guests: guestCount })
     const params = new URLSearchParams(window.location.search)
     const returnTo = params.get('return')
     if (returnTo && returnTo.startsWith('/mariage/')) {

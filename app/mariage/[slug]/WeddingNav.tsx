@@ -2,9 +2,11 @@
 
 import { usePathname } from 'next/navigation'
 import { useState, useRef, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { logoutMaried } from './logout-action'
 import { createClient } from '@supabase/supabase-js'
 import SearchModal from './SearchModal'
+import AuthLocaleSwitcher from '@/app/_components/AuthLocaleSwitcher'
 
 type NavItem = { label: string; href: string; sub?: string; target?: string }
 type NavSection = { label: string; href?: string; items?: NavItem[] }
@@ -44,65 +46,68 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
   const toastId = useRef(0)
   const mounted = useRef(false)
 
+  const t = useTranslations('wedding.nav')
+  const tc = useTranslations('common')
+
   const sections: NavSection[] = [
-    { label: "Aujourd'hui", href: `/mariage/${slug}` },
+    { label: t('today'), href: `/mariage/${slug}` },
     {
-      label: 'Imaginer',
+      label: t('imagine'),
       href: `/mariage/${slug}/imaginer`,
       items: [
-        { label: 'Inspirations', sub: "Déco, menus, tenues...", href: `/mariage/${slug}/inspirations` },
-        { label: 'Rétroplanning', sub: 'Avant le jour J', href: `/mariage/${slug}/retro-planning` },
-        { label: 'Playlist', sub: 'Musique & ambiance', href: `/mariage/${slug}/musique` },
+        { label: t('inspirations'), sub: t('inspirationsSub'), href: `/mariage/${slug}/inspirations` },
+        { label: t('retroPlanning'), sub: t('retroPlanningSub'), href: `/mariage/${slug}/retro-planning` },
+        { label: t('playlist'), sub: t('playlistSub'), href: `/mariage/${slug}/musique` },
       ],
     },
     {
-      label: 'Préparer',
+      label: t('prepare'),
       href: `/mariage/${slug}/preparer`,
       items: [
-        { label: 'Checklist du jour J', sub: "Tâches & responsabilités", href: `/mariage/${slug}/checklist` },
-        { label: 'Programme', sub: 'Déroulé de la journée', href: `/mariage/${slug}/programme` },
-        { label: 'Plan de table', sub: 'Placement des invités', href: `/mariage/${slug}/tables` },
-        { label: 'Hébergements', sub: 'Suggestions logements', href: `/mariage/${slug}/hebergements` },
-        { label: 'Documents & QR codes', sub: 'Liens & partage', href: `/mariage/${slug}/partager` },
+        { label: t('checklist'), sub: t('checklistSub'), href: `/mariage/${slug}/checklist` },
+        { label: t('programme'), sub: t('programmeSub'), href: `/mariage/${slug}/programme` },
+        { label: t('tables'), sub: t('tablesSub'), href: `/mariage/${slug}/tables` },
+        { label: t('accommodation'), sub: t('accommodationSub'), href: `/mariage/${slug}/hebergements` },
+        { label: t('documents'), sub: t('documentsSub'), href: `/mariage/${slug}/partager` },
       ],
     },
     {
-      label: 'Inviter',
+      label: t('invite'),
       href: `/mariage/${slug}/inviter`,
       items: [
-        { label: 'Invités & réponses', sub: 'Liste, invitations, RSVP', href: `/mariage/${slug}/guests` },
-        { label: 'Plan de table', sub: 'Placement des invités', href: `/mariage/${slug}/tables` },
-        { label: 'Vue invités', sub: "Voir comme un invité", href: `/invite/${slug}`, target: '_blank' },
+        { label: t('guestsAndRsvp'), sub: t('guestsAndRsvpSub'), href: `/mariage/${slug}/guests` },
+        { label: t('tables'), sub: t('tablesSub'), href: `/mariage/${slug}/tables` },
+        { label: t('guestView'), sub: t('guestViewSub'), href: `/invite/${slug}`, target: '_blank' },
       ],
     },
     {
-      label: 'Coordonner',
+      label: t('coordinate'),
       href: `/mariage/${slug}/coordonner`,
       items: [
-        { label: 'Prestataires', sub: 'Contacts & suivi', href: `/mariage/${slug}/prestataires` },
-        { label: 'Programme du jour J', sub: 'Vue prestataires', href: `/mariage/${slug}/programme` },
-        { label: 'Budget', sub: 'Devis, contrats, paiements', href: `/mariage/${slug}/budget` },
+        { label: t('vendors'), sub: t('vendorsSub'), href: `/mariage/${slug}/prestataires` },
+        { label: t('dayOfProgramme'), sub: t('dayOfProgrammeSub'), href: `/mariage/${slug}/programme` },
+        { label: t('budget'), sub: t('budgetSub'), href: `/mariage/${slug}/budget` },
       ],
     },
     {
-      label: 'Échanges & Souvenirs',
+      label: t('exchanges'),
       href: `/mariage/${slug}/echanger`,
       items: [
-        { label: 'Messagerie', sub: 'Groupes de discussion', href: `/mariage/${slug}/messagerie` },
-        { label: 'Galerie photos', sub: 'Albums partagés', href: `/mariage/${slug}/photos` },
-        { label: "Livre d'or", sub: 'Messages & voeux', href: `/mariage/${slug}/livre-dor` },
-        { label: 'Exports & partage', sub: 'Liens, QR, PDF', href: `/mariage/${slug}/partager` },
+        { label: t('messaging'), sub: t('messagingSub'), href: `/mariage/${slug}/messagerie` },
+        { label: t('photoGallery'), sub: t('photoGallerySub'), href: `/mariage/${slug}/photos` },
+        { label: t('guestbook'), sub: t('guestbookSub'), href: `/mariage/${slug}/livre-dor` },
+        { label: t('exports'), sub: t('exportsSub'), href: `/mariage/${slug}/partager` },
       ],
     },
   ]
 
   const studioSection: NavSection = {
-    label: 'Studio créatif',
+    label: t('studioCreative'),
     href: `/mariage/${slug}/studio`,
     items: [
-      { label: 'Faire-part', sub: 'Design & envoi', href: `/mariage/${slug}/studio` },
-      { label: 'Collection', sub: 'Vos créations', href: `/mariage/${slug}/studio/collection` },
-      { label: 'Univers visuel', sub: 'Votre identité', href: `/mariage/${slug}/studio/univers` },
+      { label: t('invitations'), sub: t('invitationsDesignSub'), href: `/mariage/${slug}/studio` },
+      { label: t('collection'), sub: t('collectionSub'), href: `/mariage/${slug}/studio/collection` },
+      { label: t('visualUniverse'), sub: t('visualUniverseSub'), href: `/mariage/${slug}/studio/univers` },
     ],
   }
 
@@ -133,9 +138,9 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
     }
     const channel = supabase.channel(`wedding-${weddingId}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'photos', filter: `wedding_id=eq.${weddingId}` },
-        (p) => addToast('📸', `${(p.new as any).uploaded_by_name || 'Quelqu\'un'} a ajouté une photo`))
+        (p) => addToast('📸', `${(p.new as any).uploaded_by_name || t('someone')} ${t('addedPhoto')}`))
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `wedding_id=eq.${weddingId}` },
-        (p) => addToast('💬', `${(p.new as any).author_name || 'Quelqu\'un'} a envoyé un message`))
+        (p) => addToast('💬', `${(p.new as any).author_name || t('someone')} ${t('sentMessage')}`))
       .subscribe()
     return () => { mounted.current = false; supabase.removeChannel(channel) }
   }, [weddingId])
@@ -170,12 +175,12 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
             </a>
             <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.62rem', letterSpacing: '0.12em' }}
               className="text-stone-400 uppercase mt-1 tracking-widest">
-              Espace mariés
+              {t('coupleSpace')}
             </p>
           </div>
           <button onClick={toggleCollapse}
             className="mt-0.5 p-1 rounded text-stone-300 hover:text-stone-500 hover:bg-stone-50 transition cursor-pointer"
-            title="Réduire">
+            title={t('reduce')}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
@@ -264,7 +269,7 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
           {log.length > 0 && (
             <div className="px-3 py-2 mb-1">
               <p style={{ fontWeight: 300, fontSize: '0.6rem', letterSpacing: '0.12em' }}
-                className="text-stone-300 uppercase mb-1.5">Activité récente</p>
+                className="text-stone-300 uppercase mb-1.5">{t('recentActivity')}</p>
               <ul className="space-y-1.5 max-h-24 overflow-y-auto">
                 {log.slice(0, 3).map((entry, i) => (
                   <li key={i} className="flex items-start gap-1.5">
@@ -287,7 +292,7 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              Paramètres
+              {t('settings')}
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
                 className={`w-3 h-3 ml-auto text-stone-300 transition-transform ${paramsOpen ? 'rotate-180' : ''}`}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -299,12 +304,12 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
                 <a href={`/mariage/${slug}/compte`}
                   className="flex items-center gap-2 px-3 py-2 text-xs text-stone-600 hover:bg-stone-100 hover:text-[#4a5240] transition"
                   style={{ fontWeight: 400 }}>
-                  Mon compte
+                  {t('account')}
                 </a>
                 <a href={`/invite/${slug}`} target="_blank"
                   className="flex items-center gap-2 px-3 py-2 text-xs text-stone-600 hover:bg-stone-100 hover:text-[#4a5240] transition"
                   style={{ fontWeight: 400 }}>
-                  Vue invités
+                  {t('guestView')}
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3 h-3 ml-auto text-stone-300">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
                   </svg>
@@ -314,9 +319,12 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
                   <button type="submit"
                     className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-400 hover:bg-red-50 transition cursor-pointer"
                     style={{ fontWeight: 400 }}>
-                    Déconnexion
+                    {tc('auth.logout')}
                   </button>
                 </form>
+                <div className="px-3 py-2 border-t border-stone-100">
+                  <AuthLocaleSwitcher />
+                </div>
               </div>
             )}
           </div>
@@ -407,7 +415,7 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
             })}
             <div className="border-t border-stone-100">
               <a href={`/mariage/${slug}/edit`} className="flex flex-col px-6 py-2.5 border-b border-stone-50 text-stone-600">
-                <span style={{ fontWeight: 300, fontSize: '0.85rem' }}>Paramètres</span>
+                <span style={{ fontWeight: 300, fontSize: '0.85rem' }}>{t('settings')}</span>
               </a>
               {userEmail && (
                 <div className="px-6 py-2.5 border-b border-stone-50">
@@ -416,7 +424,7 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
               )}
               <form action={logoutMaried} className="px-6 py-3">
                 <button type="submit" className="text-sm text-red-400 cursor-pointer" style={{ fontWeight: 300 }}>
-                  Déconnexion
+                  {tc('auth.logout')}
                 </button>
               </form>
             </div>

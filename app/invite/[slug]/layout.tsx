@@ -1,6 +1,8 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import AuthIntlProvider from '@/app/_components/AuthIntlProvider'
 import GuestNav from './GuestNav'
 import BottomNavGuest from './BottomNavGuest'
 import { NotificationBadgesProvider } from './NotificationBadges'
@@ -37,30 +39,32 @@ export default async function InviteLayout({
 
   const blocked = !isPaid(wedding?.plan) || wedding?.is_suspended
 
+  const t = await getTranslations('invite.blocked')
+
   // Espace invités verrouillé (plan gratuit ou suspendu)
   if (blocked) {
     const message = wedding?.is_suspended
-      ? "L'espace invités est temporairement suspendu par les mariés."
-      : 'Les mariés finalisent la configuration de votre espace. Vous recevrez bientôt votre invitation personnalisée.'
+      ? t('suspended')
+      : t('unpublished')
     return (
       <div className="min-h-screen bg-[#f5f0e8] flex items-center justify-center p-6">
         {/* Bandeau admin visible uniquement par les mariés connectés */}
         {user && (
           <div className="fixed top-0 left-0 right-0 z-50 bg-amber-50 border-b border-amber-200 px-4 py-2.5 flex items-center justify-between gap-4">
             <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.8rem' }} className="text-amber-800">
-              {wedding?.is_suspended ? 'Votre espace est suspendu — vos invités voient cette page.' : 'Espace non publié — passez au plan Mariage pour y accéder.'}
+              {wedding?.is_suspended ? t('adminSuspended') : t('adminUnpublished')}
             </p>
             <a href={`/mariage/${slug}/compte`}
                style={{ fontFamily: 'var(--font-lato)', fontWeight: 400, fontSize: '0.75rem' }}
                className="shrink-0 text-amber-800 underline hover:text-amber-900">
-              {wedding?.is_suspended ? 'Réactiver' : 'Voir les plans'} →
+              {wedding?.is_suspended ? t('reactivate') : t('seePlans')} →
             </a>
           </div>
         )}
         <div className="bg-white rounded-2xl border border-stone-100 p-10 max-w-sm w-full text-center shadow-sm">
           <div className="text-4xl mb-4">💍</div>
           <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.6rem' }}
-              className="text-[#2d3228] mb-3">Bientôt disponible</h2>
+              className="text-[#2d3228] mb-3">{t('comingSoon')}</h2>
           <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem', lineHeight: 1.7 }}
              className="text-stone-500">
             {message}
@@ -71,12 +75,14 @@ export default async function InviteLayout({
   }
 
   return (
-    <NotificationBadgesProvider slug={slug} weddingId={weddingId}>
-      <GuestNav slug={slug} isPreview={isPreview} />
-      <div className="sidebar-main pt-12 md:pt-0 pb-20 md:pb-0 md:ml-56">
-        {children}
-      </div>
-      <BottomNavGuest slug={slug} />
-    </NotificationBadgesProvider>
+    <AuthIntlProvider>
+      <NotificationBadgesProvider slug={slug} weddingId={weddingId}>
+        <GuestNav slug={slug} isPreview={isPreview} />
+        <div className="sidebar-main pt-12 md:pt-0 pb-20 md:pb-0 md:ml-56">
+          {children}
+        </div>
+        <BottomNavGuest slug={slug} />
+      </NotificationBadgesProvider>
+    </AuthIntlProvider>
   )
 }

@@ -1,6 +1,8 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { getTranslations, getLocale } from 'next-intl/server'
+import { toDateLocale } from '@/lib/locale-map'
 import Countdown from './Countdown'
 import MessageModal from './MessageModal'
 
@@ -57,7 +59,11 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
     }
   }
 
-  const guest = guestCookie ? JSON.parse(guestCookie.value) : { firstName: 'Prévisualisation', id: null }
+  const t = await getTranslations('invite.home')
+  const tc = await getTranslations('common')
+  const locale = await getLocale()
+
+  const guest = guestCookie ? JSON.parse(guestCookie.value) : { firstName: t('preview'), id: null }
 
   const supabase = await createSupabaseServerClient()
   const { data: wedding } = await supabase
@@ -66,7 +72,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
     .eq('slug', slug)
     .single()
 
-  if (!wedding) return <div className="p-8">Mariage introuvable</div>
+  if (!wedding) return <div className="p-8">{t('notFound')}</div>
 
   const [{ data: rules }, { data: guestData }] = await Promise.all([
     supabase.from('wedding_rules').select('text').eq('wedding_id', wedding.id).order('created_at'),
@@ -79,14 +85,14 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
   const existingMessage = guestData?.guest_message ?? null
   const invitedParts: string[] = guestData?.invited_parts ?? ['ceremonie', 'vin_honneur', 'reception']
   const PARTS_LABELS: Record<string, string> = {
-    ceremonie: 'Cérémonie',
-    vin_honneur: "Vin d'honneur",
-    reception: 'Réception',
+    ceremonie: t('partCeremony'),
+    vin_honneur: t('partCocktail'),
+    reception: t('partReception'),
   }
   const isPartialInvite = invitedParts.length < 3
 
   const dateFormatted = wedding.date
-    ? new Date(wedding.date).toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+    ? new Date(wedding.date).toLocaleDateString(toDateLocale(locale), { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
     : null
 
   const hasCover = !!wedding.cover_image_url
@@ -144,7 +150,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
             animation: 'fadeUp 1s ease both',
             animationDelay: '0.1s',
           }}>
-            Vous êtes invité{guest.firstName ? '(e)' : ''}
+            {t('youAreInvited')}
           </p>
 
           {/* Guest name */}
@@ -242,47 +248,47 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
             <div style={{ background: '#fff', borderRadius: 18, border: '1px solid #e7e2d8', padding: '22px 20px' }}>
 
               <p style={{ fontSize: '0.6rem', letterSpacing: '0.28em', color: '#b8b4ac', textTransform: 'uppercase', marginBottom: 14, fontWeight: 300 }}>
-                Votre réponse
+                {t('yourResponse')}
               </p>
 
               {rsvpStatus === 'confirme' ? (
                 <>
                   <p style={{ fontSize: '0.85rem', color: '#3a3a37', marginBottom: 6, fontWeight: 300 }}>
-                    Présence confirmée
+                    {t('confirmed')}
                   </p>
                   <p style={{ fontSize: '0.75rem', color: '#a09d95', marginBottom: 14, fontWeight: 300 }}>
-                    Les mariés ont hâte de vous retrouver.
+                    {t('confirmedMessage')}
                   </p>
                   <form action={respondRsvp}>
                     <input type="hidden" name="slug" value={slug} />
                     <input type="hidden" name="guest_id" value={guest.id} />
                     <input type="hidden" name="status" value="decline" />
                     <button type="submit" style={{ fontSize: '0.72rem', color: '#c0bdb8', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontWeight: 300, fontFamily: 'var(--font-lato)' }}>
-                      Annuler ma présence
+                      {t('cancelAttendance')}
                     </button>
                   </form>
                 </>
               ) : rsvpStatus === 'decline' ? (
                 <>
                   <p style={{ fontSize: '0.85rem', color: '#3a3a37', marginBottom: 6, fontWeight: 300 }}>
-                    Invitation déclinée
+                    {t('declined')}
                   </p>
                   <p style={{ fontSize: '0.75rem', color: '#a09d95', marginBottom: 14, fontWeight: 300 }}>
-                    Vous nous manquerez…
+                    {t('declinedMessage')}
                   </p>
                   <form action={respondRsvp}>
                     <input type="hidden" name="slug" value={slug} />
                     <input type="hidden" name="guest_id" value={guest.id} />
                     <input type="hidden" name="status" value="confirme" />
                     <button type="submit" style={{ fontSize: '0.72rem', color: '#c0bdb8', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontWeight: 300, fontFamily: 'var(--font-lato)' }}>
-                      Finalement, je serai présent(e)
+                      {t('actuallyAttending')}
                     </button>
                   </form>
                 </>
               ) : (
                 <>
                   <p style={{ fontSize: '0.82rem', color: '#5a5855', marginBottom: 6, fontWeight: 300 }}>
-                    Serez-vous des nôtres ?
+                    {t('willYouJoin')}
                   </p>
 
                   {isPartialInvite && (
@@ -301,7 +307,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
                   )}
 
                   <p style={{ fontSize: '0.75rem', color: '#a09d95', marginBottom: 18, fontWeight: 300 }}>
-                    Confirmez votre présence pour que les mariés puissent s&apos;organiser.
+                    {t('confirmMessage')}
                   </p>
 
                   <div style={{ display: 'flex', gap: 10 }}>
@@ -315,7 +321,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
                         fontSize: '0.78rem', cursor: 'pointer',
                         fontFamily: 'var(--font-lato)', fontWeight: 300,
                       }}>
-                        Je serai présent(e)
+                        {t('willAttend')}
                       </button>
                     </form>
                     <form action={respondRsvp} style={{ flex: 1 }}>
@@ -329,7 +335,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
                         fontSize: '0.78rem', cursor: 'pointer',
                         fontFamily: 'var(--font-lato)', fontWeight: 300,
                       }}>
-                        Je ne pourrai pas
+                        {t('cantAttend')}
                       </button>
                     </form>
                   </div>
@@ -376,7 +382,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
           {rules && rules.length > 0 && (
             <div style={{ background: '#fff', borderRadius: 18, border: '1px solid #e7e2d8', padding: '22px 20px' }}>
               <p style={{ fontSize: '0.6rem', letterSpacing: '0.28em', color: '#b8b4ac', textTransform: 'uppercase', marginBottom: 14, fontWeight: 300 }}>
-                À savoir
+                {t('goodToKnow')}
               </p>
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {rules.map((rule, i) => (
@@ -399,7 +405,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
                   background: 'none', border: 'none', cursor: 'pointer',
                   fontFamily: 'var(--font-lato)', fontWeight: 300, textTransform: 'uppercase',
                 }}>
-                  Se déconnecter
+                  {tc('auth.logout')}
                 </button>
               </form>
             </div>

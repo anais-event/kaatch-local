@@ -858,5 +858,29 @@
       "methoTitle": "La nostra metodologia: calcolatrice budget matrimonio Kaatch",
       "methoDescription": "Scopri come calcoliamo le stime del budget matrimonio. Fonti affidabili, dati sul campo 2026, aggiornamento trimestrale."
     }
+  },
+
+  "common": {
+    "auth": { "logout": "Esci", "login": "Accedi", "register": "Crea account" },
+    "buttons": { "add": "Aggiungi", "cancel": "Annulla", "save": "Salva", "delete": "Elimina", "copy": "Copia", "edit": "Modifica", "close": "Chiudi", "confirm": "Conferma", "back": "Indietro", "next": "Avanti", "send": "Invia", "download": "Scarica", "search": "Cerca", "share": "Condividi", "select": "Seleziona", "selectAll": "Seleziona tutto", "deselectAll": "Deseleziona tutto", "seeMore": "Vedi di più", "seeLess": "Vedi meno", "validate": "Convalida", "reset": "Reimposta" },
+    "status": { "confirmed": "Confermato", "declined": "Rifiutato", "pending": "In attesa", "sent": "Inviato", "notSent": "Non inviato", "active": "Attivo", "inactive": "Inattivo" },
+    "time": { "days": "giorni", "hours": "ore", "minutes": "minuti", "seconds": "secondi", "today": "Oggi", "yesterday": "Ieri", "tomorrow": "Domani" },
+    "errors": { "photoTooLarge": "La foto non deve superare 5 MB.", "generic": "Si è verificato un errore. Riprova.", "notFound": "Pagina non trovata", "unauthorized": "Accesso non autorizzato" }
+  },
+
+  "dashboard": {
+    "backToHome": "Torna alla home", "simulationReady": "Simulazione pronta da importare", "chooseWedding": "Scegli il matrimonio in cui importare la simulazione budget.", "welcome": "Benvenuto/a", "yourWedding": "Il tuo matrimonio", "yourWeddings": "I tuoi matrimoni", "dateToConfirm": "Data da confermare", "planPaid": "PIANO MATRIMONIO", "allFeaturesEnabled": "Tutte le funzionalità attivate", "planFree": "PIANO GRATUITO", "freeLimit": "30 ospiti · funzionalità limitate", "upgradePlan": "Passa al piano Matrimonio", "organizeAnother": "Organizza un altro evento"
+  },
+
+  "invite": {
+    "home": {
+      "preview": "Anteprima", "notFound": "Matrimonio non trovato", "youAreInvited": "Sei invitato/a", "yourResponse": "La tua risposta", "confirmed": "Presenza confermata", "confirmedMessage": "Gli sposi non vedono l'ora di rivederti.", "cancelAttendance": "Annulla la mia presenza", "declined": "Invito rifiutato", "declinedMessage": "Ci mancherai…", "actuallyAttending": "Alla fine ci sarò", "willYouJoin": "Sarai dei nostri?", "confirmMessage": "Conferma la tua presenza per permettere agli sposi di organizzarsi.", "willAttend": "Ci sarò", "cantAttend": "Non potrò esserci", "goodToKnow": "Da sapere", "partCeremony": "Cerimonia", "partCocktail": "Aperitivo", "partReception": "Ricevimento"
+    },
+    "blocked": { "suspended": "Lo spazio ospiti è temporaneamente sospeso dagli sposi.", "unpublished": "Gli sposi stanno finalizzando la configurazione del tuo spazio. Riceverai presto il tuo invito personalizzato.", "adminSuspended": "Il tuo spazio è sospeso — i tuoi ospiti vedono questa pagina.", "adminUnpublished": "Spazio non pubblicato — passa al piano Matrimonio per accedervi.", "reactivate": "Riattiva", "seePlans": "Vedi piani", "comingSoon": "Prossimamente" },
+    "nav": { "fairePart": "Invito", "messagerie": "Messaggistica", "programme": "Programma", "musique": "Musica", "photos": "Foto", "inspirations": "Ispirazioni", "surprises": "Sorprese", "livreDor": "Libro degli ospiti", "hebergements": "Alloggio", "compte": "Il mio account", "contacts": "Contatti", "guestSpace": "Spazio ospiti", "coupleSpace": "Spazio sposi", "home": "Home", "reduce": "Riduci" }
+  },
+
+  "wedding": {
+    "nav": { "today": "Oggi", "imagine": "Immaginare", "inspirations": "Ispirazioni", "inspirationsSub": "Decorazioni, menu, abiti...", "retroPlanning": "Cronologia", "retroPlanningSub": "Prima del grande giorno", "playlist": "Playlist", "playlistSub": "Musica e atmosfera", "prepare": "Preparare", "guests": "Ospiti", "guestsSub": "Lista e RSVP", "invitations": "Inviti", "invitationsSub": "Invio e monitoraggio", "tables": "Disposizione tavoli", "tablesSub": "Posizionamento", "budget": "Budget", "budgetSub": "Spese e fornitori", "vendors": "Fornitori", "vendorsSub": "Contratti e contatti", "checklist": "Checklist", "checklistSub": "La tua lista", "dayOf": "Il grande giorno", "programme": "Programma", "programmeSub": "Svolgimento della giornata", "share": "Condividi", "shareSub": "Codice e QR", "impressions": "Stampe", "impressionsSub": "Menu, segnaposti...", "memories": "Ricordi", "photos": "Foto", "photosSub": "Album condiviso", "guestbook": "Libro degli ospiti", "guestbookSub": "Messaggi e ricordi", "messaging": "Messaggistica", "messagingSub": "Conversazioni", "studio": "Studio", "studioSub": "Creativo", "settings": "Impostazioni", "weddingInfo": "Info matrimonio", "account": "Account", "guestSpace": "Spazio ospiti", "search": "Cerca...", "reduce": "Riduci", "expand": "Espandi", "coupleSpace": "Spazio sposi", "recentActivity": "Attività recente", "accommodation": "Alloggio", "accommodationSub": "Suggerimenti alloggio", "documents": "Documenti e codici QR", "documentsSub": "Link e condivisione", "invite": "Invitare", "guestsAndRsvp": "Ospiti e risposte", "guestsAndRsvpSub": "Lista, inviti, RSVP", "guestView": "Vista ospiti", "guestViewSub": "Vedi come ospite", "coordinate": "Coordinare", "dayOfProgramme": "Programma del giorno", "dayOfProgrammeSub": "Vista fornitori", "exchanges": "Scambi e ricordi", "photoGallery": "Galleria foto", "photoGallerySub": "Album condivisi", "exports": "Esportazione e condivisione", "exportsSub": "Link, QR, PDF", "studioCreative": "Studio creativo", "invitationsDesignSub": "Design e invio", "collection": "Collezione", "collectionSub": "Le tue creazioni", "visualUniverse": "Universo visivo", "visualUniverseSub": "La tua identità", "someone": "Qualcuno", "addedPhoto": "ha aggiunto una foto", "sentMessage": "ha inviato un messaggio" }
   }
 }

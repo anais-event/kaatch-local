@@ -3,6 +3,7 @@ import { Outfit, Cormorant_Garamond, Plus_Jakarta_Sans } from "next/font/google"
 import "./globals.css";
 import { Analytics } from '@vercel/analytics/next';
 import { GoogleAnalytics } from '@next/third-parties/google';
+import { getLocale } from 'next-intl/server';
 
 const outfit = Outfit({
   variable: "--font-display",
@@ -45,30 +46,20 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale()
+
   return (
     <html
-      lang="fr"
+      lang={locale}
       className={`${outfit.variable} ${jakarta.variable} ${cormorant.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <head>
-        <script dangerouslySetInnerHTML={{__html: `
-          (function() {
-            const path = window.location.pathname;
-            let lang = 'fr';
-            if (path.startsWith('/en')) lang = 'en';
-            else if (path.startsWith('/es')) lang = 'es';
-            else if (path.startsWith('/it')) lang = 'it';
-            else if (path.startsWith('/de')) lang = 'de';
-            document.documentElement.lang = lang;
-          })();
-        `}} />
-      </head>
+      <head />
       <body className="min-h-full flex flex-col">
         {children}
         <Analytics />

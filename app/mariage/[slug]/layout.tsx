@@ -1,5 +1,7 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
+import AuthIntlProvider from '@/app/_components/AuthIntlProvider'
 import WeddingNav from './WeddingNav'
 import BottomNav from './BottomNav'
 import OnboardingModal from './OnboardingModal'
@@ -28,8 +30,10 @@ export default async function WeddingLayout({
     redirect('/dashboard')
   }
 
+  const t = await getTranslations('common')
+
   return (
-    <>
+    <AuthIntlProvider>
       <WeddingNav slug={slug} weddingName={wedding?.name ?? ''} weddingId={wedding?.id ?? ''} userEmail={user?.email ?? ''} plan={wedding?.plan ?? null} />
       <div className="sidebar-main pt-12 md:pt-0 pb-20 md:pb-0 md:ml-56">
         {children}
@@ -42,10 +46,10 @@ export default async function WeddingLayout({
           <button type="submit"
             className="text-xs text-stone-300 hover:text-red-400 transition cursor-pointer"
             style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, letterSpacing: '0.05em' }}>
-            Se déconnecter
+            {t('auth.logout')}
           </button>
         </form>
       </footer>
-    </>
+    </AuthIntlProvider>
   )
 }

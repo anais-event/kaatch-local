@@ -1,11 +1,13 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useBadges } from './NotificationBadges'
 
 export default function BottomNavGuest({ slug }: { slug: string }) {
   const pathname = usePathname()
   const badges = useBadges()
+  const t = useTranslations('invite.nav')
 
   const isActive = (href: string) => {
     if (href === `/invite/${slug}`) return pathname === href
@@ -14,29 +16,29 @@ export default function BottomNavGuest({ slug }: { slug: string }) {
 
   const tabs = [
     {
-      label: 'Faire-part',
+      label: t('fairePart'),
       href: `/invite/${slug}/faire-part`,
       emoji: '💌',
     },
     {
-      label: 'Messagerie',
+      label: t('messagerie'),
       href: `/invite/${slug}/groupes`,
       emoji: '💬',
       badge: badges.messages,
     },
     {
-      label: 'Accueil',
+      label: t('home'),
       href: `/invite/${slug}`,
       emoji: '🏠',
       center: true,
     },
     {
-      label: 'Programme',
+      label: t('programme'),
       href: `/invite/${slug}/programme`,
       emoji: '📋',
     },
     {
-      label: 'Photos',
+      label: t('photos'),
       href: `/invite/${slug}/photos`,
       emoji: '📸',
       badge: badges.photos,

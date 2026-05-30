@@ -1,9 +1,11 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 
 export default function BottomNav({ slug }: { slug: string }) {
   const pathname = usePathname()
+  const t = useTranslations('wedding.nav')
 
   const isActive = (href: string) => {
     if (href === `/mariage/${slug}`) return pathname === href
@@ -12,7 +14,7 @@ export default function BottomNav({ slug }: { slug: string }) {
 
   const tabs = [
     {
-      label: 'Invités',
+      label: t('guests'),
       href: `/mariage/${slug}/guests`,
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-5 h-5">
@@ -21,7 +23,7 @@ export default function BottomNav({ slug }: { slug: string }) {
       ),
     },
     {
-      label: 'Programme',
+      label: t('programme'),
       href: `/mariage/${slug}/programme`,
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-5 h-5">
@@ -30,7 +32,7 @@ export default function BottomNav({ slug }: { slug: string }) {
       ),
     },
     {
-      label: 'Accueil',
+      label: t('home'),
       href: `/mariage/${slug}`,
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-6 h-6">
@@ -40,7 +42,7 @@ export default function BottomNav({ slug }: { slug: string }) {
       center: true,
     },
     {
-      label: 'Photos',
+      label: t('photos'),
       href: `/mariage/${slug}/photos`,
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-5 h-5">

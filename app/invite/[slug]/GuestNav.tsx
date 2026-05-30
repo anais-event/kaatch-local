@@ -2,11 +2,14 @@
 
 import { usePathname } from 'next/navigation'
 import { useState, useRef, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { useBadges } from './NotificationBadges'
+import AuthLocaleSwitcher from '@/app/_components/AuthLocaleSwitcher'
 
 export default function GuestNav({ slug, isPreview }: { slug: string; isPreview?: boolean }) {
   const pathname = usePathname()
   const badges = useBadges()
+  const t = useTranslations('invite.nav')
   const [mobileOpen, setMobileOpen] = useState(false)
   const [navHidden, setNavHidden] = useState(false)
   const lastScrollY = useRef(0)
@@ -25,16 +28,16 @@ export default function GuestNav({ slug, isPreview }: { slug: string; isPreview?
   }
 
   const tabs = [
-    { label: 'Faire-part',   href: `/invite/${slug}/faire-part`,    emoji: '💌' },
-    { label: 'Messagerie',   href: `/invite/${slug}/groupes`,        emoji: '💬', badge: badges.messages },
-    { label: 'Programme',    href: `/invite/${slug}/programme`,      emoji: '📋' },
-    { label: 'Musique',      href: `/invite/${slug}/musique`,        emoji: '🎵' },
-    { label: 'Photos',       href: `/invite/${slug}/photos`,         emoji: '📸', badge: badges.photos },
-    { label: 'Inspirations', href: `/invite/${slug}/inspirations`,   emoji: '✨' },
-    { label: 'Surprises',    href: `/invite/${slug}/surprises`,      emoji: '🎉' },
-    { label: "Livre d'Or",   href: `/invite/${slug}/livre-dor`,      emoji: '📖' },
-    { label: 'Hébergements', href: `/invite/${slug}/hebergements`,   emoji: '🏡' },
-    { label: 'Mon compte',   href: `/invite/${slug}/compte`,         emoji: '👤' },
+    { label: t('fairePart'),    href: `/invite/${slug}/faire-part`,    emoji: '💌' },
+    { label: t('messagerie'),   href: `/invite/${slug}/groupes`,        emoji: '💬', badge: badges.messages },
+    { label: t('programme'),    href: `/invite/${slug}/programme`,      emoji: '📋' },
+    { label: t('musique'),      href: `/invite/${slug}/musique`,        emoji: '🎵' },
+    { label: t('photos'),       href: `/invite/${slug}/photos`,         emoji: '📸', badge: badges.photos },
+    { label: t('inspirations'), href: `/invite/${slug}/inspirations`,   emoji: '✨' },
+    { label: t('surprises'),    href: `/invite/${slug}/surprises`,      emoji: '🎉' },
+    { label: t('livreDor'),     href: `/invite/${slug}/livre-dor`,      emoji: '📖' },
+    { label: t('hebergements'), href: `/invite/${slug}/hebergements`,   emoji: '🏡' },
+    { label: t('compte'),       href: `/invite/${slug}/compte`,         emoji: '👤' },
   ]
 
   const isActive = (href: string) => pathname.startsWith(href)
@@ -68,12 +71,12 @@ export default function GuestNav({ slug, isPreview }: { slug: string; isPreview?
             </a>
             <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.62rem', letterSpacing: '0.12em' }}
               className="text-stone-400 uppercase mt-1 tracking-widest">
-              Espace invités
+              {t('guestSpace')}
             </p>
           </div>
           <button onClick={toggleCollapse}
             className="mt-0.5 p-1 rounded text-stone-300 hover:text-stone-500 hover:bg-stone-50 transition cursor-pointer"
-            title="Réduire">
+            title={t('reduce')}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
@@ -111,7 +114,7 @@ export default function GuestNav({ slug, isPreview }: { slug: string; isPreview?
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3.5 h-3.5 shrink-0">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
               </svg>
-              Espace mariés
+              {t('coupleSpace')}
             </a>
           )}
           <a href={`/invite/${slug}`}
@@ -120,8 +123,9 @@ export default function GuestNav({ slug, isPreview }: { slug: string; isPreview?
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3.5 h-3.5 shrink-0">
               <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
             </svg>
-            Accueil
+            {t('home')}
           </a>
+          <AuthLocaleSwitcher />
         </div>
       </aside>
 
@@ -187,7 +191,7 @@ export default function GuestNav({ slug, isPreview }: { slug: string; isPreview?
                 <a href={`/mariage/${slug}`}
                   className="text-sm text-[#4a5240]"
                   style={{ fontWeight: 300 }}>
-                  ← Espace mariés
+                  ← {t('coupleSpace')}
                 </a>
               </div>
             )}

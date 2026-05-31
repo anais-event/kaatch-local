@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
+import { getTranslations } from 'next-intl/server'
 import GuestPhotoFeed from './GuestPhotoFeed'
 import MarkPhotosSeen from './MarkPhotosSeen'
 import { notifyCouple } from '@/lib/email/notify-couple'
@@ -118,7 +119,8 @@ export default async function GuestPhotosPage({ params }: { params: Promise<{ sl
 
   const supabase = await createSupabaseServerClient()
   const { data: wedding } = await supabase.from('weddings').select('id, name').eq('slug', slug).single()
-  if (!wedding) return <div className="p-8">Mariage introuvable</div>
+  const t = await getTranslations('invite.home')
+  if (!wedding) return <div className="p-8">{t('notFound')}</div>
 
   const { data: steps } = await supabase
     .from('program_steps').select('title').eq('wedding_id', wedding.id).order('position')

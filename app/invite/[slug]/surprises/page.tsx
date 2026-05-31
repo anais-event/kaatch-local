@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
+import { getTranslations } from 'next-intl/server'
 import LoveNotesSection from './LoveNotesSection'
 
 const IDEES_SURPRISES = [
@@ -59,7 +60,8 @@ export default async function SurprisesPage({ params }: { params: Promise<{ slug
   const cookieStore = await cookies()
   const guestCookie = cookieStore.get(`guest_${slug}`)
   const guest = guestCookie ? JSON.parse(guestCookie.value) : { firstName: '', lastName: '' }
-  const guestName = [guest.firstName, guest.lastName].filter(Boolean).join(' ') || 'Invité'
+  const t = await getTranslations('invite.surprises')
+  const guestName = [guest.firstName, guest.lastName].filter(Boolean).join(' ') || t('guest')
 
   const supabase = await createSupabaseServerClient()
   const { data: wedding } = await supabase.from('weddings').select('id, name').eq('slug', slug).single()
@@ -99,10 +101,9 @@ export default async function SurprisesPage({ params }: { params: Promise<{ slug
         {/* Header */}
         <div className="mb-8">
           <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.5rem' }}
-              className="text-[#2d3228] mb-2">Surprises pour le jour J</h1>
+              className="text-[#2d3228] mb-2">{t('title')}</h1>
           <p style={{ fontWeight: 300, fontSize: '0.9rem' }} className="text-stone-400">
-            Des idées pour rendre ce mariage encore plus inoubliable.
-            Coordonnez-vous entre invités pour préparer un moment magique à {wedding?.name ?? 'aux mariés'}.
+            {t('subtitle', { name: wedding?.name ?? '' })}
           </p>
         </div>
 
@@ -111,28 +112,28 @@ export default async function SurprisesPage({ params }: { params: Promise<{ slug
           <div className="flex items-center gap-2 mb-3">
             <span className="text-lg">💬</span>
             <h2 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.15rem' }}
-                className="text-[#4a5240]">Se coordonner avec les autres invités</h2>
+                className="text-[#4a5240]">{t('coordinateTitle')}</h2>
           </div>
           <p style={{ fontWeight: 300, fontSize: '0.82rem', lineHeight: 1.7 }} className="text-stone-400 mb-4">
-            Utilisez la messagerie pour vous organiser entre invités. Le groupe <strong>@Surprises</strong> est fait pour ça.
+            {t('coordinateDesc')}
           </p>
           <a href={`/invite/${slug}/groupes`}
              className="inline-block bg-[#4a5240] text-white px-5 py-2.5 rounded-xl hover:bg-[#2d3228] transition text-sm"
              style={{ fontWeight: 300 }}>
-            Aller dans la messagerie →
+            {t('goToMessaging')} →
           </a>
         </div>
 
         {/* Love Notes */}
         <LoveNotesSection
-          defaultAuthor={guestName === 'Invité' ? '' : guestName}
+          defaultAuthor={guestName === t('guest') ? '' : guestName}
           myNotes={myNotes ?? []}
           submit={submitLoveNote}
         />
 
         {/* Idées */}
         <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.3rem' }}
-            className="text-[#2d3228] mb-4">Idées pour vous inspirer</h2>
+            className="text-[#2d3228] mb-4">{t('ideasTitle')}</h2>
         <div className="space-y-3">
           {IDEES_SURPRISES.map(idee => (
             <div key={idee.titre} className="bg-white rounded-2xl border border-stone-100 p-5">
@@ -159,9 +160,9 @@ export default async function SurprisesPage({ params }: { params: Promise<{ slug
         {/* Jeux */}
         <div className="mt-10">
           <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.3rem' }}
-              className="text-[#2d3228] mb-1">Jeux & animations</h2>
+              className="text-[#2d3228] mb-1">{t('gamesTitle')}</h2>
           <p style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-400 mb-4">
-            Des idées pour animer la soirée et créer des souvenirs.
+            {t('gamesSubtitle')}
           </p>
           <div className="space-y-3">
             {[

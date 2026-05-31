@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { getTranslations } from 'next-intl/server'
 
 const TYPE_ICONS: Record<string, string> = {
   hotel: '🏨',
@@ -8,16 +9,17 @@ const TYPE_ICONS: Record<string, string> = {
   autre: '📍',
 }
 
-const TYPE_LABELS: Record<string, string> = {
-  hotel: 'Hôtel',
-  gite: 'Gîte / Chambre d\'hôtes',
-  airbnb: 'Airbnb / Location',
-  camping: 'Camping',
-  autre: 'Autre',
-}
-
 export default async function GuestHebergementsPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
+  const t = await getTranslations('invite.accommodation')
+
+  const TYPE_LABELS: Record<string, string> = {
+    hotel: t('typeHotel'),
+    gite: t('typeGite'),
+    airbnb: t('typeAirbnb'),
+    camping: t('typeCamping'),
+    autre: t('typeOther'),
+  }
 
   const supabase = await createSupabaseServerClient()
 
@@ -27,7 +29,7 @@ export default async function GuestHebergementsPage({ params }: { params: Promis
     .eq('slug', slug)
     .single()
 
-  if (!wedding) return <div className="p-8">Mariage introuvable</div>
+  if (!wedding) return <div className="p-8">{t('notFound')}</div>
 
   const { data: accommodations } = await supabase
     .from('accommodations')
@@ -41,16 +43,16 @@ export default async function GuestHebergementsPage({ params }: { params: Promis
 
         <div className="mb-6">
           <a href={`/invite/${slug}`} className="text-sm text-[#4a5240] hover:underline" style={{ fontWeight: 300 }}>
-            ← Retour
+            ← {t('back')}
           </a>
         </div>
 
         <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.5rem' }}
             className="text-[#2d3228] mb-2">
-          Hébergements
+          {t('title')}
         </h1>
         <p style={{ fontWeight: 300, fontSize: '0.9rem' }} className="text-stone-400 mb-8">
-          Les coups de cœur des mariés pour vous loger à proximité.
+          {t('subtitle')}
         </p>
 
         {accommodations && accommodations.length > 0 ? (
@@ -93,7 +95,7 @@ export default async function GuestHebergementsPage({ params }: { params: Promis
                     <a href={acc.url} target="_blank" rel="noopener noreferrer"
                        className="shrink-0 bg-[#4a5240] text-white px-4 py-2 rounded-full text-xs hover:bg-[#2d3228] transition"
                        style={{ fontWeight: 300, letterSpacing: '0.06em' }}>
-                      Voir →
+                      {t('view')} →
                     </a>
                   )}
                 </div>
@@ -104,10 +106,10 @@ export default async function GuestHebergementsPage({ params }: { params: Promis
           <div className="text-center py-16 bg-white/60 rounded-3xl">
             <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 700, fontSize: '1.1rem' }}
                className="text-stone-400 mb-2">
-              Aucune recommandation pour l'instant
+              {t('noRecommendations')}
             </p>
             <p style={{ fontWeight: 300, fontSize: '0.85rem' }} className="text-stone-300">
-              Les mariés n'ont pas encore ajouté d'hébergements.
+              {t('noAccommodations')}
             </p>
           </div>
         )}

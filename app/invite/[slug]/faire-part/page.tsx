@@ -1,5 +1,7 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { cookies, headers } from 'next/headers'
+import { getLocale } from 'next-intl/server'
+import { toDateLocale } from '@/lib/locale-map'
 import FairePartEnvelope from './FairePartEnvelope'
 import { isPaid } from '@/lib/plan'
 
@@ -13,7 +15,9 @@ export default async function FairePartPage({ params }: { params: Promise<{ slug
     .eq('slug', slug)
     .single()
 
-  if (!wedding) return <div className="p-8">Mariage introuvable</div>
+  const locale = await getLocale()
+
+  if (!wedding) return <div className="p-8">Not found</div>
 
   // Read guest cookie to get their personal invite token for the QR code
   const cookieStore = await cookies()
@@ -33,7 +37,7 @@ export default async function FairePartPage({ params }: { params: Promise<{ slug
   const personalUrl = inviteToken ? `${baseUrl}/i/${inviteToken}` : `${baseUrl}/invite/${slug}`
 
   const dateStr = wedding.date
-    ? new Date(wedding.date).toLocaleDateString('fr-FR', {
+    ? new Date(wedding.date).toLocaleDateString(toDateLocale(locale), {
         weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
       })
     : null

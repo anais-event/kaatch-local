@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import GuestbookForm from './GuestbookForm'
 import { notifyCouple } from '@/lib/email/notify-couple'
+import { getTranslations } from 'next-intl/server'
 
 const ALLOWED_TAGS = /<\/?(?:b|strong|i|em|u|br|p|ul|ol|li|span)(?:\s[^>]*)?>/gi
 
@@ -100,6 +101,7 @@ export default async function LivreDorPage({ params }: { params: Promise<{ slug:
   const guestCookie = cookieStore.get(`guest_${slug}`)
   const guest = guestCookie ? JSON.parse(guestCookie.value) : { firstName: '', lastName: '', id: null }
   const guestName = [guest.firstName, guest.lastName].filter(v => v && v !== 'null').join(' ')
+  const t = await getTranslations('invite.guestbook')
 
   async function boundSubmit(formData: FormData) {
     'use server'
@@ -114,10 +116,10 @@ export default async function LivreDorPage({ params }: { params: Promise<{ slug:
 
         <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.5rem' }}
             className="text-[#2d3228] mb-2">
-          Livre d&apos;Or
+          {t('title')}
         </h1>
         <p style={{ fontWeight: 300, fontSize: '0.9rem' }} className="text-stone-400 mb-8">
-          Laissez un mot aux mariés pour immortaliser ce jour.
+          {t('subtitle')}
         </p>
 
         <GuestbookForm submitEntry={boundSubmit} defaultName={guestName} />

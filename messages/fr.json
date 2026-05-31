@@ -810,6 +810,27 @@
       "partCocktail": "Vin d'honneur",
       "partReception": "Réception"
     },
+    "countdown": {
+      "today": "C'est aujourd'hui !",
+      "months": "Mois",
+      "days": "Jours",
+      "hours": "Heures",
+      "min": "Min",
+      "onlyLeft": "Plus que",
+      "countdown": "Compte à rebours"
+    },
+    "message": {
+      "myMessage": "Mon message aux mariés",
+      "leaveMessage": "Laisser un message aux mariés",
+      "title": "Message aux mariés",
+      "saved": "Message enregistré",
+      "editHint": "Modifiez votre message ci-dessous.",
+      "writeHint": "Un mot pour {name} ? Une question, un souhait…",
+      "placeholder": "Votre message…",
+      "update": "Mettre à jour",
+      "send": "Envoyer",
+      "deleteMessage": "Supprimer le message"
+    },
     "blocked": {
       "suspended": "L'espace invités est temporairement suspendu par les mariés.",
       "unpublished": "Les mariés finalisent la configuration de votre espace. Vous recevrez bientôt votre invitation personnalisée.",
@@ -818,6 +839,42 @@
       "reactivate": "Réactiver",
       "seePlans": "Voir les plans",
       "comingSoon": "Bientôt disponible"
+    },
+    "music": {
+      "guest": "Invité",
+      "notFound": "Mariage introuvable",
+      "title": "La playlist de la soirée",
+      "subtitle": "Suggérez vos morceaux préférés aux mariés",
+      "coupleSelection": "La sélection des mariés",
+      "suggestSong": "Suggérer un morceau",
+      "songTitle": "Titre de la chanson *",
+      "artist": "Artiste (optionnel)",
+      "whichMoment": "Pour quel moment ? (optionnel)",
+      "moment_ceremonie": "Cérémonie",
+      "moment_vin_honneur": "Vin d'honneur",
+      "moment_diner": "Dîner",
+      "moment_soiree": "Soirée",
+      "linkPlaceholder": "Lien Spotify / Deezer / YouTube (optionnel)",
+      "notePlaceholder": "Un petit mot pour les mariés ? (optionnel)",
+      "sendSuggestion": "Envoyer ma suggestion",
+      "mySuggestions": "Mes suggestions",
+      "pending": "En attente",
+      "currentPlaylist": "Playlist en cours"
+    },
+    "programme": {
+      "notFound": "Mariage introuvable",
+      "back": "Retour",
+      "title": "Programme de la journée",
+      "comingSoon": "Programme à venir…"
+    },
+    "contacts": {
+      "notFound": "Mariage introuvable",
+      "back": "Retour",
+      "title": "Prestataires",
+      "subtitle": "Les contacts utiles pour le jour J.",
+      "noContacts": "Aucun contact disponible pour le moment.",
+      "writeTo": "Écrire à {name}…",
+      "send": "Envoyer"
     },
     "nav": {
       "fairePart": "Faire-part",

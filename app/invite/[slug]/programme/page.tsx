@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import ProgrammePDF from './ProgrammePDF'
 
 export default async function GuestProgrammePage({ params }: { params: Promise<{ slug: string }> }) {
@@ -14,7 +15,9 @@ export default async function GuestProgrammePage({ params }: { params: Promise<{
     .eq('slug', slug)
     .single()
 
-  if (!wedding) return <div className="p-8">Mariage introuvable</div>
+  const t = await getTranslations('invite.programme')
+
+  if (!wedding) return <div className="p-8">{t('notFound')}</div>
 
   const { data: steps } = await supabase
     .from('program_steps')
@@ -29,20 +32,20 @@ export default async function GuestProgrammePage({ params }: { params: Promise<{
 
         <div className="flex items-center justify-between mb-8">
           <a href={`/invite/${slug}`} className="text-sm text-[#4a5240] hover:underline" style={{ fontWeight: 300 }}>
-            ← Retour
+            ← {t('back')}
           </a>
           <ProgrammePDF slug={slug} weddingName={wedding.name} steps={steps ?? []} />
         </div>
 
         <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.5rem' }}
             className="text-[#2d3228] mb-8">
-          Programme de la journée
+          {t('title')}
         </h1>
 
         {(!steps || steps.length === 0) ? (
           <div className="p-8 rounded-xl bg-white border border-stone-100 text-center">
             <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '1rem' }}
-               className="text-stone-400">Programme à venir…</p>
+               className="text-stone-400">{t('comingSoon')}</p>
           </div>
         ) : (
           <div className="relative">

@@ -811,6 +811,27 @@
       "partCocktail": "Cocktail hour",
       "partReception": "Reception"
     },
+    "countdown": {
+      "today": "It's today!",
+      "months": "Months",
+      "days": "Days",
+      "hours": "Hours",
+      "min": "Min",
+      "onlyLeft": "Only",
+      "countdown": "Countdown"
+    },
+    "message": {
+      "myMessage": "My message to the couple",
+      "leaveMessage": "Leave a message for the couple",
+      "title": "Message to the couple",
+      "saved": "Message saved",
+      "editHint": "Edit your message below.",
+      "writeHint": "A word for {name}? A question, a wish…",
+      "placeholder": "Your message…",
+      "update": "Update",
+      "send": "Send",
+      "deleteMessage": "Delete message"
+    },
     "blocked": {
       "suspended": "The guest space is temporarily suspended by the couple.",
       "unpublished": "The couple is finalizing your space. You will receive your personalized invitation soon.",
@@ -819,6 +840,42 @@
       "reactivate": "Reactivate",
       "seePlans": "See plans",
       "comingSoon": "Coming soon"
+    },
+    "music": {
+      "guest": "Guest",
+      "notFound": "Wedding not found",
+      "title": "The evening playlist",
+      "subtitle": "Suggest your favourite tracks to the couple",
+      "coupleSelection": "The couple's selection",
+      "suggestSong": "Suggest a song",
+      "songTitle": "Song title *",
+      "artist": "Artist (optional)",
+      "whichMoment": "For which moment? (optional)",
+      "moment_ceremonie": "Ceremony",
+      "moment_vin_honneur": "Cocktail hour",
+      "moment_diner": "Dinner",
+      "moment_soiree": "Party",
+      "linkPlaceholder": "Spotify / Deezer / YouTube link (optional)",
+      "notePlaceholder": "A note for the couple? (optional)",
+      "sendSuggestion": "Send my suggestion",
+      "mySuggestions": "My suggestions",
+      "pending": "Pending",
+      "currentPlaylist": "Current playlist"
+    },
+    "programme": {
+      "notFound": "Wedding not found",
+      "back": "Back",
+      "title": "Day schedule",
+      "comingSoon": "Schedule coming soon…"
+    },
+    "contacts": {
+      "notFound": "Wedding not found",
+      "back": "Back",
+      "title": "Vendors",
+      "subtitle": "Useful contacts for the big day.",
+      "noContacts": "No contacts available yet.",
+      "writeTo": "Write to {name}…",
+      "send": "Send"
     },
     "nav": {
       "fairePart": "Invitation",

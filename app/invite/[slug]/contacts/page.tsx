@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
+import { getTranslations } from 'next-intl/server'
 
 async function sendMessage(formData: FormData) {
   'use server'
@@ -55,7 +56,9 @@ export default async function GuestContactsPage({ params }: { params: Promise<{ 
 
   const supabase = await createSupabaseServerClient()
   const { data: wedding } = await supabase.from('weddings').select('id').eq('slug', slug).single()
-  if (!wedding) return <div className="p-8">Mariage introuvable</div>
+  const t = await getTranslations('invite.contacts')
+
+  if (!wedding) return <div className="p-8">{t('notFound')}</div>
 
   const { data: contacts } = await supabase
     .from('wedding_contacts')
@@ -70,20 +73,20 @@ export default async function GuestContactsPage({ params }: { params: Promise<{ 
 
         <div className="mb-6">
           <a href={`/invite/${slug}`} className="text-sm text-[#4a5240] hover:underline" style={{ fontWeight: 300 }}>
-            ← Retour
+            ← {t('back')}
           </a>
         </div>
 
         <h1 style={{ fontFamily: 'var(--font-lato)', fontWeight: 600, fontSize: '1.5rem' }}
-            className="text-[#2d3228] mb-2">Prestataires</h1>
+            className="text-[#2d3228] mb-2">{t('title')}</h1>
         <p style={{ fontWeight: 300, fontSize: '0.9rem' }} className="text-stone-400 mb-8">
-          Les contacts utiles pour le jour J.
+          {t('subtitle')}
         </p>
 
         {(!contacts || contacts.length === 0) ? (
           <div className="p-8 rounded-2xl bg-white/80 text-center">
             <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '1rem' }}
-               className="text-stone-400">Aucun contact disponible pour le moment.</p>
+               className="text-stone-400">{t('noContacts')}</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -129,13 +132,13 @@ export default async function GuestContactsPage({ params }: { params: Promise<{ 
                   <input type="hidden" name="slug" value={slug} />
                   <input type="hidden" name="contact_id" value={contact.id} />
                   <input type="hidden" name="sender" value={guestName} />
-                  <input type="text" name="content" placeholder={`Écrire à ${contact.name}…`}
+                  <input type="text" name="content" placeholder={t('writeTo', { name: contact.name })}
                     className="flex-1 border border-stone-200 rounded-xl px-4 py-2 bg-white outline-none focus:border-[#4a5240] transition text-stone-700 text-sm"
                     style={{ fontWeight: 300 }} />
                   <button type="submit"
                     className="bg-[#4a5240] text-white px-4 py-2 rounded-xl hover:bg-[#2d3228] transition text-sm"
                     style={{ fontWeight: 300 }}>
-                    Envoyer
+                    {t('send')}
                   </button>
                 </form>
               </div>

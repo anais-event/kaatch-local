@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useTranslations } from 'next-intl'
 
 export default function MessageModal({ slug, guestId, existingMessage, weddingName, saveMessage }: {
   slug: string
@@ -13,6 +14,7 @@ export default function MessageModal({ slug, guestId, existingMessage, weddingNa
   const [message, setMessage] = useState(existingMessage ?? '')
   const [isPending, startTransition] = useTransition()
   const [done, setDone] = useState(false)
+  const t = useTranslations('invite.message')
 
   function openModal() {
     setMessage(existingMessage ?? '')
@@ -54,7 +56,7 @@ export default function MessageModal({ slug, guestId, existingMessage, weddingNa
         <span className="text-xl">💌</span>
         <div className="flex-1 min-w-0">
           <p style={{ fontWeight: 600, fontSize: '0.9rem' }} className="text-[#2d3228]">
-            {existingMessage ? 'Mon message aux mariés' : 'Laisser un message aux mariés'}
+            {existingMessage ? t('myMessage') : t('leaveMessage')}
           </p>
           {existingMessage && (
             <p className="text-stone-400 text-xs truncate mt-0.5" style={{ fontWeight: 300 }}>
@@ -78,7 +80,7 @@ export default function MessageModal({ slug, guestId, existingMessage, weddingNa
             <div className="flex items-center justify-between px-5 py-4 border-b border-stone-100">
               <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400, fontSize: '1.3rem', fontStyle: 'italic' }}
                 className="text-[#2d3228]">
-                Message aux mariés
+                {t('title')}
               </h2>
               <button onClick={() => setOpen(false)}
                 className="w-7 h-7 rounded-full bg-stone-100 hover:bg-stone-200 transition flex items-center justify-center cursor-pointer text-stone-500">
@@ -90,20 +92,20 @@ export default function MessageModal({ slug, guestId, existingMessage, weddingNa
             <div className="p-5">
               {done ? (
                 <p className="text-center text-[#4a5240] py-4" style={{ fontWeight: 300 }}>
-                  ✓ Message enregistré
+                  ✓ {t('saved')}
                 </p>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <p className="text-stone-400 text-xs" style={{ fontWeight: 300 }}>
                     {existingMessage
-                      ? 'Modifiez votre message ci-dessous.'
-                      : `Un mot pour ${weddingName} ? Une question, un souhait…`}
+                      ? t('editHint')
+                      : t('writeHint', { name: weddingName })}
                   </p>
                   <textarea
                     value={message}
                     onChange={e => setMessage(e.target.value)}
                     rows={4}
-                    placeholder="Votre message…"
+                    placeholder={t('placeholder')}
                     className="w-full border border-stone-200 rounded-xl px-4 py-3 outline-none focus:border-[#4a5240] transition text-stone-700 resize-none bg-[#f5f0e8]"
                     style={{ fontWeight: 300, fontSize: '0.9rem', lineHeight: 1.6 }}
                     autoFocus
@@ -112,13 +114,13 @@ export default function MessageModal({ slug, guestId, existingMessage, weddingNa
                     <button type="submit" disabled={isPending || !message.trim()}
                       className="bg-[#4a5240] text-white px-5 py-2.5 rounded-xl hover:bg-[#2d3228] transition text-sm disabled:opacity-40 cursor-pointer"
                       style={{ fontWeight: 300, letterSpacing: '0.04em' }}>
-                      {isPending ? '…' : existingMessage ? 'Mettre à jour' : 'Envoyer'}
+                      {isPending ? '…' : existingMessage ? t('update') : t('send')}
                     </button>
                     {existingMessage && (
                       <button type="button" onClick={handleDelete} disabled={isPending}
                         className="text-xs text-stone-400 hover:text-red-400 transition cursor-pointer disabled:opacity-40"
                         style={{ fontWeight: 300 }}>
-                        Supprimer le message
+                        {t('deleteMessage')}
                       </button>
                     )}
                   </div>

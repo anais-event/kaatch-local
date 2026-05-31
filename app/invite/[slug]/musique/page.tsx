@@ -1,19 +1,19 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
+import { getTranslations } from 'next-intl/server'
 
-const MOMENTS = [
-  { key: 'ceremonie',  label: 'Cérémonie',   emoji: '💒', desc: 'Entrée, échange des vœux, sortie' },
-  { key: 'vin_honneur', label: 'Vin d\'honneur', emoji: '🥂', desc: 'Ambiance cocktail' },
-  { key: 'diner',      label: 'Dîner',        emoji: '🍽️', desc: 'Fond sonore pendant le repas' },
-  { key: 'soiree',     label: 'Soirée',       emoji: '🎉', desc: 'Piste de danse, fête' },
-]
+// Moment labels are resolved with translations inside the component
+const MOMENT_KEYS = ['ceremonie', 'vin_honneur', 'diner', 'soiree'] as const
+const MOMENT_EMOJIS: Record<string, string> = {
+  ceremonie: '💒', vin_honneur: '🥂', diner: '🍽️', soiree: '🎉',
+}
 
 function getPlatformLabel(url: string) {
-  if (url.includes('spotify')) return 'Écouter sur Spotify'
-  if (url.includes('deezer'))  return 'Écouter sur Deezer'
-  if (url.includes('youtube') || url.includes('youtu.be')) return 'Regarder sur YouTube'
-  return 'Ouvrir'
+  if (url.includes('spotify')) return 'Spotify'
+  if (url.includes('deezer'))  return 'Deezer'
+  if (url.includes('youtube') || url.includes('youtu.be')) return 'YouTube'
+  return '🔗'
 }
 
 function getPlatformIcon(url: string) {
@@ -43,11 +43,12 @@ function getEmbedUrl(url: string): string | null {
 
 export default async function MusiqueGuestPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
+  const t = await getTranslations('invite.music')
   const supabase = await createSupabaseServerClient()
   const cookieStore = await cookies()
   const guestCookie = cookieStore.get(`guest_${slug}`)
   const guest = guestCookie ? JSON.parse(guestCookie.value) : { firstName: '', id: null }
-  const guestName = guest.firstName || 'Invité'
+  const guestName = guest.firstName || t('guest')
 
   const { data: wedding } = await supabase
     .from('weddings')
@@ -55,7 +56,7 @@ export default async function MusiqueGuestPage({ params }: { params: Promise<{ s
     .eq('slug', slug)
     .single()
 
-  if (!wedding) return <div className="p-8">Mariage introuvable</div>
+  if (!wedding) return <div className="p-8">{t('notFound')}</div>
 
   const [{ data: songs }, { data: playlistLinks }] = await Promise.all([
     supabase
@@ -99,10 +100,10 @@ export default async function MusiqueGuestPage({ params }: { params: Promise<{ s
         {/* Header */}
         <div className="text-center pt-2">
           <h1 className="text-[#2d3228] mb-1" style={{ fontWeight: 600, fontSize: '1.5rem' }}>
-            La playlist de la soirée
+            {t('title')}
           </h1>
           <p className="text-stone-400 text-sm" style={{ fontWeight: 300 }}>
-            Suggérez vos morceaux préférés aux mariés
+            {t('subtitle')}
           </p>
         </div>
 
@@ -110,7 +111,7 @@ export default async function MusiqueGuestPage({ params }: { params: Promise<{ s
         {(playlistLinks ?? []).length > 0 && (
           <div className="space-y-3">
             <p className="text-xs text-stone-400 uppercase tracking-widest text-center" style={{ fontWeight: 300 }}>
-              La sélection des mariés
+              {t('coupleSelection')}
             </p>
             {(playlistLinks ?? []).map(pl => {
               const embed = getEmbedUrl(pl.url)
@@ -144,20 +145,20 @@ export default async function MusiqueGuestPage({ params }: { params: Promise<{ s
           <div className="flex items-center gap-2 mb-4">
             <span className="text-xl">🎵</span>
             <h2 className="text-[#2d3228]" style={{ fontWeight: 500, fontSize: '0.95rem' }}>
-              Suggérer un morceau
+              {t('suggestSong')}
             </h2>
           </div>
           <form action={suggestSong} className="space-y-3">
             <input
               name="title"
               required
-              placeholder="Titre de la chanson *"
+              placeholder={t('songTitle')}
               className="w-full border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-700 placeholder:text-stone-300 focus:outline-none focus:border-[#4a5240] transition"
               style={{ fontWeight: 300 }}
             />
             <input
               name="artist"
-              placeholder="Artiste (optionnel)"
+              placeholder={t('artist')}
               className="w-full border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-700 placeholder:text-stone-300 focus:outline-none focus:border-[#4a5240] transition"
               style={{ fontWeight: 300 }}
             />
@@ -166,20 +167,20 @@ export default async function MusiqueGuestPage({ params }: { params: Promise<{ s
               className="w-full border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-600 focus:outline-none focus:border-[#4a5240] bg-white transition"
               style={{ fontWeight: 300 }}
             >
-              <option value="">Pour quel moment ? (optionnel)</option>
-              {MOMENTS.map(m => (
-                <option key={m.key} value={m.key}>{m.emoji} {m.label}</option>
+              <option value="">{t('whichMoment')}</option>
+              {MOMENT_KEYS.map(key => (
+                <option key={key} value={key}>{MOMENT_EMOJIS[key]} {t(`moment_${key}`)}</option>
               ))}
             </select>
             <input
               name="song_url"
-              placeholder="Lien Spotify / Deezer / YouTube (optionnel)"
+              placeholder={t('linkPlaceholder')}
               className="w-full border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-700 placeholder:text-stone-300 focus:outline-none focus:border-[#4a5240] transition"
               style={{ fontWeight: 300 }}
             />
             <textarea
               name="notes"
-              placeholder="Un petit mot pour les mariés ? (optionnel)"
+              placeholder={t('notePlaceholder')}
               rows={2}
               className="w-full border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-700 placeholder:text-stone-300 focus:outline-none focus:border-[#4a5240] resize-none transition"
               style={{ fontWeight: 300 }}
@@ -189,7 +190,7 @@ export default async function MusiqueGuestPage({ params }: { params: Promise<{ s
               className="w-full bg-[#4a5240] text-white py-3 rounded-xl text-sm hover:bg-[#2d3228] transition cursor-pointer"
               style={{ fontWeight: 400 }}
             >
-              Envoyer ma suggestion ✦
+              {t('sendSuggestion')} ✦
             </button>
           </form>
         </div>
@@ -198,7 +199,7 @@ export default async function MusiqueGuestPage({ params }: { params: Promise<{ s
         {mySuggestions.length > 0 && (
           <div>
             <p className="text-xs text-stone-400 uppercase tracking-widest text-center mb-3" style={{ fontWeight: 300 }}>
-              Mes suggestions
+              {t('mySuggestions')}
             </p>
             <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden divide-y divide-stone-50">
               {mySuggestions.map(s => (
@@ -209,7 +210,7 @@ export default async function MusiqueGuestPage({ params }: { params: Promise<{ s
                     {s.artist && <p className="text-xs text-stone-400 truncate" style={{ fontWeight: 300 }}>{s.artist}</p>}
                   </div>
                   <span className="text-xs bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full shrink-0" style={{ fontWeight: 300 }}>
-                    En attente
+                    {t('pending')}
                   </span>
                 </div>
               ))}
@@ -221,15 +222,15 @@ export default async function MusiqueGuestPage({ params }: { params: Promise<{ s
         {approvedSongs.length > 0 && (
           <div className="space-y-4">
             <p className="text-xs text-stone-400 uppercase tracking-widest text-center" style={{ fontWeight: 300 }}>
-              Playlist en cours
+              {t('currentPlaylist')}
             </p>
-            {MOMENTS.map(m => {
-              const ms = approvedSongs.filter(s => s.moment === m.key)
+            {MOMENT_KEYS.map(key => {
+              const ms = approvedSongs.filter(s => s.moment === key)
               if (!ms.length) return null
               return (
-                <div key={m.key}>
+                <div key={key}>
                   <p className="text-xs text-stone-500 mb-2 flex items-center gap-1.5" style={{ fontWeight: 400 }}>
-                    <span>{m.emoji}</span> {m.label}
+                    <span>{MOMENT_EMOJIS[key]}</span> {t(`moment_${key}`)}
                   </p>
                   <div className="bg-white rounded-xl border border-stone-100 overflow-hidden divide-y divide-stone-50">
                     {ms.map((s, idx) => (

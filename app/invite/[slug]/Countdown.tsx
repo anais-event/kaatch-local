@@ -1,7 +1,9 @@
 'use client'
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 
 export default function Countdown({ weddingDate, dark = false }: { weddingDate: string; dark?: boolean }) {
+  const t = useTranslations('invite.countdown')
   const [diff, setDiff] = useState({ months: 0, days: 0, hours: 0, minutes: 0, past: false })
 
   useEffect(() => {
@@ -29,22 +31,23 @@ export default function Countdown({ weddingDate, dark = false }: { weddingDate: 
 
   if (diff.past) return (
     <div className="flex items-center gap-4 p-5 rounded-2xl bg-[#4a5240] text-white text-center justify-center">
-      <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem' }}>✨ C&apos;est aujourd&apos;hui !</span>
+      <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem' }}>✨ {t('today')}</span>
     </div>
   )
 
+  const daysLabel = t('days')
   const units = [
-    { value: diff.months, label: 'Mois' },
-    { value: diff.days, label: 'Jours' },
-    { value: diff.hours, label: 'Heures' },
-    { value: diff.minutes, label: 'Min' },
-  ].filter(u => u.value > 0 || u.label === 'Jours')
+    { value: diff.months, label: t('months'), key: 'months' },
+    { value: diff.days, label: daysLabel, key: 'days' },
+    { value: diff.hours, label: t('hours'), key: 'hours' },
+    { value: diff.minutes, label: t('min'), key: 'min' },
+  ].filter(u => u.value > 0 || u.key === 'days')
 
   if (dark) return (
     <div className="text-center">
       <p style={{ fontWeight: 300, fontSize: '0.62rem', letterSpacing: '0.25em', fontFamily: 'var(--font-lato)' }}
         className="text-white/40 uppercase mb-4">
-        Plus que
+        {t('onlyLeft')}
       </p>
       <div className="flex items-end justify-center gap-3">
         {units.map(({ value, label }) => (
@@ -62,7 +65,7 @@ export default function Countdown({ weddingDate, dark = false }: { weddingDate: 
 
   return (
     <div className="p-5 rounded-2xl bg-white/80">
-      <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }} className="text-stone-400 uppercase mb-3 text-center">Compte à rebours</p>
+      <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }} className="text-stone-400 uppercase mb-3 text-center">{t('countdown')}</p>
       <div className="grid gap-2 text-center" style={{ gridTemplateColumns: `repeat(${units.length}, 1fr)` }}>
         {units.map(({ value, label }) => (
           <div key={label} className="bg-[#f5f0e8] rounded-xl py-3">

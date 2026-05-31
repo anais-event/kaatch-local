@@ -1,4 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { getTranslations, getLocale } from 'next-intl/server'
+import { toDateLocale } from '@/lib/locale-map'
 import Countdown from './Countdown'
 import EcheancesWidget from './EcheancesWidget'
 import CreateModal from './CreateModal'
@@ -19,7 +21,10 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
   const supabase = await createSupabaseServerClient()
 
   const { data: wedding } = await supabase.from('weddings').select('*').eq('slug', slug).single()
-  if (!wedding) return <div className="p-8">Mariage introuvable</div>
+  const t = await getTranslations('wedding.dashboard')
+  const locale = await getLocale()
+
+  if (!wedding) return <div className="p-8">{t('notFound')}</div>
 
   const [
     { count: guestCount },
@@ -48,7 +53,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
   ])
 
   const dateFormatted = wedding.date
-    ? new Date(wedding.date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+    ? new Date(wedding.date).toLocaleDateString(toDateLocale(locale), { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
     : null
 
   const paid = isPaid(wedding.plan)
@@ -58,40 +63,40 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
   }
 
   const prepModules = [
-    { href: 'guests',         icon: Users,      label: "Invités",        sub: "Liste, RSVP, faire-parts" },
-    { href: 'tables',         icon: LayoutGrid,  label: "Plan de table",  sub: "Placement" },
-    { href: 'budget',         icon: Wallet,      label: "Budget",         sub: "Dépenses et suivi" },
-    { href: 'retro-planning', icon: ListChecks,  label: "Rétro-planning", sub: "Avant le jour J" },
-    { href: 'musique',        icon: Music,       label: "Musique",        sub: "Playlist" },
-    { href: 'hebergements',   icon: BedDouble,   label: "Hébergements",   sub: "Logements" },
-    { href: 'prestataires',   icon: Contact,     label: "Prestataires",   sub: "Contacts et suivi" },
-    { href: 'studio',         icon: Palette,     label: "Studio",         sub: "Papeterie" },
+    { href: 'guests',         icon: Users,      label: t('modGuests'),       sub: t('modGuestsSub') },
+    { href: 'tables',         icon: LayoutGrid,  label: t('modTables'),       sub: t('modTablesSub') },
+    { href: 'budget',         icon: Wallet,      label: t('modBudget'),       sub: t('modBudgetSub') },
+    { href: 'retro-planning', icon: ListChecks,  label: t('modRetro'),        sub: t('modRetroSub') },
+    { href: 'musique',        icon: Music,       label: t('modMusic'),        sub: t('modMusicSub') },
+    { href: 'hebergements',   icon: BedDouble,   label: t('modAccom'),        sub: t('modAccomSub') },
+    { href: 'prestataires',   icon: Contact,     label: t('modVendors'),      sub: t('modVendorsSub') },
+    { href: 'studio',         icon: Palette,     label: t('modStudio'),       sub: t('modStudioSub') },
   ]
 
   const jourJModules = [
-    { href: 'programme',   icon: Clock,          label: "Programme",    sub: "Déroulé du jour" },
-    { href: 'checklist',   icon: CheckSquare,    label: "Checklist J",  sub: "Qui fait quoi" },
-    { href: 'photos',      icon: Camera,         label: "Photos",       sub: "Galerie partagée" },
-    { href: 'messagerie',  icon: MessageCircle,  label: "Messagerie",   sub: "Groupes" },
-    { href: 'jeux',        icon: PartyPopper,    label: "Jeux",         sub: "Animations" },
+    { href: 'programme',   icon: Clock,          label: t('modProgramme'),    sub: t('modProgrammeSub') },
+    { href: 'checklist',   icon: CheckSquare,    label: t('modChecklist'),    sub: t('modChecklistSub') },
+    { href: 'photos',      icon: Camera,         label: t('modPhotos'),       sub: t('modPhotosSub') },
+    { href: 'messagerie',  icon: MessageCircle,  label: t('modMessaging'),    sub: t('modMessagingSub') },
+    { href: 'jeux',        icon: PartyPopper,    label: t('modGames'),        sub: t('modGamesSub') },
   ]
 
   const apresModules = [
-    { href: 'livre-dor',   icon: BookOpen,       label: "Livre d'or",   sub: "Messages" },
+    { href: 'livre-dor',   icon: BookOpen,       label: t('modGuestbook'),    sub: t('modGuestbookSub') },
   ]
 
   const outilsModules = [
-    { href: 'partager',      icon: QrCode,   label: "QR Code et partage",   sub: "Lien invités" },
-    { href: 'invitations',   icon: Share2,   label: "Exports documents",    sub: "PDF, Excel" },
-    { href: 'prestataires',  icon: FileText, label: "Contrats prestataires", sub: "PDF par catégorie" },
+    { href: 'partager',      icon: QrCode,   label: t('modQR'),           sub: t('modQRSub') },
+    { href: 'invitations',   icon: Share2,   label: t('modExports'),      sub: t('modExportsSub') },
+    { href: 'prestataires',  icon: FileText, label: t('modContracts'),    sub: t('modContractsSub') },
   ]
 
   const systemChecklist = [
-    { label: "Photo de couverture", done: !!wedding.cover_image_url, href: `/mariage/${slug}/edit` },
-    { label: "Date fixée", done: !!wedding.date, href: `/mariage/${slug}/edit` },
-    { label: "Lieu renseigné", done: !!wedding.location, href: `/mariage/${slug}/edit` },
-    { label: "Invités ajoutés", done: (guestCount ?? 0) > 0, href: `/mariage/${slug}/guests` },
-    { label: "Programme créé", done: false, href: `/mariage/${slug}/programme` },
+    { label: t('checkCover'), done: !!wedding.cover_image_url, href: `/mariage/${slug}/edit` },
+    { label: t('checkDate'), done: !!wedding.date, href: `/mariage/${slug}/edit` },
+    { label: t('checkLocation'), done: !!wedding.location, href: `/mariage/${slug}/edit` },
+    { label: t('checkGuests'), done: (guestCount ?? 0) > 0, href: `/mariage/${slug}/guests` },
+    { label: t('checkProgramme'), done: false, href: `/mariage/${slug}/programme` },
   ]
 
   return (
@@ -107,7 +112,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
                 className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full text-white transition"
                 style={{ fontWeight: 400, fontSize: '0.85rem' }}>
                 <Camera className="w-4 h-4" />
-                Ajouter une photo de couverture
+                {t('addCoverPhoto')}
               </Link>
             </div>
         }
@@ -128,7 +133,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
             className="absolute top-3 right-3 z-10 flex items-center gap-1.5 px-3 py-1.5 bg-black/30 hover:bg-black/50 backdrop-blur-sm rounded-full text-white transition opacity-0 group-hover:opacity-100"
             style={{ fontWeight: 400, fontSize: '0.75rem' }}>
             <Camera className="w-3.5 h-3.5" />
-            Modifier la photo
+            {t('editPhoto')}
           </Link>
         )}
       </div>
@@ -139,10 +144,10 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
         {/* Quick stats bar */}
         <div className="grid grid-cols-4 gap-3 mb-8">
           {[
-            { value: guestCount ?? 0, label: "Invités", href: 'guests' },
-            { value: confirmedCount ?? 0, label: "Confirmés", href: 'guests' },
-            { value: photoCount ?? 0, label: "Photos", href: 'photos' },
-            { value: budgetCount ?? 0, label: "Dépenses", href: 'budget' },
+            { value: guestCount ?? 0, label: t('statGuests'), href: 'guests' },
+            { value: confirmedCount ?? 0, label: t('statConfirmed'), href: 'guests' },
+            { value: photoCount ?? 0, label: t('statPhotos'), href: 'photos' },
+            { value: budgetCount ?? 0, label: t('statExpenses'), href: 'budget' },
           ].map(s => (
             <Link key={s.label} href={`/mariage/${slug}/${s.href}`}
               className="bg-white rounded-2xl border border-stone-100 p-4 hover:shadow-md transition group">
@@ -160,13 +165,13 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
 
             {/* À faire maintenant */}
             <TodoNow slug={slug} tasks={[
-              { label: 'Invitez votre moitié', sub: 'Pour organiser le mariage à deux', done: false, href: `/mariage/${slug}/compte#partenaire` },
-              { label: 'Ajoutez une photo de vous', sub: 'Pour personnaliser votre espace', done: !!wedding.cover_image_url, href: `/mariage/${slug}/edit` },
-              { label: 'Complétez les infos du Jour J', sub: 'Date, lieu, horaires, ambiance', done: !!wedding.date && !!wedding.location, href: `/mariage/${slug}/programme` },
-              { label: "Créez votre liste d'invités", sub: 'Commencez à poser les bases', done: (guestCount ?? 0) > 0, href: `/mariage/${slug}/guests` },
-              { label: 'Préparez votre plan de table', sub: "Même en brouillon, ça aide vite", done: (tablesCount ?? 0) > 0, href: paid ? `/mariage/${slug}/tables` : `/mariage/${slug}/compte#formule` },
-              { label: 'Ajoutez vos premiers prestataires', sub: 'Lieu, traiteur, photographe, DJ…', done: (vendors?.length ?? 0) > 0, href: `/mariage/${slug}/prestataires` },
-              { label: 'Notez vos premières tâches importantes', sub: "Ce qu'il ne faut surtout pas oublier", done: (todosData?.length ?? 0) > 0, href: `/mariage/${slug}/retro-planning` },
+              { label: t('todoPartner'), sub: t('todoPartnerSub'), done: false, href: `/mariage/${slug}/compte#partenaire` },
+              { label: t('todoPhoto'), sub: t('todoPhotoSub'), done: !!wedding.cover_image_url, href: `/mariage/${slug}/edit` },
+              { label: t('todoInfo'), sub: t('todoInfoSub'), done: !!wedding.date && !!wedding.location, href: `/mariage/${slug}/programme` },
+              { label: t('todoGuests'), sub: t('todoGuestsSub'), done: (guestCount ?? 0) > 0, href: `/mariage/${slug}/guests` },
+              { label: t('todoTables'), sub: t('todoTablesSub'), done: (tablesCount ?? 0) > 0, href: paid ? `/mariage/${slug}/tables` : `/mariage/${slug}/compte#formule` },
+              { label: t('todoVendors'), sub: t('todoVendorsSub'), done: (vendors?.length ?? 0) > 0, href: `/mariage/${slug}/prestataires` },
+              { label: t('todoTasks'), sub: t('todoTasksSub'), done: (todosData?.length ?? 0) > 0, href: `/mariage/${slug}/retro-planning` },
             ]} />
 
             {/* Derniers mouvements */}
@@ -174,26 +179,26 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
               const activity: { text: string; time: string }[] = []
               recentConfirmed?.forEach(g => {
                 const name = [g.first_name, g.last_name].filter(Boolean).join(' ')
-                activity.push({ text: `${name} a confirmé sa présence`, time: g.created_at })
+                activity.push({ text: `${name} ${t('actConfirmed')}`, time: g.created_at })
               })
               recentPhotos?.forEach(p => {
-                const name = p.uploaded_by_name || 'Quelqu\'un'
-                activity.push({ text: `${name} a ajouté une photo`, time: p.created_at })
+                const name = p.uploaded_by_name || t('actSomeone')
+                activity.push({ text: `${name} ${t('actPhoto')}`, time: p.created_at })
               })
               recentGuestbook?.forEach(e => {
-                activity.push({ text: `${e.author_name} a laissé un message dans le livre d\'or`, time: e.created_at })
+                activity.push({ text: `${e.author_name} ${t('actGuestbook')}`, time: e.created_at })
               })
               activity.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
               const top = activity.slice(0, 5)
               return (
                 <div className="bg-white rounded-3xl border border-stone-100 p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <h2 style={{ fontWeight: 600, fontSize: '1.1rem' }} className="text-stone-800">Derniers mouvements</h2>
+                    <h2 style={{ fontWeight: 600, fontSize: '1.1rem' }} className="text-stone-800">{t('recentActivity')}</h2>
                     <Clock className="w-5 h-5 text-[#4a5240]" strokeWidth={2} />
                   </div>
                   {top.length === 0 ? (
                     <p style={{ fontWeight: 300, fontSize: '0.88rem' }} className="text-stone-400 italic">
-                      Aucune activité récente — invitez vos premiers invités !
+                      {t('noActivity')}
                     </p>
                   ) : (
                     <ul className="space-y-2.5">
@@ -230,7 +235,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
                     )}
                     {!wedding.date && (
                       <Link href={`/mariage/${slug}/edit`} style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-400 italic flex items-center gap-1.5 hover:text-[#4a5240] transition">
-                        <span>📅</span> Date non renseignée
+                        <span>📅</span> {t('noDate')}
                       </Link>
                     )}
                     {wedding.location && (
@@ -240,14 +245,14 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
                     )}
                     {!wedding.location && (
                       <Link href={`/mariage/${slug}/edit`} style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-400 italic flex items-center gap-1.5 hover:text-[#4a5240] transition">
-                        <span>📍</span> Lieu non renseigné
+                        <span>📍</span> {t('noLocation')}
                       </Link>
                     )}
                   </div>
                 </div>
                 <Link href={`/mariage/${slug}/edit`}
                   className="shrink-0 p-2 rounded-xl bg-stone-50 hover:bg-[#4a5240]/10 transition"
-                  title="Modifier les infos">
+                  title={t('editInfo')}>
                   <Settings className="w-4 h-4 text-stone-400 hover:text-[#4a5240]" />
                 </Link>
               </div>
@@ -255,22 +260,22 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
 
             {/* Accès rapides */}
             <div className="bg-white rounded-3xl border border-stone-100 p-6">
-              <h2 style={{ fontWeight: 600, fontSize: '1.1rem' }} className="text-stone-800 mb-4">Accès rapides</h2>
+              <h2 style={{ fontWeight: 600, fontSize: '1.1rem' }} className="text-stone-800 mb-4">{t('quickAccess')}</h2>
               <div className="space-y-2.5">
                 <Link href={`/mariage/${slug}/guests`} className="flex items-center justify-between p-3 rounded-xl bg-stone-50 hover:bg-[#4a5240]/5 transition group">
-                  <span style={{ fontWeight: 500, fontSize: '0.9rem' }} className="text-stone-700">Liste invités</span>
+                  <span style={{ fontWeight: 500, fontSize: '0.9rem' }} className="text-stone-700">{t('quickGuests')}</span>
                   <span className="text-stone-300 text-lg group-hover:text-[#4a5240]">→</span>
                 </Link>
                 <Link href={`/mariage/${slug}/rsvp`} className="flex items-center justify-between p-3 rounded-xl bg-stone-50 hover:bg-[#4a5240]/5 transition group">
-                  <span style={{ fontWeight: 500, fontSize: '0.9rem' }} className="text-stone-700">Gérer RSVP</span>
+                  <span style={{ fontWeight: 500, fontSize: '0.9rem' }} className="text-stone-700">{t('quickRSVP')}</span>
                   <span className="text-stone-300 text-lg group-hover:text-[#4a5240]">→</span>
                 </Link>
                 <Link href={`/mariage/${slug}/budget`} className="flex items-center justify-between p-3 rounded-xl bg-stone-50 hover:bg-[#4a5240]/5 transition group">
-                  <span style={{ fontWeight: 500, fontSize: '0.9rem' }} className="text-stone-700">Budget</span>
+                  <span style={{ fontWeight: 500, fontSize: '0.9rem' }} className="text-stone-700">{t('quickBudget')}</span>
                   <span className="text-stone-300 text-lg group-hover:text-[#4a5240]">→</span>
                 </Link>
                 <Link href={`/mariage/${slug}/programme`} className="flex items-center justify-between p-3 rounded-xl bg-stone-50 hover:bg-[#4a5240]/5 transition group">
-                  <span style={{ fontWeight: 500, fontSize: '0.9rem' }} className="text-stone-700">Programme</span>
+                  <span style={{ fontWeight: 500, fontSize: '0.9rem' }} className="text-stone-700">{t('quickProgramme')}</span>
                   <span className="text-stone-300 text-lg group-hover:text-[#4a5240]">→</span>
                 </Link>
               </div>
@@ -279,7 +284,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
             {/* Compte à rebours */}
             {wedding.date && (
               <div className="bg-gradient-to-br from-[#4a5240] to-[#2d3228] rounded-3xl p-6 text-white text-center">
-                <p style={{ fontWeight: 500, fontSize: '0.85rem', opacity: 0.9 }} className="mb-3">Compte à rebours</p>
+                <p style={{ fontWeight: 500, fontSize: '0.85rem', opacity: 0.9 }} className="mb-3">{t('countdown')}</p>
                 <Countdown weddingDate={wedding.date} small />
               </div>
             )}

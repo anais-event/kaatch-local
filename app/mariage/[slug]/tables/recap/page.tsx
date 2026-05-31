@@ -1,8 +1,12 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { toDateLocale } from '@/lib/locale-map'
+import { getTranslations, getLocale } from 'next-intl/server'
 import PrintButton from './PrintButton'
 
 export default async function TablesRecapPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
+  const locale = await getLocale()
+  const t = await getTranslations('wedding.pages')
   const supabase = await createSupabaseServerClient()
 
   const { data: wedding } = await supabase
@@ -11,7 +15,7 @@ export default async function TablesRecapPage({ params }: { params: Promise<{ sl
     .eq('slug', slug)
     .single()
 
-  if (!wedding) return <div className="p-8">Mariage introuvable</div>
+  if (!wedding) return <div className="p-8">{t('notFound')}</div>
 
   const [{ data: tables }, { data: guests }] = await Promise.all([
     supabase
@@ -28,7 +32,7 @@ export default async function TablesRecapPage({ params }: { params: Promise<{ sl
   ])
 
   const dateFormatted = wedding.date
-    ? new Date(wedding.date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+    ? new Date(wedding.date).toLocaleDateString(toDateLocale(locale), { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
     : null
 
   const unassigned = (guests ?? []).filter(g => !g.table_id)
@@ -189,7 +193,7 @@ export default async function TablesRecapPage({ params }: { params: Promise<{ sl
         {/* Pied de page */}
         <div className="mt-12 pt-6 border-t border-stone-100 text-center">
           <p className="text-[10px] text-stone-200" style={{ fontWeight: 300 }}>
-            Généré par Kaatch · {new Date().toLocaleDateString('fr-FR')}
+            Généré par Kaatch · {new Date().toLocaleDateString(toDateLocale(locale))}
           </p>
         </div>
       </div>

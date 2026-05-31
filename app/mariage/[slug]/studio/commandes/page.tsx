@@ -1,4 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { toDateLocale } from '@/lib/locale-map'
+import { getTranslations, getLocale } from 'next-intl/server'
 import { redirect } from 'next/navigation'
 
 const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }> = {
@@ -13,6 +15,8 @@ const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }
 
 export default async function CommandesPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
+  const locale = await getLocale()
+  const t = await getTranslations('wedding.pages')
   const supabase = await createSupabaseServerClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -20,7 +24,7 @@ export default async function CommandesPage({ params }: { params: Promise<{ slug
 
   const { data: wedding } = await supabase
     .from('weddings').select('id, name').eq('slug', slug).single()
-  if (!wedding) return <div className="p-8 text-stone-500">Mariage introuvable</div>
+  if (!wedding) return <div className="p-8 text-stone-500">{t('notFound')}</div>
 
   const { data: orders } = await supabase
     .from('studio_orders')
@@ -29,7 +33,7 @@ export default async function CommandesPage({ params }: { params: Promise<{ slug
     .order('created_at', { ascending: false })
 
   const fmt = (d: string) =>
-    new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+    new Date(d).toLocaleDateString(toDateLocale(locale), { day: 'numeric', month: 'long', year: 'numeric' })
 
   return (
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>

@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { getTranslations } from 'next-intl/server'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import SlugField from './SlugField'
@@ -79,6 +80,7 @@ async function updateWedding(formData: FormData) {
 
 export default async function EditWedding({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ error?: string }> }) {
   const { slug } = await params
+  const t = await getTranslations('wedding.pages')
   const { error } = await searchParams
   const supabase = await createSupabaseServerClient()
 
@@ -89,7 +91,7 @@ export default async function EditWedding({ params, searchParams }: { params: Pr
     .single()
 
   if (!wedding) {
-    return <div className="p-8">Mariage introuvable 😢</div>
+    return <div className="p-8">{t('notFound')} 😢</div>
   }
 
   return (

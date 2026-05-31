@@ -1003,6 +1003,34 @@
       "quickProgramme": "Schedule",
       "countdown": "Countdown"
     },
+    "guests": {
+      "notFound": "Wedding not found",
+      "back": "Back",
+      "title": "Guests",
+      "guestCount": "guest{count, plural, one {} other {s}}",
+      "tabList": "Guests & RSVP",
+      "tabSummary": "Summary",
+      "partCeremony": "Ceremony",
+      "partCocktail": "Cocktail hour",
+      "partReception": "Reception",
+      "noTokenBanner": "{count} guest(s) without personal link — generate them to send invitations.",
+      "generateLinks": "Generate links ({count})",
+      "confirmed": "Confirmed",
+      "pending": "Pending",
+      "declined": "Declined",
+      "composition": "Composition",
+      "adults": "Adults (18+)",
+      "teens": "Teens (12-18, no alcohol)",
+      "children": "Children (≤12)",
+      "animals": "Pets",
+      "bulkSend": "Bulk send",
+      "dietary": "Dietary & allergies",
+      "export": "Export"
+    },
+    "pages": {
+      "notFound": "Wedding not found",
+      "back": "Back"
+    },
     "nav": {
       "today": "Today",
       "imagine": "Imagine",

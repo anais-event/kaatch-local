@@ -1,4 +1,6 @@
 'use client'
+import { toDateLocale } from '@/lib/locale-map'
+import { useLocale } from 'next-intl'
 
 import { Fragment, useState, useMemo, useTransition, useEffect } from 'react'
 import FileUploadButton from './FileUploadButton'
@@ -14,6 +16,7 @@ type SimulationPayload = {
 }
 
 function ImportSimulationBanner({ slug, importAction }: { slug: string; importAction: (f: FormData) => Promise<void> }) {
+  const locale = useLocale()
   const [sim, setSim] = useState<SimulationPayload | null>(null)
   const [pending, startTransition] = useTransition()
 
@@ -27,7 +30,7 @@ function ImportSimulationBanner({ slug, importAction }: { slug: string; importAc
   if (!sim) return null
 
   const fmtEUR = (n: number) => new Intl.NumberFormat('fr-FR').format(n) + ' €'
-  const date = new Date(sim.createdAt).toLocaleDateString('fr-FR')
+  const date = new Date(sim.createdAt).toLocaleDateString(toDateLocale(locale))
   const count = sim.items.filter(i => !i.horsTotal).length
 
   return (
@@ -138,6 +141,7 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
   categories: Category[]; items: Item[]; quotes: Quote[]; files: BudgetFile[]
   currencies: string[]; contacts: ContactBasic[]; actions: Actions
 }) {
+  const locale = useLocale()
   const [search, setSearch] = useState('')
   const [editBudget, setEditBudget] = useState(false)
   const [addingCat, setAddingCat] = useState(false)
@@ -749,7 +753,7 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
                                             )}
                                             {quote.due_date && (
                                               <p style={{ fontWeight: 300, fontSize: '0.65rem', color: isRet ? 'rgba(255,255,255,0.6)' : '#b45309' }}>
-                                                Échéance {new Date(quote.due_date + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                                                Échéance {new Date(quote.due_date + 'T00:00:00').toLocaleDateString(toDateLocale(locale), { day: 'numeric', month: 'short' })}
                                               </p>
                                             )}
                                             {quote.notes && (

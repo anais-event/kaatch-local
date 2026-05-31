@@ -1,13 +1,15 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { getTranslations } from 'next-intl/server'
 import RetroPlanningClient from './RetroPlanningClient'
 import { PERIODS } from './tasks'
 
 export default async function RetroPlanningPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
+  const t = await getTranslations('wedding.pages')
   const supabase = await createSupabaseServerClient()
 
   const { data: wedding } = await supabase.from('weddings').select('id, name').eq('slug', slug).single()
-  if (!wedding) return <div className="p-8">Mariage introuvable</div>
+  if (!wedding) return <div className="p-8">{t('notFound')}</div>
 
   const [{ data: doneRows }, { data: customRows }] = await Promise.all([
     supabase.from('retro_planning').select('task_key, done, deadline, assigned_to').eq('wedding_id', wedding.id),
@@ -34,7 +36,7 @@ export default async function RetroPlanningPage({ params }: { params: Promise<{ 
       <div className="max-w-2xl mx-auto px-4 pt-8">
         <a href={`/mariage/${slug}`} className="text-sm text-[#4a5240] hover:underline inline-block"
            style={{ fontWeight: 300 }}>
-          ← Retour aux préparatifs
+          ← {t('back')}
         </a>
       </div>
       <RetroPlanningClient

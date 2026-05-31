@@ -1,4 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { toDateLocale } from '@/lib/locale-map'
+import { getLocale } from 'next-intl/server'
 import { TASK_LABEL_MAP, PERIOD_COLORS } from './retro-planning/tasks'
 
 interface Props {
@@ -6,7 +8,7 @@ interface Props {
   weddingId: string
 }
 
-function formatRelative(dateStr: string): { label: string; urgent: boolean; overdue: boolean } {
+function formatRelative(dateStr: string, locale: string): { label: string; urgent: boolean; overdue: boolean } {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   const d = new Date(dateStr + 'T00:00:00')
@@ -18,13 +20,14 @@ function formatRelative(dateStr: string): { label: string; urgent: boolean; over
   if (diff <= 30) return { label: `Dans ${diff}j`, urgent: false, overdue: false }
   const d2 = new Date(dateStr + 'T00:00:00')
   return {
-    label: d2.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }),
+    label: d2.toLocaleDateString(toDateLocale(locale), { day: 'numeric', month: 'short' }),
     urgent: false,
     overdue: false,
   }
 }
 
 export default async function EcheancesWidget({ slug, weddingId }: Props) {
+  const locale = await getLocale()
   const supabase = await createSupabaseServerClient()
 
   const today = new Date()
@@ -126,7 +129,7 @@ export default async function EcheancesWidget({ slug, weddingId }: Props) {
 
       <ul className="divide-y divide-stone-50">
         {items.slice(0, 6).map(item => {
-          const rel = formatRelative(item.deadline)
+          const rel = formatRelative(item.deadline, locale)
           const color = PERIOD_COLORS[item.periodId] ?? '#9ca3af'
           return (
             <li key={item.key} className="flex items-center gap-3 px-5 py-3">

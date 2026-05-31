@@ -1,4 +1,6 @@
 'use client'
+import { toDateLocale } from '@/lib/locale-map'
+import { useLocale } from 'next-intl'
 
 import { useState, useRef } from 'react'
 
@@ -47,7 +49,7 @@ export default function GuestbookViewer({ entries, slug }: Props) {
   }
 
   const formattedDate = (iso: string) =>
-    new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+    new Date(iso).toLocaleDateString(toDateLocale('fr'), { day: 'numeric', month: 'long', year: 'numeric' })
 
   return (
     <>

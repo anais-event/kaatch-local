@@ -1,7 +1,9 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { getTranslations } from 'next-intl/server'
 
 export default async function PartagerPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
+  const t = await getTranslations('wedding.pages')
   const supabase = await createSupabaseServerClient()
 
   const { data: wedding } = await supabase
@@ -10,7 +12,7 @@ export default async function PartagerPage({ params }: { params: Promise<{ slug:
     .eq('slug', slug)
     .single()
 
-  if (!wedding) return <div className="p-8">Mariage introuvable</div>
+  if (!wedding) return <div className="p-8">{t('notFound')}</div>
 
   return (
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>

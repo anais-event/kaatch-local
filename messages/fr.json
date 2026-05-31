@@ -1002,6 +1002,34 @@
       "quickProgramme": "Programme",
       "countdown": "Compte à rebours"
     },
+    "guests": {
+      "notFound": "Mariage introuvable",
+      "back": "Retour",
+      "title": "Invités",
+      "guestCount": "invité{count, plural, one {} other {s}}",
+      "tabList": "Invités & RSVP",
+      "tabSummary": "Synthèse",
+      "partCeremony": "Cérémonie",
+      "partCocktail": "Vin d'honneur",
+      "partReception": "Réception",
+      "noTokenBanner": "{count} invité(s) sans lien personnel — générez-les pour envoyer les faire-parts.",
+      "generateLinks": "Générer les liens ({count})",
+      "confirmed": "Confirmés",
+      "pending": "En attente",
+      "declined": "Déclinés",
+      "composition": "Composition",
+      "adults": "Adultes (18+)",
+      "teens": "Ados (12-18, sans alcool)",
+      "children": "Enfants (≤12 ans)",
+      "animals": "Animaux",
+      "bulkSend": "Envoi groupé",
+      "dietary": "Régimes & allergies",
+      "export": "Export"
+    },
+    "pages": {
+      "notFound": "Mariage introuvable",
+      "back": "Retour"
+    },
     "nav": {
       "today": "Aujourd'hui",
       "imagine": "Imaginer",

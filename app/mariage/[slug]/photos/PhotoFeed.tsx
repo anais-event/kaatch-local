@@ -1,4 +1,6 @@
 'use client'
+import { toDateLocale } from '@/lib/locale-map'
+import { useLocale } from 'next-intl'
 
 import { useState, useTransition } from 'react'
 
@@ -182,7 +184,7 @@ export default function PhotoFeed({ photos, moments, guestNames, addLike, addCom
             </div>
             <div className="p-3">
               <p className="text-[10px] text-stone-300 mb-1" style={{ fontWeight: 300 }}>
-                {new Date(photo.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                {new Date(photo.created_at).toLocaleDateString(toDateLocale('fr'), { day: 'numeric', month: 'long', year: 'numeric' })}
               </p>
               {photo.uploader_name && (
                 <p className="text-xs text-stone-400 mb-1 truncate"

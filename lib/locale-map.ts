@@ -7,6 +7,7 @@ const LOCALE_MAP: Record<string, string> = {
   de: 'de-DE',
 }
 
-export function toDateLocale(locale: string): string {
+export function toDateLocale(locale?: string): string {
+  if (!locale) return 'fr-FR'
   return LOCALE_MAP[locale] || 'fr-FR'
 }

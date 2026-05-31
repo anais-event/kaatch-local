@@ -1,4 +1,6 @@
 'use client'
+import { toDateLocale } from '@/lib/locale-map'
+import { useLocale } from 'next-intl'
 
 import { useState } from 'react'
 import CopyLinkButton from './CopyLinkButton'
@@ -131,7 +133,7 @@ export default function InvitationsTab({ guests, slug, baseUrl, wedding, wedding
                     </p>
                     {g.invite_sent_at ? (
                       <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-emerald-500 mt-0.5">
-                        Envoyé {new Date(g.invite_sent_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                        Envoyé {new Date(g.invite_sent_at).toLocaleDateString(toDateLocale('fr'), { day: 'numeric', month: 'short' })}
                       </p>
                     ) : g.rsvp_status !== 'en_attente' ? (
                       <p style={{ fontWeight: 300, fontSize: '0.65rem' }} className="text-[#4a5240]/60 mt-0.5">

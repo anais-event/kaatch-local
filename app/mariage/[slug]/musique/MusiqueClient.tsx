@@ -1,4 +1,6 @@
 'use client'
+import { toDateLocale } from '@/lib/locale-map'
+import { useLocale } from 'next-intl'
 
 import { useState, useTransition } from 'react'
 
@@ -221,7 +223,7 @@ export default function MusiqueClient({ slug, songs, playlistLinks, addSong, del
         </div>
       </div>` : ''
 
-    const today = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+    const today = new Date().toLocaleDateString(toDateLocale('fr'), { day: 'numeric', month: 'long', year: 'numeric' })
 
     // Plain text for sharing
     const textLines: string[] = [`Playlist mariage — ${realSongs.length} morceaux\n`]

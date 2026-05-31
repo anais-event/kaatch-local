@@ -1,4 +1,6 @@
 'use client'
+import { toDateLocale } from '@/lib/locale-map'
+import { useLocale } from 'next-intl'
 
 import { useEffect, useRef, useState } from 'react'
 
@@ -7,12 +9,13 @@ export default function QRCodeDisplay({ url, weddingName, weddingDate }: {
   weddingName: string
   weddingDate?: string | null
 }) {
+  const locale = useLocale()
   const qrCanvasRef = useRef<HTMLCanvasElement>(null)
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
   const [downloading, setDownloading] = useState(false)
 
   const dateFormatted = weddingDate
-    ? new Date(weddingDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+    ? new Date(weddingDate).toLocaleDateString(toDateLocale(locale), { day: 'numeric', month: 'long', year: 'numeric' })
     : null
 
   useEffect(() => {

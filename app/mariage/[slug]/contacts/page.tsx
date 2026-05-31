@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { getTranslations } from 'next-intl/server'
 import { revalidatePath } from 'next/cache'
 import ContactPdfUpload from './ContactPdfUpload'
 
@@ -71,10 +72,11 @@ function fmtEur(amount: number) {
 
 export default async function ContactsPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
+  const t = await getTranslations('wedding.pages')
   const supabase = await createSupabaseServerClient()
 
   const { data: wedding } = await supabase.from('weddings').select('id, name').eq('slug', slug).single()
-  if (!wedding) return <div className="p-8">Mariage introuvable</div>
+  if (!wedding) return <div className="p-8">{t('notFound')}</div>
 
   const { data: contacts } = await supabase
     .from('wedding_contacts')

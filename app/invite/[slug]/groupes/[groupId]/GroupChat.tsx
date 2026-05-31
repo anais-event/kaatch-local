@@ -1,22 +1,24 @@
 'use client'
+import { toDateLocale } from '@/lib/locale-map'
+import { useLocale } from 'next-intl'
 
 import { useState, useRef, useEffect, useTransition } from 'react'
 
 type Msg = { id: string; content: string; author_name: string; created_at: string }
 
-function formatDateSeparator(date: Date): string {
+function formatDateSeparator(date: Date, locale: string): string {
   const today = new Date()
   const yesterday = new Date(today)
   yesterday.setDate(today.getDate() - 1)
   if (date.toDateString() === today.toDateString()) return "Aujourd'hui"
   if (date.toDateString() === yesterday.toDateString()) return 'Hier'
-  return date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
+  return date.toLocaleDateString(toDateLocale(locale), { weekday: 'long', day: 'numeric', month: 'long' })
 }
 
-function groupByDate(messages: Msg[]) {
+function groupByDate(messages: Msg[], locale: string) {
   const grouped: { date: string; msgs: Msg[] }[] = []
   for (const msg of messages) {
-    const d = formatDateSeparator(new Date(msg.created_at))
+    const d = formatDateSeparator(new Date(msg.created_at), locale)
     const last = grouped[grouped.length - 1]
     if (!last || last.date !== d) grouped.push({ date: d, msgs: [msg] })
     else last.msgs.push(msg)
@@ -39,6 +41,7 @@ export default function GroupChat({
   guestName: string
   initialMessages: Msg[]
 }) {
+  const locale = useLocale()
   const [messages, setMessages] = useState<Msg[]>(initialMessages)
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
@@ -100,7 +103,7 @@ export default function GroupChat({
     }
   }
 
-  const grouped = groupByDate(messages)
+  const grouped = groupByDate(messages, locale)
 
   return (
     <div className="flex flex-col h-full bg-[#f5f0e8]">

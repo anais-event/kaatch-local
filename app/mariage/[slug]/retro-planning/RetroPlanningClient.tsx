@@ -1,4 +1,6 @@
 'use client'
+import { toDateLocale } from '@/lib/locale-map'
+import { useLocale } from 'next-intl'
 
 import { useState, useRef, useEffect } from 'react'
 import { PERIOD_COLORS } from './tasks'
@@ -40,11 +42,11 @@ function saveHidden(s: Set<string>) {
 }
 
 function formatDate(d: string) {
-  return new Date(d + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+  return new Date(d + 'T00:00:00').toLocaleDateString(toDateLocale('fr'), { day: 'numeric', month: 'short' })
 }
 function monthLabel(d: string) {
   const [y, m] = d.split('-').map(Number)
-  return new Date(y, m - 1, 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+  return new Date(y, m - 1, 1).toLocaleDateString(toDateLocale('fr'), { month: 'long', year: 'numeric' })
     .replace(/^./, c => c.toUpperCase())
 }
 function isOverdue(d: string) {
@@ -171,6 +173,7 @@ export default function RetroPlanningClient({
   initialPeriods: Period[]
   initialCustomTasks: CustomTask[]
 }) {
+  const locale = useLocale()
   const [periodsState, setPeriodsState] = useState(initialPeriods)
   const [customTasks, setCustomTasks] = useState(initialCustomTasks)
   const [saving, setSaving] = useState<string | null>(null)

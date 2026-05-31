@@ -1,4 +1,6 @@
 'use client'
+import { toDateLocale } from '@/lib/locale-map'
+import { useLocale } from 'next-intl'
 
 import { useState, useCallback } from 'react'
 
@@ -231,7 +233,7 @@ function PreviewFairepart({ ambiance, wedding, fontDisplay, contenu }: {
 }) {
   const nomMaries = contenu?.fairepart.nomMaries || wedding.name || 'Sophie & Marc'
   const date = wedding.date
-    ? new Date(wedding.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+    ? new Date(wedding.date).toLocaleDateString(toDateLocale('fr'), { day: 'numeric', month: 'long', year: 'numeric' })
     : '14 juin 2025'
   const lieu = wedding.location || 'Château de Villandry'
   const [c1, c2, c3, c4] = ambiance.palette.map(p => p.hex)
@@ -350,6 +352,7 @@ export default function ImpressionsClient({
   guests: Guest[]
   userEmail: string
 }) {
+  const locale = useLocale()
   const [step, setStep] = useState<Step>('landing')
   const [selectedAmbiance, setSelectedAmbiance] = useState<Ambiance | null>(null)
   const nomMariesDefault = wedding.name || [wedding.bride_name, wedding.groom_name].filter(Boolean).join(' & ') || ''
@@ -604,7 +607,7 @@ function LandingStep({ onStart, wedding, guests }: {
             </p>
             <p className="text-stone-400 text-xs mt-0.5" style={{ fontWeight: 300 }}>
               {[
-                wedding.date ? new Date(wedding.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : null,
+                wedding.date ? new Date(wedding.date).toLocaleDateString(toDateLocale('fr'), { day: 'numeric', month: 'long', year: 'numeric' }) : null,
                 wedding.location,
               ].filter(Boolean).join(' · ')}
             </p>
@@ -1557,7 +1560,7 @@ function OrderModal({ ambiance, wedding, guests, quantities, setQuantities, ship
   const shippingValid = shipping.firstName.trim() && shipping.lastName.trim() && shipping.addressLine1.trim() && shipping.city.trim() && shipping.postCode.trim() && shipping.email.trim()
   const nomMaries = wedding.name || [wedding.bride_name, wedding.groom_name].filter(Boolean).join(' & ')
   const dateFormatted = wedding.date
-    ? new Date(wedding.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+    ? new Date(wedding.date).toLocaleDateString(toDateLocale('fr'), { day: 'numeric', month: 'long', year: 'numeric' })
     : null
 
   return (

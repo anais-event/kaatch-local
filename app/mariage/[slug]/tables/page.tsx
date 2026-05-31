@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { getTranslations } from 'next-intl/server'
 import { revalidatePath } from 'next/cache'
 import TablesClient from './TablesClient'
 import RoomView from './RoomView'
@@ -66,6 +67,7 @@ export default async function TablesPage({
   searchParams: Promise<{ tab?: string }>
 }) {
   const { slug } = await params
+  const t = await getTranslations('wedding.pages')
   const { tab: tabParam = 'brouillon' } = await searchParams
   const tab: Tab = tabParam === 'salle' ? 'salle' : 'brouillon'
   const supabase = await createSupabaseServerClient()
@@ -76,7 +78,7 @@ export default async function TablesPage({
     .eq('slug', slug)
     .single()
 
-  if (!wedding) return <div className="p-8">Mariage introuvable</div>
+  if (!wedding) return <div className="p-8">{t('notFound')}</div>
 
   const plan = normalizePlan(wedding.plan)
   if (!canAccess(plan, 'tables')) {

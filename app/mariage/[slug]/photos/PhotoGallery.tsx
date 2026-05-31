@@ -1,4 +1,6 @@
 'use client'
+import { toDateLocale } from '@/lib/locale-map'
+import { useLocale } from 'next-intl'
 
 import { useState, useRef, useCallback, useEffect } from 'react'
 
@@ -37,12 +39,12 @@ type Props = {
 
 function formatDateShort(dateStr: string) {
   const d = new Date(dateStr)
-  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+  return d.toLocaleDateString(toDateLocale('fr'), { day: 'numeric', month: 'short' })
 }
 
 function formatDateLong(dateStr: string) {
   const d = new Date(dateStr)
-  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+  return d.toLocaleDateString(toDateLocale('fr'), { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
 async function downloadZip(photos: Photo[]) {

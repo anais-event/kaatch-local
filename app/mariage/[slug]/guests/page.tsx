@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
+import { getTranslations } from 'next-intl/server'
 import GuestList from './GuestList'
 import GuestListSection from './GuestListSection'
 import ImportGuests from './ImportGuests'
@@ -134,16 +135,7 @@ async function generateTokens(formData: FormData) {
 }
 
 type Tab = 'liste' | 'synthese'
-const TABS: { key: Tab; label: string }[] = [
-  { key: 'liste',    label: 'Invités & RSVP' },
-  { key: 'synthese', label: 'Synthèse' },
-]
-
-const PARTS_LABELS: Record<string, string> = {
-  ceremonie:    'Cérémonie',
-  vin_honneur:  'Vin d\'honneur',
-  reception:    'Réception',
-}
+// TABS and PARTS_LABELS are now defined inside the component with translations
 
 export default async function GuestsPage({
   params,
@@ -158,6 +150,19 @@ export default async function GuestsPage({
     ? (tabParam as Tab)
     : 'liste'
 
+  const t = await getTranslations('wedding.guests')
+
+  const TABS: { key: Tab; label: string }[] = [
+    { key: 'liste',    label: t('tabList') },
+    { key: 'synthese', label: t('tabSummary') },
+  ]
+
+  const PARTS_LABELS: Record<string, string> = {
+    ceremonie:    t('partCeremony'),
+    vin_honneur:  t('partCocktail'),
+    reception:    t('partReception'),
+  }
+
   const supabase = await createSupabaseServerClient()
 
   const { data: wedding } = await supabase
@@ -166,7 +171,7 @@ export default async function GuestsPage({
     .eq('slug', slug)
     .single()
 
-  if (!wedding) return <div className="p-8">Mariage introuvable</div>
+  if (!wedding) return <div className="p-8">{t('notFound')}</div>
 
   const [{ data: guests }, { data: tables }] = await Promise.all([
     supabase.from('guests').select('*').eq('wedding_id', wedding.id).order('first_name', { ascending: true }),
@@ -204,17 +209,17 @@ export default async function GuestsPage({
           <div className="flex items-center gap-3">
             <a href={`/mariage/${slug}`}
                className="flex items-center justify-center w-8 h-8 rounded-full text-stone-400 hover:bg-stone-200/60 transition"
-               title="Retour">
+               title={t('back')}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
               </svg>
             </a>
             <div>
               <h1 style={{ fontWeight: 600, fontSize: '1.1rem' }} className="text-[#2d3228] leading-none">
-                Invités
+                {t('title')}
               </h1>
               <p style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400 mt-0.5">
-                {total} invité{total > 1 ? 's' : ''}
+                {total} {t('guestCount', { count: total })}
               </p>
             </div>
           </div>
@@ -257,14 +262,14 @@ export default async function GuestsPage({
             {withoutToken.length > 0 && (
               <div className="flex items-center justify-between bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 flex-wrap gap-2 mb-4">
                 <p className="text-xs text-amber-700" style={{ fontWeight: 300 }}>
-                  💌 {withoutToken.length} invité{withoutToken.length > 1 ? 's' : ''} sans lien personnel — générez-les pour envoyer les faire-parts.
+                  💌 {t('noTokenBanner', { count: withoutToken.length })}
                 </p>
                 <form action={generateTokens}>
                   <input type="hidden" name="slug" value={slug} />
                   <button type="submit"
                     className="bg-[#4a5240] text-white px-4 py-1.5 rounded-xl text-xs hover:bg-[#2d3228] transition cursor-pointer whitespace-nowrap"
                     style={{ fontWeight: 300 }}>
-                    Générer les liens ({withoutToken.length})
+                    {t('generateLinks', { count: withoutToken.length })}
                   </button>
                 </form>
               </div>
@@ -306,9 +311,9 @@ export default async function GuestsPage({
                    className="text-stone-400 uppercase mb-4">RSVP</p>
                 <div className="space-y-3">
                   {[
-                    { label: 'Confirmés',  value: confirmed, color: '#4ade80' },
-                    { label: 'En attente', value: pending,   color: '#d6d3d1' },
-                    { label: 'Déclinés',   value: declined,  color: '#fca5a5' },
+                    { label: t('confirmed'),  value: confirmed, color: '#4ade80' },
+                    { label: t('pending'),    value: pending,   color: '#d6d3d1' },
+                    { label: t('declined'),   value: declined,  color: '#fca5a5' },
                   ].map(s => (
                     <div key={s.label}>
                       <div className="flex justify-between mb-1">
@@ -332,13 +337,13 @@ export default async function GuestsPage({
                 return (
                   <div className="bg-white rounded-2xl border border-stone-100 p-5">
                     <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
-                       className="text-stone-400 uppercase mb-4">Composition</p>
+                       className="text-stone-400 uppercase mb-4">{t('composition')}</p>
                     <div className="space-y-3">
                       {[
-                        { label: 'Adultes (18+)', value: adultes },
-                        ...(ados > 0 ? [{ label: 'Ados (12-18, sans alcool)', value: ados }] : []),
-                        { label: 'Enfants (≤12 ans)', value: enfants },
-                        ...(animaux > 0 ? [{ label: 'Animaux', value: animaux }] : []),
+                        { label: t('adults'), value: adultes },
+                        ...(ados > 0 ? [{ label: t('teens'), value: ados }] : []),
+                        { label: t('children'), value: enfants },
+                        ...(animaux > 0 ? [{ label: t('animals'), value: animaux }] : []),
                       ].map(s => (
                         <div key={s.label} className="flex items-baseline justify-between">
                           <span style={{ fontWeight: 300, fontSize: '0.75rem' }} className="text-stone-600">{s.label}</span>
@@ -359,7 +364,7 @@ export default async function GuestsPage({
             {/* Envoi groupé */}
             <div className="bg-white rounded-2xl border border-stone-100 p-5">
               <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
-                 className="text-stone-400 uppercase mb-3">Envoi groupé</p>
+                 className="text-stone-400 uppercase mb-3">{t('bulkSend')}</p>
               <PublipostagePanel guests={guestList} weddingId={wedding.id} slug={slug} />
             </div>
 
@@ -370,7 +375,7 @@ export default async function GuestsPage({
               return (
                 <div className="bg-white rounded-2xl border border-stone-100 p-5">
                   <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
-                     className="text-stone-400 uppercase mb-4">Régimes & allergies</p>
+                     className="text-stone-400 uppercase mb-4">{t('dietary')}</p>
                   <div className="space-y-2">
                     {withDietary.map(g => {
                       const name = [g.first_name, g.last_name].filter(Boolean).join(' ')
@@ -404,7 +409,7 @@ export default async function GuestsPage({
             {total > 0 && (
               <div className="bg-white rounded-2xl border border-stone-100 p-5">
                 <p style={{ fontWeight: 300, fontSize: '0.65rem', letterSpacing: '0.15em' }}
-                   className="text-stone-400 uppercase mb-4">Export</p>
+                   className="text-stone-400 uppercase mb-4">{t('export')}</p>
                 <div className="space-y-3">
                   <GuestPdfExport guests={guestList} weddingName={wedding.name} weddingDate={wedding.date ?? null} />
                   <div className="pt-2 border-t border-stone-50">

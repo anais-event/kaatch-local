@@ -1,4 +1,6 @@
 'use client'
+import { toDateLocale } from '@/lib/locale-map'
+import { useLocale } from 'next-intl'
 
 import { useState, useRef, useCallback, useEffect, useTransition, RefObject } from 'react'
 
@@ -14,11 +16,11 @@ function cleanName(name: string | null | undefined): string {
   return name.split(' ').filter(p => p && p !== 'null').join(' ')
 }
 
-function formatDateShort(d: string) {
-  return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+function formatDateShort(d: string, locale: string) {
+  return new Date(d).toLocaleDateString(toDateLocale(locale), { day: 'numeric', month: 'short' })
 }
-function formatDateLong(d: string) {
-  return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+function formatDateLong(d: string, locale: string) {
+  return new Date(d).toLocaleDateString(toDateLocale(locale), { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
 async function downloadPhotoBlob(url: string, filename = 'photo.jpg') {
@@ -54,6 +56,7 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
   deletePhoto: (fd: FormData) => Promise<void>
   claimPhoto: (fd: FormData) => Promise<void>
 }) {
+  const locale = useLocale()
   const [search, setSearch] = useState('')
   const [selectMode, setSelectMode] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -254,7 +257,7 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
                         {cleanName(photo.uploaded_by_name) || 'Anonyme'}
                         {photo.moment_tag && <span className="text-[#4a5240] ml-1">· {photo.moment_tag}</span>}
                       </p>
-                      <span className="text-[10px] text-stone-300" style={{ fontWeight: 300 }}>{formatDateShort(photo.created_at)}</span>
+                      <span className="text-[10px] text-stone-300" style={{ fontWeight: 300 }}>{formatDateShort(photo.created_at, locale)}</span>
                     </div>
                     {photo.tagged_guests.filter(g => cleanName(g)).length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-1">
@@ -592,7 +595,7 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
           {/* ── DESKTOP : panneau latéral ── */}
           <div className="hidden md:flex absolute right-0 top-0 bottom-0 w-72 bg-white flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-4 py-3 border-b border-stone-100">
-              <span className="text-stone-400 text-xs" style={{ fontWeight: 300 }}>{formatDateLong(currentPhoto.created_at)}</span>
+              <span className="text-stone-400 text-xs" style={{ fontWeight: 300 }}>{formatDateLong(currentPhoto.created_at, locale)}</span>
               <button onClick={closeLightbox} className="w-7 h-7 rounded-full bg-stone-100 hover:bg-stone-200 transition flex items-center justify-center cursor-pointer">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5 text-stone-500"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
               </button>

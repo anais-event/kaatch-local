@@ -1,4 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { toDateLocale } from '@/lib/locale-map'
+import { getTranslations, getLocale } from 'next-intl/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
@@ -19,28 +21,32 @@ async function sendMessage(formData: FormData) {
   revalidatePath(`/mariage/${slug}/messagerie/${group_id}`)
 }
 
-function formatDateSeparator(date: Date): string {
-  const today = new Date()
-  const yesterday = new Date(today)
-  yesterday.setDate(today.getDate() - 1)
-  if (date.toDateString() === today.toDateString()) return "Aujourd'hui"
-  if (date.toDateString() === yesterday.toDateString()) return 'Hier'
-  return date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
-}
-
 export default async function WeddingGroupPage({
   params,
 }: {
   params: Promise<{ slug: string; groupId: string }>
 }) {
   const { slug, groupId } = await params
+  const t = await getTranslations('wedding.pages')
+  const tc = await getTranslations('common.time')
+  const locale = await getLocale()
+
+  function formatDateSeparator(date: Date): string {
+    const today = new Date()
+    const yesterday = new Date(today)
+    yesterday.setDate(today.getDate() - 1)
+    if (date.toDateString() === today.toDateString()) return tc('today')
+    if (date.toDateString() === yesterday.toDateString()) return tc('yesterday')
+    return date.toLocaleDateString(toDateLocale(locale), { weekday: 'long', day: 'numeric', month: 'long' })
+  }
+
   const supabase = await createSupabaseServerClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect(`/auth`)
 
   const { data: wedding } = await supabase.from('weddings').select('id, name').eq('slug', slug).single()
-  if (!wedding) return <div className="p-8">Mariage introuvable</div>
+  if (!wedding) return <div className="p-8">{t('notFound')}</div>
 
   const authorName = `Les mariés`
 

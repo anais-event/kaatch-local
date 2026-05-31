@@ -1,4 +1,6 @@
 'use client'
+import { toDateLocale } from '@/lib/locale-map'
+import { useLocale } from 'next-intl'
 
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { FairePartCard } from '../../../invite/[slug]/faire-part/FairePartCard'
@@ -30,6 +32,7 @@ export default function CopyLinkButton({
   weddingId?: string
   theme?: string | null
 }) {
+  const locale = useLocale()
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const [downloading, setDownloading] = useState(false)
@@ -49,7 +52,7 @@ export default function CopyLinkButton({
   // Format date the same way FairePartEnvelope does
   const dateStr = useMemo(() => {
     if (!wedding?.date) return null
-    const d = new Date(wedding.date + 'T00:00:00').toLocaleDateString('fr-FR', {
+    const d = new Date(wedding.date + 'T00:00:00').toLocaleDateString(toDateLocale(locale), {
       weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
     })
     return d.charAt(0).toUpperCase() + d.slice(1)

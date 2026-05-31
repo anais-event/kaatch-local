@@ -1,4 +1,6 @@
 'use client'
+import { toDateLocale } from '@/lib/locale-map'
+import { useLocale } from 'next-intl'
 
 import { useState, useEffect, useRef } from 'react'
 
@@ -20,7 +22,7 @@ interface Props {
 function getMonthLabel(yearMonth: string): string {
   const [year, month] = yearMonth.split('-').map(Number)
   const date = new Date(year, month - 1, 1)
-  return date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+  return date.toLocaleDateString(toDateLocale('fr'), { month: 'long', year: 'numeric' })
     .replace(/^./, c => c.toUpperCase())
 }
 

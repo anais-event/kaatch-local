@@ -1,9 +1,11 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { getTranslations } from 'next-intl/server'
 import { revalidatePath } from 'next/cache'
 import PrestatairesClient from './PrestatairesClient'
 
 export default async function PrestatairesPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
+  const t = await getTranslations('wedding.pages')
   const supabase = await createSupabaseServerClient()
 
   const { data: wedding } = await supabase
@@ -12,7 +14,7 @@ export default async function PrestatairesPage({ params }: { params: Promise<{ s
     .eq('slug', slug)
     .single()
 
-  if (!wedding) return <div className="p-8">Mariage introuvable</div>
+  if (!wedding) return <div className="p-8">{t('notFound')}</div>
 
   const { data: vendors } = await supabase
     .from('wedding_vendors')

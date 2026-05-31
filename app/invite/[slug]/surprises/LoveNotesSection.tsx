@@ -1,4 +1,6 @@
 'use client'
+import { toDateLocale } from '@/lib/locale-map'
+import { useLocale } from 'next-intl'
 
 import { useState } from 'react'
 
@@ -22,8 +24,8 @@ function addMonths(months: number) {
   return d.toISOString().slice(0, 10)
 }
 
-function formatFr(iso: string) {
-  return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+function formatDate(iso: string, locale: string) {
+  return new Date(iso).toLocaleDateString(toDateLocale(locale), { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
 export default function LoveNotesSection({
@@ -35,6 +37,7 @@ export default function LoveNotesSection({
   myNotes: LoveNote[]
   submit: (formData: FormData) => Promise<void>
 }) {
+  const locale = useLocale()
   const [message, setMessage] = useState('')
   const [openAt, setOpenAt] = useState(addMonths(12))
   const [loading, setLoading] = useState(false)
@@ -133,7 +136,7 @@ export default function LoveNotesSection({
             style={{ fontWeight: 300 }}
           />
           <p className="text-xs text-stone-400" style={{ fontWeight: 300 }}>
-            Les mariés verront ce mot à partir du <strong>{formatFr(openAt)}</strong>.
+            Les mariés verront ce mot à partir du <strong>{formatDate(openAt, locale)}</strong>.
           </p>
         </div>
 
@@ -147,7 +150,7 @@ export default function LoveNotesSection({
 
         {done && (
           <p className="text-center text-xs text-[#4a5240]" style={{ fontWeight: 300 }}>
-            ✨ Votre mot est scellé. Les mariés le découvriront le {formatFr(openAt)}.
+            ✨ Votre mot est scellé. Les mariés le découvriront le {formatDate(openAt, locale)}.
           </p>
         )}
       </form>
@@ -166,7 +169,7 @@ export default function LoveNotesSection({
                     {n.message.length > 80 ? n.message.slice(0, 80) + '…' : n.message}
                   </p>
                   <p className="text-xs text-stone-400 mt-0.5" style={{ fontWeight: 300 }}>
-                    Ouverture le {formatFr(n.open_at)}
+                    Ouverture le {formatDate(n.open_at, locale)}
                   </p>
                 </div>
               </div>

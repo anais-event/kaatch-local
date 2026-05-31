@@ -1,4 +1,6 @@
 'use client'
+import { toDateLocale } from '@/lib/locale-map'
+import { useLocale } from 'next-intl'
 
 import { useState } from 'react'
 
@@ -47,7 +49,7 @@ export default function ExportGuestsButton({ guests, weddingName, tables = [] }:
         Type: g.guest_type ?? 'adulte',
         RSVP: RSVP_LABELS[g.rsvp_status ?? ''] ?? 'En attente',
         'Invitation envoyée': g.invite_sent_at
-          ? new Date(g.invite_sent_at).toLocaleDateString('fr-FR')
+          ? new Date(g.invite_sent_at).toLocaleDateString(toDateLocale('fr'))
           : '',
       }))
       const ws = XLSX.utils.json_to_sheet(rows)
@@ -116,7 +118,7 @@ export default function ExportGuestsButton({ guests, weddingName, tables = [] }:
       g.relation ?? '',
       g.guest_type ?? 'adulte',
       RSVP_LABELS[g.rsvp_status ?? ''] ?? 'En attente',
-      g.invite_sent_at ? new Date(g.invite_sent_at).toLocaleDateString('fr-FR') : '',
+      g.invite_sent_at ? new Date(g.invite_sent_at).toLocaleDateString(toDateLocale('fr')) : '',
     ])
     const csv = [headers, ...rows]
       .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))

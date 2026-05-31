@@ -1,4 +1,6 @@
 'use client'
+import { toDateLocale } from '@/lib/locale-map'
+import { useLocale } from 'next-intl'
 
 import { useState, useRef } from 'react'
 
@@ -39,7 +41,7 @@ export default function GuestPdfExport({ guests, weddingName, weddingDate }: Pro
   const withDietary = guests.filter(g => g.dietary_notes)
 
   const fmtDate = weddingDate
-    ? new Date(weddingDate + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+    ? new Date(weddingDate + 'T00:00:00').toLocaleDateString(toDateLocale('fr'), { day: 'numeric', month: 'long', year: 'numeric' })
     : null
 
   async function exportSynthese() {
@@ -262,7 +264,7 @@ export default function GuestPdfExport({ guests, weddingName, weddingDate }: Pro
           </div>
 
           <p style={{ fontSize: 8, fontWeight: 300, color: '#e7e5e4', textAlign: 'right', marginTop: 20 }}>
-            Généré avec Kaatch · {new Date().toLocaleDateString('fr-FR')}
+            Généré avec Kaatch · {new Date().toLocaleDateString(toDateLocale('fr'))}
           </p>
         </div>
       </div>

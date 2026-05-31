@@ -1,13 +1,15 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { getTranslations } from 'next-intl/server'
 import { Clock, Palette, CheckCircle2, Zap } from 'lucide-react'
 import Link from 'next/link'
 
 export default async function ImaginerPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
+  const t = await getTranslations('wedding.pages')
   const supabase = await createSupabaseServerClient()
 
   const { data: wedding } = await supabase.from('weddings').select('*').eq('slug', slug).single()
-  if (!wedding) return <div className="p-8">Mariage introuvable</div>
+  if (!wedding) return <div className="p-8">{t('notFound')}</div>
 
   return (
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>

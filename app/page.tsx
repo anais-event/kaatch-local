@@ -940,6 +940,11 @@ export default function Home() {
           </div>
         </div>
       </footer>
+      <div className="flex justify-center py-4 bg-[#f5f0e8]">
+        <a href="https://postyourstartup.co/startup/kaatch?ref=badge" target="_blank" rel="noopener noreferrer">
+          <img src="https://postyourstartup.co/api/badge/kaatch?theme=neutral" alt="Featured on PostYourStartup" width="159" height="41" />
+        </a>
+      </div>
     </main>
   )
 }

@@ -157,6 +157,11 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
           ))}
         </div>
 
+        {/* Créer button — full width between stats and content */}
+        <div className="mb-8">
+          <CreateModal slug={slug} />
+        </div>
+
         {/* 2-column grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-20">
 
@@ -218,9 +223,6 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
 
           {/* RIGHT: Infos mariage + Accès rapides + Divers */}
           <div className="space-y-6">
-
-            {/* Créer button — opens modal */}
-            <CreateModal slug={slug} />
 
             {/* Pastille infos mariage */}
             <div className="bg-white rounded-2xl border border-stone-100 p-4">

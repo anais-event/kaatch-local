@@ -15,6 +15,7 @@ import {
   UserPlus, StickyNote, FileText
 } from 'lucide-react'
 import TodoNow from './TodoNow'
+import RecentActivitySection from './RecentActivitySection'
 
 export default async function WeddingPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -181,42 +182,21 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
 
             {/* Derniers mouvements */}
             {(() => {
-              const activity: { text: string; time: string }[] = []
-              recentConfirmed?.forEach(g => {
+              const activity: { text: string; time: string; id: string }[] = []
+              recentConfirmed?.forEach((g, idx) => {
                 const name = [g.first_name, g.last_name].filter(Boolean).join(' ')
-                activity.push({ text: `${name} ${t('actConfirmed')}`, time: g.created_at })
+                activity.push({ text: `${name} ${t('actConfirmed')}`, time: g.created_at, id: `confirmed-${idx}` })
               })
-              recentPhotos?.forEach(p => {
+              recentPhotos?.forEach((p, idx) => {
                 const name = p.uploaded_by_name || t('actSomeone')
-                activity.push({ text: `${name} ${t('actPhoto')}`, time: p.created_at })
+                activity.push({ text: `${name} ${t('actPhoto')}`, time: p.created_at, id: `photo-${idx}` })
               })
-              recentGuestbook?.forEach(e => {
-                activity.push({ text: `${e.author_name} ${t('actGuestbook')}`, time: e.created_at })
+              recentGuestbook?.forEach((e, idx) => {
+                activity.push({ text: `${e.author_name} ${t('actGuestbook')}`, time: e.created_at, id: `guestbook-${idx}` })
               })
               activity.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
               const top = activity.slice(0, 5)
-              return (
-                <div className="bg-white rounded-3xl border border-stone-100 p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 style={{ fontWeight: 600, fontSize: '1.1rem' }} className="text-stone-800">{t('recentActivity')}</h2>
-                    <Clock className="w-5 h-5 text-[#4a5240]" strokeWidth={2} />
-                  </div>
-                  {top.length === 0 ? (
-                    <p style={{ fontWeight: 300, fontSize: '0.88rem' }} className="text-stone-400 italic">
-                      {t('noActivity')}
-                    </p>
-                  ) : (
-                    <ul className="space-y-2.5">
-                      {top.map((item, i) => (
-                        <li key={i} className="flex items-start gap-2.5">
-                          <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[#4a5240]/30 shrink-0" />
-                          <p style={{ fontWeight: 400, fontSize: '0.88rem' }} className="text-stone-700">{item.text}</p>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              )
+              return <RecentActivitySection activity={top} />
             })()}
 
           </div>

@@ -219,6 +219,9 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
           {/* RIGHT: Infos mariage + Accès rapides + Divers */}
           <div className="space-y-6">
 
+            {/* Créer button — opens modal */}
+            <CreateModal slug={slug} />
+
             {/* Pastille infos mariage */}
             <div className="bg-white rounded-2xl border border-stone-100 p-4">
               <div className="flex items-start justify-between gap-2">
@@ -288,9 +291,6 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
                 <Countdown weddingDate={wedding.date} small />
               </div>
             )}
-
-            {/* Créer button — opens modal */}
-            <CreateModal slug={slug} />
 
           </div>
 

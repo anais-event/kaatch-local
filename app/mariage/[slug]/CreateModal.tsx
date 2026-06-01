@@ -1,52 +1,54 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { X, Users, LayoutList, Sparkles, Share2 } from 'lucide-react'
 
 export default function CreateModal({ slug }: { slug: string }) {
   const [open, setOpen] = useState(false)
+  const t = useTranslations('wedding.create')
 
   const categories = [
     {
       icon: Users,
-      label: 'Personnes',
+      label: t('people'),
       color: 'text-blue-600',
       items: [
-        { label: 'Ajouter un invité', href: `/mariage/${slug}/guests` },
-        { label: 'Messagerie', href: `/mariage/${slug}/messagerie` },
-        { label: 'Plan de table', href: `/mariage/${slug}/tables` },
+        { label: t('addGuest'), href: `/mariage/${slug}/guests` },
+        { label: t('messaging'), href: `/mariage/${slug}/messagerie` },
+        { label: t('seatingChart'), href: `/mariage/${slug}/tables` },
       ],
     },
     {
       icon: LayoutList,
-      label: 'Organisation',
+      label: t('organization'),
       color: 'text-green-600',
       items: [
-        { label: 'Programme', href: `/mariage/${slug}/programme` },
-        { label: 'Checklist', href: `/mariage/${slug}/checklist` },
-        { label: 'Budget', href: `/mariage/${slug}/budget` },
-        { label: 'Prestataires', href: `/mariage/${slug}/prestataires` },
+        { label: t('programme'), href: `/mariage/${slug}/programme` },
+        { label: t('checklist'), href: `/mariage/${slug}/checklist` },
+        { label: t('budget'), href: `/mariage/${slug}/budget` },
+        { label: t('vendors'), href: `/mariage/${slug}/prestataires` },
       ],
     },
     {
       icon: Sparkles,
-      label: 'Créatif',
+      label: t('creative'),
       color: 'text-purple-600',
       items: [
-        { label: 'Studio créatif', href: `/mariage/${slug}/studio` },
-        { label: 'Inspiration', href: `/mariage/${slug}/inspirations` },
-        { label: 'Hébergements', href: `/mariage/${slug}/hebergements` },
+        { label: t('creativeStudio'), href: `/mariage/${slug}/studio` },
+        { label: t('inspiration'), href: `/mariage/${slug}/inspirations` },
+        { label: t('accommodation'), href: `/mariage/${slug}/hebergements` },
       ],
     },
     {
       icon: Share2,
-      label: 'Partage',
+      label: t('sharing'),
       color: 'text-orange-600',
       items: [
-        { label: 'Partage & QR', href: `/mariage/${slug}/partager` },
-        { label: 'Galerie photos', href: `/mariage/${slug}/photos` },
-        { label: "Livre d'or", href: `/mariage/${slug}/livre-dor` },
+        { label: t('shareQR'), href: `/mariage/${slug}/partager` },
+        { label: t('photoGallery'), href: `/mariage/${slug}/photos` },
+        { label: t('guestbook'), href: `/mariage/${slug}/livre-dor` },
       ],
     },
   ]
@@ -58,7 +60,7 @@ export default function CreateModal({ slug }: { slug: string }) {
         className="w-full bg-[#4a5240] hover:bg-[#2d3228] text-white rounded-3xl py-3.5 transition font-medium flex items-center justify-center gap-2"
       >
         <span>+</span>
-        Créer
+        {t('create')}
       </button>
 
       {open && (
@@ -74,7 +76,7 @@ export default function CreateModal({ slug }: { slug: string }) {
             {/* Header */}
             <div className="sticky top-0 bg-white border-b border-stone-100 p-6 flex items-center justify-between">
               <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.5rem' }} className="text-[#4a5240]">
-                Créer
+                {t('create')}
               </h2>
               <button
                 onClick={() => setOpen(false)}

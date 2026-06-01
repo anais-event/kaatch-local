@@ -1,9 +1,11 @@
 'use client'
 
 import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { useTranslations } from 'next-intl'
 import type { SearchResult } from '@/app/api/search/route'
 
 export default function SearchModal({ slug }: { slug: string }) {
+  const t = useTranslations('wedding.search')
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SearchResult[]>([])
@@ -82,11 +84,11 @@ export default function SearchModal({ slug }: { slug: string }) {
     <button
       onClick={() => setOpen(true)}
       className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-stone-400 hover:text-[#4a5240] hover:bg-stone-100 transition cursor-pointer"
-      title="Rechercher (⌘K)">
+      title={`${t('search')} (⌘K)`}>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
         <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
       </svg>
-      <span className="hidden lg:inline text-xs" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>Rechercher</span>
+      <span className="hidden lg:inline text-xs" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>{t('search')}</span>
       <kbd className="hidden lg:inline text-[10px] bg-stone-100 text-stone-400 px-1.5 py-0.5 rounded font-mono">⌘K</kbd>
     </button>
   )
@@ -110,7 +112,7 @@ export default function SearchModal({ slug }: { slug: string }) {
             value={query}
             onChange={e => setQuery(e.target.value)}
             onKeyDown={handleKey}
-            placeholder="Rechercher invités, musiques, prestataires…"
+            placeholder={t('placeholder')}
             className="flex-1 outline-none text-stone-800 text-sm placeholder:text-stone-300"
             style={{ fontWeight: 300 }}
           />
@@ -129,13 +131,13 @@ export default function SearchModal({ slug }: { slug: string }) {
         <div className="max-h-[60vh] overflow-y-auto">
           {query.length >= 2 && !loading && results.length === 0 && (
             <div className="py-12 text-center">
-              <p style={{ fontWeight: 300, fontSize: '0.85rem' }} className="text-stone-400">Aucun résultat pour « {query} »</p>
+              <p style={{ fontWeight: 300, fontSize: '0.85rem' }} className="text-stone-400">{t('noResults', { query })}</p>
             </div>
           )}
 
           {query.length < 2 && (
             <div className="py-8 text-center">
-              <p style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-300">Tapez au moins 2 caractères…</p>
+              <p style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-300">{t('minChars')}</p>
             </div>
           )}
 
@@ -169,7 +171,7 @@ export default function SearchModal({ slug }: { slug: string }) {
           {results.length > 0 && (
             <div className="px-4 py-2.5 border-t border-stone-50">
               <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300">
-                {results.length} résultat{results.length > 1 ? 's' : ''} · ↑↓ naviguer · ↵ ouvrir
+                {results.length} {t('results', { count: results.length })} · ↑↓ {t('navigate')} · ↵ {t('open')}
               </p>
             </div>
           )}

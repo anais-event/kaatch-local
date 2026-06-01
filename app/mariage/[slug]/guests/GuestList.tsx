@@ -1,13 +1,9 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useTranslations } from 'next-intl'
 import CopyLinkButton from './CopyLinkButton'
 
-const PARTS_LABELS: Record<string, string> = {
-  ceremonie: 'Cérémonie',
-  vin_honneur: "Vin d'honneur",
-  reception: 'Réception',
-}
 const ALL_PARTS = ['ceremonie', 'vin_honneur', 'reception']
 const RELATIONS = ['Ami(e)', 'Frère', 'Sœur', 'Père', 'Mère', 'Oncle', 'Tante', 'Cousin(e)', 'Collègue', 'Autre']
 
@@ -72,20 +68,7 @@ const RSVP_NEXT: Record<RsvpStatus, RsvpStatus> = {
   confirme:   'decline',
   decline:    'en_attente',
 }
-const RSVP_TITLE: Record<RsvpStatus, string> = {
-  confirme:   'Confirmé — cliquer pour passer à Décliné',
-  en_attente: 'En attente — cliquer pour Confirmer',
-  decline:    'Décliné — cliquer pour remettre En attente',
-}
-
 type RsvpFilter = 'tous' | 'confirme' | 'en_attente' | 'decline'
-
-const FILTER_TABS: { key: RsvpFilter; label: string; dot?: string }[] = [
-  { key: 'tous',       label: 'Tous' },
-  { key: 'confirme',   label: 'Confirmés',  dot: 'bg-emerald-400' },
-  { key: 'en_attente', label: 'En attente', dot: 'bg-stone-300' },
-  { key: 'decline',    label: 'Déclinés',   dot: 'bg-red-300' },
-]
 
 function CheckCircle({ checked, onChange }: { checked: boolean; onChange: () => void }) {
   return (
@@ -110,6 +93,27 @@ export default function GuestList({
   updateGuestNotes, setGuestFamily,
   paid = true, weddingId,
 }: Props) {
+  const t = useTranslations('wedding.guests')
+
+  const PARTS_LABELS: Record<string, string> = {
+    ceremonie: t('partCeremony'),
+    vin_honneur: t('partCocktail'),
+    reception: t('partReception'),
+  }
+
+  const RSVP_TITLE: Record<RsvpStatus, string> = {
+    confirme:   t('rsvpConfirmedClick'),
+    en_attente: t('rsvpPendingClick'),
+    decline:    t('rsvpDeclinedClick'),
+  }
+
+  const FILTER_TABS: { key: RsvpFilter; label: string; dot?: string }[] = [
+    { key: 'tous',       label: t('filterAll') },
+    { key: 'confirme',   label: t('filterConfirmed'),  dot: 'bg-emerald-400' },
+    { key: 'en_attente', label: t('filterPending'), dot: 'bg-stone-300' },
+    { key: 'decline',    label: t('filterDeclined'),   dot: 'bg-red-300' },
+  ]
+
   const [guests, setGuests] = useState(initialGuests)
   const [search, setSearch] = useState('')
   const [rsvpFilter, setRsvpFilter] = useState<RsvpFilter>('tous')
@@ -239,23 +243,23 @@ export default function GuestList({
 
   async function exportSelection() {
     const XLSX = await import('xlsx')
-    const RSVP_LABELS: Record<string, string> = { confirme: 'Confirmé', en_attente: 'En attente', decline: 'Décliné' }
+    const RSVP_LABELS: Record<string, string> = { confirme: t('exportConfirmed'), en_attente: t('exportPending'), decline: t('exportDeclined') }
     const rows = selectedGuests.map(g => {
-      const table = tables.find(t => t.id === g.table_id)
+      const table = tables.find(tbl => tbl.id === g.table_id)
       return {
-        Prénom: g.first_name,
-        Nom: g.last_name ?? '',
-        Table: table?.name ?? '',
-        Type: g.guest_type === 'enfant' ? 'Enfant' : g.guest_type === 'ado' ? 'Ado' : g.guest_type === 'animal' ? 'Animal' : 'Adulte',
-        RSVP: RSVP_LABELS[g.rsvp_status] ?? '',
-        'Régime / Allergie': g.dietary_notes ?? '',
-        Relation: g.relation ?? '',
+        [t('exportFirstName')]: g.first_name,
+        [t('exportLastName')]: g.last_name ?? '',
+        [t('exportTable')]: table?.name ?? '',
+        [t('exportType')]: g.guest_type === 'enfant' ? t('exportChild') : g.guest_type === 'ado' ? t('exportTeen') : g.guest_type === 'animal' ? t('exportAnimal') : t('exportAdult'),
+        [t('exportRsvp')]: RSVP_LABELS[g.rsvp_status] ?? '',
+        [t('exportDietary')]: g.dietary_notes ?? '',
+        [t('exportRelation')]: g.relation ?? '',
       }
     })
     const ws = XLSX.utils.json_to_sheet(rows)
     ws['!cols'] = [14, 14, 16, 8, 12, 28, 14].map(w => ({ wch: w }))
     const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, ws, 'Sélection')
+    XLSX.utils.book_append_sheet(wb, ws, t('exportSheetName'))
     XLSX.writeFile(wb, `selection-invites.xlsx`)
   }
 
@@ -301,9 +305,9 @@ export default function GuestList({
                onClick={() => { setExpandedId(isExpanded ? null : guest.id); setEditingId(null) }}>
             <p style={{ fontWeight: 400, fontSize: '0.88rem' }} className="text-stone-800 truncate leading-snug">
               {fullName}
-              {guest.guest_type === 'enfant' && <span className="ml-1 text-xs" title="Enfant">👶</span>}
-              {guest.guest_type === 'ado' && <span className="ml-1 text-xs" title="Ado">🧑</span>}
-              {guest.guest_type === 'animal' && <span className="ml-1 text-xs" title="Animal de compagnie">🐶</span>}
+              {guest.guest_type === 'enfant' && <span className="ml-1 text-xs" title={t('exportChild')}>👶</span>}
+              {guest.guest_type === 'ado' && <span className="ml-1 text-xs" title={t('exportTeen')}>🧑</span>}
+              {guest.guest_type === 'animal' && <span className="ml-1 text-xs" title={t('exportAnimal')}>🐶</span>}
             </p>
             <div className="flex items-center gap-2 mt-0.5 flex-wrap">
               {guest.family_name && viewMode !== 'family' && (
@@ -329,7 +333,7 @@ export default function GuestList({
             </div>
           </div>
           <div onClick={e => e.stopPropagation()} className="shrink-0 hidden sm:block">
-            <input type="text" defaultValue={guest.notes ?? ''} placeholder="Notes…"
+            <input type="text" defaultValue={guest.notes ?? ''} placeholder={t('notesPlaceholder')}
               onBlur={e => { const val = e.target.value.trim(); if (val !== (guest.notes ?? '')) saveNotes(guest.id, val) }}
               className="w-32 px-2.5 py-1.5 text-xs border border-stone-150 rounded-lg bg-stone-50 text-stone-600 outline-none focus:border-[#4a5240]/40 focus:bg-white transition placeholder:text-stone-300"
               style={{ fontWeight: 300 }} />
@@ -376,7 +380,7 @@ export default function GuestList({
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3 h-3">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                     </svg>
-                    Invitation envoyée
+                    {t('invitationSent')}
                   </span>
                 )}
               </div>
@@ -387,7 +391,7 @@ export default function GuestList({
                 const active = parts.includes(p)
                 return (
                   <button key={p} onClick={() => handleTogglePart(guest.id, p, parts)}
-                    title={active ? `Retirer ${PARTS_LABELS[p]}` : `Ajouter ${PARTS_LABELS[p]}`}
+                    title={active ? t('removePart', { part: PARTS_LABELS[p] }) : t('addPart', { part: PARTS_LABELS[p] })}
                     className={`text-xs px-2.5 py-0.5 rounded-full transition cursor-pointer border ${
                       active
                         ? 'bg-[#4a5240]/10 text-[#4a5240] border-[#4a5240]/20 hover:bg-red-50 hover:text-red-400 hover:border-red-200'
@@ -417,14 +421,14 @@ export default function GuestList({
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3.5 h-3.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
                 </svg>
-                Modifier
+                {t('edit')}
               </button>
               <span className="text-stone-200">·</span>
               <form action={deleteGuest} className="inline">
                 <input type="hidden" name="id" value={guest.id} />
                 <input type="hidden" name="slug" value={slug} />
                 <button type="submit" className="text-xs text-stone-300 hover:text-red-400 transition cursor-pointer" style={{ fontWeight: 300 }}>
-                  Supprimer
+                  {t('delete')}
                 </button>
               </form>
             </div>
@@ -439,11 +443,11 @@ export default function GuestList({
             <input type="hidden" name="slug" value={slug} />
             <div className="grid grid-cols-2 gap-2">
               {[
-                { name: 'first_name', placeholder: 'Prénom *', value: guest.first_name, required: true, type: 'text' },
-                { name: 'last_name',  placeholder: 'Nom',      value: guest.last_name ?? '',  required: false, type: 'text' },
-                { name: 'nickname',   placeholder: 'Surnom',   value: guest.nickname ?? '',   required: false, type: 'text' },
+                { name: 'first_name', placeholder: t('firstNameRequired'), value: guest.first_name, required: true, type: 'text' },
+                { name: 'last_name',  placeholder: t('lastName'),      value: guest.last_name ?? '',  required: false, type: 'text' },
+                { name: 'nickname',   placeholder: t('nickname'),   value: guest.nickname ?? '',   required: false, type: 'text' },
                 { name: 'email',      placeholder: 'Email',    value: guest.email ?? '',      required: false, type: 'email' },
-                { name: 'telephone',  placeholder: 'Téléphone',value: guest.telephone ?? '',  required: false, type: 'tel' },
+                { name: 'telephone',  placeholder: t('phone'),value: guest.telephone ?? '',  required: false, type: 'tel' },
               ].map(f => (
                 <input key={f.name} type={f.type} name={f.name} defaultValue={f.value}
                   placeholder={f.placeholder} required={f.required}
@@ -453,27 +457,27 @@ export default function GuestList({
               <select name="relation" defaultValue={guest.relation ?? ''}
                 className="border border-stone-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#4a5240]/50 bg-white text-stone-500"
                 style={{ fontWeight: 300 }}>
-                <option value="">Lien de parenté</option>
+                <option value="">{t('relationship')}</option>
                 {RELATIONS.map(r => <option key={r} value={r}>{r}</option>)}
               </select>
               <select name="gender" defaultValue={guest.gender ?? ''}
                 className="border border-stone-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#4a5240]/50 bg-white text-stone-500"
                 style={{ fontWeight: 300 }}>
-                <option value="">Genre…</option>
-                <option value="F">Féminin</option>
-                <option value="M">Masculin</option>
+                <option value="">{t('gender')}</option>
+                <option value="F">{t('genderF')}</option>
+                <option value="M">{t('genderM')}</option>
               </select>
               <select name="guest_type" defaultValue={guest.guest_type ?? 'adulte'}
                 className="border border-stone-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#4a5240]/50 bg-white text-stone-500"
                 style={{ fontWeight: 300 }}>
-                <option value="adulte">Adulte (18+)</option>
-                <option value="ado">🧑 Ado (12-18, sans alcool)</option>
-                <option value="enfant">👶 Enfant (≤12 ans)</option>
-                <option value="animal">🐶 Animal</option>
+                <option value="adulte">{t('adultType')}</option>
+                <option value="ado">{t('teenType')}</option>
+                <option value="enfant">{t('childType')}</option>
+                <option value="animal">{t('animalType')}</option>
               </select>
             </div>
             <div className="border border-stone-200 rounded-xl px-3 py-2.5 bg-white">
-              <p className="text-xs text-stone-400 mb-2" style={{ fontWeight: 300 }}>Invité à…</p>
+              <p className="text-xs text-stone-400 mb-2" style={{ fontWeight: 300 }}>{t('invitedTo')}</p>
               <div className="flex flex-wrap gap-3">
                 {ALL_PARTS.map(p => (
                   <label key={p} className="flex items-center gap-1.5 text-xs text-stone-600 cursor-pointer" style={{ fontWeight: 300 }}>
@@ -486,19 +490,19 @@ export default function GuestList({
               </div>
             </div>
             <input name="dietary_notes" type="text" defaultValue={guest.dietary_notes ?? ''}
-              placeholder="Régime alimentaire, allergie, attention particulière… (optionnel)"
+              placeholder={t('dietaryPlaceholder')}
               className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#4a5240]/50 bg-white text-stone-700"
               style={{ fontWeight: 300 }} />
             <div className="flex gap-2 pt-1">
               <button type="submit" disabled={isPending}
                 className="flex-1 bg-[#4a5240] text-white rounded-xl py-2 text-sm hover:bg-[#2d3228] transition disabled:opacity-50 cursor-pointer"
                 style={{ fontWeight: 300 }}>
-                {isPending ? 'Enregistrement…' : 'Enregistrer'}
+                {isPending ? t('saving') : t('save')}
               </button>
               <button type="button" onClick={() => setEditingId(null)}
                 className="px-4 border border-stone-200 text-stone-400 rounded-xl py-2 text-sm hover:border-stone-300 transition cursor-pointer"
                 style={{ fontWeight: 300 }}>
-                Annuler
+                {t('cancel')}
               </button>
             </div>
           </form>
@@ -545,7 +549,7 @@ export default function GuestList({
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3.5 h-3.5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
           </svg>
-          Par famille
+          {t('byFamily')}
         </button>
         {/* Type counters */}
         {(typeCountsInFiltered.enfant > 0 || typeCountsInFiltered.ado > 0 || typeCountsInFiltered.animal > 0) && (
@@ -569,7 +573,7 @@ export default function GuestList({
              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-300 pointer-events-none">
           <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
         </svg>
-        <input type="text" placeholder="Rechercher un invité…" value={search} onChange={e => setSearch(e.target.value)}
+        <input type="text" placeholder={t('searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)}
           className="w-full pl-9 pr-3 py-2.5 border border-stone-100 rounded-xl text-sm outline-none focus:border-[#4a5240]/40 transition bg-white text-stone-700"
           style={{ fontWeight: 300 }} />
       </div>
@@ -577,14 +581,14 @@ export default function GuestList({
       {/* Liste */}
       {filtered.length === 0 ? (
         <p className="text-center text-stone-400 py-10 text-sm" style={{ fontWeight: 300 }}>
-          {search ? 'Aucun résultat' : 'Aucun invité dans cette catégorie'}
+          {search ? t('noResults') : t('noGuestsInCategory')}
         </p>
       ) : viewMode === 'family' ? (
         /* ── VUE PAR FAMILLE ── */
         <div className="space-y-4">
           {familyGroups.map(([familyKey, members]) => {
             const isSansFamille = familyKey === '__sans_famille__'
-            const familyLabel = isSansFamille ? 'Sans famille' : familyKey
+            const familyLabel = isSansFamille ? t('noFamily') : familyKey
             const ados = members.filter(g => g.guest_type === 'ado').length
             const enfants = members.filter(g => g.guest_type === 'enfant').length
             const animaux = members.filter(g => g.guest_type === 'animal').length
@@ -610,7 +614,7 @@ export default function GuestList({
                     {familyLabel}
                   </span>
                   <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">
-                    {members.length} membre{members.length > 1 ? 's' : ''}
+                    {t('memberCount', { count: members.length })}
                   </span>
                   {confirmes > 0 && (
                     <span className="flex items-center gap-1 text-xs text-emerald-500" style={{ fontWeight: 300 }}>
@@ -646,7 +650,7 @@ export default function GuestList({
             <div className="flex items-center gap-3 px-4 py-2.5 border-b border-stone-50 bg-stone-50/40">
               <CheckCircle checked={allSelected} onChange={toggleSelectAll} />
               <span style={{ fontWeight: 300, fontSize: '0.72rem' }} className="text-stone-400">
-                {allSelected ? 'Tout désélectionner' : `Tout sélectionner (${filtered.length})`}
+                {allSelected ? t('deselectAll') : t('selectAll', { count: filtered.length })}
               </span>
             </div>
           )}
@@ -662,7 +666,7 @@ export default function GuestList({
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-[#2d3228] text-white px-5 py-3 rounded-2xl shadow-xl"
              style={{ fontFamily: 'var(--font-lato)' }}>
           <span style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-300">
-            {selected.size} invité{selected.size > 1 ? 's' : ''}
+            {t('guestSelected', { count: selected.size })}
           </span>
           <span className="w-px h-4 bg-stone-600" />
           <button
@@ -672,7 +676,7 @@ export default function GuestList({
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4">
               <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
             </svg>
-            Famille
+            {t('family')}
           </button>
           <span className="w-px h-4 bg-stone-600" />
           <button
@@ -682,7 +686,7 @@ export default function GuestList({
             <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v1.25A1.25 1.25 0 004.25 19h11.5A1.25 1.25 0 0017 17.75V16.5M10 3.5v9m0 0l-3-3m3 3l3-3" />
             </svg>
-            Exporter
+            {t('exportBtn')}
           </button>
           <button
             onClick={() => setSelected(new Set())}
@@ -702,17 +706,17 @@ export default function GuestList({
           <div className="relative bg-[#f5f0e8] rounded-2xl w-full max-w-sm mx-4 p-6 shadow-xl"
                style={{ fontFamily: 'var(--font-lato)' }}>
             <p style={{ fontWeight: 500, fontSize: '0.95rem' }} className="text-[#2d3228] mb-1">
-              Nommer cette famille
+              {t('nameFamily')}
             </p>
             <p style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-400 mb-4">
-              {selected.size} invité{selected.size > 1 ? 's' : ''} sélectionné{selected.size > 1 ? 's' : ''}
+              {t('selectedCount', { count: selected.size })}
             </p>
             <input
               type="text"
               value={familyInput}
               onChange={e => setFamilyInput(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') createFamily() }}
-              placeholder="Ex : Famille Dupont, Amis de Paris…"
+              placeholder={t('familyPlaceholder')}
               autoFocus
               className="w-full border border-stone-200 rounded-xl px-3 py-2.5 text-sm bg-white outline-none focus:border-[#4a5240]/50 text-stone-700 mb-3"
               style={{ fontWeight: 300 }}
@@ -723,13 +727,13 @@ export default function GuestList({
                 disabled={!familyInput.trim()}
                 className="flex-1 bg-[#4a5240] text-white rounded-xl py-2.5 text-sm hover:bg-[#2d3228] transition disabled:opacity-40 cursor-pointer"
                 style={{ fontWeight: 300 }}>
-                Créer la famille
+                {t('createFamily')}
               </button>
               <button
                 onClick={() => setFamilyModal(false)}
                 className="px-4 border border-stone-200 text-stone-400 rounded-xl py-2.5 text-sm hover:border-stone-300 transition cursor-pointer"
                 style={{ fontWeight: 300 }}>
-                Annuler
+                {t('cancel')}
               </button>
             </div>
             {selectedGuests.some(g => g.family_name) && (
@@ -737,7 +741,7 @@ export default function GuestList({
                 onClick={removeFamily}
                 className="w-full mt-2 text-xs text-red-400 hover:text-red-500 transition cursor-pointer py-1"
                 style={{ fontWeight: 300 }}>
-                Retirer de leur famille actuelle
+                {t('removeFromFamily')}
               </button>
             )}
           </div>

@@ -1,6 +1,6 @@
 'use client'
 import { toDateLocale } from '@/lib/locale-map'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 import { Fragment, useState, useMemo, useTransition, useEffect } from 'react'
 import FileUploadButton from './FileUploadButton'
@@ -17,6 +17,7 @@ type SimulationPayload = {
 
 function ImportSimulationBanner({ slug, importAction }: { slug: string; importAction: (f: FormData) => Promise<void> }) {
   const locale = useLocale()
+  const t = useTranslations('wedding.budget')
   const [sim, setSim] = useState<SimulationPayload | null>(null)
   const [pending, startTransition] = useTransition()
 
@@ -37,13 +38,13 @@ function ImportSimulationBanner({ slug, importAction }: { slug: string; importAc
     <div className="bg-[#f5f0e8] border border-[#4a5240]/20 rounded-2xl p-5 mb-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
       <div className="flex-1">
         <div className="text-[0.65rem] uppercase tracking-wider text-[#4a5240] mb-1" style={{ fontWeight: 400 }}>
-          Simulation détectée
+          {t('simulationDetected')}
         </div>
         <div className="text-sm text-[#2d3228]" style={{ fontWeight: 400 }}>
-          Importer votre simulation du {date} : {count} postes · {fmtEUR(sim.total)}
+          {t('importSimulationDesc', { date, count, total: fmtEUR(sim.total) })}
         </div>
         <div className="text-xs text-stone-500 mt-1" style={{ fontWeight: 300 }}>
-          {sim.guestCount} invités · {sim.region} · Style {sim.style}
+          {t('simulationMeta', { guestCount: sim.guestCount, region: sim.region, style: sim.style })}
         </div>
       </div>
       <div className="flex gap-2 flex-shrink-0">
@@ -62,7 +63,7 @@ function ImportSimulationBanner({ slug, importAction }: { slug: string; importAc
           className="bg-[#4a5240] text-white px-5 py-2 rounded-xl text-sm hover:bg-[#2d3228] transition disabled:opacity-50"
           style={{ fontWeight: 400 }}
         >
-          {pending ? 'Import...' : 'Importer'}
+          {pending ? t('importing') : t('import')}
         </button>
         <button
           onClick={() => {
@@ -72,7 +73,7 @@ function ImportSimulationBanner({ slug, importAction }: { slug: string; importAc
           className="text-stone-400 hover:text-stone-600 text-sm px-3"
           style={{ fontWeight: 300 }}
         >
-          Ignorer
+          {t('ignore')}
         </button>
       </div>
     </div>
@@ -94,9 +95,9 @@ function fmt(amount: number, currency: string) {
 }
 
 const STATUS_CFG = [
-  { key: 'devis',   label: 'Devis',   dot: '#d6d3d1', pill: '#f5f5f4', text: '#78716c' },
-  { key: 'acompte', label: 'Acompte', dot: '#fbbf24', pill: '#fffbeb', text: '#b45309' },
-  { key: 'solde',   label: 'Soldé',   dot: '#34d399', pill: '#ecfdf5', text: '#059669' },
+  { key: 'devis',   labelKey: 'statusQuote',   dot: '#d6d3d1', pill: '#f5f5f4', text: '#78716c' },
+  { key: 'acompte', labelKey: 'statusDeposit', dot: '#fbbf24', pill: '#fffbeb', text: '#b45309' },
+  { key: 'solde',   labelKey: 'statusSettled', dot: '#34d399', pill: '#ecfdf5', text: '#059669' },
 ]
 const getStatus = (key: string) => STATUS_CFG.find(s => s.key === key) ?? STATUS_CFG[0]
 
@@ -104,10 +105,11 @@ function QuoteInlineForm({ slug, itemId, currencies, defaultValues, onSubmit, on
   slug: string; itemId: string; currencies: string[]
   defaultValues?: Quote; onSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>; onCancel: () => void
 }) {
+  const t = useTranslations('wedding.budget')
   return (
     <form onSubmit={onSubmit} className="bg-[#f5f0e8]/60 border border-stone-200 rounded-xl p-3 space-y-2">
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-        <input name="vendor_name" type="text" placeholder="Prestataire" defaultValue={defaultValues?.vendor_name ?? ''} autoFocus
+        <input name="vendor_name" type="text" placeholder={t('vendor')} defaultValue={defaultValues?.vendor_name ?? ''} autoFocus
           className="col-span-2 border border-stone-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[#4a5240] bg-white text-stone-700" style={{ fontWeight: 300 }} />
         <select name="currency" defaultValue={defaultValues?.currency ?? 'EUR'}
           className="border border-stone-200 rounded-lg px-2 py-1.5 text-sm outline-none bg-white text-stone-700" style={{ fontWeight: 300 }}>
@@ -115,22 +117,22 @@ function QuoteInlineForm({ slug, itemId, currencies, defaultValues, onSubmit, on
         </select>
       </div>
       <div className="grid grid-cols-2 gap-2">
-        <input name="amount" type="number" placeholder="Montant devis (€)" min={0} defaultValue={defaultValues?.amount || ''} required
+        <input name="amount" type="number" placeholder={t('quoteAmountPlaceholder')} min={0} defaultValue={defaultValues?.amount || ''} required
           className="border border-stone-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[#4a5240] bg-white text-stone-700" style={{ fontWeight: 300 }} />
-        <input name="paid_amount" type="number" placeholder="Déjà versé (€)" min={0} defaultValue={defaultValues?.paid_amount || ''}
+        <input name="paid_amount" type="number" placeholder={t('alreadyPaidPlaceholder')} min={0} defaultValue={defaultValues?.paid_amount || ''}
           className="border border-stone-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[#4a5240] bg-white text-stone-700" style={{ fontWeight: 300 }} />
       </div>
       <div className="grid grid-cols-2 gap-2">
         <input name="due_date" type="date" defaultValue={defaultValues?.due_date ?? ''}
           className="border border-stone-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[#4a5240] bg-white text-stone-500" style={{ fontWeight: 300 }} />
-        <input name="notes" type="text" placeholder="Notes" defaultValue={defaultValues?.notes ?? ''}
+        <input name="notes" type="text" placeholder={t('notes')} defaultValue={defaultValues?.notes ?? ''}
           className="border border-stone-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[#4a5240] bg-white text-stone-700" style={{ fontWeight: 300 }} />
       </div>
       <div className="flex gap-2">
         <button type="submit" className="bg-[#4a5240] text-white px-4 py-1.5 rounded-lg text-sm cursor-pointer hover:bg-[#2d3228] transition" style={{ fontWeight: 300 }}>
-          {defaultValues ? 'Enregistrer' : 'Ajouter'}
+          {defaultValues ? t('save') : t('add')}
         </button>
-        <button type="button" onClick={onCancel} className="text-stone-400 text-sm px-3 cursor-pointer" style={{ fontWeight: 300 }}>Annuler</button>
+        <button type="button" onClick={onCancel} className="text-stone-400 text-sm px-3 cursor-pointer" style={{ fontWeight: 300 }}>{t('cancel')}</button>
       </div>
     </form>
   )
@@ -142,6 +144,7 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
   currencies: string[]; contacts: ContactBasic[]; actions: Actions
 }) {
   const locale = useLocale()
+  const t = useTranslations('wedding.budget')
   const [search, setSearch] = useState('')
   const [editBudget, setEditBudget] = useState(false)
   const [addingCat, setAddingCat] = useState(false)
@@ -296,7 +299,7 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
             {editBudget ? (
               <form onSubmit={async e => { e.preventDefault(); const fd = new FormData(e.currentTarget); fd.set('slug', slug); await actions.setBudgetTotal(fd); setEditBudget(false) }}
                     className="flex gap-2 items-center">
-                <input name="total" type="number" defaultValue={budgetTotal || ''} min={0} step={100} placeholder="Ex : 25000" autoFocus
+                <input name="total" type="number" defaultValue={budgetTotal || ''} min={0} step={100} placeholder={t('budgetPlaceholder')} autoFocus
                   className="border border-stone-200 rounded-xl px-3 py-1.5 outline-none focus:border-[#4a5240] text-stone-700 w-28 text-sm" style={{ fontWeight: 300 }} />
                 <select name="currency" defaultValue={budgetCurrency}
                   className="border border-stone-200 rounded-xl px-2 py-1.5 outline-none text-stone-700 bg-white text-sm" style={{ fontWeight: 300 }}>
@@ -307,7 +310,7 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
               </form>
             ) : (
               <button onClick={() => setEditBudget(true)} className="flex items-center gap-2 cursor-pointer group">
-                <span style={LABEL}>Enveloppe</span>
+                <span style={LABEL}>{t('envelope')}</span>
                 <span style={{ ...AMT, color: '#2d3228' }}>{budgetTotal > 0 ? fmt(budgetTotal, budgetCurrency) : '—'}</span>
                 <span className="text-[10px] text-stone-300 group-hover:text-[#4a5240] transition" style={{ fontWeight: 300 }}>✎</span>
               </button>
@@ -315,15 +318,15 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
           </div>
           <div className="flex gap-5">
             <div className="text-right">
-              <p style={LABEL}>Engagé</p>
+              <p style={LABEL}>{t('committed')}</p>
               <p style={{ ...AMT, color: '#4a5240' }}>{fmt(totalEngaged, budgetCurrency)}</p>
             </div>
             <div className="text-right">
-              <p style={LABEL}>Payé</p>
+              <p style={LABEL}>{t('paid')}</p>
               <p style={{ ...AMT, color: '#16a34a' }}>{fmt(totalPaid, budgetCurrency)}</p>
             </div>
             <div className="text-right">
-              <p style={LABEL}>Reste</p>
+              <p style={LABEL}>{t('remaining')}</p>
               <p style={{ ...AMT, color: totalRemaining > 0 ? '#b45309' : '#a8a29e' }}>{fmt(totalRemaining, budgetCurrency)}</p>
             </div>
           </div>
@@ -346,7 +349,7 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
           </svg>
           <input type="text" value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Rechercher un poste ou prestataire…"
+            placeholder={t('searchPlaceholder')}
             className="w-full pl-10 pr-4 py-2.5 bg-white border border-stone-200 rounded-xl outline-none focus:border-[#4a5240] transition text-stone-700 text-sm"
             style={{ fontWeight: 300 }} />
           {search && <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-300 hover:text-stone-500 cursor-pointer text-xs">✕</button>}
@@ -357,20 +360,20 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
               <button onClick={expandAll}
                 className="flex items-center gap-1.5 px-3 py-2.5 bg-white border border-stone-200 rounded-xl text-xs text-stone-500 hover:border-[#4a5240] hover:text-[#4a5240] transition cursor-pointer"
                 style={{ fontWeight: 300 }}>
-                ↕ Tout développer
+                ↕ {t('expandAll')}
               </button>
             ) : (
               <button onClick={collapseAll}
                 className="flex items-center gap-1.5 px-3 py-2.5 bg-white border border-stone-200 rounded-xl text-xs text-stone-500 hover:border-[#4a5240] hover:text-[#4a5240] transition cursor-pointer"
                 style={{ fontWeight: 300 }}>
-                ↕ Tout réduire
+                ↕ {t('collapseAll')}
               </button>
             )}
             {!addingCat && (
               <button onClick={() => setAddingCat(true)}
                 className="flex items-center gap-1.5 px-4 py-2.5 bg-white border border-stone-200 rounded-xl text-xs text-stone-500 hover:border-[#4a5240] hover:text-[#4a5240] transition cursor-pointer"
                 style={{ fontWeight: 300 }}>
-                + Catégorie
+                + {t('category')}
               </button>
             )}
           </div>
@@ -380,14 +383,14 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
       {/* Formulaire nouvelle catégorie */}
       {addingCat && (
         <div className="bg-white rounded-2xl border border-stone-100 p-5">
-          <p style={{ fontWeight: 500, fontSize: '0.88rem' }} className="text-[#2d3228] mb-4">Nouvelle catégorie</p>
+          <p style={{ fontWeight: 500, fontSize: '0.88rem' }} className="text-[#2d3228] mb-4">{t('newCategory')}</p>
           <form onSubmit={async e => { e.preventDefault(); const fd = new FormData(e.currentTarget); fd.set('slug', slug); await actions.addCategory(fd); setAddingCat(false) }} className="space-y-3">
             <div className="flex gap-2 flex-wrap">
               <input name="icon" type="text" defaultValue="💰" maxLength={2}
                 className="w-12 border border-stone-200 rounded-xl px-2 py-2 text-center outline-none text-lg bg-white" />
-              <input name="name" type="text" placeholder="Nom de la catégorie" required autoFocus
+              <input name="name" type="text" placeholder={t('categoryNamePlaceholder')} required autoFocus
                 className="flex-1 min-w-[160px] border border-stone-200 rounded-xl px-4 py-2 outline-none focus:border-[#4a5240] transition text-stone-700 text-sm bg-white" style={{ fontWeight: 300 }} />
-              <input name="allocated" type="number" placeholder="Budget alloué (optionnel)" min={0}
+              <input name="allocated" type="number" placeholder={t('allocatedOptional')} min={0}
                 className="w-44 border border-stone-200 rounded-xl px-3 py-2 outline-none focus:border-[#4a5240] transition text-stone-700 text-sm bg-white" style={{ fontWeight: 300 }} />
             </div>
             <div className="flex gap-2 flex-wrap">
@@ -399,8 +402,8 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
               ))}
             </div>
             <div className="flex gap-2">
-              <button type="submit" className="bg-[#4a5240] text-white px-5 py-2 rounded-xl text-sm cursor-pointer" style={{ fontWeight: 300 }}>Créer</button>
-              <button type="button" onClick={() => setAddingCat(false)} className="text-stone-400 text-sm px-3 cursor-pointer" style={{ fontWeight: 300 }}>Annuler</button>
+              <button type="submit" className="bg-[#4a5240] text-white px-5 py-2 rounded-xl text-sm cursor-pointer" style={{ fontWeight: 300 }}>{t('create')}</button>
+              <button type="button" onClick={() => setAddingCat(false)} className="text-stone-400 text-sm px-3 cursor-pointer" style={{ fontWeight: 300 }}>{t('cancel')}</button>
             </div>
           </form>
         </div>
@@ -411,24 +414,24 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
         <>
         {actions.importFromSimulation && <ImportSimulationBanner slug={slug} importAction={actions.importFromSimulation} />}
         <div className="text-center py-14 bg-white rounded-2xl border border-stone-100">
-          <p style={{ fontWeight: 300, fontSize: '1rem' }} className="text-stone-400 mb-2">Aucune catégorie</p>
-          <p style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-300 mb-6">Choisissez par où commencer</p>
+          <p style={{ fontWeight: 300, fontSize: '1rem' }} className="text-stone-400 mb-2">{t('noCategories')}</p>
+          <p style={{ fontWeight: 300, fontSize: '0.82rem' }} className="text-stone-300 mb-6">{t('chooseStart')}</p>
           <div className="flex flex-wrap justify-center gap-2.5">
             <a href={`/budget-mariage?return=/mariage/${slug}/budget`}
               className="bg-[#4a5240] text-white px-6 py-2.5 rounded-xl text-sm hover:bg-[#2d3228] transition cursor-pointer" style={{ fontWeight: 300 }}>
-              ✨ Simuler mon budget
+              ✨ {t('simulateBudget')}
             </a>
             <button onClick={async () => { const fd = new FormData(); fd.set('slug', slug); await actions.initDefaultCategories(fd) }}
               className="bg-stone-100 text-[#4a5240] px-6 py-2.5 rounded-xl text-sm hover:bg-stone-200 transition cursor-pointer" style={{ fontWeight: 300 }}>
-              Catégories suggérées
+              {t('suggestedCategories')}
             </button>
             <button onClick={() => setAddingCat(true)}
               className="border border-stone-200 text-stone-500 px-6 py-2.5 rounded-xl text-sm hover:border-[#4a5240] hover:text-[#4a5240] transition cursor-pointer" style={{ fontWeight: 300 }}>
-              Créer manuellement
+              {t('createManually')}
             </button>
           </div>
           <p style={{ fontWeight: 300, fontSize: '0.7rem' }} className="text-stone-300 mt-5">
-            La simulation génère vos catégories personnalisées avec montants estimés.
+            {t('simulationHint')}
           </p>
         </div>
         </>
@@ -438,7 +441,7 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
           <table className="w-full min-w-[680px] border-collapse">
             <thead>
               <tr className="border-b border-stone-100">
-                {['Poste', 'Prestataire retenu', 'Montant', 'Payé', 'Reste', 'Statut', ''].map((h, i) => (
+                {[t('item'), t('retainedVendor'), t('amount'), t('paid'), t('remaining'), t('status'), ''].map((h, i) => (
                   <th key={i} className={`px-4 py-3 ${i <= 1 ? 'text-left' : i === 6 ? 'text-center' : 'text-right'}`}
                       style={LABEL}>
                     {h}
@@ -469,11 +472,11 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
                       onClick={() => toggleCat(cat.id)}>
                       <td className="px-4 py-2.5" colSpan={2}>
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] text-stone-300 cursor-grab active:cursor-grabbing hover:text-stone-500 transition" onMouseDown={e => e.stopPropagation()} title="Glisser pour réordonner">⠿</span>
+                          <span className="text-[10px] text-stone-300 cursor-grab active:cursor-grabbing hover:text-stone-500 transition" onMouseDown={e => e.stopPropagation()} title={t('dragToReorder')}>⠿</span>
                           <span className="text-[10px] text-stone-400 transition-transform" style={{ display: 'inline-block', transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)' }}>▾</span>
                           <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: cat.color }} />
                           <span style={{ fontWeight: 500, fontSize: '0.82rem', color: '#2d3228' }}>{cat.icon} {cat.name}</span>
-                          <span style={{ fontWeight: 300, fontSize: '0.7rem', color: '#a8a29e' }}>{catItems.length} poste{catItems.length !== 1 ? 's' : ''}</span>
+                          <span style={{ fontWeight: 300, fontSize: '0.7rem', color: '#a8a29e' }}>{t('itemCount', { count: catItems.length })}</span>
                         </div>
                       </td>
                       <td className="px-4 py-2.5 text-right">
@@ -505,20 +508,20 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
                             onKeyDown={e => { if (e.key === 'Enter') saveCatAlloc(cat.id); if (e.key === 'Escape') setEditingCatAlloc(null) }}
                             autoFocus
                             className="w-24 text-right border border-[#4a5240]/40 rounded px-2 py-0.5 text-xs focus:outline-none focus:border-[#4a5240]"
-                            placeholder="Budget" style={{ fontWeight: 300 }} />
+                            placeholder={t('budgetLabel')} style={{ fontWeight: 300 }} />
                         ) : (
                           <button onClick={() => { setEditingCatAlloc(cat.id); setCatAllocValue(String(alloc || '')) }}
-                            title="Définir le budget alloué"
+                            title={t('setAllocatedBudget')}
                             className="text-xs text-stone-300 hover:text-[#4a5240] transition cursor-pointer"
                             style={{ fontWeight: 300, background: 'transparent', border: 'none' }}>
-                            {alloc > 0 ? `alloué: ${fmt(alloc, budgetCurrency)}` : '+ budget alloué'}
+                            {alloc > 0 ? t('allocated', { amount: fmt(alloc, budgetCurrency) }) : t('addAllocated')}
                           </button>
                         )}
                       </td>
                       <td className="px-4 py-2.5 text-right">
-                        <button onClick={async e => { e.stopPropagation(); if (!confirm(`Supprimer "${cat.name}" ?`)) return; await call('deleteCategory', { id: cat.id }) }}
+                        <button onClick={async e => { e.stopPropagation(); if (!confirm(t('confirmDeleteCategory', { name: cat.name }))) return; await call('deleteCategory', { id: cat.id }) }}
                           className="text-[10px] text-stone-200 hover:text-red-400 transition cursor-pointer" style={{ fontWeight: 300 }}>
-                          Supprimer
+                          {t('delete')}
                         </button>
                       </td>
                     </tr>
@@ -547,7 +550,7 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
                                   onSubmit={async e => { e.preventDefault(); const fd = new FormData(e.currentTarget); fd.set('slug', slug); fd.set('id', item.id); await actions.updateItem(fd); setEditingItem(null) }}>
                                   <input name="label" defaultValue={item.label} required autoFocus
                                     className="border border-[#4a5240] rounded-lg px-2 py-1 text-sm outline-none bg-white text-stone-700 w-36" style={{ fontWeight: 400 }} />
-                                  <input name="estimated" type="number" defaultValue={item.estimated_amount || ''} placeholder="Estimé €" min={0}
+                                  <input name="estimated" type="number" defaultValue={item.estimated_amount || ''} placeholder={t('estimatedPlaceholder')} min={0}
                                     className="w-20 border border-stone-200 rounded-lg px-2 py-1 text-sm outline-none bg-white text-stone-700" style={{ fontWeight: 300 }} />
                                   <button type="submit" className="bg-[#4a5240] text-white px-2 py-1 rounded-lg text-xs cursor-pointer" style={{ fontWeight: 300 }}>OK</button>
                                   <button type="button" onClick={() => setEditingItem(null)} className="text-stone-400 text-xs cursor-pointer">✕</button>
@@ -606,8 +609,8 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
                                     className="w-24 text-right border border-[#4a5240]/40 rounded px-2 py-0.5 text-sm focus:outline-none focus:border-[#4a5240] bg-white text-stone-700" style={{ fontWeight: 400 }} />
                                 </form>
                               ) : (
-                                <span title="Cliquer pour modifier" className="cursor-text group inline-flex items-center gap-1 hover:text-[#4a5240] transition" style={{ fontWeight: 500, fontSize: '0.9rem', color: retained ? '#44403c' : '#6b7280' }}>
-                                  {eff.amount > 0 ? fmt(eff.amount, eff.currency) : <span style={{ color: '#d6d3d1' }}>+ montant</span>}
+                                <span title={t('clickToEdit')} className="cursor-text group inline-flex items-center gap-1 hover:text-[#4a5240] transition" style={{ fontWeight: 500, fontSize: '0.9rem', color: retained ? '#44403c' : '#6b7280' }}>
+                                  {eff.amount > 0 ? fmt(eff.amount, eff.currency) : <span style={{ color: '#d6d3d1' }}>+ {t('amount')}</span>}
                                   {!retained && <span className="opacity-0 group-hover:opacity-100 text-[10px] text-stone-300 transition">✎</span>}
                                 </span>
                               )}
@@ -643,10 +646,10 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
                                 </form>
                               ) : (
                                 <span
-                                  title={retained ? 'Cliquer pour modifier' : 'Retenez un devis pour saisir le payé'}
+                                  title={retained ? t('clickToEdit') : t('retainQuoteFirst')}
                                   className={retained ? 'cursor-text group inline-flex items-center gap-1 hover:text-emerald-600 transition' : ''}
                                   style={{ fontWeight: 400, fontSize: '0.9rem', color: '#16a34a' }}>
-                                  {eff.paid > 0 ? fmt(eff.paid, eff.currency) : <span style={{ color: retained ? '#d6d3d1' : '#e5e7eb', fontSize: '0.8rem' }}>{retained ? '+ payé' : '—'}</span>}
+                                  {eff.paid > 0 ? fmt(eff.paid, eff.currency) : <span style={{ color: retained ? '#d6d3d1' : '#e5e7eb', fontSize: '0.8rem' }}>{retained ? `+ ${t('paid')}` : '—'}</span>}
                                   {retained && <span className="opacity-0 group-hover:opacity-100 text-[10px] text-stone-300 transition">✎</span>}
                                 </span>
                               )}
@@ -657,17 +660,17 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
                               {remaining > 0
                                 ? <span style={{ fontWeight: 300, fontSize: '0.88rem', color: '#b45309' }}>{fmt(remaining, eff.currency)}</span>
                                 : eff.paid > 0
-                                  ? <span style={{ fontSize: '0.78rem', color: '#16a34a' }}>✓ soldé</span>
+                                  ? <span style={{ fontSize: '0.78rem', color: '#16a34a' }}>✓ {t('settled')}</span>
                                   : <span style={{ color: '#d6d3d1' }}>—</span>}
                             </td>
 
                             {/* Statut */}
                             <td className="px-4 py-3 text-center" onClick={e => e.stopPropagation()}>
-                              <button onClick={() => cycleStatus(item)} title="Changer le statut"
+                              <button onClick={() => cycleStatus(item)} title={t('changeStatus')}
                                 className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full cursor-pointer transition"
                                 style={{ fontWeight: 300, fontSize: '0.7rem', background: st.pill, color: st.text }}>
                                 <span className="w-1.5 h-1.5 rounded-full" style={{ background: st.dot }} />
-                                {st.label}
+                                {t(st.labelKey)}
                               </button>
                             </td>
 
@@ -676,22 +679,22 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
                               <div className="flex items-center justify-center gap-2">
                                 {activeQ.length > 0 ? (
                                   <span className="text-xs bg-stone-100 text-stone-500 px-2 py-0.5 rounded-full" style={{ fontWeight: 300 }}>
-                                    {activeQ.length} devis{retained ? ' ✦' : ''}
+                                    {t('quoteCount', { count: activeQ.length })}{retained ? ' ✦' : ''}
                                   </span>
                                 ) : (
                                   <button onClick={() => { setAddingQuoteFor(item.id); if (!expandedItems.has(item.id)) toggleItem(item.id) }}
                                     className="text-xs text-stone-300 hover:text-[#4a5240] transition cursor-pointer" style={{ fontWeight: 300 }}>
-                                    + devis
+                                    + {t('quote')}
                                   </button>
                                 )}
                                 <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition">
-                                  <button onClick={() => setEditingItem(item.id)} title="Modifier"
+                                  <button onClick={() => setEditingItem(item.id)} title={t('edit')}
                                     className="p-1 text-stone-300 hover:text-[#4a5240] transition cursor-pointer rounded">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3 h-3">
                                       <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
                                     </svg>
                                   </button>
-                                  <button onClick={async () => { if (!confirm('Supprimer ce poste ?')) return; await call('deleteItem', { id: item.id }) }}
+                                  <button onClick={async () => { if (!confirm(t('confirmDeleteItem'))) return; await call('deleteItem', { id: item.id }) }}
                                     className="p-1 text-stone-300 hover:text-red-400 transition cursor-pointer rounded">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-3 h-3">
                                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -739,21 +742,21 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
                                               isRet ? 'bg-[#4a5240] border-[#4a5240]' :
                                               isRef ? 'bg-stone-50 border-stone-100 opacity-40' :
                                               'bg-white border-stone-200 hover:border-stone-300 hover:shadow-sm'}`}>
-                                            {isRet && <span className="absolute -top-2 left-3 text-[9px] bg-white text-[#4a5240] px-1.5 py-0.5 rounded-full font-semibold">✦ Retenu</span>}
+                                            {isRet && <span className="absolute -top-2 left-3 text-[9px] bg-white text-[#4a5240] px-1.5 py-0.5 rounded-full font-semibold">✦ {t('retained')}</span>}
                                             <p style={{ fontWeight: isRet ? 500 : 400, fontSize: '0.82rem', color: isRet ? 'white' : '#44403c' }}>
-                                              {quote.vendor_name || <span className="italic opacity-40">Prestataire</span>}
+                                              {quote.vendor_name || <span className="italic opacity-40">{t('vendor')}</span>}
                                             </p>
                                             <p style={{ fontWeight: 600, fontSize: '1.15rem', lineHeight: 1, color: isRet ? 'white' : '#2d3228' }}>
                                               {fmt(quote.amount, quote.currency)}
                                             </p>
                                             {quote.paid_amount > 0 && (
                                               <p style={{ fontWeight: 300, fontSize: '0.65rem', color: isRet ? 'rgba(255,255,255,0.7)' : '#16a34a' }}>
-                                                {fmt(quote.paid_amount, quote.currency)} versé
+                                                {t('paidAmount', { amount: fmt(quote.paid_amount, quote.currency) })}
                                               </p>
                                             )}
                                             {quote.due_date && (
                                               <p style={{ fontWeight: 300, fontSize: '0.65rem', color: isRet ? 'rgba(255,255,255,0.6)' : '#b45309' }}>
-                                                Échéance {new Date(quote.due_date + 'T00:00:00').toLocaleDateString(toDateLocale(locale), { day: 'numeric', month: 'short' })}
+                                                {t('dueDate', { date: new Date(quote.due_date + 'T00:00:00').toLocaleDateString(toDateLocale(locale), { day: 'numeric', month: 'short' }) })}
                                               </p>
                                             )}
                                             {quote.notes && (
@@ -775,19 +778,19 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
                                               {!isRet && !isRef && (
                                                 <button onClick={() => call('retainQuote', { id: quote.id, item_id: item.id })}
                                                   className="text-[10px] px-2 py-0.5 rounded-full border border-[#4a5240]/30 text-[#4a5240] hover:bg-[#4a5240] hover:text-white transition cursor-pointer" style={{ fontWeight: 400 }}>
-                                                  Retenir
+                                                  {t('retain')}
                                                 </button>
                                               )}
                                               {isRet && (
                                                 <button onClick={() => call('retainQuote', { id: quote.id, item_id: item.id })}
                                                   className="text-[10px] text-white/50 hover:text-white cursor-pointer" style={{ fontWeight: 300 }}>
-                                                  Annuler
+                                                  {t('cancel')}
                                                 </button>
                                               )}
                                               {!isRet && !isRef && (
                                                 <button onClick={() => call('refuseQuote', { id: quote.id })}
                                                   className="text-[10px] text-stone-300 hover:text-red-400 cursor-pointer" style={{ fontWeight: 300 }}>
-                                                  Refuser
+                                                  {t('refuse')}
                                                 </button>
                                               )}
                                               <FileUploadButton slug={slug} weddingId={weddingId} quoteId={quote.id} onSave={actions.saveBudgetFileMeta} />
@@ -807,7 +810,7 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
                                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                                           </svg>
-                                          <span style={{ fontWeight: 300, fontSize: '0.68rem' }}>Devis</span>
+                                          <span style={{ fontWeight: 300, fontSize: '0.68rem' }}>{t('quote')}</span>
                                         </button>
                                       )}
                                     </div>
@@ -819,7 +822,7 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
                                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                                       </svg>
-                                      Ajouter un premier devis
+                                      {t('addFirstQuote')}
                                     </button>
                                   )}
 
@@ -842,11 +845,11 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
                         {addingItemFor === cat.id ? (
                           <form onSubmit={async e => { e.preventDefault(); const fd = new FormData(e.currentTarget); fd.set('slug', slug); fd.set('category_id', cat.id); await actions.addItem(fd); setAddingItemFor(null) }}
                                 className="flex gap-2 flex-wrap items-center">
-                            <input name="label" type="text" placeholder="Nom du poste" required autoFocus
+                            <input name="label" type="text" placeholder={t('itemNamePlaceholder')} required autoFocus
                               className="flex-1 min-w-[140px] border border-stone-200 rounded-xl px-3 py-1.5 text-sm outline-none focus:border-[#4a5240] bg-white text-stone-700" style={{ fontWeight: 300 }} />
-                            <input name="estimated" type="number" placeholder="Budget estimé (€)" min={0}
+                            <input name="estimated" type="number" placeholder={t('estimatedBudgetPlaceholder')} min={0}
                               className="w-36 border border-stone-200 rounded-xl px-3 py-1.5 text-sm outline-none focus:border-[#4a5240] bg-white text-stone-700" style={{ fontWeight: 300 }} />
-                            <button type="submit" className="bg-[#4a5240] text-white px-4 py-1.5 rounded-xl text-sm cursor-pointer" style={{ fontWeight: 300 }}>Créer</button>
+                            <button type="submit" className="bg-[#4a5240] text-white px-4 py-1.5 rounded-xl text-sm cursor-pointer" style={{ fontWeight: 300 }}>{t('create')}</button>
                             <button type="button" onClick={() => setAddingItemFor(null)} className="text-stone-400 text-sm cursor-pointer" style={{ fontWeight: 300 }}>✕</button>
                           </form>
                         ) : (
@@ -855,7 +858,7 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
                               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                             </svg>
-                            Ajouter un poste
+                            {t('addItem')}
                           </button>
                         )}
                       </td>
@@ -871,7 +874,7 @@ export default function BudgetBoard({ slug, weddingId, budgetTotal, budgetCurren
                 <tr className="bg-stone-50/60 border-t-2 border-stone-100">
                   <td colSpan={2} className="px-4 py-3">
                     <span style={{ fontWeight: 300, fontSize: '0.7rem', letterSpacing: '0.12em', color: '#a8a29e', textTransform: 'uppercase' }}>
-                      Total — {items.length} poste{items.length > 1 ? 's' : ''}
+                      {t('totalItems', { count: items.length })}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">

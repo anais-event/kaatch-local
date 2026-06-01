@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { Zap, CheckCircle2, X } from 'lucide-react'
 
@@ -12,6 +13,7 @@ type Task = {
 }
 
 export default function TodoNow({ tasks, slug }: { tasks: Task[]; slug: string }) {
+  const t = useTranslations('wedding.dashboard')
   const LS_KEY = `todo_dismissed_${slug}`
   const [dismissed, setDismissed] = useState<Set<string>>(new Set())
   const [mounted, setMounted] = useState(false)
@@ -44,7 +46,7 @@ export default function TodoNow({ tasks, slug }: { tasks: Task[]; slug: string }
     <div className="bg-white rounded-3xl border border-stone-100 p-6">
       <div className="flex items-center justify-between mb-4">
         <h2 style={{ fontWeight: 600, fontSize: '1.1rem' }} className="text-stone-800">
-          À faire maintenant
+          {t('todoTitle')}
         </h2>
         <Zap className="w-5 h-5 text-[#4a5240]" strokeWidth={2} />
       </div>
@@ -70,7 +72,7 @@ export default function TodoNow({ tasks, slug }: { tasks: Task[]; slug: string }
             <button
               onClick={() => dismiss(task.label)}
               className="shrink-0 mt-1 p-1 rounded-full text-stone-200 hover:text-stone-400 hover:bg-stone-100 transition opacity-0 group-hover/row:opacity-100"
-              title="Masquer"
+              title={t('hide')}
             >
               <X className="w-3.5 h-3.5" />
             </button>

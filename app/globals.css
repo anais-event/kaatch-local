@@ -77,6 +77,30 @@ body::after {
   animation: marquee 28s linear infinite;
   will-change: transform;
 }
+.features-track { scrollbar-width: none; }
+.features-track::-webkit-scrollbar { display: none; }
+
+/* Bandeau compteur de places — décale la nav fixe */
+html.has-banner nav { top: 2.1rem !important; }
+
+/* Landing page — tous les titres en Plus Jakarta Sans (pas Outfit) */
+.landing h1, .landing h2, .landing h3, .landing h4 {
+  font-family: var(--font-body);
+}
+/* Exception : Instrument Serif pour les h3 "Good catch." / "Catch up." */
+.landing .why-serif {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+/* Révélation scroll */
+.landing .reveal {
+  opacity: 0;
+  transform: translateY(1.2rem);
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.landing .reveal.vis { opacity: 1; transform: translateY(0); }
+
 .animate-marquee:hover {
   animation-play-state: paused;
 }

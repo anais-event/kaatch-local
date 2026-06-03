@@ -1,950 +1,881 @@
-import Image from 'next/image'
 import ContactForm from './_components/ContactForm'
 import PublicNav from './_components/PublicNav'
-import ForumEmbed from './_components/ForumEmbed'
 import ScrollReveal from './_components/ScrollReveal'
-import FeatureTicker from './_components/FeatureTicker'
+import FeaturesTrack from './_components/FeaturesTrack'
 
 export const dynamic = 'force-dynamic'
 
-const DISPLAY = 'var(--font-display)'
-const SHADOW = '0 4px 24px rgba(44,59,46,0.08), 0 1px 4px rgba(44,59,46,0.04)'
+const BODY   = 'var(--font-body)'   // Plus Jakarta Sans — TOUT
+const SERIF  = 'var(--font-serif)'  // Instrument Serif — logo + Pourquoi Kaatch uniquement
 
-function FAQ() {
-  const items = [
-    {
-      q: "Mes invités doivent-ils créer un compte ?",
-      a: "Non, jamais. Chaque invité reçoit un lien unique à son prénom. Il accède directement à son espace — RSVP, programme, album photo — sans inscription, sans mot de passe.",
-    },
-    {
-      q: "Que se passe-t-il après le mariage ? Mes données sont conservées ?",
-      a: "Vos données (photos, messages, liste d'invités) restent accessibles aussi longtemps que votre espace est actif. Vous pouvez tout télécharger à tout moment.",
-    },
-    {
-      q: "Puis-je passer du plan gratuit au plan Mariage plus tard ?",
-      a: "Oui, à tout moment depuis la page Compte de votre mariage. Vos données et votre espace sont entièrement conservés. Vous n'avez pas à recommencer de zéro.",
-    },
-    {
-      q: "Mes données sont-elles sécurisées ?",
-      a: "Kaatch est sécurisé, les données sont chiffrées et ne sont jamais revendues ni partagées. Vous restez propriétaire de tout ce que vous publiez.",
-    },
-    {
-      q: "Kaatch fonctionne-t-il sur téléphone ?",
-      a: "Oui, entièrement. L'espace mariés comme l'espace invités sont conçus mobile-first. Aucune application à télécharger — tout fonctionne depuis le navigateur.",
-    },
-  ]
+const SAGE_DARK  = '#2d3228'
+const SAGE       = '#4a5240'
+const SAGE_MUTED = '#5e6654'
+const TEXT       = '#2e2b27'
+const TEXT_MID   = '#5a5549'
+const TEXT_SOFT  = '#847d73'
+const CREAM      = '#f5f0e8'
+const CREAM_MID  = '#ece6db'
+const WHITE      = '#fffdf9'
 
-  return (
-    <section className="py-28 px-10 bg-white border-t border-stone-100">
-      <div className="max-w-2xl mx-auto">
-        <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-4" style={{ fontFamily: DISPLAY, fontWeight: 500 }}>FAQ</p>
-        <h2 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(1.7rem, 3vw, 2.4rem)', lineHeight: 1.15, letterSpacing: '-0.02em' }}
-            className="text-[#2C3B2E] mb-12">
-          Les questions qu&apos;on nous pose souvent.
-        </h2>
-        <div className="divide-y divide-stone-100">
-          {items.map((item, i) => (
-            <details key={i} className="group py-5 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
-              <summary className="flex items-center justify-between gap-4 list-none" style={{ fontFamily: DISPLAY, fontWeight: 600, fontSize: '0.95rem', color: '#2C3B2E' }}>
-                {item.q}
-                <span className="shrink-0 w-5 h-5 rounded-full border border-stone-300 flex items-center justify-center text-stone-400 group-open:rotate-45 transition-transform text-xs">+</span>
-              </summary>
-              <p className="mt-3 text-stone-500 text-sm leading-relaxed" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
-                {item.a}
-              </p>
-            </details>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Kaatch",
+    "url": "https://kaatch.fr",
+    "applicationCategory": "LifestyleApplication",
+    "operatingSystem": "Web",
+    "description": "Plateforme française d'organisation de mariage tout-en-un. Gestion des invités, faire-part animés, RSVP, plan de table, album photo partagé, playlist participative, livre d'or, messagerie interne, budget, programme du jour J et coordination des prestataires en temps réel.",
+    "inLanguage": "fr",
+    "offers": [
+      { "@type": "Offer", "name": "Découverte", "price": "0", "priceCurrency": "EUR" },
+      { "@type": "Offer", "name": "Mariage", "price": "45", "priceCurrency": "EUR" },
+    ],
+    "featureList": [
+      "Gestion de la liste d'invités avec import Excel",
+      "Faire-part interactifs et animés personnalisés par invité",
+      "RSVP en temps réel",
+      "Plan de table en glisser-déposer",
+      "Album photo partagé",
+      "Playlist participative",
+      "Livre d'or numérique",
+      "Messagerie interne",
+      "Suivi de budget",
+      "Programme du jour J",
+      "Coordination des prestataires",
+    ],
+    "screenshot": "https://kaatch.fr/og-image.png",
+    "creator": { "@type": "Organization", "name": "Kaatch", "url": "https://kaatch.fr", "email": "bonjour@kaatch.fr" },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Kaatch",
+    "url": "https://kaatch.fr",
+    "logo": "https://kaatch.fr/logo.png",
+    "email": "bonjour@kaatch.fr",
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Les invités doivent-ils créer un compte pour utiliser Kaatch ?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Non. Chaque invité reçoit un lien unique. Aucune inscription, aucun mot de passe." },
+      },
+      {
+        "@type": "Question",
+        "name": "Combien coûte Kaatch ?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Plan Découverte gratuit avec 30 invités. Plan Mariage à 45 euros, paiement unique, invités illimités." },
+      },
+      {
+        "@type": "Question",
+        "name": "Faut-il télécharger une application ?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Non. Kaatch est accessible depuis n'importe quel navigateur, sur mobile comme sur ordinateur." },
+      },
+    ],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Kaatch",
+    "url": "https://kaatch.fr",
+    "inLanguage": "fr",
+  },
+]
 
 export default function Home() {
-  const backstage = [
-    { icon: '📋', label: "Rétro-planning", detail: "Toutes les étapes de J-12 mois au jour J, dans l'ordre." },
-    { icon: '💌', label: "Faire-parts & RSVP", detail: "Lien personnel par invité, réponses qui tombent en direct." },
-    { icon: '🪑', label: "Plan de table", detail: "Glisser-déposer, ajusté jusqu'à la veille." },
-    { icon: '💰', label: "Budget global", detail: "Devis, dépenses, prestataires — tout sous les yeux.", href: '/budget-mariage' },
-    { icon: '🤝', label: "Prestataires", detail: "Invitez-les, choisissez ce qu'ils voient. Finis les mails.", href: '/gestion-prestataires' },
-    { icon: '📅', label: "Programme jour J", detail: "Le déroulé de la journée. Vos témoins respirent." },
-    { icon: '🎵', label: "Playlist & animations", detail: "Construire la bande-son, des idées pour animer la soirée." },
-  ]
-
-  const scene = [
-    { icon: '🔗', label: "Lien magique", detail: "Pas de compte à créer. Le lien dans le faire-part, et ils sont chez vous." },
-    { icon: '📅', label: "Programme du jour", detail: "Sans avoir à déranger qui que ce soit." },
-    { icon: '📝', label: "Livre d'or", detail: "Mots doux, messages audio, souvenirs — le tout depuis leur téléphone." },
-    { icon: '🏠', label: "Hébergements", detail: "Vos suggestions de logements, en un clic." },
-    { icon: '💬', label: "Messagerie", detail: "Discussion directe entre invités." },
-    { icon: '📸', label: "Album partagé", detail: "Toutes les photos, au même endroit, pour tout le monde." },
-  ]
-
-  const jsonLd = [
-    {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "Kaatch",
-      "url": "https://kaatch.fr",
-      "applicationCategory": "LifestyleApplication",
-      "operatingSystem": "Web",
-      "description": "Plateforme française d'organisation de mariage tout-en-un. Gestion des invités, faire-part animés, RSVP, plan de table, album photo partagé, playlist participative, livre d'or, messagerie interne, budget, programme du jour J et coordination des prestataires en temps réel. Les invités accèdent à leur espace sans compte et sans application à télécharger.",
-      "inLanguage": "fr",
-      "offers": [
-        {
-          "@type": "Offer",
-          "name": "Découverte",
-          "price": "0",
-          "priceCurrency": "EUR",
-          "description": "1 mariage, 30 invités, 20 photos, accès 3 mois. Programme jour J, faire-part digital, RSVP basique."
-        },
-        {
-          "@type": "Offer",
-          "name": "Mariage",
-          "price": "45",
-          "priceCurrency": "EUR",
-          "description": "Invités sans limite, 200 photos incluses, faire-part animé personnalisé, espace invités complet, plan de table, budget, programme jour J, RSVP complet. Paiement unique, en euros."
-        }
-      ],
-      "featureList": [
-        "Gestion de la liste d'invités avec import Excel et Google Sheets",
-        "Faire-part interactifs et animés personnalisés par invité",
-        "RSVP en temps réel avec suivi des réponses",
-        "Plan de table en glisser-déposer",
-        "Album photo partagé avec taggage des personnes",
-        "Playlist participative par moment du mariage",
-        "Livre d'or numérique",
-        "Messagerie interne avec groupes personnalisés",
-        "Rétro-planning avec suggestions intégrées",
-        "Suivi de budget poste par poste",
-        "Programme du jour J avec sections par rôle",
-        "Coordination des prestataires via lien de partage en temps réel",
-        "Espace invités sans inscription ni mot de passe",
-        "Espace prestataires avec mises à jour en temps réel",
-        "QR code imprimable pour accès rapide le jour J",
-        "Export et impression PDF de tous les documents",
-        "Suggestions d'hébergements pour les invités",
-        "Animations et jeux pour la soirée",
-        "Aucune publicité"
-      ],
-      "screenshot": "https://kaatch.fr/og-image.png",
-      "creator": {
-        "@type": "Organization",
-        "name": "Ana",
-        "url": "https://kaatch.fr",
-        "email": "bonjour@kaatch.fr"
-      }
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "Kaatch",
-      "url": "https://kaatch.fr",
-      "logo": "https://kaatch.fr/logo.png",
-      "email": "bonjour@kaatch.fr",
-      "description": "Kaatch est une plateforme française d'organisation de mariage tout-en-un, sans publicité, où les invités et les prestataires accèdent à leur espace sans créer de compte.",
-      "sameAs": []
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Les invités doivent-ils créer un compte pour utiliser Kaatch ?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Non. Chaque invité reçoit un lien unique à son prénom. Il accède directement à son espace (RSVP, programme, album photo, livre d'or, playlist) sans inscription, sans mot de passe et sans télécharger d'application."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Combien coûte Kaatch pour organiser son mariage ?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Le plan Découverte permet de commencer sans frais avec 30 invités. Le plan Mariage coûte 45 euros en paiement unique, avec invités sans limite et 200 photos incluses. Aucun abonnement, aucun frais caché."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Faut-il télécharger une application pour utiliser Kaatch ?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Non. Kaatch est une application web accessible depuis n'importe quel navigateur, sur mobile comme sur ordinateur. Ni les mariés, ni les invités, ni les prestataires n'ont besoin de télécharger quoi que ce soit."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Comment fonctionne l'album photo partagé de Kaatch ?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Les mariés et les invités déposent leurs photos dans un album centralisé. Les invités peuvent taguer les personnes présentes sur chaque photo. Le jour J, un QR code imprimable peut être posé sur les tables : les invités le scannent et déposent leurs photos en deux clics."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Comment fonctionne le plan de table sur Kaatch ?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Le plan de table utilise une interface glisser-déposer. Vous créez vos tables avec un nom et une capacité, puis vous assignez les invités en les faisant glisser. Modifiable jusqu'à la veille du mariage. Un récapitulatif est imprimable en PDF."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Comment coordonner ses prestataires avec Kaatch ?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Les mariés invitent leurs prestataires via un lien de partage dédié et choisissent exactement quelles informations partager. Si un changement est fait sur la plateforme (horaire, menu, nombre d'invités), le prestataire voit la mise à jour en temps réel. Plus besoin de jongler entre mails, WhatsApp et SMS."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Comment fonctionne la playlist participative de Kaatch ?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Les mariés créent la bande-son organisée par moment : cérémonie, vin d'honneur, dîner, soirée. Les invités peuvent suggérer des morceaux depuis leur espace. La liste est exportable pour le DJ."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Kaatch contient-il de la publicité ?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Non. Aucune publicité, aucun démarchage. L'interface est entièrement dédiée à l'organisation du mariage, sans distraction commerciale."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Peut-on importer sa liste d'invités depuis Excel dans Kaatch ?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Oui. Kaatch permet l'import direct depuis un fichier Excel ou Google Sheets avec tous les champs : prénom, nom, email, téléphone, lien de parenté, régime alimentaire, etc."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Comment les invités accèdent-ils à leur espace sur Kaatch ?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Trois manières : un lien personnel unique envoyé dans le faire-part (numérique ou papier), un code de partage personnalisable, ou un QR code imprimable. Dans tous les cas, aucune inscription ni mot de passe n'est nécessaire."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Comment gérer ses invitations de mariage sans application à télécharger ?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Kaatch fonctionne directement dans le navigateur. Vous créez votre liste d'invités (import Excel possible), générez un faire-part animé personnalisé par invité, et suivez les réponses RSVP en temps réel. Les invités reçoivent leur invitation par lien, e-mail, WhatsApp ou SMS et accèdent à leur espace en un clic."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "La messagerie de Kaatch remplace-t-elle les groupes WhatsApp pour le mariage ?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Oui. Kaatch intègre une messagerie interne avec des groupes personnalisés et ciblés par tags (@lestemoins, @babysittermariage, @famille, @prestataires). Plus besoin de créer et gérer une quinzaine de groupes WhatsApp différents."
-          }
-        }
-      ]
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "Kaatch",
-      "url": "https://kaatch.fr",
-      "description": "Plateforme française d'organisation de mariage tout-en-un",
-      "inLanguage": "fr"
-    }
-  ]
-
   return (
-    <main className="bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, color: '#2d3228' }}>
+    <main style={{ fontFamily: BODY, fontWeight: 300, color: TEXT, background: CREAM, overflowX: 'hidden' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       {/* ── NAV ── */}
       <PublicNav />
 
-      {/* ── HERO ── */}
-      <section className="hero-gradient pt-16 md:min-h-screen grid md:grid-cols-2">
-        <div className="flex flex-col justify-center px-6 md:px-20 py-16 md:py-24 max-w-xl mx-auto md:mx-0 md:ml-auto">
-          <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-7" style={{ fontWeight: 500 }}>
-            La solution qui vous simplifie la vie
-          </p>
-          <h1 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(2.2rem, 4vw, 3.4rem)', lineHeight: 1.08, letterSpacing: '-0.02em' }}
-              className="text-[#2C3B2E] mb-7">
-            Toute l&apos;organisation de votre mariage.{' '}
-            <span style={{ color: '#4a5240' }}>Au même endroit.</span>
-          </h1>
-          <div className="text-stone-600 mb-10" style={{ fontSize: '1.05rem', lineHeight: 1.85 }}>
-            <p>
-              Préparer un mariage, c&apos;est pas de l&apos;impro. C&apos;est 1000 décisions, 20 prestataires,
-              des dizaines d&apos;invités, un peu de stress et beaucoup d&apos;argent. On a peur d&apos;oublier
-              quelque chose, il faut penser à chaque détail, et l&apos;on peut vite se sentir dépassé.
-            </p>
-            <p className="mt-4">
-              Kaatch centralise tout — c&apos;est un peu comme ranger sa chambre. Une fois qu&apos;on y voit
-              plus clair, l&apos;esprit s&apos;apaise, la fête approche, et vous pouvez vous reconcentrer
-              sur l&apos;essentiel&nbsp;: Vous.
-            </p>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <a href="/auth"
-               className="inline-block bg-[#2C3B2E] text-white px-8 py-4 rounded-2xl hover:bg-[#1a2419] transition text-sm text-center"
-               style={{ fontWeight: 500, letterSpacing: '0.01em' }}>
-              Je me connecte à mon espace →
-            </a>
-            <a href="/rejoindre"
-               className="inline-block border border-stone-300 text-stone-500 px-8 py-4 rounded-2xl hover:border-[#2C3B2E] hover:text-[#2C3B2E] transition text-sm text-center"
-               style={{ fontWeight: 400 }}>
-              Invité(e) à un mariage ? →
-            </a>
-          </div>
-          <div className="flex items-center gap-2.5 mt-8">
-            <span className="text-[#2C3B2E]" style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1.1rem' }}>4.9/5</span>
-            <span className="flex gap-0.5 text-amber-400" style={{ fontSize: '1rem' }}>{'★★★★★'}</span>
-            <span className="text-stone-400 text-xs" style={{ fontWeight: 300 }}>noté par nos couples</span>
-          </div>
+      {/* ══════════════════════════════════════════════
+          HERO — fond cream, aligné à gauche
+      ══════════════════════════════════════════════ */}
+      <header
+        aria-label="Kaatch — organisation de mariage"
+        style={{
+          minHeight: '100vh', display: 'flex', flexDirection: 'column',
+          justifyContent: 'center',
+          padding: 'clamp(6rem, 10vw, 8rem) 2.5rem 4rem',
+          maxWidth: '68rem', margin: '0 auto',
+        }}
+      >
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+          fontSize: '0.72rem', fontWeight: 500, letterSpacing: '0.03em',
+          color: SAGE, background: 'rgba(74,82,64,0.08)',
+          padding: '0.35rem 0.9rem', borderRadius: 100, width: 'fit-content',
+          marginBottom: '2rem',
+          animation: 'fadeIn 0.5s ease both 0.1s',
+          fontFamily: BODY,
+        }}>
+          Accès offert pour les 100 premiers couples
         </div>
 
-        <div className="hidden md:block relative">
-          <img
-            src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=1200&q=85&auto=format&fit=crop"
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-          <div className="absolute inset-0" style={{ background: 'rgba(30,28,24,0.12)' }} />
-          <div className="absolute bottom-14 left-10 bg-white/95 backdrop-blur-sm px-6 py-5 max-w-[240px]"
-               style={{ borderRadius: 16, boxShadow: '0 8px 32px rgba(44,59,46,0.18), 0 2px 8px rgba(44,59,46,0.08)' }}>
-            <p style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '0.95rem', color: '#2C3B2E', marginBottom: 4 }}>
-              Emma &amp; Luc
-            </p>
-            <p style={{ fontWeight: 300, fontSize: '0.72rem', color: '#78716c' }}>
-              127 invités · 12 tables · 1 seule app. 0 stress.
-            </p>
-          </div>
-        </div>
-      </section>
+        <h1 style={{
+          fontFamily: BODY, fontWeight: 800,
+          fontSize: 'clamp(2.6rem, 5.8vw, 4.8rem)',
+          lineHeight: 1.08, color: SAGE_DARK,
+          marginBottom: '1.8rem', maxWidth: '44rem',
+          animation: 'fadeUp 0.6s ease both 0.15s',
+          letterSpacing: '-0.02em',
+        }}>
+          Toute l&apos;organisation de votre mariage au même endroit.
+        </h1>
 
-      {/* ── TICKER ── */}
-      <FeatureTicker />
+        <p style={{
+          fontSize: '1.05rem', fontWeight: 300, lineHeight: 1.7,
+          color: TEXT_MID, maxWidth: '38rem', marginBottom: '1rem',
+          animation: 'fadeUp 0.6s ease both 0.3s',
+          fontFamily: BODY,
+        }}>
+          Préparer un mariage, c&apos;est pas de l&apos;impro. C&apos;est 1000 décisions,
+          20 prestataires, des dizaines d&apos;invités, un peu de stress
+          et beaucoup d&apos;argent. On a peur d&apos;oublier quelque chose,
+          il faut penser à chaque détail, et l&apos;on peut vite se sentir dépassé.
+        </p>
+        <p style={{
+          fontSize: '1.05rem', fontWeight: 300, lineHeight: 1.7,
+          color: TEXT_MID, maxWidth: '38rem', marginBottom: '2.5rem',
+          animation: 'fadeUp 0.6s ease both 0.4s',
+          fontFamily: BODY,
+        }}>
+          Kaatch centralise tout — c&apos;est un peu comme ranger sa chambre.
+          Une fois qu&apos;on y voit plus clair, l&apos;esprit s&apos;apaise, la fête approche,
+          et vous pouvez vous reconcentrer sur l&apos;essentiel&nbsp;: vous.
+        </p>
 
-      {/* ── POURQUOI KAATCH ── */}
-      <section className="py-16 md:py-28 px-6 md:px-10 bg-white border-t border-stone-100">
-        <div className="max-w-5xl mx-auto">
-          <ScrollReveal>
-          <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-5" style={{ fontWeight: 500 }}>
-            Pourquoi &quot;Kaatch&quot; ?
-          </p>
-          </ScrollReveal>
-          <div className="grid md:grid-cols-2 gap-16 items-center">
-            <ScrollReveal delay={100}>
-            <div>
-              <h2 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(2rem, 4vw, 3rem)', lineHeight: 1.05, letterSpacing: '-0.03em' }}
-                  className="text-[#2C3B2E] mb-6">
-                Good catch. Catch up.
-              </h2>
-              <p className="text-stone-600 mb-5" style={{ fontSize: '1.05rem', lineHeight: 1.85 }}>
-                En anglais, &quot;catch&quot; veut dire deux choses.
-              </p>
-              <div className="mb-5 flex flex-col gap-3">
-                <p style={{ fontSize: '1rem', lineHeight: 1.7 }}>
-                  <span style={{ fontFamily: DISPLAY, fontWeight: 700, color: '#2C3B2E' }}>Good catch&nbsp;:</span>{' '}
-                  <span className="text-stone-600">La bonne personne. Celle qu&apos;on ne laisse pas partir.</span>
-                </p>
-                <p style={{ fontSize: '1rem', lineHeight: 1.7 }}>
-                  <span style={{ fontFamily: DISPLAY, fontWeight: 700, color: '#2C3B2E' }}>Catch up&nbsp;:</span>{' '}
-                  <span className="text-stone-600">Se retrouver. Enfin tous au même endroit.</span>
-                </p>
-              </div>
-              <p className="text-stone-600" style={{ fontSize: '1.05rem', lineHeight: 1.85 }}>
-                Un mariage, c&apos;est exactement ça. Le moment où tout le monde se retrouve pour célébrer votre{' '}
-                <em style={{ color: '#2C3B2E' }}>good catch</em>.
-                Maintenant, on vous aide à <em style={{ color: '#2C3B2E' }}>catch up</em>{' '}
-                avec tous vos invités, chaque détail, chaque souvenir — sans rien oublier.
-              </p>
-            </div>
-            </ScrollReveal>
-            <ScrollReveal delay={200}>
-            <div className="flex flex-col gap-5">
-              <div className="bg-[#f5f0e8] rounded-2xl p-7" style={{ boxShadow: SHADOW }}>
-                <p style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1.4rem', letterSpacing: '-0.01em' }}
-                   className="text-[#2C3B2E] mb-2">Good catch.</p>
-                <p className="text-stone-500 text-sm" style={{ lineHeight: 1.7 }}>
-                  La bonne personne. Celle qu&apos;on ne laisse pas partir.
-                </p>
-              </div>
-              <div className="bg-[#f5f0e8] rounded-2xl p-7" style={{ boxShadow: SHADOW }}>
-                <p style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1.4rem', letterSpacing: '-0.01em' }}
-                   className="text-[#2C3B2E] mb-2">Catch up.</p>
-                <p className="text-stone-500 text-sm" style={{ lineHeight: 1.7 }}>
-                  Se retrouver. Enfin tous au même endroit.
-                </p>
-              </div>
-            </div>
-            </ScrollReveal>
-          </div>
-        </div>
-      </section>
-
-      {/* ── FORUM EMBED ── */}
-      <ForumEmbed />
-
-      {/* ── 1 MARIAGE, 2 ACCÈS ── */}
-      <section id="comment-ca-marche" className="py-16 md:py-28 px-6 md:px-10 bg-[#f5f0e8] border-t border-stone-100">
-        <div className="max-w-5xl mx-auto">
-          <div className="mb-16">
-            <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-4" style={{ fontWeight: 500 }}>1 mariage · 2 accès</p>
-            <h2 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)', lineHeight: 1.1, letterSpacing: '-0.02em' }}
-                className="text-[#2C3B2E] max-w-2xl">
-              Le backstage et la scène. Chacun son espace, le même mariage.
-            </h2>
-            <p className="mt-4 text-stone-600 max-w-xl" style={{ fontSize: '0.95rem', lineHeight: 1.85 }}>
-              Un seul mariage. Deux portes d&apos;entrée : une pour vous (les régisseurs), une pour vos invités (les spectateurs ravis).
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6">
-            <ScrollReveal delay={0}>
-            <div className="bg-white rounded-[28px] overflow-hidden" style={{ boxShadow: SHADOW }}>
-              <div className="h-56 overflow-hidden">
-                <img
-                  src="https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=1200&q=80&auto=format&fit=crop"
-                  alt=""
-                  className="w-full h-full object-cover hover:scale-105 transition duration-700"
-                />
-              </div>
-              <div className="p-8">
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="text-xs uppercase tracking-[0.2em] text-[#2C3B2E]" style={{ fontWeight: 600 }}>Backstage</span>
-                  <span className="text-xs text-stone-400">— pour les mariés</span>
-                </div>
-                <h3 style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1.25rem', letterSpacing: '-0.01em', lineHeight: 1.2 }}
-                    className="text-[#2C3B2E] mb-5">
-                  Tout ce qu&apos;il faut pour une organisation simple et efficace.
-                </h3>
-                <div className="grid grid-cols-2 gap-2.5">
-                  {backstage.map(b => {
-                    const Tag = b.href ? 'a' : 'div'
-                    return (
-                      <Tag key={b.label} {...(b.href ? { href: b.href } : {})} className={`flex items-start gap-2.5 bg-[#f5f0e8] rounded-xl px-3.5 py-3${b.href ? ' hover:bg-[#ece7dd] transition cursor-pointer' : ''}`}>
-                        <span className="text-base mt-0.5 shrink-0">{b.icon}</span>
-                        <div>
-                          <p style={{ fontWeight: 600, fontSize: '0.78rem', fontFamily: DISPLAY }} className="text-[#2C3B2E]">{b.label}{b.href ? ' →' : ''}</p>
-                          <p style={{ fontWeight: 300, fontSize: '0.7rem', lineHeight: 1.5 }} className="text-stone-500 mt-0.5">{b.detail}</p>
-                        </div>
-                      </Tag>
-                    )
-                  })}
-                </div>
-              </div>
-            </div>
-            </ScrollReveal>
-
-            {/* Scène — invités */}
-            <ScrollReveal delay={150}>
-            <div className="rounded-[28px] overflow-hidden" style={{ background: '#2C3B2E', boxShadow: '0 8px 40px rgba(44,59,46,0.25), 0 2px 8px rgba(44,59,46,0.12)' }}>
-              <div className="h-56 overflow-hidden relative">
-                <img
-                  src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=1200&q=80&auto=format&fit=crop"
-                  alt=""
-                  className="w-full h-full object-cover hover:scale-105 transition duration-700"
-                />
-                <div className="absolute inset-0" style={{ background: 'rgba(44,59,46,0.25)' }} />
-              </div>
-              <div className="p-8 text-white">
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="text-xs uppercase tracking-[0.2em] text-white/80" style={{ fontWeight: 600 }}>La scène</span>
-                  <span className="text-xs text-white/50">— pour les invités</span>
-                </div>
-                <h3 style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1.25rem', letterSpacing: '-0.01em', lineHeight: 1.2 }}
-                    className="mb-4">
-                  Un lien dans le faire-part. Et ils sont chez vous.
-                </h3>
-                <p className="text-white/65 text-sm mb-5" style={{ lineHeight: 1.7 }}>
-                  Pas de compte à créer. Vos invités cliquent sur leur lien personnel — papier ou numérique, vous choisissez — et accèdent à tout.
-                </p>
-                <div className="grid grid-cols-2 gap-2.5">
-                  {scene.map(s => (
-                    <div key={s.label} className="flex items-start gap-2.5 rounded-xl px-3.5 py-3"
-                         style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                      <span className="text-base mt-0.5 shrink-0">{s.icon}</span>
-                      <div>
-                        <p style={{ fontWeight: 600, fontSize: '0.78rem', fontFamily: DISPLAY }}>{s.label}</p>
-                        <p style={{ fontWeight: 300, fontSize: '0.7rem', lineHeight: 1.5 }} className="text-white/55 mt-0.5">{s.detail}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <p className="mt-5 text-white/40 text-xs italic" style={{ lineHeight: 1.6 }}>
-                  Vous préférez un faire-part papier ? Aucun problème — le lien Kaatch peut y figurer aussi.
-                </p>
-              </div>
-            </div>
-            </ScrollReveal>
-          </div>
-        </div>
-      </section>
-
-      {/* ── L'ALBUM ── */}
-      <section className="py-16 md:py-28 px-6 md:px-10 bg-white border-t border-stone-100">
-        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-16 items-center">
-          <div className="rounded-2xl overflow-hidden" style={{ boxShadow: SHADOW, height: 400 }}>
-            <img
-              src="/On the spot.jpeg"
-              alt=""
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div>
-            <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-4" style={{ fontWeight: 500 }}>Le plus croustillant</p>
-            <h2 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(1.8rem, 3.5vw, 2.6rem)', lineHeight: 1.1, letterSpacing: '-0.02em' }}
-                className="text-[#2C3B2E] mb-5">
-              L&apos;album photo partagé entre tout le monde.
-            </h2>
-            <p className="text-stone-600 mb-4" style={{ fontSize: '1rem', lineHeight: 1.85 }}>
-              Plus de Google Drive perdus, plus de groupes Facebook saturés, plus de centaines de messages WhatsApp avec le fameux &quot;tu m&apos;enverras les photos hein ?&quot;.
-            </p>
-            <p className="text-stone-600" style={{ fontSize: '1rem', lineHeight: 1.85 }}>
-              Un QR code sur les tables, les invités déposent leurs photos en deux 2 clics. Tout atterrit au même endroit, vous décidez ce que vous gardez. Et dans dix ans, c&apos;est toujours là.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-2.5">
-              {['Sans groupe Facebook', 'Sans Google Drive', 'Sans WhatsApp galère', 'Sans relancer personne'].map(t => (
-                <span key={t} className="px-4 py-2 rounded-full border border-stone-200 bg-[#f5f0e8] text-sm text-stone-600" style={{ fontWeight: 300 }}>{t}</span>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── OFFRES ── */}
-      <section id="offres" className="relative py-16 md:py-28 px-6 md:px-10 bg-white border-t border-stone-100 overflow-hidden">
-        {/* Decorative number */}
-        <div
-          className="absolute right-0 top-1/2 -translate-y-1/2 select-none pointer-events-none hidden md:block"
-          style={{
-            fontFamily: 'var(--font-display)',
-            fontWeight: 800,
-            fontSize: 'clamp(200px, 22vw, 320px)',
-            lineHeight: 1,
-            color: 'transparent',
-            WebkitTextStroke: '1.5px rgba(44,59,46,0.06)',
-            letterSpacing: '-0.05em',
-            userSelect: 'none',
+        <div style={{
+          display: 'flex', gap: '1.2rem', alignItems: 'center', flexWrap: 'wrap',
+          animation: 'fadeUp 0.6s ease both 0.55s',
+        }}>
+          <a href="/auth" style={{
+            display: 'inline-flex', alignItems: 'center',
+            fontFamily: BODY, fontSize: '0.88rem', fontWeight: 500,
+            color: WHITE, background: SAGE,
+            padding: '0.85rem 1.7rem', borderRadius: 8,
+            textDecoration: 'none', border: 'none', cursor: 'pointer',
+            transition: 'all 0.25s',
           }}
-          aria-hidden="true"
-        >
-          45
-        </div>
-        <div className="max-w-5xl mx-auto relative">
-          <div className="mb-10">
-            <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-4" style={{ fontWeight: 500 }}>Offres</p>
-            <h2 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(1.7rem, 3vw, 2.5rem)', lineHeight: 1.15, letterSpacing: '-0.02em' }}
-                className="text-[#2C3B2E] mb-3">
-              Aucune mauvaise surprise.
-            </h2>
-            <p style={{ fontSize: '0.95rem', lineHeight: 1.85 }} className="text-stone-500 mb-4">
-              Un tarif unique, un seul paiement. Pas d&apos;abonnement caché. Prix en euros.
-            </p>
-            {/* Bannière Product Hunt */}
-            <div className="inline-flex items-center gap-3 bg-[#2d3228] text-white text-sm px-5 py-3 rounded-2xl" style={{ fontWeight: 300 }}>
-              <span>🚀</span>
-              <span>
-                <strong style={{ fontWeight: 600 }}>Lancement Product Hunt</strong> — Code{' '}
-                <span className="font-mono bg-white/15 px-1.5 py-0.5 rounded text-xs">KAATCH2026</span>{' '}
-                : plan Mariage offert · 100 places
-              </span>
-            </div>
-          </div>
-
-          <div className="md:grid md:grid-cols-3 md:gap-6 md:items-start flex overflow-x-auto gap-5 snap-x snap-mandatory pb-4 -mx-2 px-2">
-
-            {/* Découverte */}
-            <div className="bg-[#f5f0e8] rounded-2xl p-8 flex flex-col min-w-[280px] snap-start md:min-w-0" style={{ boxShadow: SHADOW }}>
-              <div className="mb-6">
-                <p className="text-xs tracking-widest uppercase text-stone-400 mb-1" style={{ fontWeight: 500 }}>Découverte</p>
-                <p className="text-stone-400 text-xs mb-3" style={{ fontWeight: 300 }}>Pour commencer à organiser</p>
-                <p style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '2.6rem', lineHeight: 1, letterSpacing: '-0.03em' }}
-                   className="text-[#2C3B2E]">0</p>
-                <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-400 mt-2">Inclus · sans frais</p>
-              </div>
-              <ul className="space-y-2.5 flex-1 mb-7">
-                {["1 mariage", "30 invités", "20 photos", "Accès 3 mois", 'Programme jour J', "Faire-part digital", "RSVP basique", "1 groupe de discussion"].map(f => (
-                  <li key={f} className="flex items-start gap-3 text-sm text-stone-600" style={{ fontWeight: 300 }}>
-                    <span className="text-[#2C3B2E] mt-0.5 shrink-0 font-bold">✓</span>{f}
-                  </li>
-                ))}
-              </ul>
-              <a href="/auth"
-                 className="w-full text-center border-2 border-stone-300 text-stone-500 px-6 py-3 rounded-2xl hover:border-[#2C3B2E] hover:text-[#2C3B2E] transition text-sm"
-                 style={{ fontWeight: 500 }}>
-                Commencer
-              </a>
-            </div>
-
-            {/* Mariage */}
-            <div className="rounded-2xl flex flex-col min-w-[280px] snap-start md:min-w-0 overflow-hidden"
-                 style={{ background: '#2C3B2E', boxShadow: '0 8px 40px rgba(44,59,46,0.25), 0 2px 8px rgba(44,59,46,0.12)' }}>
-              <div className="flex justify-center pt-5">
-                <span className="bg-[#f5f0e8] text-[#2C3B2E] text-xs px-4 py-1.5 rounded-full whitespace-nowrap border border-[#2C3B2E]/20"
-                      style={{ fontWeight: 600 }}>
-                  ✦ Recommandé
-                </span>
-              </div>
-              <div className="px-8 pb-8 pt-4 flex flex-col flex-1">
-              <div className="mb-6">
-                <p className="text-xs tracking-widest uppercase text-white/70 mb-1" style={{ fontWeight: 500 }}>💍 Mariage</p>
-                <p className="text-white/50 text-xs mb-3" style={{ fontWeight: 300 }}>Tout pour votre mariage</p>
-                <p style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '2.6rem', lineHeight: 1, letterSpacing: '-0.03em' }}
-                     className="text-white">45</p>
-                <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-white/65 mt-2">Paiement unique · en euros · 1 mariage</p>
-              </div>
-              <ul className="space-y-2.5 flex-1 mb-7">
-                {[
-                  'Invités sans limite',
-                  '200 photos incluses',
-                  'Faire-part animé personnalisé',
-                  'RSVP complet',
-                  'Plan de table',
-                  'Budget et prestataires',
-                  'Musique / playlist',
-                  "Livre d'or",
-                  'Export & import invités',
-                  'Téléchargement ZIP photos',
-                ].map(f => (
-                  <li key={f} className="flex items-start gap-3 text-sm text-white/85" style={{ fontWeight: 300 }}>
-                    <span className="text-white/80 mt-0.5 shrink-0 font-bold">✓</span>{f}
-                  </li>
-                ))}
-              </ul>
-              <a href="/auth"
-                 className="w-full text-center bg-white text-[#2C3B2E] px-6 py-3 rounded-2xl hover:bg-[#f5f0e8] transition text-sm"
-                 style={{ fontWeight: 600 }}>
-                Créer mon espace →
-              </a>
-              </div>
-            </div>
-
-            {/* Premium */}
-            <div className="bg-white rounded-2xl p-8 flex flex-col min-w-[280px] snap-start md:min-w-0 relative"
-                 style={{ boxShadow: SHADOW, border: '1.5px solid #c4a87c' }}>
-              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                <span className="bg-[#c4a87c] text-white text-xs px-4 py-1.5 rounded-full whitespace-nowrap"
-                      style={{ fontWeight: 600 }}>
-                  Bientôt disponible
-                </span>
-              </div>
-              <div className="mb-6 mt-1">
-                <p className="text-xs tracking-widest uppercase text-stone-400 mb-1" style={{ fontWeight: 500 }}>👑 Premium</p>
-                <p className="text-stone-400 text-xs mb-3" style={{ fontWeight: 300 }}>L&apos;expérience complète</p>
-                <p style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '2.6rem', lineHeight: 1, letterSpacing: '-0.03em' }}
-                   className="text-[#2C3B2E]">99</p>
-                <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-400 mt-2">Paiement unique · en euros</p>
-              </div>
-              <ul className="space-y-2.5 flex-1 mb-7">
-                {[
-                  'Tout le plan Mariage',
-                  'Templates faire-part exclusifs',
-                  'Papeterie imprimable',
-                  'Design sur-mesure',
-                  'Support prioritaire',
-                ].map(f => (
-                  <li key={f} className="flex items-start gap-3 text-sm text-stone-500" style={{ fontWeight: 300 }}>
-                    <span className="text-[#c4a87c] mt-0.5 shrink-0">🔜</span>{f}
-                  </li>
-                ))}
-              </ul>
-              <a href="/pricing"
-                 className="w-full text-center border border-[#c4a87c] text-[#c4a87c] px-6 py-3 rounded-2xl hover:bg-[#c4a87c]/5 transition text-sm"
-                 style={{ fontWeight: 500 }}>
-                En savoir plus →
-              </a>
-            </div>
-
-          </div>
-
-          <p className="text-center mt-10 text-xs text-stone-400" style={{ fontWeight: 300 }}>
-            Plan Découverte inclus sans carte bleue · Paiement sécurisé · Accès immédiat · Prix en euros
-          </p>
-        </div>
-      </section>
-
-      {/* ── STUDIO CRÉATIF ── */}
-      <section id="studio" className="py-16 md:py-28 px-6 md:px-10 bg-[#f5f0e8] border-t border-stone-100 overflow-hidden">
-        <div className="max-w-5xl mx-auto">
-
-          {/* Header */}
-          <ScrollReveal>
-          <div className="mb-14 md:mb-20">
-            <p className="text-xs tracking-[0.25em] uppercase text-[#4a5240] mb-4" style={{ fontWeight: 500 }}>Studio Créatif</p>
-            <h2 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(2rem, 4vw, 3rem)', lineHeight: 1.08, letterSpacing: '-0.02em' }}
-                className="text-[#2C3B2E] mb-5 max-w-2xl">
-              La papeterie de votre mariage,{' '}
-              <span style={{ color: '#4a5240', fontStyle: 'italic' }}>créée automatiquement.</span>
-            </h2>
-            <p className="text-stone-600 max-w-xl" style={{ fontSize: '1.05rem', lineHeight: 1.85 }}>
-              Choisissez une ambiance, on génère vos faire-parts, menus, marque-places et plan de table.
-              Imprimés et livrés. Vous n&apos;avez rien d&apos;autre à faire.
-            </p>
-          </div>
-          </ScrollReveal>
-
-          {/* 3 étapes */}
-          <ScrollReveal delay={100}>
-          <div className="grid md:grid-cols-3 gap-5 mb-16 md:mb-20">
-            {[
-              { n: '01', title: 'Choisissez votre ambiance', desc: "Bohème, classique, champêtre, art déco… 5 univers graphiques créés par nos designers." },
-              { n: '02', title: 'On génère tout', desc: "Faire-part, menu, marque-place, plan de table — générés automatiquement depuis votre liste d'invités." },
-              { n: '03', title: 'Imprimé et livré chez vous', desc: "Impression professionnelle, papier premium, livraison en 5–7 jours ouvrés." },
-            ].map(step => (
-              <div key={step.n} className="bg-white rounded-2xl p-7 border border-stone-100" style={{ boxShadow: SHADOW }}>
-                <p style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '2.2rem', letterSpacing: '-0.04em', color: 'rgba(74,82,64,0.15)' }}
-                   className="mb-3 leading-none">{step.n}</p>
-                <p style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1.05rem', letterSpacing: '-0.01em' }}
-                   className="text-[#2C3B2E] mb-2">{step.title}</p>
-                <p className="text-stone-500 text-sm" style={{ lineHeight: 1.7, fontWeight: 300 }}>{step.desc}</p>
-              </div>
-            ))}
-          </div>
-          </ScrollReveal>
-
-          {/* Ambiances carousel */}
-          <ScrollReveal delay={150}>
-          <div className="mb-6">
-            <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-5" style={{ fontWeight: 500 }}>5 ambiances disponibles</p>
-          </div>
-          <div className="flex overflow-x-auto gap-4 pb-4 -mx-2 px-2 snap-x snap-mandatory">
-            {[
-              { name: 'Bohème', tag: 'Nature & liberté', color: '#e8e0d4', text: '#5c4f3a', accent: '#a8936a' },
-              { name: 'Classique', tag: 'Élégance intemporelle', color: '#e8eae5', text: '#2d3228', accent: '#4a5240' },
-              { name: 'Champêtre', tag: 'Douceur & fleurs', color: '#eee8e0', text: '#4a3728', accent: '#8b6e5c' },
-              { name: 'Art Déco', tag: 'Glamour des années 20', color: '#1e1a14', text: '#e8d9b8', accent: '#c8a84b' },
-              { name: 'Minimaliste', tag: 'Épuré & moderne', color: '#f0eeec', text: '#1c1c1c', accent: '#888888' },
-            ].map(a => (
-              <div key={a.name} className="shrink-0 snap-start rounded-2xl p-7 flex flex-col justify-between"
-                   style={{ background: a.color, width: 200, height: 260, boxShadow: SHADOW }}>
-                <div>
-                  <p style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '1.35rem', letterSpacing: '-0.02em', color: a.text }}>{a.name}</p>
-                  <p style={{ fontSize: '0.72rem', color: a.text, opacity: 0.6, fontWeight: 300, marginTop: 4 }}>{a.tag}</p>
-                </div>
-                <div style={{ width: 32, height: 3, background: a.accent, borderRadius: 2 }} />
-              </div>
-            ))}
-          </div>
-          </ScrollReveal>
-
-          {/* Produits */}
-          <ScrollReveal delay={200}>
-          <div className="mt-14 grid grid-cols-2 md:grid-cols-3 gap-4 mb-14">
-            {[
-              { icon: '💌', name: 'Faire-part',      desc: 'Animé + PDF haute résolution. Lien partageable ou impression papier.' },
-              { icon: '🍽️', name: 'Menu',             desc: 'Format A5, généré depuis votre programme et vos choix de repas.' },
-              { icon: '📋', name: 'Programme jour J', desc: 'Le déroulé complet, mis en page automatiquement depuis votre planning.' },
-              { icon: '🪧', name: 'Marque-places',    desc: "Un par invité, générés en masse depuis votre liste. Zéro saisie manuelle." },
-              { icon: '🗺️', name: 'Plan de table',    desc: 'Toutes vos tables et vos invités, mis en page proprement.' },
-              { icon: '🔢', name: 'Numéros de table', desc: "Chevalet A5 avec le numéro de chaque table. Imprimé, prêt à poser." },
-            ].map(p => (
-              <div key={p.name} className="bg-white rounded-2xl p-6 border border-stone-100" style={{ boxShadow: SHADOW }}>
-                <span className="text-2xl block mb-3">{p.icon}</span>
-                <p style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1rem', letterSpacing: '-0.01em' }}
-                   className="text-[#2C3B2E] mb-2">{p.name}</p>
-                <p className="text-stone-500 text-sm" style={{ lineHeight: 1.7, fontWeight: 300 }}>{p.desc}</p>
-              </div>
-            ))}
-          </div>
-          </ScrollReveal>
-
-          {/* CTA */}
-          <ScrollReveal delay={250}>
-          <div className="rounded-[28px] overflow-hidden relative"
-               style={{ background: 'linear-gradient(135deg, #4a5240 0%, #2d3228 100%)', boxShadow: '0 8px 40px rgba(44,59,46,0.25)' }}>
-            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-              <span className="bg-[#c4a87c] text-white text-xs px-4 py-1.5 rounded-full whitespace-nowrap" style={{ fontWeight: 600 }}>
-                Bientôt disponible
-              </span>
-            </div>
-            <div className="p-10 md:p-14">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-8">
-                <div>
-                  <p className="text-white/60 text-xs tracking-[0.2em] uppercase mb-3" style={{ fontWeight: 500 }}>Prix de lancement</p>
-                  <p style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', letterSpacing: '-0.02em', lineHeight: 1.1 }}
-                     className="text-white mb-3">
-                    Votre collection de papeterie,{' '}
-                    <span style={{ fontWeight: 300, fontSize: '1.1rem', opacity: 0.8 }}>au prix d&apos;un menu.</span>
-                  </p>
-                  <p className="text-white/65 text-sm" style={{ fontWeight: 300, lineHeight: 1.7 }}>
-                    Impression professionnelle incluse · Livraison 5–7 jours · Papier premium 300g/m²
-                  </p>
-                </div>
-              </div>
-              <div className="border-t border-white/10 pt-6">
-                <p className="text-white/50 text-xs mb-3" style={{ fontWeight: 300 }}>
-                  Être informé(e) dès que le studio est prêt :
-                </p>
-                <form action="mailto:bonjour@kaatch.fr" method="GET" className="flex gap-2 max-w-sm">
-                  <input
-                    type="email"
-                    name="subject"
-                    placeholder="votre@email.fr"
-                    className="flex-1 text-sm border border-white/20 rounded-xl px-3 py-2.5 bg-white/10 text-white placeholder:text-white/30 outline-none focus:border-white/40"
-                    style={{ fontWeight: 300 }}
-                  />
-                  <button
-                    type="submit"
-                    className="text-sm bg-white text-[#2C3B2E] px-4 py-2.5 rounded-xl hover:bg-[#f5f0e8] transition shrink-0"
-                    style={{ fontWeight: 500 }}
-                  >
-                    Me prévenir
-                  </button>
-                </form>
-              </div>
-            </div>
-          </div>
-          </ScrollReveal>
-
-        </div>
-      </section>
-
-      {/* ── FAQ ── */}
-      <FAQ />
-
-      {/* ── CTA FINAL ── */}
-      <section className="py-20 md:py-32 px-6 md:px-10">
-        <div className="max-w-2xl mx-auto text-center">
-          <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-5" style={{ fontWeight: 500 }}>Pensé avec amour</p>
-          <h2 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(2rem, 4vw, 3rem)', lineHeight: 1.1, letterSpacing: '-0.02em' }}
-              className="text-[#2C3B2E] mb-6">
-            Pour simplifier le plus beau jour d&apos;une vie.
-          </h2>
-          <p style={{ fontSize: '0.95rem', lineHeight: 1.9 }} className="text-stone-500 mb-10">
-            Vous célébrez votre <em>good catch</em>. On s&apos;occupe du reste — pour que vous, vos témoins et vos
-            invités restiez ensemble, présents, et profitiez vraiment.
-          </p>
-          <a href="/auth"
-             className="inline-block bg-[#2C3B2E] text-white rounded-2xl hover:bg-[#1a2419] transition text-sm"
-             style={{ fontWeight: 500, letterSpacing: '0.01em', padding: '1rem 3.5rem' }}>
-            Je me connecte à mon espace →
+          onMouseEnter={e => { e.currentTarget.style.background = SAGE_DARK; e.currentTarget.style.transform = 'translateY(-1px)' }}
+          onMouseLeave={e => { e.currentTarget.style.background = SAGE; e.currentTarget.style.transform = 'translateY(0)' }}
+          >
+            Créer mon espace mariage
           </a>
-          <p className="mt-6 text-sm text-stone-400" style={{ fontWeight: 300 }}>
-            <a href="/rejoindre" className="hover:text-[#2C3B2E] transition">Invité(e) à un mariage ? Rejoindre →</a>
+          <a href="/rejoindre" style={{
+            fontSize: '0.85rem', fontWeight: 400, color: TEXT_MID,
+            textDecoration: 'none', borderBottom: '1px solid rgba(0,0,0,0.12)',
+            paddingBottom: 2, transition: 'all 0.2s', fontFamily: BODY,
+          }}
+          onMouseEnter={e => { e.currentTarget.style.color = SAGE; e.currentTarget.style.borderColor = SAGE }}
+          onMouseLeave={e => { e.currentTarget.style.color = TEXT_MID; e.currentTarget.style.borderColor = 'rgba(0,0,0,0.12)' }}
+          >
+            Invité(e) à un mariage ?
+          </a>
+        </div>
+
+        <p style={{
+          marginTop: '3rem', fontSize: '0.75rem', color: TEXT_SOFT,
+          animation: 'fadeIn 0.5s ease both 0.8s', fontFamily: BODY,
+        }}>
+          Gratuit pour les 100 premiers couples.
+          Ensuite&nbsp;: un seul paiement, pas d&apos;abonnement, pas de frais cachés.
+        </p>
+      </header>
+
+      {/* ══════════════════════════════════════════════
+          CONVERSATIONS — fond white
+      ══════════════════════════════════════════════ */}
+      <section
+        aria-label="Les problèmes que Kaatch résout"
+        style={{ padding: '5rem 2.5rem', background: WHITE }}
+      >
+        <div style={{ maxWidth: '62rem', margin: '0 auto' }}>
+          <h2 style={{
+            fontFamily: BODY, fontWeight: 700,
+            fontSize: 'clamp(1.5rem, 2.8vw, 2rem)',
+            color: SAGE_DARK, textAlign: 'center', marginBottom: '0.6rem', lineHeight: 1.15,
+          }}>
+            Et pour gérer tout ça, on fait comment&nbsp;?
+          </h2>
+          <p style={{
+            fontSize: '0.9rem', fontWeight: 300, color: TEXT_MID,
+            textAlign: 'center', marginBottom: '3rem', fontFamily: BODY,
+          }}>
+            Encore un groupe WhatsApp&nbsp;? Un Drive&nbsp;? Un tableur&nbsp;? Ou alors...
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
+
+            <div style={{ background: CREAM, borderRadius: 18, padding: '1.5rem' }}>
+              <p style={{ fontSize: '0.65rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: SAGE_MUTED, marginBottom: '1rem', textAlign: 'center', fontFamily: BODY }}>
+                Côté invités
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                {[
+                  { side: 'l', text: '"C\'est quoi le programme demain ?"' },
+                  { side: 'l', text: '"Vous pouvez m\'envoyer les photos ?"' },
+                  { side: 'r', text: '"Regarde dans le groupe WhatsApp"' },
+                  { side: 'l', text: '"Lequel ? Y en a 4"' },
+                  { side: 'sys', text: 'Jean-Pierre a quitté le groupe' },
+                  { side: 'l', text: '"... mamie a encore envoyé un GIF de chat"' },
+                ].map((b, i) => (
+                  <div key={i} className="reveal" style={{
+                    padding: b.side === 'sys' ? '0.2rem 0' : '0.7rem 1rem',
+                    borderRadius: b.side === 'sys' ? 0 : 16,
+                    borderBottomLeftRadius: b.side === 'l' ? 4 : undefined,
+                    borderBottomRightRadius: b.side === 'r' ? 4 : undefined,
+                    background: b.side === 'l' ? WHITE : b.side === 'r' ? SAGE : 'none',
+                    color: b.side === 'r' ? WHITE : b.side === 'sys' ? TEXT_SOFT : TEXT,
+                    fontSize: b.side === 'sys' ? '0.68rem' : '0.82rem',
+                    lineHeight: 1.45, maxWidth: '85%',
+                    alignSelf: b.side === 'l' ? 'flex-start' : b.side === 'r' ? 'flex-end' : 'center',
+                    fontFamily: BODY,
+                  }}>
+                    {b.text}
+                  </div>
+                ))}
+              </div>
+              <p style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.72rem', color: TEXT_SOFT, fontFamily: BODY }}>
+                On exagère à peine.
+              </p>
+            </div>
+
+            <div style={{ background: CREAM, borderRadius: 18, padding: '1.5rem' }}>
+              <p style={{ fontSize: '0.65rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: SAGE_MUTED, marginBottom: '1rem', textAlign: 'center', fontFamily: BODY }}>
+                Côté prestataires
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                {[
+                  { side: 'l', text: '"Combien de végétariens finalement ?"' },
+                  { side: 'r', text: '"Attends je vérifie... 6. Non 8. Non attends."' },
+                  { side: 'l', text: '"Et les sans gluten ?"' },
+                  { side: 'r', text: '"Je te renvoie le tableur ce soir"' },
+                  { side: 'l', text: '"Celui de la semaine dernière était pas à jour"' },
+                  { side: 'r', text: '"..."' },
+                ].map((b, i) => (
+                  <div key={i} className="reveal" style={{
+                    padding: '0.7rem 1rem', borderRadius: 16,
+                    borderBottomLeftRadius: b.side === 'l' ? 4 : undefined,
+                    borderBottomRightRadius: b.side === 'r' ? 4 : undefined,
+                    background: b.side === 'l' ? WHITE : SAGE,
+                    color: b.side === 'r' ? WHITE : TEXT,
+                    fontSize: '0.82rem', lineHeight: 1.45, maxWidth: '85%',
+                    alignSelf: b.side === 'l' ? 'flex-start' : 'flex-end',
+                    fontFamily: BODY,
+                  }}>
+                    {b.text}
+                  </div>
+                ))}
+              </div>
+              <p style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.72rem', color: TEXT_SOFT, fontFamily: BODY }}>
+                Spoiler&nbsp;: le tableur n&apos;a jamais été renvoyé.
+              </p>
+            </div>
+
+          </div>
+
+          <p className="reveal" style={{
+            marginTop: '3rem', textAlign: 'center',
+            fontSize: '1.15rem', fontWeight: 600, color: SAGE_DARK,
+            lineHeight: 1.45, maxWidth: '34rem',
+            marginLeft: 'auto', marginRight: 'auto', fontFamily: BODY,
+          }}>
+            Kaatch, c&apos;est la fin de ce bazar. Chacun accède à ce dont il a besoin,
+            au même endroit, sans rien demander à personne.
           </p>
         </div>
       </section>
 
-      {/* ── CONTACT ── */}
-      <section className="py-16 md:py-24 px-6 md:px-10 bg-[#f5f0e8] border-t border-stone-200">
-        <div className="max-w-xl mx-auto text-center">
-          <p className="text-xs tracking-[0.25em] uppercase text-[#2C3B2E] mb-4" style={{ fontWeight: 500 }}>Contact</p>
-          <h2 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(1.5rem, 3vw, 2rem)', lineHeight: 1.15, letterSpacing: '-0.02em' }}
-              className="text-[#2C3B2E] mb-2">
-            Une question ? Une idée ? Un commentaire ? Une suggestion ?
+      {/* ══════════════════════════════════════════════
+          TROIS PORTES — fond cream
+      ══════════════════════════════════════════════ */}
+      <section
+        aria-label="Un mariage, trois portes d'entrée"
+        style={{ padding: '5rem 2.5rem', background: CREAM }}
+      >
+        <div style={{ maxWidth: '62rem', margin: '0 auto' }}>
+          <h2 style={{
+            fontFamily: BODY, fontWeight: 700,
+            fontSize: 'clamp(1.7rem, 3.2vw, 2.4rem)',
+            color: SAGE_DARK, textAlign: 'center', marginBottom: '0.6rem', lineHeight: 1.15,
+          }}>
+            Un mariage, trois portes d&apos;entrée.
           </h2>
-          <p className="text-stone-500 mb-10" style={{ fontSize: '0.95rem', lineHeight: 1.8, fontWeight: 300 }}>
+          <p style={{
+            fontSize: '0.9rem', fontWeight: 300, color: TEXT_MID,
+            textAlign: 'center', marginBottom: '3.5rem',
+            maxWidth: '36rem', marginLeft: 'auto', marginRight: 'auto', fontFamily: BODY,
+          }}>
+            Les mariés profitent de leur journée. Les invités ont tout sous la main.
+            Les prestataires bossent sans vous déranger.
+          </p>
+
+          {/* Orbital desktop / stack mobile */}
+          <div className="orbits-wrap" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.2rem', position: 'relative' }}>
+
+            {/* Centre */}
+            <div className="reveal" style={{
+              background: SAGE, borderRadius: '50%',
+              width: '10rem', height: '10rem',
+              display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 8px 40px rgba(74,82,64,0.2)',
+              justifySelf: 'center', alignSelf: 'center',
+            }}>
+              <span style={{ fontFamily: SERIF, fontSize: '1.6rem', color: WHITE, marginBottom: '0.2rem' }}>K</span>
+              <h3 style={{ fontWeight: 600, fontSize: '0.88rem', color: WHITE, textAlign: 'center', fontFamily: BODY, margin: 0 }}>
+                Les mariés
+              </h3>
+              <p style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.65)', textAlign: 'center', marginTop: '0.2rem', fontFamily: BODY }}>
+                Organisent et profitent
+              </p>
+            </div>
+
+            {/* Espace mariés */}
+            <div className="reveal" style={{
+              background: WHITE, borderRadius: 14, padding: '1.2rem 1.4rem',
+              border: '1px solid rgba(0,0,0,0.05)',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+              transition: 'transform 0.2s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)' }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)' }}
+            >
+              <span style={{
+                display: 'inline-block', fontSize: '0.62rem', fontWeight: 600,
+                letterSpacing: '0.08em', textTransform: 'uppercase',
+                color: SAGE, background: 'rgba(74,82,64,0.08)',
+                padding: '0.2rem 0.6rem', borderRadius: 3, marginBottom: '0.6rem', fontFamily: BODY,
+              }}>
+                Espace mariés
+              </span>
+              <h4 style={{ fontWeight: 600, fontSize: '0.92rem', color: SAGE_DARK, marginBottom: '0.5rem', lineHeight: 1.3, fontFamily: BODY }}>
+                Le cockpit — simple et complet
+              </h4>
+              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                {["Invitations animées et RSVP en direct", "Budget, prestataires, devis", "Programme du jour éditable", "Galerie photos avec modération", "Livre d'or, playlist, messagerie"].map(item => (
+                  <li key={item} style={{ fontSize: '0.76rem', fontWeight: 300, color: TEXT_MID, lineHeight: 1.4, paddingLeft: '0.7rem', position: 'relative', fontFamily: BODY }}>
+                    <span style={{ position: 'absolute', left: 0, top: '0.4rem', width: 3, height: 3, borderRadius: '50%', background: SAGE_MUTED, display: 'block' }} />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Espace invités */}
+            <div className="reveal" style={{
+              background: WHITE, borderRadius: 14, padding: '1.2rem 1.4rem',
+              border: '1px solid rgba(0,0,0,0.05)',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+              transition: 'transform 0.2s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)' }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)' }}
+            >
+              <span style={{
+                display: 'inline-block', fontSize: '0.62rem', fontWeight: 600,
+                letterSpacing: '0.08em', textTransform: 'uppercase',
+                color: SAGE, background: 'rgba(74,82,64,0.08)',
+                padding: '0.2rem 0.6rem', borderRadius: 3, marginBottom: '0.6rem', fontFamily: BODY,
+              }}>
+                Espace invités
+              </span>
+              <h4 style={{ fontWeight: 600, fontSize: '0.92rem', color: SAGE_DARK, marginBottom: '0.5rem', lineHeight: 1.3, fontFamily: BODY }}>
+                Tout ce qu&apos;il faut, sans rien demander
+              </h4>
+              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                {["Faire-part personnel et RSVP en un clic", "Programme, contacts, hébergements", "Album photo partagé par QR code", "Livre d'or, messagerie entre invités", "Suggestions musicales par moment"].map(item => (
+                  <li key={item} style={{ fontSize: '0.76rem', fontWeight: 300, color: TEXT_MID, lineHeight: 1.4, paddingLeft: '0.7rem', position: 'relative', fontFamily: BODY }}>
+                    <span style={{ position: 'absolute', left: 0, top: '0.4rem', width: 3, height: 3, borderRadius: '50%', background: SAGE_MUTED, display: 'block' }} />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Espace prestataires */}
+            <div className="reveal" style={{
+              background: WHITE, borderRadius: 14, padding: '1.2rem 1.4rem',
+              border: '1px solid rgba(0,0,0,0.05)',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+              transition: 'transform 0.2s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)' }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)' }}
+            >
+              <span style={{
+                display: 'inline-block', fontSize: '0.62rem', fontWeight: 600,
+                letterSpacing: '0.08em', textTransform: 'uppercase',
+                color: SAGE, background: 'rgba(74,82,64,0.08)',
+                padding: '0.2rem 0.6rem', borderRadius: 3, marginBottom: '0.6rem', fontFamily: BODY,
+              }}>
+                Espace prestataires
+              </span>
+              <h4 style={{ fontWeight: 600, fontSize: '0.92rem', color: SAGE_DARK, marginBottom: '0.5rem', lineHeight: 1.3, fontFamily: BODY }}>
+                Les infos utiles, toujours à jour
+              </h4>
+              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                {["Plan de table avec régimes alimentaires", "Nombre exact de couverts, en temps réel", "Programme et timing de la journée", "Export des données pour le traiteur", "Accès en lecture — sans interférer"].map(item => (
+                  <li key={item} style={{ fontSize: '0.76rem', fontWeight: 300, color: TEXT_MID, lineHeight: 1.4, paddingLeft: '0.7rem', position: 'relative', fontFamily: BODY }}>
+                    <span style={{ position: 'absolute', left: 0, top: '0.4rem', width: 3, height: 3, borderRadius: '50%', background: SAGE_MUTED, display: 'block' }} />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════
+          FEATURES — fond white, scroll horizontal
+      ══════════════════════════════════════════════ */}
+      <section
+        id="fonctionnalites"
+        aria-label="Fonctionnalités de Kaatch"
+        style={{ padding: '5rem 0', background: WHITE }}
+      >
+        <div style={{ padding: '0 2.5rem', marginBottom: '2.5rem', maxWidth: '68rem', marginLeft: 'auto', marginRight: 'auto' }}>
+          <h2 style={{
+            fontFamily: BODY, fontWeight: 700,
+            fontSize: 'clamp(1.7rem, 3.2vw, 2.4rem)',
+            color: SAGE_DARK, marginBottom: '0.6rem', lineHeight: 1.15,
+          }}>
+            Tout ce que vous allez enfin arrêter de chercher.
+          </h2>
+          <p style={{ fontSize: '0.92rem', fontWeight: 300, color: TEXT_MID, maxWidth: '34rem', fontFamily: BODY }}>
+            Chacune de ces fonctionnalités résout un problème que vous connaissez déjà
+            — ou que vous découvrirez dans 3 mois.
+          </p>
+        </div>
+
+        <FeaturesTrack />
+      </section>
+
+      {/* ══════════════════════════════════════════════
+          TEASER — fond sage-dark
+      ══════════════════════════════════════════════ */}
+      <section
+        aria-label="Ce qui vous attend encore"
+        style={{ padding: '5rem 2.5rem', background: SAGE_DARK, color: CREAM, textAlign: 'center' }}
+      >
+        <h2 style={{
+          fontFamily: BODY, fontWeight: 700,
+          fontSize: 'clamp(1.6rem, 3vw, 2.2rem)',
+          color: CREAM, marginBottom: '1.2rem', lineHeight: 1.15,
+        }}>
+          Ce n&apos;est pas tout. Loin de là.
+        </h2>
+        <p style={{
+          fontSize: '0.92rem', fontWeight: 300,
+          color: 'rgba(245,240,232,0.65)',
+          maxWidth: '34rem', margin: '0 auto 2.5rem', lineHeight: 1.7, fontFamily: BODY,
+        }}>
+          Derrière votre espace mariage, il y a tout un monde de petites attentions
+          que vos invités vont adorer — et que vous ne trouverez nulle part ailleurs.
+        </p>
+
+        <div style={{
+          display: 'flex', gap: '0.8rem', justifyContent: 'center',
+          flexWrap: 'wrap', marginBottom: '1.5rem',
+          maxWidth: '50rem', marginLeft: 'auto', marginRight: 'auto',
+        }}>
+          {[
+            { label: "Livre d'or", blur: false },
+            { label: "Playlist par moment", blur: false },
+            { label: "Messagerie de groupe", blur: false },
+            { label: "Idées surprises", blur: true },
+            { label: "Jeux et animations", blur: true },
+            { label: "Contacts utiles", blur: false },
+            { label: "Hébergements", blur: false },
+            { label: "Et d'autres choses encore", blur: true },
+          ].map(pill => (
+            <span key={pill.label} style={{
+              display: 'inline-flex', alignItems: 'center',
+              fontSize: '0.78rem', fontWeight: 400,
+              color: 'rgba(245,240,232,0.8)',
+              background: 'rgba(245,240,232,0.08)',
+              border: '1px solid rgba(245,240,232,0.1)',
+              padding: '0.45rem 1rem', borderRadius: 100,
+              fontFamily: BODY,
+            }}>
+              <span style={pill.blur ? { filter: 'blur(4px)', userSelect: 'none' } : {}}>
+                {pill.label}
+              </span>
+            </span>
+          ))}
+        </div>
+
+        <div style={{ width: '3rem', height: 1, background: 'rgba(245,240,232,0.15)', margin: '2rem auto' }} />
+
+        <p style={{
+          fontSize: '0.82rem', fontWeight: 300,
+          color: 'rgba(245,240,232,0.5)',
+          maxWidth: '30rem', margin: '0 auto 2.5rem', lineHeight: 1.7, fontFamily: BODY,
+        }}>
+          Et demain&nbsp;? Un studio créatif pour concevoir toute votre papeterie assortie,
+          des suggestions de cadeaux, des mises en scène de tables...
+          Et Kaatch s&apos;adaptera aussi aux baptêmes et aux événements d&apos;entreprise.
+        </p>
+
+        <a href="/auth" style={{
+          display: 'inline-flex', alignItems: 'center',
+          fontFamily: BODY, fontSize: '0.88rem', fontWeight: 600,
+          color: SAGE_DARK, background: CREAM,
+          padding: '0.85rem 1.7rem', borderRadius: 8,
+          textDecoration: 'none', transition: 'all 0.25s',
+        }}
+        onMouseEnter={e => { e.currentTarget.style.background = WHITE }}
+        onMouseLeave={e => { e.currentTarget.style.background = CREAM }}
+        >
+          Découvrir tout ce qui vous attend
+        </a>
+        <p style={{ marginTop: '1.2rem', fontSize: '0.7rem', color: 'rgba(245,240,232,0.35)', fontFamily: BODY }}>
+          Créez votre espace en 2 minutes pour voir l&apos;intérieur.
+        </p>
+      </section>
+
+      {/* ══════════════════════════════════════════════
+          POURQUOI KAATCH — fond sage-dark
+          Instrument Serif UNIQUEMENT pour les h3
+      ══════════════════════════════════════════════ */}
+      <section
+        aria-label="Pourquoi Kaatch"
+        style={{ padding: '5rem 2.5rem', background: SAGE_DARK, color: CREAM }}
+      >
+        <div style={{ maxWidth: '42rem', margin: '0 auto', textAlign: 'center' }}>
+          <h2 style={{
+            fontFamily: BODY, fontWeight: 700, fontSize: '1.6rem',
+            color: CREAM, marginBottom: '0.5rem', lineHeight: 1.15,
+          }}>
+            Pourquoi &quot;Kaatch&quot;&nbsp;?
+          </h2>
+          <p style={{
+            fontFamily: SERIF,
+            fontSize: 'clamp(1.4rem, 2.5vw, 2rem)',
+            color: 'rgba(245,240,232,0.7)',
+            marginBottom: '2.5rem', lineHeight: 1.3,
+          }}>
+            Good catch. Catch up.
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
+            <div className="reveal" style={{
+              background: 'rgba(245,240,232,0.06)',
+              border: '1px solid rgba(245,240,232,0.08)',
+              borderRadius: 14, padding: '2rem', textAlign: 'left',
+            }}>
+              <h3 style={{ fontFamily: SERIF, fontSize: '1.5rem', fontWeight: 400, color: CREAM, marginBottom: '0.5rem' }}>
+                Good catch.
+              </h3>
+              <p style={{ fontSize: '0.88rem', fontWeight: 300, color: 'rgba(245,240,232,0.65)', lineHeight: 1.6, fontFamily: BODY }}>
+                La bonne personne. Celle qu&apos;on ne laisse pas partir.
+              </p>
+            </div>
+            <div className="reveal" style={{
+              background: 'rgba(245,240,232,0.06)',
+              border: '1px solid rgba(245,240,232,0.08)',
+              borderRadius: 14, padding: '2rem', textAlign: 'left',
+            }}>
+              <h3 style={{ fontFamily: SERIF, fontSize: '1.5rem', fontWeight: 400, color: CREAM, marginBottom: '0.5rem' }}>
+                Catch up.
+              </h3>
+              <p style={{ fontSize: '0.88rem', fontWeight: 300, color: 'rgba(245,240,232,0.65)', lineHeight: 1.6, fontFamily: BODY }}>
+                Se retrouver. Enfin tous au même endroit.
+              </p>
+            </div>
+          </div>
+
+          <p className="reveal" style={{
+            fontSize: '0.95rem', fontWeight: 300,
+            color: 'rgba(245,240,232,0.7)',
+            lineHeight: 1.75, maxWidth: '36rem', margin: '0 auto', fontFamily: BODY,
+          }}>
+            Un mariage, c&apos;est exactement ça. Le moment où tout le monde
+            se retrouve pour célébrer votre <em>good catch</em>.
+            Maintenant, on vous aide à <em>catch up</em>{' '}
+            avec tous vos invités, chaque détail, chaque souvenir — sans rien oublier.
+          </p>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════
+          PRICING — fond white
+      ══════════════════════════════════════════════ */}
+      <section
+        id="tarifs"
+        aria-label="Tarifs Kaatch"
+        style={{ padding: '5rem 2.5rem', background: WHITE }}
+      >
+        <div style={{ maxWidth: '52rem', margin: '0 auto' }}>
+          <h2 style={{
+            fontFamily: BODY, fontWeight: 700,
+            fontSize: 'clamp(1.7rem, 3.2vw, 2.4rem)',
+            color: SAGE_DARK, marginBottom: '0.6rem', lineHeight: 1.15,
+          }}>
+            En ce moment, c&apos;est offert.
+          </h2>
+          <p style={{
+            fontSize: '0.92rem', fontWeight: 300, color: TEXT_MID,
+            marginBottom: '2.5rem', maxWidth: '36rem', lineHeight: 1.7, fontFamily: BODY,
+          }}>
+            Kaatch est en lancement. Les 100 premiers couples accèdent à tout,
+            gratuitement, sans limite de temps. En échange, votre avis pour améliorer Kaatch.
+            C&apos;est tout. Pas de piège.
+          </p>
+
+          {/* Offre de lancement */}
+          <div className="reveal" style={{
+            background: SAGE, borderRadius: 16, padding: '2.5rem',
+            color: CREAM, marginBottom: '2rem', position: 'relative', overflow: 'hidden',
+          }}>
+            <div style={{
+              position: 'absolute', top: '-4rem', right: '-4rem',
+              width: '12rem', height: '12rem', borderRadius: '50%',
+              background: 'rgba(255,255,255,0.04)',
+            }} />
+            <span style={{
+              display: 'inline-block', fontSize: '0.65rem', fontWeight: 600,
+              letterSpacing: '0.08em', textTransform: 'uppercase',
+              background: 'rgba(255,255,255,0.12)',
+              padding: '0.3rem 0.8rem', borderRadius: 4, marginBottom: '1rem', fontFamily: BODY,
+            }}>
+              Offre de lancement
+            </span>
+            <h3 style={{ fontWeight: 700, fontSize: '1.5rem', color: CREAM, marginBottom: '0.6rem', lineHeight: 1.25, fontFamily: BODY }}>
+              Accès complet offert pour les 100 premiers couples.
+            </h3>
+            <p style={{ fontSize: '0.88rem', fontWeight: 300, color: 'rgba(245,240,232,0.75)', lineHeight: 1.6, marginBottom: '1.5rem', maxWidth: '28rem', fontFamily: BODY }}>
+              Invités illimités, toutes les fonctionnalités, aucune restriction.
+            </p>
+            <a href="/auth" style={{
+              display: 'inline-flex', alignItems: 'center',
+              fontFamily: BODY, fontSize: '0.88rem', fontWeight: 600,
+              color: SAGE_DARK, background: CREAM,
+              padding: '0.85rem 1.7rem', borderRadius: 8,
+              textDecoration: 'none', transition: 'background 0.2s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = WHITE }}
+            onMouseLeave={e => { e.currentTarget.style.background = CREAM }}
+            >
+              Réserver ma place
+            </a>
+            <p style={{ marginTop: '1rem', fontSize: '0.72rem', color: 'rgba(245,240,232,0.5)', fontFamily: BODY }}>
+              Il reste quelques places — premier arrivé, premier servi.
+            </p>
+          </div>
+
+          <p style={{
+            fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.08em',
+            textTransform: 'uppercase', color: TEXT_SOFT,
+            marginBottom: '1.2rem', fontFamily: BODY,
+          }}>
+            Ensuite, voici comment les offres seront articulées
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
+            {[
+              { name: 'Essentiel', price: '0 €', sub: 'Pour tester, sans engagement', items: ["30 invités, 20 photos", "Faire-part digital et RSVP", "Programme du jour"] },
+              { name: 'Mariage', price: '45 €', sub: 'Paiement unique', items: ["Invités illimités, 200 photos", "Faire-part animé, plan de table", "Budget, livre d'or, export"] },
+              { name: 'Studio', price: '99 €', sub: 'Bientôt disponible', items: ["Tout le plan Mariage", "Papeterie assortie sur-mesure", "Templates exclusifs, support VIP"] },
+            ].map(plan => (
+              <div key={plan.name} style={{ background: CREAM, borderRadius: 12, padding: '1.4rem' }}>
+                <h4 style={{ fontWeight: 600, fontSize: '0.92rem', color: SAGE_DARK, marginBottom: '0.2rem', fontFamily: BODY }}>
+                  {plan.name}
+                </h4>
+                <p style={{ fontWeight: 700, fontSize: '1.4rem', color: SAGE_DARK, fontFamily: BODY }}>{plan.price}</p>
+                <p style={{ fontSize: '0.68rem', color: TEXT_SOFT, marginBottom: '0.8rem', fontFamily: BODY }}>{plan.sub}</p>
+                <ul style={{ listStyle: 'none' }}>
+                  {plan.items.map(item => (
+                    <li key={item} style={{ fontSize: '0.76rem', fontWeight: 300, color: TEXT_MID, lineHeight: 1.4, marginBottom: '0.3rem', fontFamily: BODY }}>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════
+          FAQ — fond cream, blocs TOUJOURS ouverts
+      ══════════════════════════════════════════════ */}
+      <section
+        id="faq"
+        aria-label="Questions fréquentes"
+        style={{ padding: '5rem 2.5rem', background: CREAM }}
+      >
+        <div style={{ maxWidth: '40rem', margin: '0 auto' }}>
+          <h2 style={{
+            fontFamily: BODY, fontWeight: 700, fontSize: '1.6rem',
+            color: SAGE_DARK, marginBottom: '2.5rem', lineHeight: 1.15,
+          }}>
+            On répond avant que vous demandiez.
+          </h2>
+
+          {[
+            {
+              q: "Mes invités doivent créer un compte ?",
+              a: "Non, jamais. Chaque invité reçoit un lien unique. Un clic et il accède à tout — sans mot de passe, sans inscription, sans application à télécharger.",
+            },
+            {
+              q: "Et les prestataires ?",
+              a: "Vous leur donnez un accès en lecture seule. Le traiteur voit les régimes alimentaires à jour, le photographe a le programme — et personne ne vous appelle à 23h pour \"juste une petite info\".",
+            },
+            {
+              q: "On peut garder un faire-part papier ?",
+              a: "Évidemment. Le lien Kaatch ou le QR code se glisse sur n'importe quel support — papier, e-mail, WhatsApp, pigeon voyageur. Le digital complète le papier, il ne le remplace pas.",
+            },
+            {
+              q: "Nos données et nos photos sont en sécurité ?",
+              a: "Tout est chiffré et hébergé en Europe. On ne revend rien, on ne partage rien. Vous restez propriétaires de tout ce que vous publiez.",
+            },
+            {
+              q: "Et après le mariage ?",
+              a: "Votre espace reste actif. Les photos, le livre d'or, la playlist — tout est téléchargeable quand vous voulez, même 5 ans après pour une bonne crise de nostalgie.",
+            },
+            {
+              q: "C'est compliqué à mettre en place ?",
+              a: "Vous créez votre espace en 2 minutes. Vous ajoutez vos invités. Vous envoyez les liens. C'est tout. Si vous savez envoyer un message, vous savez utiliser Kaatch.",
+            },
+            {
+              q: "Kaatch fonctionne sur téléphone ?",
+              a: "Oui, entièrement. L'espace mariés comme l'espace invités sont conçus mobile-first. Aucune application à télécharger — tout fonctionne depuis le navigateur.",
+            },
+          ].map((item, i) => (
+            <div key={i} className="reveal" style={{
+              padding: '1.3rem 0',
+              borderBottom: `1px solid ${CREAM_MID}`,
+            }}>
+              <h3 style={{
+                fontWeight: 500, fontSize: '0.95rem',
+                color: SAGE_DARK, marginBottom: '0.5rem', fontFamily: BODY,
+              }}>
+                {item.q}
+              </h3>
+              <p style={{ fontSize: '0.86rem', fontWeight: 300, color: TEXT_MID, lineHeight: 1.7, fontFamily: BODY }}>
+                {item.a}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════
+          CTA FINAL — fond sage-dark
+      ══════════════════════════════════════════════ */}
+      <section
+        style={{ padding: '5rem 2.5rem', textAlign: 'center', background: SAGE_DARK, color: CREAM }}
+      >
+        <h2 style={{
+          fontFamily: BODY, fontWeight: 700,
+          fontSize: 'clamp(1.5rem, 2.8vw, 2rem)',
+          marginBottom: '0.8rem', color: CREAM, lineHeight: 1.15,
+        }}>
+          Prêts à tout centraliser&nbsp;?
+        </h2>
+        <p style={{
+          fontSize: '0.88rem', fontWeight: 300,
+          color: 'rgba(245,240,232,0.6)',
+          marginBottom: '2rem', maxWidth: '28rem',
+          marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6, fontFamily: BODY,
+        }}>
+          Créez votre espace en 2 minutes. C&apos;est gratuit pour les 100 premiers couples,
+          et on est là si vous avez des questions.
+        </p>
+        <a href="/auth" style={{
+          display: 'inline-flex', alignItems: 'center',
+          fontFamily: BODY, fontSize: '0.88rem', fontWeight: 600,
+          color: SAGE_DARK, background: CREAM,
+          padding: '0.85rem 1.7rem', borderRadius: 8,
+          textDecoration: 'none', transition: 'background 0.2s',
+        }}
+        onMouseEnter={e => { e.currentTarget.style.background = WHITE }}
+        onMouseLeave={e => { e.currentTarget.style.background = CREAM }}
+        >
+          Créer mon espace mariage
+        </a>
+      </section>
+
+      {/* ══════════════════════════════════════════════
+          CONTACT
+      ══════════════════════════════════════════════ */}
+      <section style={{ padding: '4rem 2.5rem', background: CREAM, borderTop: `1px solid ${CREAM_MID}` }}>
+        <div style={{ maxWidth: '38rem', margin: '0 auto', textAlign: 'center' }}>
+          <p style={{ fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: TEXT_SOFT, marginBottom: '1rem', fontFamily: BODY }}>
+            Contact
+          </p>
+          <h2 style={{
+            fontFamily: BODY, fontWeight: 700,
+            fontSize: 'clamp(1.2rem, 2.5vw, 1.6rem)',
+            color: SAGE_DARK, marginBottom: '0.5rem', lineHeight: 1.15,
+          }}>
+            Une question ? Une idée ?
+          </h2>
+          <p style={{ fontSize: '0.88rem', fontWeight: 300, color: TEXT_MID, marginBottom: '2rem', lineHeight: 1.7, fontFamily: BODY }}>
             On vous répond dans la journée.
           </p>
-          <div className="bg-white/70 rounded-2xl p-8 shadow-sm border border-stone-100">
+          <div style={{ background: WHITE, borderRadius: 16, padding: '2rem' }}>
             <ContactForm />
           </div>
         </div>
       </section>
 
-      {/* ── FOOTER ── */}
-      <footer className="border-t border-stone-200 py-12 px-6 md:px-10 bg-[#f5f0e8]">
-        <div className="max-w-5xl mx-auto">
-          <div className="flex flex-col sm:flex-row items-start justify-between gap-8 mb-8">
-            <div className="max-w-xs">
-              <span style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: '1.1rem', letterSpacing: '-0.02em' }}
-                    className="text-[#2C3B2E] block mb-2">Kaatch</span>
-              <p className="text-xs text-stone-400" style={{ fontWeight: 300, lineHeight: 1.7 }}>
-                L&apos;app qui remplace les listes, les WhatsApp galère, et les tableurs Excel.
-                Pour les mariés qui veulent se concentrer sur leur mariage, pas sur son organisation.
-              </p>
-            </div>
-            <div className="flex items-center gap-5 flex-wrap">
-              {[
-                { label: "Comment ça marche", href: '#comment-ca-marche' },
-                { label: 'Studio Créatif', href: '#studio' },
-                { label: 'Offres', href: '#offres' },
-                { label: 'Inspirations', href: '/inspirations' },
-                { label: 'Espace invités', href: '/rejoindre' },
-              ].map(l => (
-                <a key={l.href} href={l.href}
-                   className="text-sm text-stone-400 hover:text-[#2C3B2E] transition" style={{ fontWeight: 300 }}>
-                  {l.label}
-                </a>
-              ))}
-            </div>
-            <a href="/auth" className="text-sm text-[#2C3B2E] hover:underline shrink-0" style={{ fontWeight: 400 }}>Connexion →</a>
-          </div>
-          {/* Product Hunt */}
-          <div className="border-t border-stone-200 pt-6 pb-4 flex justify-center">
-            <a href="https://www.producthunt.com/products/kaatch?embed=true&utm_source=embed&utm_medium=post_embed"
-               target="_blank" rel="noopener noreferrer"
-               className="inline-flex items-center gap-3 border border-stone-200 rounded-xl px-4 py-2.5 bg-white hover:border-[#FF6154] transition group">
-              <img src="https://ph-files.imgix.net/3fcc3c1c-fd88-4f87-a9fe-f2b47ec6f6e2.png?auto=format&fit=crop&w=80&h=80"
-                   alt="Kaatch sur Product Hunt" width={32} height={32}
-                   className="rounded-md object-cover" />
-              <span className="text-sm text-stone-500 group-hover:text-[#FF6154] transition" style={{ fontWeight: 400 }}>
-                Retrouvez Kaatch sur{' '}
-                <span style={{ fontWeight: 600, color: '#FF6154' }}>Product Hunt</span>
-              </span>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                   className="text-stone-300 group-hover:text-[#FF6154] transition">
-                <path d="M7 17L17 7M7 7h10v10"/>
-              </svg>
+      {/* ══════════════════════════════════════════════
+          FOOTER
+      ══════════════════════════════════════════════ */}
+      <footer style={{
+        padding: '2rem 2.5rem', display: 'flex',
+        justifyContent: 'space-between', alignItems: 'center',
+        flexWrap: 'wrap', gap: '1rem',
+        fontSize: '0.72rem', color: TEXT_SOFT,
+        background: CREAM, borderTop: `1px solid ${CREAM_MID}`,
+        fontFamily: BODY,
+      }}>
+        <span>Kaatch — fait à Paris, avec des vrais humains dedans.</span>
+        <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+          {[
+            { label: 'Fonctionnalités', href: '#fonctionnalites' },
+            { label: 'Tarifs', href: '#tarifs' },
+            { label: 'Questions', href: '#faq' },
+            { label: 'Mentions légales', href: '/mentions-legales' },
+            { label: 'Confidentialité', href: '/politique-de-confidentialite' },
+            { label: 'Contact', href: 'mailto:bonjour@kaatch.fr' },
+            { label: 'Instagram', href: 'https://instagram.com/kaatch.fr' },
+          ].map(l => (
+            <a key={l.href} href={l.href}
+               style={{ color: TEXT_SOFT, textDecoration: 'none', transition: 'color 0.2s' }}
+               onMouseEnter={e => { e.currentTarget.style.color = SAGE }}
+               onMouseLeave={e => { e.currentTarget.style.color = TEXT_SOFT }}
+            >
+              {l.label}
             </a>
-          </div>
-
-          <div className="border-t border-stone-200 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-stone-400" style={{ fontWeight: 300 }}>
-              © 2026 Kaatch —{' '}
-              <a href="mailto:bonjour@kaatch.fr" className="hover:text-[#2C3B2E] transition">bonjour@kaatch.fr</a>
-              <span className="hidden sm:inline"> · Aucun groupe WhatsApp n&apos;a été maltraité dans la fabrication de ce site.</span>
-            </p>
-            <div className="flex items-center gap-4 flex-wrap justify-center">
-              {/* Réseaux sociaux */}
-              <div className="flex items-center gap-3">
-                <a href="https://www.instagram.com/kaatch.fr" target="_blank" rel="noopener noreferrer"
-                   aria-label="Instagram" className="text-stone-400 hover:text-[#2C3B2E] transition">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-                    <circle cx="12" cy="12" r="4"/>
-                    <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
-                  </svg>
-                </a>
-                <a href="https://www.facebook.com/kaatch.fr" target="_blank" rel="noopener noreferrer"
-                   aria-label="Facebook" className="text-stone-400 hover:text-[#2C3B2E] transition">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
-                  </svg>
-                </a>
-                <a href="https://www.pinterest.fr/kaatchfr" target="_blank" rel="noopener noreferrer"
-                   aria-label="Pinterest" className="text-stone-400 hover:text-[#2C3B2E] transition">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/>
-                  </svg>
-                </a>
-              </div>
-              <div className="flex items-center gap-4">
-                {[
-                  { label: 'Mentions légales', href: '/mentions-legales' },
-                  { label: 'CGV', href: '/cgv' },
-                  { label: 'Confidentialité', href: '/politique-de-confidentialite' },
-                ].map(l => (
-                  <a key={l.href} href={l.href}
-                     className="text-xs text-stone-400 hover:text-[#2C3B2E] transition" style={{ fontWeight: 300 }}>
-                    {l.label}
-                  </a>
-                ))}
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
       </footer>
-      <div className="flex justify-center py-4 bg-[#f5f0e8]">
-        <a href="https://postyourstartup.co/startup/kaatch?ref=badge" target="_blank" rel="noopener noreferrer">
-          <img src="https://postyourstartup.co/api/badge/kaatch?theme=neutral" alt="Featured on PostYourStartup" width="159" height="41" />
+
+      {/* Product Hunt badge */}
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '1rem', background: CREAM }}>
+        <a href="https://www.producthunt.com/products/kaatch?embed=true&utm_source=embed&utm_medium=post_embed"
+           target="_blank" rel="noopener noreferrer"
+           style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', border: `1px solid ${CREAM_MID}`, borderRadius: 12, padding: '0.6rem 1rem', background: WHITE, textDecoration: 'none', transition: 'border-color 0.2s' }}>
+          <img src="https://ph-files.imgix.net/3fcc3c1c-fd88-4f87-a9fe-f2b47ec6f6e2.png?auto=format&fit=crop&w=80&h=80"
+               alt="Kaatch sur Product Hunt" width={28} height={28} style={{ borderRadius: 6, objectFit: 'cover' }} />
+          <span style={{ fontSize: '0.82rem', color: TEXT_MID, fontFamily: BODY, fontWeight: 400 }}>
+            Retrouvez Kaatch sur{' '}
+            <strong style={{ fontWeight: 600, color: '#FF6154' }}>Product Hunt</strong>
+          </span>
         </a>
       </div>
+
     </main>
   )
 }

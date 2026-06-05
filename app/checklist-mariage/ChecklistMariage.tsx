@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { track } from '@vercel/analytics'
 
 const SAGE = '#4a5240'
 const SAGE_DARK = '#2d3228'
@@ -300,7 +299,9 @@ export default function ChecklistMariage() {
       doc.text('Genere par Kaatch — kaatch.fr/checklist-mariage', 20, 287)
 
       doc.save('checklist-mariage-kaatch.pdf')
-      track('pdf_download', { tool: 'checklist', progression: pct, checked: checked.size })
+      if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+        window.gtag('event', 'pdf_download', { tool: 'checklist', progression: pct, checked: checked.size })
+      }
     } catch (err) {
       console.error('PDF error:', err)
     }

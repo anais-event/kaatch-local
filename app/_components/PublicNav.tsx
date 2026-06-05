@@ -24,7 +24,7 @@ const features = [
 
 const navLinksConfig = [
   { labelKey: 'nav.studio',       subKey: 'nav.studioSub',  href: '/studio' },
-  { labelKey: 'nav.calculator',   subKey: 'nav.calculatorSub',   href: '/budget-mariage' },
+  { labelKey: 'nav.outils',   subKey: 'nav.outisSub',   href: '/outils' },
   { labelKey: 'nav.inspirations', subKey: 'nav.inspirationsSub',  href: '/inspirations' },
   { labelKey: 'nav.forum',   subKey: 'nav.forumSub', href: '/entre-nous' },
 ]
@@ -127,7 +127,7 @@ export default function PublicNav({ active }: { active?: string }) {
           </div>
 
           {navLinksConfig.map(l => {
-            const isCalculator = l.href === '/budget-mariage'
+            const isCalculator = false
             const linkClass = `flex flex-col items-center px-3 py-1.5 rounded-lg transition hover:bg-stone-100 ${active === l.href.slice(1) ? 'bg-stone-100' : ''}`
 
             return isCalculator ? (
@@ -238,7 +238,7 @@ export default function PublicNav({ active }: { active?: string }) {
             )}
 
             {navLinksConfig.map(l => {
-              const isCalculator = l.href === '/budget-mariage'
+              const isCalculator = false
               const linkClass = "flex items-center justify-between px-4 py-3 rounded-xl hover:bg-stone-100 transition"
 
               return isCalculator ? (

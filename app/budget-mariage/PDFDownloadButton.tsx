@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback } from 'react'
+import { track } from '@vercel/analytics'
 import type { CostBreakdown, WeddingLevel, Region } from '@/lib/calculator/budget-formulas'
 
 interface PDFDownloadButtonProps {
@@ -147,6 +148,7 @@ export default function PDFDownloadButton({
       }
 
       pdf.save(`budget-mariage-${guestCount}-invites.pdf`)
+      track('pdf_download', { tool: 'budget', guests: guestCount, level, region })
     } catch (error) {
       console.error('Erreur lors de la génération du PDF:', error)
       alert('Impossible de générer le PDF. Veuillez réessayer.')

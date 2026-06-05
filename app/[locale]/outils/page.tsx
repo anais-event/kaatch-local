@@ -4,10 +4,10 @@ import PublicNav from '@/app/_components/PublicNav'
 
 export const metadata: Metadata = {
   title: 'Outils gratuits pour organiser votre mariage | Kaatch',
-  description: 'Calculateur de budget, checklist interactive, plan de table — des outils gratuits pour préparer votre mariage sereinement. Sans inscription.',
+  description: 'Calculateur de budget, checklist interactive — des outils gratuits pour préparer votre mariage sereinement. Sans inscription.',
   openGraph: {
     title: 'Outils gratuits pour organiser votre mariage | Kaatch',
-    description: 'Des outils pratiques et gratuits pour préparer votre mariage : budget, checklist, plan de table et plus encore.',
+    description: 'Des outils pratiques et gratuits pour préparer votre mariage : budget, checklist et plus encore.',
     url: 'https://kaatch.fr/outils',
     type: 'website',
   },
@@ -25,7 +25,7 @@ const tools = [
     href: '/checklist-mariage',
     emoji: '✅',
     label: 'Checklist mariage',
-    description: 'Toutes les étapes mois par mois, avec les détails auxquels on ne pense pas toujours. Cases cochées sauvegardées automatiquement.',
+    description: "Toutes les étapes mois par mois, avec les détails auxquels on ne pense pas toujours. Cases cochées sauvegardées automatiquement.",
     cta: 'Ouvrir la checklist →',
     badge: 'Nouveau',
   },
@@ -33,7 +33,7 @@ const tools = [
     href: '/budget-mariage',
     emoji: '💰',
     label: 'Calculateur de budget',
-    description: 'Estimez le coût de votre mariage selon votre région, le nombre d\'invités et vos choix. Export PDF inclus.',
+    description: "Estimez le coût de votre mariage selon votre région, le nombre d'invités et vos choix. Export PDF inclus.",
     cta: 'Calculer mon budget →',
     badge: null,
   },
@@ -41,7 +41,7 @@ const tools = [
 
 const coming = [
   { emoji: '🪑', label: 'Plan de table', description: 'Glissez-déposez vos invités sur un plan de table visuel. Gratuit.' },
-  { emoji: '📋', label: "Liste d'invités", description: 'Gérez votre liste, les RSVP et les régimes alimentaires en un seul tableau.' },
+  { emoji: '📋', label: "Liste d'invités", description: "Gérez votre liste, les RSVP et les régimes alimentaires en un seul tableau." },
   { emoji: '📅', label: 'Programme mariage', description: 'Construisez le programme de votre journée et partagez-le avec vos invités.' },
 ]
 
@@ -53,7 +53,6 @@ export default function OutilsPage() {
       <div className="pt-24 pb-20 px-5 md:px-10">
         <div className="max-w-3xl mx-auto">
 
-          {/* Header */}
           <div className="mb-10">
             <p className="text-xs text-stone-400 mb-3 uppercase tracking-widest" style={{ fontWeight: 300 }}>
               Kaatch
@@ -66,7 +65,6 @@ export default function OutilsPage() {
             </p>
           </div>
 
-          {/* Available tools */}
           <div className="space-y-4 mb-12">
             {tools.map(tool => (
               <Link
@@ -107,7 +105,6 @@ export default function OutilsPage() {
             ))}
           </div>
 
-          {/* Coming soon */}
           <div>
             <p className="text-xs text-stone-400 mb-4 uppercase tracking-widest" style={{ fontWeight: 300 }}>
               Bientôt disponibles
@@ -130,7 +127,6 @@ export default function OutilsPage() {
             </div>
           </div>
 
-          {/* CTA Kaatch */}
           <div className="mt-12 rounded-2xl p-7 text-center" style={{ background: SAGE_DARK }}>
             <p className="text-white text-xl mb-2" style={{ fontWeight: 300 }}>
               Et si on allait plus loin ?

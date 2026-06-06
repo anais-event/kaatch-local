@@ -109,6 +109,20 @@ const PHASES: Phase[] = [
     ]
   },
   {
+    id: 'pcivil',
+    label: 'Mairie & cérémonie civile',
+    timing: 'J-3 à J-1 mois',
+    emoji: '🏛️',
+    items: [
+      { id: 'pcivil-1', text: "Constituer le dossier de mariage : acte de naissance de moins de 3 mois pour chacun (à demander sur service-public.fr), justificatif de domicile, pièce d'identité", isKeyItem: true, tip: "L'acte de naissance doit dater de moins de 3 mois. Prévoir 2 à 3 semaines pour l'obtenir en ligne — ne pas attendre la dernière minute" },
+      { id: 'pcivil-2', text: "Déposer le dossier complet à la mairie — la publication des bans démarre automatiquement (10 jours ouvrables obligatoires avant la cérémonie)", isKeyItem: true, tip: "Sans dépôt de dossier, pas de mariage civil. C'est le point de départ légal. La mairie confirme la date et l'heure définitives à ce moment-là" },
+      { id: 'pcivil-3', text: "Choisir les témoins civils — 2 minimum, 4 maximum, tous majeurs, pièce d'identité obligatoire le jour J", isKeyItem: true, tip: "Les témoins civils signent le registre. Ils peuvent être les mêmes que les témoins de la soirée — ou des personnes différentes" },
+      { id: 'pcivil-4', text: "Confirmer l'heure exacte de passage à la mairie et la transmettre au photographe, au cortège et aux prestataires" },
+      { id: 'pcivil-5', text: "Planifier le timing mairie → lieu de réception : photos de groupe, transport, accueil des invités" },
+      { id: 'pcivil-6', text: "Si cérémonie religieuse prévue : entamer les démarches auprès de l'église, du temple ou de la synagogue — les délais sont souvent plus longs que prévu", isKeyItem: true },
+    ]
+  },
+  {
     id: 'p1m',
     label: '1 mois avant',
     timing: 'J-1 mois',
@@ -195,6 +209,17 @@ function ChevronIcon({ open }: { open: boolean }) {
   )
 }
 
+function sanitize(s: string): string {
+  return s
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[‘’]/g, "'")
+    .replace(/[“”]/g, '"')
+    .replace(/[–—]/g, '-')
+    .replace(/…/g, '...')
+    .replace(/[^ -~]/g, '')
+}
+
 function CheckboxCircle({ checked: isChecked }: { checked: boolean }) {
   return (
     <div
@@ -269,7 +294,7 @@ export default function ChecklistMariage() {
       y += 8
       doc.setFontSize(10)
       doc.setTextColor(120, 113, 108)
-      doc.text(`Progression : ${pct}% — ${checked.size}/${TOTAL} etapes cochees`, 20, y)
+      doc.text(sanitize(`Progression : ${pct}% - ${checked.size}/${TOTAL} etapes cochees`), 20, y)
       y += 5
       doc.text('kaatch.fr/checklist-mariage', 20, y)
       y += 14
@@ -278,7 +303,7 @@ export default function ChecklistMariage() {
         if (y > 255) { doc.addPage(); y = 20 }
         doc.setFontSize(12)
         doc.setTextColor(74, 82, 64)
-        doc.text(`${phase.emoji}  ${phase.label} — ${phase.timing}`, 20, y)
+        doc.text(sanitize(`${phase.label} - ${phase.timing}`), 20, y)
         y += 8
 
         for (const item of phase.items) {
@@ -287,7 +312,7 @@ export default function ChecklistMariage() {
           doc.setFontSize(8.5)
           doc.setTextColor(isDone ? 170 : 50, isDone ? 170 : 47, isDone ? 170 : 43)
           const prefix = isDone ? '[x] ' : '[ ] '
-          const lines = doc.splitTextToSize(prefix + item.text, 168)
+          const lines = doc.splitTextToSize(sanitize(prefix + item.text), 168)
           doc.text(lines, 26, y)
           y += (lines as string[]).length * 5 + 1
         }
@@ -296,7 +321,7 @@ export default function ChecklistMariage() {
 
       doc.setFontSize(8)
       doc.setTextColor(180, 180, 180)
-      doc.text('Genere par Kaatch — kaatch.fr/checklist-mariage', 20, 287)
+      doc.text('Genere par Kaatch - kaatch.fr/checklist-mariage', 20, 287)
 
       doc.save('checklist-mariage-kaatch.pdf')
       if (typeof window !== 'undefined' && typeof window.gtag === 'function') {

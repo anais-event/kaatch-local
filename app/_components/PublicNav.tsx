@@ -22,9 +22,18 @@ const features = [
   { icon: '💍', label: 'Wedding planners',       desc: 'Un espace pro, complémentaire',                href: '/wedding-planner' },
 ]
 
+const outilsList = [
+  { icon: '✅', label: 'Checklist mariage', desc: 'Toutes les étapes mois par mois', href: '/checklist-mariage' },
+  { icon: '💰', label: 'Calculateur de budget', desc: 'Estimez le coût selon vos critères', href: '/budget-mariage' },
+]
+const comingOutils = [
+  { icon: '🪑', label: 'Plan de table' },
+  { icon: '📋', label: "Liste d'invités" },
+  { icon: '📅', label: 'Programme jour J' },
+]
+
 const navLinksConfig = [
   { labelKey: 'nav.studio',       subKey: 'nav.studioSub',  href: '/studio' },
-  { labelKey: 'nav.outils',   subKey: 'nav.outisSub',   href: '/outils' },
   { labelKey: 'nav.inspirations', subKey: 'nav.inspirationsSub',  href: '/inspirations' },
   { labelKey: 'nav.forum',   subKey: 'nav.forumSub', href: '/entre-nous' },
 ]
@@ -33,12 +42,15 @@ export default function PublicNav({ active }: { active?: string }) {
   const t = useTranslations()
   const [open, setOpen] = useState(false)
   const [dropOpen, setDropOpen] = useState(false)
+  const [toolsOpen, setToolsOpen] = useState(false)
   const [mobileFeatsOpen, setMobileFeatsOpen] = useState(false)
+  const [mobileToolsOpen, setMobileToolsOpen] = useState(false)
   const dropRef = useRef<HTMLDivElement>(null)
+  const toolsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') { setDropOpen(false); setOpen(false) }
+      if (e.key === 'Escape') { setDropOpen(false); setToolsOpen(false); setOpen(false) }
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
@@ -121,6 +133,69 @@ export default function PublicNav({ active }: { active?: string }) {
                   >
                     Voir comment ça marche →
                   </Link>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Outils dropdown */}
+          <div
+            ref={toolsRef}
+            className="relative"
+            onMouseEnter={() => setToolsOpen(true)}
+            onMouseLeave={() => setToolsOpen(false)}
+          >
+            <button
+              onClick={() => setToolsOpen(o => !o)}
+              className="flex flex-col items-center px-3 py-1.5 rounded-lg transition hover:bg-stone-100"
+              aria-expanded={toolsOpen}
+            >
+              <span className="flex items-center gap-1">
+                <span className="text-sm leading-tight" style={{ fontFamily: BODY, fontWeight: 600, color: '#44403c' }}>
+                  {t('nav.outils')}
+                </span>
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className={`transition-transform duration-200 ${toolsOpen ? 'rotate-180' : ''}`} style={{ color: '#a8a29e' }}>
+                  <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+              <span className="text-[10px] leading-tight text-stone-400" style={{ fontFamily: BODY, fontWeight: 300 }}>
+                {t('nav.outisSub')}
+              </span>
+            </button>
+
+            {toolsOpen && (
+              <div
+                className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 w-[300px] bg-white rounded-2xl border border-stone-100 p-3"
+                style={{ boxShadow: '0 8px 32px rgba(44,59,46,0.12), 0 2px 8px rgba(44,59,46,0.06)' }}
+              >
+                <div className="space-y-1 mb-2">
+                  {outilsList.map(tool => (
+                    <a
+                      key={tool.href}
+                      href={tool.href}
+                      onClick={() => setToolsOpen(false)}
+                      className="flex items-start gap-3 p-3 rounded-xl hover:bg-[#f5f0e8] transition"
+                    >
+                      <span className="text-lg mt-0.5 shrink-0">{tool.icon}</span>
+                      <div>
+                        <p style={{ fontFamily: DISPLAY, fontWeight: 600, fontSize: '0.82rem', color: GREEN }}>{tool.label}</p>
+                        <p style={{ fontWeight: 300, fontSize: '0.72rem', color: '#78716c', lineHeight: 1.4, fontFamily: BODY }}>{tool.desc}</p>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+                <div className="pt-2 border-t border-stone-100">
+                  <p className="px-3 mb-1.5 text-[10px] text-stone-400 uppercase tracking-widest" style={{ fontWeight: 300 }}>
+                    {t('nav.outisSub') === 'Gratuits' ? 'Bientôt' : 'Coming soon'}
+                  </p>
+                  <div className="space-y-0.5 opacity-50 pointer-events-none">
+                    {comingOutils.map(tool => (
+                      <div key={tool.label} className="flex items-center gap-3 px-3 py-1.5">
+                        <span className="text-sm shrink-0">{tool.icon}</span>
+                        <span style={{ fontFamily: BODY, fontWeight: 300, fontSize: '0.78rem', color: GREEN }}>{tool.label}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
@@ -233,6 +308,40 @@ export default function PublicNav({ active }: { active?: string }) {
                     <span className="text-base shrink-0">{f.icon}</span>
                     <span style={{ fontFamily: BODY, fontWeight: 400, fontSize: '0.9rem', color: GREEN }}>{f.label}</span>
                   </Link>
+                ))}
+              </div>
+            )}
+
+            {/* Outils — expandable */}
+            <button
+              onClick={() => setMobileToolsOpen(o => !o)}
+              className="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-stone-100 transition"
+            >
+              <span style={{ fontFamily: BODY, fontWeight: 400, fontSize: '0.95rem', color: GREEN }}>Outils gratuits</span>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`transition-transform duration-200 ${mobileToolsOpen ? 'rotate-180' : ''}`}>
+                <path d="M2 4L6 8L10 4" stroke={GREEN} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+
+            {mobileToolsOpen && (
+              <div className="ml-3 space-y-0.5 pb-1">
+                {outilsList.map(tool => (
+                  <a
+                    key={tool.href}
+                    href={tool.href}
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-stone-100 transition"
+                  >
+                    <span className="text-base shrink-0">{tool.icon}</span>
+                    <span style={{ fontFamily: BODY, fontWeight: 400, fontSize: '0.9rem', color: GREEN }}>{tool.label}</span>
+                  </a>
+                ))}
+                {comingOutils.map(tool => (
+                  <div key={tool.label} className="flex items-center gap-3 px-4 py-2.5 opacity-40">
+                    <span className="text-base shrink-0">{tool.icon}</span>
+                    <span style={{ fontFamily: BODY, fontWeight: 300, fontSize: '0.9rem', color: GREEN }}>{tool.label}</span>
+                    <span className="ml-auto text-[10px] text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full">Bientôt</span>
+                  </div>
                 ))}
               </div>
             )}

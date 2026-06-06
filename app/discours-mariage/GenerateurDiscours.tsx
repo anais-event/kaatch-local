@@ -227,10 +227,10 @@ export default function GenerateurDiscours() {
         <div className="max-w-2xl mx-auto">
 
           <div className="mb-8">
-            <p className="text-xs text-stone-400 mb-3 uppercase tracking-widest" style={{ fontWeight: 300 }}>
+            <p className="text-xs uppercase tracking-[0.25em] text-[#2C3B2E] mb-4" style={{ fontFamily: 'var(--font-display)', fontWeight: 500 }}>
               Outils gratuits · Kaatch
             </p>
-            <h1 className="text-3xl md:text-4xl text-stone-800 mb-2" style={{ fontWeight: 300 }}>
+            <h1 className="text-[#2C3B2E] mb-2" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', lineHeight: 1.1, letterSpacing: '-0.02em' }}>
               Générateur de discours
             </h1>
             <p className="text-stone-500 text-base leading-relaxed max-w-lg" style={{ fontWeight: 300 }}>

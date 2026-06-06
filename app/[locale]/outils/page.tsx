@@ -43,6 +43,14 @@ const tools = [
     label: 'Plan de table',
     description: "Ajoutez vos invités, créez vos tables, glissez-déposez pour placer chacun. Sauvegarde automatique, export PDF.",
     cta: 'Créer mon plan →',
+    badge: null,
+  },
+  {
+    href: '/discours-mariage',
+    emoji: '✨',
+    label: 'Générateur de discours',
+    description: "Témoin, vœux des mariés, parents — générez votre discours grâce à l'IA. Structure, points clés ou discours complet. Éditable, export PDF.",
+    cta: 'Générer mon discours →',
     badge: 'Nouveau',
   },
 ]

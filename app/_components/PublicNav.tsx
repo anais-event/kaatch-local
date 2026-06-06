@@ -23,9 +23,10 @@ const features = [
 ]
 
 const outilsList = [
-  { icon: '✅', label: 'Checklist mariage', desc: 'Toutes les étapes mois par mois', href: '/checklist-mariage' },
-  { icon: '💰', label: 'Calculateur de budget', desc: 'Estimez le coût selon vos critères', href: '/budget-mariage' },
-  { icon: '🪑', label: 'Plan de table', desc: 'Glissez-déposez, sauvegarde auto', href: '/plan-de-table-mariage' },
+  { icon: '✅', label: 'Checklist mariage',      desc: 'Toutes les étapes mois par mois',      href: '/checklist-mariage' },
+  { icon: '💰', label: 'Calculateur de budget',  desc: 'Estimez le coût selon vos critères',   href: '/budget-mariage' },
+  { icon: '🪑', label: 'Plan de table',           desc: 'Glissez-déposez, sauvegarde auto',     href: '/plan-de-table-mariage' },
+  { icon: '✨', label: 'Générateur de discours',  desc: 'IA · témoin, vœux, parents',           href: '/discours-mariage' },
 ]
 const comingOutils = [
   { icon: '📋', label: "Liste d'invités" },

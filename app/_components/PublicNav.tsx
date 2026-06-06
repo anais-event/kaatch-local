@@ -25,9 +25,9 @@ const features = [
 const outilsList = [
   { icon: '✅', label: 'Checklist mariage', desc: 'Toutes les étapes mois par mois', href: '/checklist-mariage' },
   { icon: '💰', label: 'Calculateur de budget', desc: 'Estimez le coût selon vos critères', href: '/budget-mariage' },
+  { icon: '🪑', label: 'Plan de table', desc: 'Glissez-déposez, sauvegarde auto', href: '/plan-de-table-mariage' },
 ]
 const comingOutils = [
-  { icon: '🪑', label: 'Plan de table' },
   { icon: '📋', label: "Liste d'invités" },
   { icon: '📅', label: 'Programme jour J' },
 ]

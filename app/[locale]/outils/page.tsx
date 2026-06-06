@@ -27,7 +27,7 @@ const tools = [
     label: 'Checklist mariage',
     description: "Toutes les étapes mois par mois, avec les détails auxquels on ne pense pas toujours. Cases cochées sauvegardées automatiquement.",
     cta: 'Ouvrir la checklist →',
-    badge: 'Nouveau',
+    badge: null,
   },
   {
     href: '/budget-mariage',
@@ -37,10 +37,17 @@ const tools = [
     cta: 'Calculer mon budget →',
     badge: null,
   },
+  {
+    href: '/plan-de-table-mariage',
+    emoji: '🪑',
+    label: 'Plan de table',
+    description: "Ajoutez vos invités, créez vos tables, glissez-déposez pour placer chacun. Sauvegarde automatique, export PDF.",
+    cta: 'Créer mon plan →',
+    badge: 'Nouveau',
+  },
 ]
 
 const coming = [
-  { emoji: '🪑', label: 'Plan de table', description: 'Glissez-déposez vos invités sur un plan de table visuel. Gratuit.' },
   { emoji: '📋', label: "Liste d'invités", description: "Gérez votre liste, les RSVP et les régimes alimentaires en un seul tableau." },
   { emoji: '📅', label: 'Programme mariage', description: 'Construisez le programme de votre journée et partagez-le avec vos invités.' },
 ]

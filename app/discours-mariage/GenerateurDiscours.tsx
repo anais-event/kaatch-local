@@ -146,7 +146,10 @@ export default function GenerateurDiscours() {
         signal: abortRef.current.signal,
       })
 
-      if (!res.ok || !res.body) throw new Error('Erreur serveur')
+      if (!res.ok || !res.body) {
+        const detail = await res.text().catch(() => '')
+        throw new Error(detail || `Erreur serveur (${res.status})`)
+      }
 
       const reader  = res.body.getReader()
       const decoder = new TextDecoder()
@@ -164,7 +167,8 @@ export default function GenerateurDiscours() {
       setStep('result')
     } catch (err: unknown) {
       if (err instanceof Error && err.name === 'AbortError') return
-      setError('Génération échouée. Réessayer.')
+      const detail = err instanceof Error && err.message ? ` (${err.message})` : ''
+      setError(`Génération échouée. Réessayer.${detail}`)
       setStep('form')
     }
   }, [canGenerate, type, auteur, prenom1, prenom2, ton, niveau, duree, infos])

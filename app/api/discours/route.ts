@@ -109,19 +109,36 @@ Commence DIRECTEMENT par le discours, sans titre.`
       messages: [{ role: 'user', content: prompt }],
     })
 
+    // Pre-fetch the first event OUTSIDE the ReadableStream: if Anthropic rejects
+    // (bad key, bad model, rate limit...), it surfaces here — before any byte is
+    // flushed — so the outer catch can return a clean Response instead of Next
+    // swapping in its generic error page once the stream has already errored.
+    const iterator = stream[Symbol.asyncIterator]()
+    const first = await iterator.next()
+
     const encoder = new TextEncoder()
+    function textOf(event: Awaited<ReturnType<typeof iterator.next>>['value']): string {
+      if (event && event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
+        return event.delta.text
+      }
+      return ''
+    }
+
     const readable = new ReadableStream({
       async start(controller) {
         try {
-          for await (const event of stream) {
-            if (
-              event.type === 'content_block_delta' &&
-              event.delta.type === 'text_delta'
-            ) {
-              controller.enqueue(encoder.encode(event.delta.text))
-            }
+          if (!first.done) {
+            const t = textOf(first.value)
+            if (t) controller.enqueue(encoder.encode(t))
+          }
+          while (true) {
+            const { done, value } = await iterator.next()
+            if (done) break
+            const t = textOf(value)
+            if (t) controller.enqueue(encoder.encode(t))
           }
         } catch (err) {
+          console.error('discours stream error (mid-stream):', err)
           controller.error(err)
         } finally {
           controller.close()

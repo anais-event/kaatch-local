@@ -131,7 +131,9 @@ Commence DIRECTEMENT par le discours, sans titre.`
         'Cache-Control': 'no-cache, no-store',
       },
     })
-  } catch {
-    return new Response('Erreur serveur', { status: 500 })
+  } catch (err) {
+    console.error('discours API error:', err)
+    const msg = err instanceof Error ? err.message : 'Erreur serveur'
+    return new Response(msg, { status: 500 })
   }
 }

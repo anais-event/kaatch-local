@@ -3,7 +3,14 @@ import type { NextRequest } from 'next/server'
 
 export const runtime = 'nodejs'
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+let anthropic: Anthropic | null = null
+function getClient(): Anthropic {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    throw new Error('ANTHROPIC_API_KEY manquante sur le serveur')
+  }
+  if (!anthropic) anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+  return anthropic
+}
 
 const TYPE_LABELS: Record<string, string> = {
   'temoin-mariee': "témoin de la mariée",
@@ -95,7 +102,7 @@ Commence DIRECTEMENT par le discours, sans titre.`
       maxTokens = duree === 'long' ? 2200 : duree === 'moyen' ? 1300 : 700
     }
 
-    const stream = anthropic.messages.stream({
+    const stream = getClient().messages.stream({
       model: 'claude-3-5-sonnet-20241022',
       max_tokens: maxTokens,
       system: SYSTEM,

@@ -12,9 +12,43 @@ type ParsedGuest = {
   guest_type?: string
 }
 
+const KAATCH_FIELDS = [
+  { key: 'first_name', label: 'Prénom', required: true },
+  { key: 'last_name', label: 'Nom de famille', required: false },
+  { key: 'email', label: 'Email', required: false },
+  { key: 'telephone', label: 'Téléphone', required: false },
+  { key: 'relation', label: 'Lien de parenté', required: false },
+  { key: 'guest_type', label: 'Type (adulte/enfant/animal)', required: false },
+]
+
+// Tentative d'auto-détection par mots-clés
+function autoDetect(headers: string[]): Record<string, string> {
+  const map: Record<string, string> = {}
+  const matchers: Record<string, string[]> = {
+    first_name: ['prénom', 'prenom', 'firstname', 'first name', 'given'],
+    last_name: ['nom', 'lastname', 'last name', 'surname', 'family'],
+    email: ['email', 'mail', 'courriel', 'e-mail'],
+    telephone: ['tel', 'phone', 'portable', 'mobile', 'gsm'],
+    relation: ['relation', 'lien', 'parenté', 'parente', 'famille'],
+    guest_type: ['type', 'catégorie', 'categorie'],
+  }
+  for (const [field, keywords] of Object.entries(matchers)) {
+    for (const h of headers) {
+      if (keywords.some(k => h.toLowerCase().includes(k))) {
+        map[field] = h
+        break
+      }
+    }
+  }
+  return map
+}
+
 export default function ImportGuests({ weddingId, slug }: { weddingId: string; slug: string }) {
   const [open, setOpen] = useState(false)
-  const [guests, setGuests] = useState<ParsedGuest[]>([])
+  const [step, setStep] = useState<'upload' | 'map' | 'preview'>('upload')
+  const [headers, setHeaders] = useState<string[]>([])
+  const [rows, setRows] = useState<Record<string, string>[]>([])
+  const [mapping, setMapping] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -28,32 +62,37 @@ export default function ImportGuests({ weddingId, slug }: { weddingId: string; s
     const buffer = await file.arrayBuffer()
     const wb = XLSX.read(buffer, { type: 'array' })
     const ws = wb.Sheets[wb.SheetNames[0]]
-    const rows = XLSX.utils.sheet_to_json<Record<string, string>>(ws, { defval: '' })
+    const parsed = (XLSX.utils.sheet_to_json(ws, { defval: '' }) as Record<string, string>[])
 
-    const parsed: ParsedGuest[] = rows.map(row => {
-      // Cherche les colonnes par nom (insensible à la casse)
-      const get = (keys: string[]) => {
-        for (const k of Object.keys(row)) {
-          if (keys.some(key => k.toLowerCase().includes(key))) return row[k]?.toString().trim() || undefined
-        }
-        return undefined
-      }
-
-      return {
-        first_name: get(['prénom', 'prenom', 'firstname', 'first']) || '',
-        last_name: get(['nom', 'lastname', 'last', 'surname']),
-        email: get(['email', 'mail', 'courriel']),
-        telephone: get(['tel', 'phone', 'portable', 'mobile']),
-        relation: get(['relation', 'lien', 'parenté', 'parente']),
-        guest_type: get(['type', 'catégorie', 'categorie']) || 'adulte',
-      }
-    }).filter(g => g.first_name)
-
-    setGuests(parsed)
+    if (parsed.length === 0) return
+    const hdrs = Object.keys(parsed[0])
+    setHeaders(hdrs)
+    setRows(parsed)
+    setMapping(autoDetect(hdrs))
+    setStep('map')
     setDone(false)
   }
 
+  function applyMapping(): ParsedGuest[] {
+    return rows.map(row => {
+      const get = (field: string) => {
+        const col = mapping[field]
+        return col ? row[col]?.toString().trim() || undefined : undefined
+      }
+      return {
+        first_name: get('first_name') || '',
+        last_name: get('last_name'),
+        email: get('email'),
+        telephone: get('telephone'),
+        relation: get('relation'),
+        guest_type: get('guest_type') || 'adulte',
+      }
+    }).filter(g => g.first_name)
+  }
+
   async function handleImport() {
+    const guests = applyMapping()
+    if (!guests.length) return
     setLoading(true)
     const res = await fetch('/api/import-guests', {
       method: 'POST',
@@ -63,62 +102,117 @@ export default function ImportGuests({ weddingId, slug }: { weddingId: string; s
     setLoading(false)
     if (res.ok) {
       setDone(true)
-      setGuests([])
+      setStep('upload')
       setOpen(false)
+      setRows([])
+      setHeaders([])
+      setMapping({})
+      if (fileRef.current) fileRef.current.value = ''
       router.refresh()
     }
   }
 
+  const preview = step !== 'upload' ? applyMapping().slice(0, 5) : []
+
   return (
-    <div className="mb-4">
-      <button onClick={() => setOpen(!open)}
-        className="text-sm border border-[#4a5240] text-[#4a5240] px-4 py-2 rounded-full hover:bg-[#4a5240] hover:text-white transition"
+    <div className="mb-6">
+      <button
+        onClick={() => { setOpen(!open); if (!open) setStep('upload') }}
+        className="text-sm border border-[#4a5240] text-[#4a5240] px-4 py-2 rounded-lg hover:bg-[#4a5240] hover:text-white transition cursor-pointer"
         style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, letterSpacing: '0.05em' }}>
-        📥 Importer depuis Excel / Google Sheets
+        Importer depuis Excel / Google Sheets
       </button>
 
       {done && (
         <p className="mt-2 text-sm text-[#4a5240]" style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
-          ✅ Invités importés avec succès !
+          Invités importés avec succès !
         </p>
       )}
 
       {open && (
-        <div className="mt-4 bg-white/80 rounded-2xl p-5 shadow-sm border border-stone-100">
+        <div className="mt-4 bg-white rounded-xl p-6 shadow-sm border border-stone-100">
           <h3 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.2rem', fontStyle: 'italic' }}
-              className="text-[#4a5240] mb-2">Importer une liste</h3>
+              className="text-[#4a5240] mb-1">Importer une liste d'invités</h3>
 
-          <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.8rem' }}
-             className="text-stone-400 mb-3">
-            Format accepté : Excel (.xlsx) ou CSV. Les colonnes reconnues : <strong>Prénom</strong>, Nom, Email, Téléphone, Relation, Type.
-            <br />Pour Google Sheets : Fichier → Télécharger → .xlsx
-          </p>
-
-          <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" onChange={handleFile}
-            className="w-full border border-stone-200 rounded-xl px-4 py-2 text-stone-500 bg-white file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:bg-[#f5f0e8] file:text-[#4a5240] transition mb-3"
-            style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem' }} />
-
-          {guests.length > 0 && (
+          {step === 'upload' && (
             <>
-              <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem' }}
-                 className="text-stone-600 mb-3">
-                {guests.length} invité{guests.length > 1 ? 's' : ''} détecté{guests.length > 1 ? 's' : ''} :
+              <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.8rem' }}
+                 className="text-stone-400 mb-4">
+                Supporte Excel (.xlsx), Google Sheets (.xlsx) et CSV.<br />
+                Pour Google Sheets : Fichier → Télécharger → Format .xlsx
               </p>
-              <div className="max-h-48 overflow-y-auto space-y-1 mb-4">
-                {guests.map((g, i) => (
-                  <div key={i} className="flex items-center gap-2 text-sm text-stone-600 px-2">
-                    <span>{g.guest_type === 'enfant' ? '👶' : g.guest_type === 'animal' ? '🐾' : '🧑'}</span>
-                    <span style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
-                      {g.first_name} {g.last_name} {g.email && `· ${g.email}`}
-                    </span>
+              <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" onChange={handleFile}
+                className="w-full border border-stone-200 rounded-xl px-4 py-2 text-stone-500 bg-white file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-[#f5f0e8] file:text-[#4a5240] file:cursor-pointer transition"
+                style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem' }} />
+            </>
+          )}
+
+          {step === 'map' && (
+            <>
+              <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.8rem' }}
+                 className="text-stone-400 mb-4">
+                {rows.length} ligne{rows.length > 1 ? 's' : ''} détectée{rows.length > 1 ? 's' : ''}. Associe chaque champ à la bonne colonne de ton fichier.
+              </p>
+
+              <div className="space-y-3 mb-5">
+                {KAATCH_FIELDS.map(field => (
+                  <div key={field.key} className="flex items-center gap-3">
+                    <label style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem' }}
+                           className="w-44 text-stone-600 shrink-0">
+                      {field.label}{field.required && <span className="text-red-400 ml-0.5">*</span>}
+                    </label>
+                    <select
+                      value={mapping[field.key] || ''}
+                      onChange={e => setMapping(prev => ({ ...prev, [field.key]: e.target.value }))}
+                      className="flex-1 border border-stone-200 rounded-lg px-3 py-1.5 bg-white text-stone-600 outline-none focus:border-[#4a5240] transition"
+                      style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem' }}>
+                      <option value="">— Ignorer —</option>
+                      {headers.map(h => <option key={h} value={h}>{h}</option>)}
+                    </select>
                   </div>
                 ))}
               </div>
-              <button onClick={handleImport} disabled={loading}
-                className="w-full bg-[#4a5240] text-white py-2.5 rounded-full hover:bg-[#2d3228] transition disabled:opacity-50"
-                style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.85rem' }}>
-                {loading ? 'Import en cours…' : `Importer ${guests.length} invité${guests.length > 1 ? 's' : ''}`}
-              </button>
+
+              {/* Aperçu */}
+              {preview.length > 0 && (
+                <div className="mb-4">
+                  <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.75rem', letterSpacing: '0.1em' }}
+                     className="text-stone-400 uppercase mb-2">Aperçu (5 premiers)</p>
+                  <div className="space-y-1">
+                    {preview.map((g, i) => (
+                      <div key={i} className="text-sm text-stone-600 px-3 py-1.5 bg-[#f5f0e8] rounded-lg"
+                           style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
+                        <span className="font-medium">{g.first_name} {g.last_name}</span>
+                        {g.email && <span className="text-stone-400 ml-2">· {g.email}</span>}
+                        {g.telephone && <span className="text-stone-400 ml-2">· {g.telephone}</span>}
+                      </div>
+                    ))}
+                    {rows.length > 5 && (
+                      <p className="text-xs text-stone-300 px-3" style={{ fontWeight: 300 }}>
+                        + {rows.length - 5} autre{rows.length - 5 > 1 ? 's' : ''}…
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-2">
+                <button onClick={() => { setStep('upload'); if (fileRef.current) fileRef.current.value = '' }}
+                  className="flex-1 border border-stone-200 text-stone-400 py-2 rounded-lg hover:border-stone-300 transition text-sm cursor-pointer"
+                  style={{ fontWeight: 300 }}>
+                  Changer de fichier
+                </button>
+                <button onClick={handleImport} disabled={loading || !mapping['first_name']}
+                  className="flex-1 bg-[#4a5240] text-white py-2 rounded-lg hover:bg-[#2d3228] transition disabled:opacity-40 text-sm cursor-pointer"
+                  style={{ fontWeight: 300 }}>
+                  {loading ? 'Import en cours…' : `Importer ${rows.length} invité${rows.length > 1 ? 's' : ''}`}
+                </button>
+              </div>
+              {!mapping['first_name'] && (
+                <p className="text-xs text-red-400 mt-2 text-center" style={{ fontWeight: 300 }}>
+                  Le champ Prénom est obligatoire.
+                </p>
+              )}
             </>
           )}
         </div>

@@ -1,15 +1,33 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 
 const SUGGESTED_GROUPS = [
-  { name: 'Babysitting', desc: 'Organiser la garde des enfants' },
-  { name: 'Cadeaux aux mariés', desc: 'Coordonner les cadeaux' },
-  { name: 'Surprises & Flashmob', desc: 'Discours, jeux, chorégraphies…' },
-  { name: 'Covoiturage', desc: 'Organiser les trajets' },
-  { name: 'Afterparty', desc: 'La suite de la fête' },
+  '@EntreTemoinsMariee',
+  '@EntreTemoinsMarie',
+  '@Covoiturage',
+  '@Cadeaux',
+  '@Afterparty',
+  '@Babysitting',
+  '@Surprises',
 ]
+
+async function ensureToutLeMonde(supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>, weddingId: string) {
+  const { data: existing } = await supabase
+    .from('message_groups')
+    .select('id')
+    .eq('wedding_id', weddingId)
+    .eq('name', '@ToutLeMonde')
+    .single()
+
+  if (!existing) {
+    await supabase.from('message_groups').insert({
+      wedding_id: weddingId,
+      name: '@ToutLeMonde',
+      created_by: 'system',
+    })
+  }
+}
 
 async function createGroup(formData: FormData) {
   'use server'
@@ -17,37 +35,44 @@ async function createGroup(formData: FormData) {
   const slug = formData.get('slug') as string
   const name = formData.get('name') as string
   const author = formData.get('author') as string
+  if (!name.trim()) return
 
   const { data: wedding } = await supabase.from('weddings').select('id').eq('slug', slug).single()
   if (!wedding) return
 
+  // Vérifier si le groupe existe déjà
   const { data: existing } = await supabase
     .from('message_groups')
     .select('id')
     .eq('wedding_id', wedding.id)
     .eq('name', name)
     .single()
+  if (existing) { revalidatePath(`/invite/${slug}/groupes`); return }
 
-  if (!existing) {
-    await supabase.from('message_groups').insert({
+  // Créer le groupe
+  await supabase.from('message_groups').insert({
+    wedding_id: wedding.id,
+    name,
+    created_by: author,
+  })
+
+  // Notif dans @ToutLeMonde
+  const { data: general } = await supabase
+    .from('message_groups')
+    .select('id')
+    .eq('wedding_id', wedding.id)
+    .eq('name', '@ToutLeMonde')
+    .single()
+
+  if (general) {
+    await supabase.from('messages').insert({
+      group_id: general.id,
       wedding_id: wedding.id,
-      name,
-      created_by: author,
+      content: `📢 ${author} vient de créer le groupe ${name}. Rejoignez-le !`,
+      author_name: 'Kaatch',
     })
   }
 
-  revalidatePath(`/invite/${slug}/groupes`)
-}
-
-async function sendMessage(formData: FormData) {
-  'use server'
-  const supabase = await createSupabaseServerClient()
-  const slug = formData.get('slug') as string
-  const group_id = formData.get('group_id') as string
-  const content = formData.get('content') as string
-  const author = formData.get('author') as string
-
-  await supabase.from('messages').insert({ group_id, content, author_name: author })
   revalidatePath(`/invite/${slug}/groupes`)
 }
 
@@ -55,7 +80,6 @@ export default async function GuestGroupesPage({ params }: { params: Promise<{ s
   const { slug } = await params
   const cookieStore = await cookies()
   const guestCookie = cookieStore.get(`guest_${slug}`)
-  if (!guestCookie) redirect(`/invite/${slug}`)
 
   const guest = JSON.parse(guestCookie.value)
   const guestName = [guest.firstName, guest.lastName].filter(Boolean).join(' ')
@@ -64,105 +88,106 @@ export default async function GuestGroupesPage({ params }: { params: Promise<{ s
   const { data: wedding } = await supabase.from('weddings').select('id').eq('slug', slug).single()
   if (!wedding) return <div className="p-8">Mariage introuvable</div>
 
+  // S'assurer que @ToutLeMonde existe
+  await ensureToutLeMonde(supabase, wedding.id)
+
   const { data: groups } = await supabase
     .from('message_groups')
-    .select('id, name, created_by, messages(id, content, author_name, created_at)')
+    .select('id, name, created_by')
     .eq('wedding_id', wedding.id)
     .order('created_at', { ascending: true })
 
+  // Dernier message par groupe
+  const groupsWithLastMsg = await Promise.all(
+    (groups ?? []).map(async (group) => {
+      const { data: msgs } = await supabase
+        .from('messages')
+        .select('content, author_name, created_at')
+        .eq('group_id', group.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+      return { ...group, lastMsg: msgs?.[0] ?? null }
+    })
+  )
+
+  // @ToutLeMonde en premier
+  const sorted = [
+    ...groupsWithLastMsg.filter(g => g.name === '@ToutLeMonde'),
+    ...groupsWithLastMsg.filter(g => g.name !== '@ToutLeMonde'),
+  ]
+
   return (
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
+      <div className="max-w-2xl mx-auto px-6 pt-8 pb-24">
 
-      {/* Navbar fixe */}
-      <div className="bg-[#f5f0e8]/95 backdrop-blur fixed top-0 left-0 right-0 z-50 border-b border-stone-200 shadow-sm">
-        <div className="max-w-2xl mx-auto flex justify-around px-4 pt-3 pb-0">
-          {[
-            { label: 'Programme', href: `/invite/${slug}/programme` },
-            { label: 'Photos', href: `/invite/${slug}/photos` },
-            { label: 'Messagerie', href: `/invite/${slug}/groupes` },
-            { label: 'Contacts', href: `/invite/${slug}/contacts` },
-          ].map((tab) => (
-            <a key={tab.label} href={tab.href}
-              className={`pb-3 text-sm whitespace-nowrap px-2 border-b-2 transition-colors ${
-                tab.href === `/invite/${slug}/groupes`
-                  ? 'border-[#4a5240] text-[#4a5240]'
-                  : 'border-transparent text-stone-400 hover:border-[#4a5240] hover:text-[#4a5240]'
-              }`}
-              style={{ fontWeight: 400, letterSpacing: '0.04em' }}>
-              {tab.label}
-            </a>
-          ))}
-        </div>
-      </div>
+        <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.2rem', fontStyle: 'italic' }}
+            className="text-[#2d3228] mb-1">Messagerie</h1>
+        <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-400 mb-6">
+          Les groupes sont ouverts à tous les invités.
+        </p>
 
-      <div className="max-w-2xl mx-auto px-6 pt-20 pb-8">
-
-
-        <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.5rem', fontStyle: 'italic' }}
-            className="text-[#2d3228] mb-8">Messagerie</h1>
-
-        {/* Groupes existants */}
-        <div className="space-y-3 mb-10">
-          {(groups ?? []).map(group => {
-            const msgs = (group.messages as { id: string; content: string; author_name: string; created_at: string }[]) ?? []
-            const last = msgs[msgs.length - 1]
+        {/* Liste des groupes */}
+        <div className="space-y-2 mb-10">
+          {sorted.map(group => {
+            const isGeneral = group.name === '@ToutLeMonde'
             return (
               <a key={group.id} href={`/invite/${slug}/groupes/${group.id}`}
-                className="flex items-center gap-4 bg-white rounded-xl border border-stone-100 p-4 shadow-sm transition-shadow cursor-pointer">
-                <div className="w-11 h-11 rounded-full bg-[#4a5240]/10 flex items-center justify-center text-xl shrink-0">
-                  {group.name.charAt(0)}
+                className="flex items-center gap-3 bg-white rounded-xl border border-stone-100 px-4 py-3.5 hover:border-[#4a5240]/30 hover:shadow-sm transition-all cursor-pointer">
+                {/* Avatar */}
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm shrink-0 ${
+                  isGeneral ? 'bg-[#4a5240] text-white' : 'bg-[#4a5240]/10 text-[#4a5240]'
+                }`}
+                  style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1rem' }}>
+                  {isGeneral ? '✦' : group.name.replace('@', '').charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <h3 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.1rem' }}
-                        className="text-[#2d3228] truncate">{group.name}</h3>
-                    {last && (
+                  <div className="flex items-baseline justify-between gap-2">
+                    <h3 style={{ fontWeight: isGeneral ? 500 : 400, fontSize: '0.9rem' }}
+                        className={`truncate ${isGeneral ? 'text-[#4a5240]' : 'text-stone-700'}`}>
+                      {group.name}
+                    </h3>
+                    {group.lastMsg && (
                       <span className="text-[10px] text-stone-300 shrink-0" style={{ fontWeight: 300 }}>
-                        {new Date(last.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                        {new Date(group.lastMsg.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     )}
                   </div>
-                  {last ? (
+                  {group.lastMsg ? (
                     <p className="text-xs text-stone-400 truncate mt-0.5" style={{ fontWeight: 300 }}>
-                      <span className="text-[#4a5240]">{last.author_name}</span> : {last.content}
+                      <span className="text-stone-500">{group.lastMsg.author_name}</span> · {group.lastMsg.content}
                     </p>
                   ) : (
-                    <p className="text-xs text-stone-300 mt-0.5" style={{ fontWeight: 300, fontStyle: 'italic' }}>
+                    <p className="text-xs text-stone-300 mt-0.5 italic" style={{ fontWeight: 300 }}>
                       Aucun message encore…
                     </p>
                   )}
                 </div>
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-stone-300 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M9 18l6-6-6-6"/>
-                </svg>
+                <span className="text-stone-300 text-sm shrink-0">›</span>
               </a>
             )
           })}
-          {(!groups || groups.length === 0) && (
-            <p style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontSize: '1.1rem' }}
-               className="text-stone-400 text-center py-6">
-              Aucun groupe pour le moment…
-            </p>
-          )}
         </div>
 
-        {/* Suggestions */}
-        <div className="mb-8">
-          <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.4rem', fontStyle: 'italic' }}
-              className="text-[#4a5240] mb-4">Créer un groupe</h2>
-          <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-400 mb-4">
-            Suggestions :
+        {/* Créer un groupe */}
+        <div className="bg-white rounded-xl border border-stone-100 p-5">
+          <h2 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: '1.2rem', fontStyle: 'italic' }}
+              className="text-[#4a5240] mb-1">Créer un groupe</h2>
+          <p style={{ fontWeight: 300, fontSize: '0.78rem' }} className="text-stone-400 mb-4">
+            Donnez-lui un titre — tous les invités et les mariés seront notifiés dans <strong>@ToutLeMonde</strong>.
+            Pour les surprises, choisissez un nom discret&nbsp;: <span className="text-stone-500">@Projet-Secret</span>, <span className="text-stone-500">@EntreNous</span>…
           </p>
+
+          {/* Suggestions */}
           <div className="flex flex-wrap gap-2 mb-4">
             {SUGGESTED_GROUPS.map(sg => (
-              <form key={sg.name} action={createGroup}>
+              <form key={sg} action={createGroup}>
                 <input type="hidden" name="slug" value={slug} />
-                <input type="hidden" name="name" value={sg.name} />
+                <input type="hidden" name="name" value={sg} />
                 <input type="hidden" name="author" value={guestName} />
                 <button type="submit"
-                  className="px-4 py-2 rounded-lg border border-stone-200 bg-white hover:border-[#4a5240] hover:text-[#4a5240] transition text-sm text-stone-600"
+                  className="px-3 py-1.5 rounded-lg border border-stone-200 bg-white hover:border-[#4a5240] hover:text-[#4a5240] transition text-xs text-stone-500 cursor-pointer"
                   style={{ fontWeight: 300 }}>
-                  {sg.name}
+                  {sg}
                 </button>
               </form>
             ))}
@@ -171,18 +196,17 @@ export default async function GuestGroupesPage({ params }: { params: Promise<{ s
           <form action={createGroup} className="flex gap-2">
             <input type="hidden" name="slug" value={slug} />
             <input type="hidden" name="author" value={guestName} />
-            <input type="text" name="name" placeholder="Nom du groupe personnalisé…"
-              className="flex-1 border border-stone-200 rounded-xl px-4 py-2 bg-white outline-none focus:border-[#4a5240] transition text-stone-700 text-sm"
+            <input type="text" name="name" placeholder="@MonGroupe…"
+              className="flex-1 border border-stone-200 rounded-lg px-4 py-2 bg-white outline-none focus:border-[#4a5240] transition text-stone-700 text-sm"
               style={{ fontWeight: 300 }} />
             <button type="submit"
-              className="bg-[#4a5240] text-white px-5 py-2 rounded-xl hover:bg-[#2d3228] transition text-sm"
+              className="bg-[#4a5240] text-white px-4 py-2 rounded-lg hover:bg-[#2d3228] transition text-sm cursor-pointer"
               style={{ fontWeight: 300 }}>
               Créer
             </button>
           </form>
         </div>
 
-      </div>
       </div>
     </div>
   )

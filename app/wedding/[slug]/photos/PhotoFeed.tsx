@@ -32,18 +32,20 @@ export default function PhotoFeed({ photos, moments, guestNames, addLike, addCom
   const [openComments, setOpenComments] = useState<string | null>(null)
   const [, startTransition] = useTransition()
 
-  // Suggestions autocomplete
+  // Mode de recherche : moment ou personne visible sur la photo
+  const isMomentSearch = moments.some(m => m.toLowerCase() === search.toLowerCase().trim())
+
+  // Suggestions autocomplete — moments d'abord, puis noms d'invités
   const searchSuggestions = search.length > 0 ? [
     ...moments.filter(m => m.toLowerCase().includes(search.toLowerCase())),
-    ...guestNames.filter(n => n.toLowerCase().includes(search.toLowerCase()) && !moments.includes(n))
+    ...guestNames.filter(n => n.toLowerCase().includes(search.toLowerCase()) && !moments.some(m => m.toLowerCase() === n.toLowerCase()))
   ].slice(0, 6) : []
 
-  // Filtrage
+  // Filtrage — la recherche par nom ne cherche QUE dans tagged_guests (pas uploader_name)
   const filtered = photos.filter(p => {
     const q = search.toLowerCase().trim()
     const matchSearch = q === '' ||
       p.moment_tag?.toLowerCase().includes(q) ||
-      p.uploader_name?.toLowerCase().includes(q) ||
       p.tagged_guests.some(g => g.toLowerCase().includes(q))
     const matchMoment = momentFilter === 'all' || p.moment_tag === momentFilter
     return matchSearch && matchMoment
@@ -179,10 +181,13 @@ export default function PhotoFeed({ photos, moments, guestNames, addLike, addCom
               </button>
             </div>
             <div className="p-3">
+              <p className="text-[10px] text-stone-300 mb-1" style={{ fontWeight: 300 }}>
+                {new Date(photo.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+              </p>
               {photo.uploader_name && (
                 <p className="text-xs text-stone-400 mb-1 truncate"
                    style={{ fontFamily: 'var(--font-lato)', fontWeight: 300 }}>
-                  📸 {photo.uploader_name}
+                  {photo.uploader_name}
                   {photo.moment_tag && <span className="ml-2 text-[#4a5240]">· {photo.moment_tag}</span>}
                 </p>
               )}

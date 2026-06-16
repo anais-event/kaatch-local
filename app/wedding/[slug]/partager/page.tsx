@@ -20,7 +20,7 @@ export default async function PartagerPage({ params }: { params: Promise<{ slug:
 
   const { data: wedding } = await supabase
     .from('weddings')
-    .select('id, name, share_code')
+    .select('id, name, share_code, date')
     .eq('slug', slug)
     .single()
 
@@ -105,7 +105,7 @@ export default async function PartagerPage({ params }: { params: Promise<{ slug:
               </h2>
               <p style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, fontSize: '0.8rem' }}
                  className="text-stone-400 mb-6">À imprimer sur les tables le jour J</p>
-              <QRCodeDisplay url={shareUrl} />
+              <QRCodeDisplay url={shareUrl} weddingName={wedding.name} weddingDate={wedding.date} />
             </div>
           </>
         )}

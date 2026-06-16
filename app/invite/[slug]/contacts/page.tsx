@@ -1,6 +1,5 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 
 async function sendMessage(formData: FormData) {
@@ -50,7 +49,6 @@ export default async function GuestContactsPage({ params }: { params: Promise<{ 
   const { slug } = await params
   const cookieStore = await cookies()
   const guestCookie = cookieStore.get(`guest_${slug}`)
-  if (!guestCookie) redirect(`/invite/${slug}`)
 
   const guest = JSON.parse(guestCookie.value)
   const guestName = `${guest.firstName} ${guest.lastName}`
@@ -77,7 +75,7 @@ export default async function GuestContactsPage({ params }: { params: Promise<{ 
         </div>
 
         <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: '2.5rem', fontStyle: 'italic' }}
-            className="text-[#2d3228] mb-8">Contacts</h1>
+            className="text-[#2d3228] mb-8">Prestataires</h1>
 
         {(!contacts || contacts.length === 0) ? (
           <div className="p-8 rounded-2xl bg-white/80 text-center">
@@ -94,9 +92,34 @@ export default async function GuestContactsPage({ params }: { params: Promise<{ 
                   <h3 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 600, fontSize: '1.3rem' }}
                       className="text-[#2d3228]">{contact.name}</h3>
                   {contact.note && (
-                    <p style={{ fontWeight: 300, fontSize: '0.85rem' }} className="text-stone-500 mt-1">
+                    <p style={{ fontWeight: 300, fontSize: '0.85rem' }} className="text-stone-500 mt-1 italic">
                       {contact.note}
                     </p>
+                  )}
+                  {(contact.telephone || contact.email || contact.instagram) && (
+                    <div className="flex flex-wrap gap-3 mt-2">
+                      {contact.telephone && (
+                        <a href={`tel:${contact.telephone}`}
+                           className="flex items-center gap-1 text-xs text-stone-500 hover:text-[#4a5240] transition"
+                           style={{ fontWeight: 300 }}>
+                          📞 {contact.telephone}
+                        </a>
+                      )}
+                      {contact.email && (
+                        <a href={`mailto:${contact.email}`}
+                           className="flex items-center gap-1 text-xs text-stone-500 hover:text-[#4a5240] transition"
+                           style={{ fontWeight: 300 }}>
+                          ✉️ {contact.email}
+                        </a>
+                      )}
+                      {contact.instagram && (
+                        <a href={`https://instagram.com/${contact.instagram.replace('@','')}`} target="_blank" rel="noreferrer"
+                           className="flex items-center gap-1 text-xs text-stone-500 hover:text-[#4a5240] transition"
+                           style={{ fontWeight: 300 }}>
+                          📷 {contact.instagram}
+                        </a>
+                      )}
+                    </div>
                   )}
                 </div>
                 <form action={sendMessage} className="flex gap-2">

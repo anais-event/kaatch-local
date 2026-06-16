@@ -2,11 +2,12 @@ import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import ProgrammePDF from './ProgrammePDF'
+import MapEmbed from './MapEmbed'
+import ProgrammeMap from './ProgrammeMap'
 
 export default async function GuestProgrammePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const cookieStore = await cookies()
-  if (!cookieStore.get(`guest_${slug}`)) redirect(`/invite/${slug}`)
 
   const supabase = await createSupabaseServerClient()
   const { data: wedding } = await supabase
@@ -38,6 +39,8 @@ export default async function GuestProgrammePage({ params }: { params: Promise<{
             className="text-[#2d3228] mb-8">
           Programme de la journée
         </h1>
+
+        <ProgrammeMap steps={steps ?? []} />
 
         {(!steps || steps.length === 0) ? (
           <div className="p-8 rounded-xl bg-white border border-stone-100 text-center">
@@ -87,20 +90,23 @@ export default async function GuestProgrammePage({ params }: { params: Promise<{
                       )}
 
                       {step.address && (
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-400 w-full">
+                        <div className="mt-2">
+                          <p style={{ fontWeight: 300, fontSize: '0.8rem' }} className="text-stone-400 mb-2">
                             {step.address}
                           </p>
-                          <a href={mapsUrl!} target="_blank" rel="noopener noreferrer"
-                             className="text-xs bg-[#4a5240] text-white px-3 py-1 rounded-lg hover:bg-[#2d3228] transition"
-                             style={{ fontWeight: 300 }}>
-                            Google Maps
-                          </a>
-                          <a href={appleMapsUrl!} target="_blank" rel="noopener noreferrer"
-                             className="text-xs border border-[#4a5240] text-[#4a5240] px-3 py-1 rounded-lg hover:bg-[#4a5240] hover:text-white transition"
-                             style={{ fontWeight: 300 }}>
-                            Apple Maps
-                          </a>
+                          <MapEmbed address={step.address} />
+                          <div className="flex gap-2 mt-2">
+                            <a href={mapsUrl!} target="_blank" rel="noopener noreferrer"
+                               className="text-xs bg-[#4a5240] text-white px-3 py-1 rounded-lg hover:bg-[#2d3228] transition"
+                               style={{ fontWeight: 300 }}>
+                              Google Maps
+                            </a>
+                            <a href={appleMapsUrl!} target="_blank" rel="noopener noreferrer"
+                               className="text-xs border border-[#4a5240] text-[#4a5240] px-3 py-1 rounded-lg hover:bg-[#4a5240] hover:text-white transition"
+                               style={{ fontWeight: 300 }}>
+                              Apple Maps
+                            </a>
+                          </div>
                         </div>
                       )}
                     </div>

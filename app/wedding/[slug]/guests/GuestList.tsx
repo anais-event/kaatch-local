@@ -5,11 +5,13 @@ import { useState, useTransition } from 'react'
 type Guest = {
   id: string
   first_name: string
+  last_name: string | null
   nickname: string | null
   email: string | null
   telephone: string | null
   relation: string | null
   rsvp_status: 'en_attente' | 'confirme' | 'decline'
+  gender: 'M' | 'F' | null
 }
 
 const RELATIONS = ['Ami(e)', 'Frère', 'Sœur', 'Père', 'Mère', 'Oncle', 'Tante', 'Cousin(e)', 'Collègue', 'Autre']
@@ -127,6 +129,15 @@ export default function GuestList({ guests, slug, setRsvp, deleteGuest, updateGu
                     <option value="">Lien de parenté</option>
                     {RELATIONS.map(r => <option key={r} value={r}>{r}</option>)}
                   </select>
+                  <select
+                    name="gender"
+                    defaultValue={guest.gender ?? ''}
+                    className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
+                  >
+                    <option value="">Genre…</option>
+                    <option value="F">👩 Féminin (Chère)</option>
+                    <option value="M">👨 Masculin (Cher)</option>
+                  </select>
                   <div className="flex gap-2">
                     <button
                       type="submit"
@@ -149,6 +160,7 @@ export default function GuestList({ guests, slug, setRsvp, deleteGuest, updateGu
                 <div className="flex justify-between items-center p-4 hover:bg-gray-50 transition-colors">
                   <div className="flex flex-col gap-0.5">
                     <p className="font-medium text-gray-800">
+                      <span className="text-stone-400 text-sm mr-1">{guest.gender === 'F' ? '👩' : guest.gender === 'M' ? '👨' : '👤'}</span>
                       {guest.first_name}
                       {guest.nickname && <span className="text-gray-400 font-normal text-sm ml-1">({guest.nickname})</span>}
                       {guest.relation && (

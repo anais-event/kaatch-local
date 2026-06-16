@@ -12,7 +12,7 @@ export default function AddressInput() {
   const [query, setQuery] = useState('')
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
   const [selected, setSelected] = useState<Suggestion | null>(null)
-  const debounceRef = useRef<NodeJS.Timeout>()
+  const debounceRef = useRef<NodeJS.Timeout | undefined>(undefined)
 
   useEffect(() => {
     if (query.length < 3 || selected) {

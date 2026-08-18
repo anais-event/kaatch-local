@@ -16,14 +16,14 @@ export default function GuestNav({ slug, isPreview }: { slug: string; isPreview?
   const [collapsed, setCollapsed] = useState(false)
 
   useEffect(() => {
-    const saved = localStorage.getItem('kaatch-sidebar-collapsed')
+    const saved = localStorage.getItem('kaatch-guest-sidebar-collapsed')
     if (saved === 'true') { setCollapsed(true); document.documentElement.classList.add('sidebar-collapsed') }
   }, [])
 
   function toggleCollapse() {
     const next = !collapsed
     setCollapsed(next)
-    localStorage.setItem('kaatch-sidebar-collapsed', String(next))
+    localStorage.setItem('kaatch-guest-sidebar-collapsed', String(next))
     document.documentElement.classList.toggle('sidebar-collapsed', next)
   }
 

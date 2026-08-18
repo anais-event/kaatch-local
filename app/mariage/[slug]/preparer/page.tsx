@@ -34,7 +34,7 @@ export default async function PreparerPage({ params }: { params: Promise<{ slug:
         </h1>
 
         {/* Stats bar */}
-        <div className="grid grid-cols-4 gap-3 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
           {[
             { value: daysRemaining ?? 0, label: 'Jours restants', href: null },
             { value: programSteps ?? 0, label: 'Étapes programme', href: 'programme' },

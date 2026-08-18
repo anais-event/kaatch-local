@@ -35,7 +35,7 @@ export default async function WeddingLayout({
   return (
     <AuthIntlProvider>
       <WeddingNav slug={slug} weddingName={wedding?.name ?? ''} weddingId={wedding?.id ?? ''} userEmail={user?.email ?? ''} plan={wedding?.plan ?? null} />
-      <div className="sidebar-main pt-12 md:pt-0 pb-20 md:pb-0 md:ml-56">
+      <div className="sidebar-main pt-12 md:pt-0 pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0 md:ml-56">
         {children}
       </div>
       <BottomNav slug={slug} />

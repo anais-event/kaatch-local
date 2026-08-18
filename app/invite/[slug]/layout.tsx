@@ -78,7 +78,7 @@ export default async function InviteLayout({
     <AuthIntlProvider>
       <NotificationBadgesProvider slug={slug} weddingId={weddingId}>
         <GuestNav slug={slug} isPreview={isPreview} />
-        <div className="sidebar-main pt-12 md:pt-0 pb-20 md:pb-0 md:ml-56">
+        <div className="sidebar-main pt-12 md:pt-0 pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0 md:ml-56">
           {children}
         </div>
         <BottomNavGuest slug={slug} />

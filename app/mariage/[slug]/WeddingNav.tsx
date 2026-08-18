@@ -433,7 +433,7 @@ export default function WeddingNav({ slug, weddingName, weddingId, userEmail, pl
       </nav>
 
       {/* Toasts */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-[100] pointer-events-none">
+      <div className="fixed bottom-24 md:bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-[100] pointer-events-none">
         {toasts.map(toast => (
           <div key={toast.id}
             className="flex items-center gap-2 bg-[#2d3228] text-white text-sm px-4 py-2.5 rounded-full shadow-lg pointer-events-auto"

@@ -20,7 +20,7 @@ export default async function ImaginerPage({ params }: { params: Promise<{ slug:
         </h1>
 
         {/* Stats bar */}
-        <div className="grid grid-cols-4 gap-3 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
           {[
             { value: 0, label: 'Moodboards' },
             { value: 0, label: 'Inspirations' },

@@ -28,7 +28,7 @@ export default async function CoordonnnerPage({ params }: { params: Promise<{ sl
         </h1>
 
         {/* Stats bar */}
-        <div className="grid grid-cols-4 gap-3 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
           {[
             { value: vendorCount ?? 0, label: 'Prestataires', href: 'prestataires' },
             { value: budgetCount ?? 0, label: 'Lignes budget', href: 'budget' },

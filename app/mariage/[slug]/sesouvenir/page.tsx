@@ -28,7 +28,7 @@ export default async function Sesouvenir({ params }: { params: Promise<{ slug: s
         </h1>
 
         {/* Stats bar */}
-        <div className="grid grid-cols-4 gap-3 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
           {[
             { value: photoCount ?? 0, label: 'Photos', href: 'photos' },
             { value: guestbookCount ?? 0, label: 'Messages livre d"or', href: 'livre-dor' },

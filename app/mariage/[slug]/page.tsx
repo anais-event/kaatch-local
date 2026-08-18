@@ -143,7 +143,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
       <div className="max-w-5xl mx-auto px-4 py-6">
 
         {/* Quick stats bar */}
-        <div className="grid grid-cols-4 gap-3 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
           {[
             { value: guestCount ?? 0, label: t('statGuests'), href: 'guests' },
             { value: confirmedCount ?? 0, label: t('statConfirmed'), href: 'guests' },

@@ -65,9 +65,9 @@ const TON_LABELS: Record<string, string> = {
 }
 
 const DUREE_LABELS: Record<string, string> = {
-  'court': "environ 2 minutes (300 à 350 mots)",
-  'moyen': "environ 5 minutes (650 à 750 mots)",
-  'long':  "environ 10 minutes (1300 à 1500 mots)",
+  'court': "exactement 2 minutes — MAXIMUM 320 mots, pas un de plus",
+  'moyen': "exactement 5 minutes — MAXIMUM 700 mots, pas un de plus",
+  'long':  "exactement 10 minutes — MAXIMUM 1400 mots, pas un de plus",
 }
 
 const SYSTEM = `Tu es un expert en rédaction de discours de mariage en français. Tu écris des discours personnels, mémorables et authentiques. Ton français est naturel et chaleureux, jamais pompeux. Tu n'utilises jamais de phrases clichées comme "En ce jour si spécial", "Aujourd'hui est un jour magique" ou "Nous sommes réunis aujourd'hui". Tu respectes exactement le format, le ton et le niveau de détail demandés.`
@@ -130,6 +130,7 @@ Longueur : ${dureeLabel}
 ${infosLine}
 
 Règles :
+- Respecte STRICTEMENT la limite de mots — arrête-toi avant si nécessaire, ne dépasse jamais
 - Discours intégral, fluide, prêt à lire à voix haute
 - Ouverture originale (JAMAIS "En ce jour si spécial")
 - Développement naturel en 3-4 temps
@@ -137,7 +138,7 @@ Règles :
 - [TON ANECDOTE ICI] uniquement si l'info est absente
 
 Commence DIRECTEMENT par le discours, sans titre.`
-      maxTokens = duree === 'long' ? 4000 : duree === 'moyen' ? 2200 : 1200
+      maxTokens = duree === 'long' ? 2800 : duree === 'moyen' ? 1400 : 700
     }
 
     const client = await getClient()

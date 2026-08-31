@@ -8,7 +8,13 @@ function getClient(): Anthropic {
   if (!process.env.ANTHROPIC_API_KEY) {
     throw new Error('ANTHROPIC_API_KEY manquante sur le serveur')
   }
-  if (!anthropic) anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+  if (!anthropic) {
+    const opts: ConstructorParameters<typeof Anthropic>[0] = { apiKey: process.env.ANTHROPIC_API_KEY }
+    if (process.env.ANTHROPIC_WORKSPACE_ID) {
+      opts.defaultHeaders = { 'anthropic-workspace-id': process.env.ANTHROPIC_WORKSPACE_ID }
+    }
+    anthropic = new Anthropic(opts)
+  }
   return anthropic
 }
 

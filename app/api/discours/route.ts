@@ -23,9 +23,12 @@ async function discoverWorkspaceId(apiKey: string): Promise<string | null> {
       const data = await res.json() as { data?: { id: string }[] }
       cachedWorkspaceId = data.data?.[0]?.id ?? null
     } else {
+      const errBody = await res.json().catch(() => null) as { error?: { message?: string } } | null
+      console.error('discours: workspace discovery failed', res.status, errBody)
       cachedWorkspaceId = null
     }
-  } catch {
+  } catch (e) {
+    console.error('discours: workspace discovery error', e)
     cachedWorkspaceId = null
   }
   return cachedWorkspaceId
@@ -194,6 +197,13 @@ Commence DIRECTEMENT par le discours, sans titre.`
   } catch (err) {
     console.error('discours API error:', err)
     const msg = err instanceof Error ? err.message : 'Erreur serveur'
+    const isWorkspaceErr = msg.includes('anthropic-workspace-id')
+    if (isWorkspaceErr) {
+      return new Response(
+        'Clé API identity-linked : variable ANTHROPIC_WORKSPACE_ID manquante dans Vercel. Ajoute ton workspace ID (console.anthropic.com → Settings → Workspaces).',
+        { status: 500 }
+      )
+    }
     return new Response(msg, { status: 500 })
   }
 }

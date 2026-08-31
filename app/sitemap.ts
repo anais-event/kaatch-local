@@ -26,6 +26,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/plan-de-table-mariage`,   alternates: localeAlternates("/plan-de-table-mariage", baseUrl),   lastModified: now,                    changeFrequency: "monthly", priority: 0.9 },
     { url: `${baseUrl}/discours-mariage`,        alternates: localeAlternates("/discours-mariage", baseUrl),        lastModified: now,                    changeFrequency: "monthly", priority: 0.9 },
     { url: `${baseUrl}/outils`,                  alternates: localeAlternates("/outils", baseUrl),                  lastModified: now,                    changeFrequency: "monthly", priority: 0.8 },
+    { url: `${baseUrl}/liste-invites-mariage`,   alternates: localeAlternates("/liste-invites-mariage", baseUrl),   lastModified: now,                    changeFrequency: "monthly", priority: 0.8 },
+    { url: `${baseUrl}/programme-mariage`,       alternates: localeAlternates("/programme-mariage", baseUrl),       lastModified: now,                    changeFrequency: "monthly", priority: 0.8 },
     { url: `${baseUrl}/studio`,                  alternates: localeAlternates("/studio", baseUrl),                  lastModified: new Date("2026-05-01"), changeFrequency: "monthly", priority: 0.7 },
     { url: `${baseUrl}/inspirations`,            lastModified: now,                    changeFrequency: "weekly",  priority: 0.8 },
     { url: `${baseUrl}/entre-nous`,              lastModified: new Date("2026-05-01"), changeFrequency: "weekly",  priority: 0.5 },

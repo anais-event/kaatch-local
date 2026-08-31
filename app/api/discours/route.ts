@@ -4,14 +4,43 @@ import type { NextRequest } from 'next/server'
 export const runtime = 'nodejs'
 
 let anthropic: Anthropic | null = null
-function getClient(): Anthropic {
+let cachedWorkspaceId: string | null | undefined = undefined
+
+async function discoverWorkspaceId(apiKey: string): Promise<string | null> {
+  if (cachedWorkspaceId !== undefined) return cachedWorkspaceId
+  if (process.env.ANTHROPIC_WORKSPACE_ID) {
+    cachedWorkspaceId = process.env.ANTHROPIC_WORKSPACE_ID
+    return cachedWorkspaceId
+  }
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/organizations/workspaces?limit=1', {
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+    })
+    if (res.ok) {
+      const data = await res.json() as { data?: { id: string }[] }
+      cachedWorkspaceId = data.data?.[0]?.id ?? null
+    } else {
+      cachedWorkspaceId = null
+    }
+  } catch {
+    cachedWorkspaceId = null
+  }
+  return cachedWorkspaceId
+}
+
+async function getClient(): Promise<Anthropic> {
   if (!process.env.ANTHROPIC_API_KEY) {
     throw new Error('ANTHROPIC_API_KEY manquante sur le serveur')
   }
   if (!anthropic) {
-    const opts: ConstructorParameters<typeof Anthropic>[0] = { apiKey: process.env.ANTHROPIC_API_KEY }
-    if (process.env.ANTHROPIC_WORKSPACE_ID) {
-      opts.defaultHeaders = { 'anthropic-workspace-id': process.env.ANTHROPIC_WORKSPACE_ID }
+    const apiKey = process.env.ANTHROPIC_API_KEY
+    const workspaceId = await discoverWorkspaceId(apiKey)
+    const opts: ConstructorParameters<typeof Anthropic>[0] = { apiKey }
+    if (workspaceId) {
+      opts.defaultHeaders = { 'anthropic-workspace-id': workspaceId }
     }
     anthropic = new Anthropic(opts)
   }
@@ -108,7 +137,8 @@ Commence DIRECTEMENT par le discours, sans titre.`
       maxTokens = duree === 'long' ? 2200 : duree === 'moyen' ? 1300 : 700
     }
 
-    const stream = getClient().messages.stream({
+    const client = await getClient()
+    const stream = client.messages.stream({
       model: 'claude-3-5-sonnet-20241022',
       max_tokens: maxTokens,
       system: SYSTEM,

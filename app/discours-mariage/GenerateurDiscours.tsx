@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect, type FormEvent } from 'react'
 import Link from 'next/link'
+import { assembleDiscours } from '@/lib/discours-templates'
 
 const SAGE      = '#4a5240'
 const SAGE_DARK = '#2d3228'
@@ -10,7 +11,6 @@ const DISPLAY   = 'var(--font-display)'
 
 type DiscoursType = 'temoin-mariee' | 'temoin-marie' | 'maries' | 'parents' | 'toast'
 type Ton          = 'humour' | 'emotion' | 'equilibre'
-type Niveau       = 'structure' | 'points-cles' | 'complet'
 type Duree        = 'court' | 'moyen' | 'long'
 type Step         = 'form' | 'generating' | 'result'
 
@@ -37,12 +37,6 @@ const TON_OPTIONS = [
   { value: 'humour'    as Ton, icon: '😄', label: 'Humour',    desc: 'Léger, drôle, anecdotes marrantes' },
   { value: 'emotion'   as Ton, icon: '💛', label: 'Émotion',   desc: 'Sincère, touchant, profond' },
   { value: 'equilibre' as Ton, icon: '⚖️',  label: 'Les deux', desc: 'Humour et émotion alternés' },
-]
-
-const NIVEAU_OPTIONS = [
-  { value: 'structure'  as Niveau, icon: '📋', label: 'Structure',        desc: 'Plan sectionné — vous rédigez' },
-  { value: 'points-cles'as Niveau, icon: '💬', label: 'Points clés',      desc: 'Phrases semi-rédigées · ~2 min' },
-  { value: 'complet'    as Niveau, icon: '📄', label: 'Discours complet', desc: 'Texte intégral prêt à lire' },
 ]
 
 const DUREE_OPTIONS = [
@@ -113,9 +107,7 @@ export default function GenerateurDiscours() {
   const [prenom2, setPrenom2] = useState('')
   const [auteur,  setAuteur]  = useState('')
   const [ton,     setTon]     = useState<Ton | null>(null)
-  const [niveau,  setNiveau]  = useState<Niveau | null>(null)
   const [duree,   setDuree]   = useState<Duree>('moyen')
-  const [infos,   setInfos]   = useState('')
 
   const [step,       setStep]       = useState<Step>('form')
   const [streamText, setStreamText] = useState('')
@@ -128,64 +120,45 @@ export default function GenerateurDiscours() {
   const [emailInput,      setEmailInput]      = useState('')
   const [emailSubmitting, setEmailSubmitting] = useState(false)
 
-  const abortRef = useRef<AbortController | null>(null)
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
     try { setEmailGiven(!!localStorage.getItem('kaatch_discours_email')) } catch {}
   }, [])
 
-  const canGenerate = !!(type && prenom1.trim() && prenom2.trim() && ton && niveau)
+  const canGenerate = !!(type && prenom1.trim() && prenom2.trim() && ton)
 
   const wordCount   = editText.split(/\s+/).filter(Boolean).length
   const readingTime = Math.max(1, Math.round(wordCount / 130))
 
-  const doGenerate = useCallback(async () => {
-    if (!canGenerate) return
+  const doGenerate = useCallback(() => {
+    if (!canGenerate || !ton) return
     setShowEmailModal(false)
     setStep('generating')
     setStreamText('')
     setError(null)
 
-    abortRef.current = new AbortController()
+    if (timerRef.current) clearInterval(timerRef.current)
 
-    try {
-      const res = await fetch('/api/discours', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, auteur, prenom1, prenom2, ton, niveau, duree, infos }),
-        signal: abortRef.current.signal,
-      })
+    const fullText = assembleDiscours(ton, duree, prenom1, prenom2, auteur)
+    const CHUNK = 10
+    let i = 0
 
-      if (!res.ok || !res.body) {
-        const detail = await res.text().catch(() => '')
-        throw new Error(detail || `Erreur serveur (${res.status})`)
+    timerRef.current = setInterval(() => {
+      i = Math.min(i + CHUNK, fullText.length)
+      setStreamText(fullText.slice(0, i))
+      if (i >= fullText.length) {
+        clearInterval(timerRef.current!)
+        timerRef.current = null
+        setEditText(fullText)
+        setStep('result')
+        try {
+          const c = parseInt(localStorage.getItem('kaatch_discours_count') || '0', 10)
+          localStorage.setItem('kaatch_discours_count', String(c + 1))
+        } catch {}
       }
-
-      const reader  = res.body.getReader()
-      const decoder = new TextDecoder()
-      let full = ''
-
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        const chunk = decoder.decode(value, { stream: true })
-        full += chunk
-        setStreamText(full)
-      }
-
-      setEditText(full)
-      setStep('result')
-      try {
-        const c = parseInt(localStorage.getItem('kaatch_discours_count') || '0', 10)
-        localStorage.setItem('kaatch_discours_count', String(c + 1))
-      } catch {}
-    } catch (err: unknown) {
-      if (err instanceof Error && err.name === 'AbortError') return
-      const detail = err instanceof Error && err.message ? ` (${err.message})` : ''
-      setError(`Génération échouée. Réessayer.${detail}`)
-      setStep('form')
-    }
-  }, [canGenerate, type, auteur, prenom1, prenom2, ton, niveau, duree, infos])
+    }, 16)
+  }, [canGenerate, ton, duree, prenom1, prenom2, auteur])
 
   const handleGenerate = useCallback(() => {
     if (!canGenerate) return
@@ -219,7 +192,7 @@ export default function GenerateurDiscours() {
   }, [emailInput, doGenerate])
 
   const handleAbort = () => {
-    abortRef.current?.abort()
+    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null }
     setStep('form')
   }
 
@@ -394,34 +367,8 @@ export default function GenerateurDiscours() {
             </FormSection>
 
             <FormSection>
-              <FormLabel>Niveau de détail</FormLabel>
-              <ChoiceGrid options={NIVEAU_OPTIONS} value={niveau} onChange={setNiveau} cols={3} />
-            </FormSection>
-
-            {niveau === 'complet' && (
-              <FormSection>
-                <FormLabel>Durée souhaitée</FormLabel>
-                <ChoiceGrid options={DUREE_OPTIONS} value={duree} onChange={setDuree} cols={3} />
-              </FormSection>
-            )}
-
-            <FormSection>
-              <FormLabel>
-                Quelques mots{' '}
-                <span className="text-stone-400 text-xs ml-1" style={{ fontWeight: 300, fontFamily: BODY }}>
-                  optionnel — anecdotes, souvenirs, ce que vous voulez dire
-                </span>
-              </FormLabel>
-              <textarea
-                value={infos}
-                onChange={e => setInfos(e.target.value)}
-                placeholder={`Ex : "On se connaît depuis le lycée, on a fait un road trip ensemble en Écosse, Marie est quelqu'un de généreux et drôle..."`}
-                className="w-full text-sm text-stone-700 bg-stone-50 rounded-xl border border-stone-200 px-3 py-2.5 resize-none focus:outline-none focus:border-[#4a5240] transition"
-                style={{ fontWeight: 300, minHeight: '90px' }}
-              />
-              <p className="mt-1.5 text-xs text-stone-400" style={{ fontWeight: 300 }}>
-                Plus vous donnez d'informations, plus le discours sera personnel.
-              </p>
+              <FormLabel>Durée souhaitée</FormLabel>
+              <ChoiceGrid options={DUREE_OPTIONS} value={duree} onChange={setDuree} cols={3} />
             </FormSection>
 
             <div className="pt-2">

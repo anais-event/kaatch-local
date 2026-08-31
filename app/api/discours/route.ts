@@ -142,7 +142,7 @@ Commence DIRECTEMENT par le discours, sans titre.`
 
     const client = await getClient()
     const stream = client.messages.stream({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-sonnet-5',
       max_tokens: maxTokens,
       system: SYSTEM,
       messages: [{ role: 'user', content: prompt }],

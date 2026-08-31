@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import Link from 'next/link'
 
 const SAGE      = '#4a5240'
@@ -123,15 +123,25 @@ export default function GenerateurDiscours() {
   const [error,      setError]      = useState<string | null>(null)
   const [copied,     setCopied]     = useState(false)
 
+  const [emailGiven,      setEmailGiven]      = useState(false)
+  const [showEmailModal,  setShowEmailModal]  = useState(false)
+  const [emailInput,      setEmailInput]      = useState('')
+  const [emailSubmitting, setEmailSubmitting] = useState(false)
+
   const abortRef = useRef<AbortController | null>(null)
+
+  useEffect(() => {
+    try { setEmailGiven(!!localStorage.getItem('kaatch_discours_email')) } catch {}
+  }, [])
 
   const canGenerate = !!(type && prenom1.trim() && prenom2.trim() && ton && niveau)
 
   const wordCount   = editText.split(/\s+/).filter(Boolean).length
   const readingTime = Math.max(1, Math.round(wordCount / 130))
 
-  const handleGenerate = useCallback(async () => {
+  const doGenerate = useCallback(async () => {
     if (!canGenerate) return
+    setShowEmailModal(false)
     setStep('generating')
     setStreamText('')
     setError(null)
@@ -165,6 +175,10 @@ export default function GenerateurDiscours() {
 
       setEditText(full)
       setStep('result')
+      try {
+        const c = parseInt(localStorage.getItem('kaatch_discours_count') || '0', 10)
+        localStorage.setItem('kaatch_discours_count', String(c + 1))
+      } catch {}
     } catch (err: unknown) {
       if (err instanceof Error && err.name === 'AbortError') return
       const detail = err instanceof Error && err.message ? ` (${err.message})` : ''
@@ -172,6 +186,37 @@ export default function GenerateurDiscours() {
       setStep('form')
     }
   }, [canGenerate, type, auteur, prenom1, prenom2, ton, niveau, duree, infos])
+
+  const handleGenerate = useCallback(() => {
+    if (!canGenerate) return
+    try {
+      const count = parseInt(localStorage.getItem('kaatch_discours_count') || '0', 10)
+      const email = localStorage.getItem('kaatch_discours_email')
+      if (count >= 1 && !email) {
+        setShowEmailModal(true)
+        return
+      }
+    } catch {}
+    doGenerate()
+  }, [canGenerate, doGenerate])
+
+  const handleEmailSubmit = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault()
+    const em = emailInput.trim()
+    if (!em) return
+    setEmailSubmitting(true)
+    try {
+      await fetch('/api/discours-lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: em }),
+      })
+      localStorage.setItem('kaatch_discours_email', em)
+      setEmailGiven(true)
+    } catch {}
+    setEmailSubmitting(false)
+    doGenerate()
+  }, [emailInput, doGenerate])
 
   const handleAbort = () => {
     abortRef.current?.abort()
@@ -185,48 +230,100 @@ export default function GenerateurDiscours() {
     })
   }, [editText])
 
-  const handlePDF = useCallback(async () => {
-    try {
-      const { jsPDF } = await import('jspdf')
-      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
-      let y = 22
+  const handlePDF = useCallback(() => {
+    const typeLabel = type ? TYPE_LABELS[type] : 'Discours'
+    const bodyHtml = editText
+      .split(/\n\n+/)
+      .filter(p => p.trim())
+      .map(p => `<p>${p.trim().replace(/\n/g, '<br>')}</p>`)
+      .join('')
 
-      // Title
-      doc.setFontSize(18); doc.setTextColor(45, 50, 40)
-      doc.text(sanitize(type ? TYPE_LABELS[type] : 'Discours'), 20, y); y += 7
-      doc.setFontSize(9); doc.setTextColor(130, 120, 110)
-      doc.text(sanitize(`${prenom1} & ${prenom2}`), 20, y); y += 5
-      doc.text('kaatch.fr/discours-mariage', 20, y); y += 12
+    const html = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Discours ${prenom1} &amp; ${prenom2}</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  @page { margin: 18mm 22mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Lato', sans-serif; font-weight: 300; color: #3a3733; background: #f5f0e8; }
+  .page { background: white; max-width: 700px; margin: 0 auto; padding: 56px 64px 52px; min-height: 100vh; }
+  .header { text-align: center; margin-bottom: 40px; padding-bottom: 32px; border-bottom: 1px solid #e5dfd4; }
+  .ornament { display: block; color: #4a5240; font-size: 18px; letter-spacing: 14px; margin-bottom: 20px; }
+  .type-label { font-family: 'Lato', sans-serif; font-size: 11px; font-weight: 400; letter-spacing: 3.5px; text-transform: uppercase; color: #4a5240; margin-bottom: 12px; }
+  .names { font-family: 'Cormorant Garamond', serif; font-size: 38px; font-weight: 300; font-style: italic; color: #2d3228; line-height: 1.15; }
+  .amp { color: #4a5240; }
+  .body p { font-size: 13.5px; line-height: 2.1; margin-bottom: 20px; text-align: justify; hyphens: auto; }
+  .footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid #e5dfd4; text-align: center; font-size: 10px; color: #b0a89f; letter-spacing: 1.5px; text-transform: uppercase; }
+  @media print { body { background: white; } .page { max-width: 100%; padding: 0; } }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <span class="ornament">— ✦ —</span>
+    <div class="type-label">${typeLabel}</div>
+    <div class="names">${prenom1} <span class="amp">&amp;</span> ${prenom2}</div>
+  </div>
+  <div class="body">${bodyHtml}</div>
+  <div class="footer">Généré par Kaatch &nbsp;·&nbsp; kaatch.fr/discours-mariage</div>
+</div>
+<script>document.fonts.ready.then(() => { window.print() })<\/script>
+</body>
+</html>`
 
-      // Separator
-      doc.setDrawColor(220, 215, 205)
-      doc.line(20, y, 190, y); y += 8
-
-      // Body — split by paragraphs
-      doc.setFontSize(10); doc.setTextColor(60, 57, 53)
-      const paragraphs = editText.split(/\n\n+/)
-      for (const para of paragraphs) {
-        const trimmed = para.trim()
-        if (!trimmed) continue
-        const lines = doc.splitTextToSize(sanitize(trimmed), 168) as string[]
-        for (const line of lines) {
-          if (y > 272) { doc.addPage(); y = 20 }
-          doc.text(line, 20, y)
-          y += 5.5
-        }
-        y += 4
-      }
-
-      doc.setFontSize(7); doc.setTextColor(190, 185, 180)
-      doc.text('Genere par Kaatch - kaatch.fr/discours-mariage', 20, 287)
-
-      doc.save(sanitize(`discours-${prenom1}-${prenom2}-kaatch.pdf`))
-    } catch (e) { console.error(e) }
+    const win = window.open('', '_blank')
+    if (!win) return
+    win.document.write(html)
+    win.document.close()
   }, [editText, type, prenom1, prenom2])
+
+  const EmailModal = (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-5"
+         style={{ backgroundColor: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(6px)' }}>
+      <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center">
+        <p style={{ fontFamily: DISPLAY, fontStyle: 'italic', color: SAGE_DARK, fontSize: '1.55rem', fontWeight: 300 }}>
+          Votre discours est prêt ✨
+        </p>
+        <p className="text-stone-500 text-sm mt-3 mb-6 leading-relaxed" style={{ fontWeight: 300, fontFamily: BODY }}>
+          Pour continuer à générer gratuitement,<br />laissez simplement votre email.
+        </p>
+        <form onSubmit={handleEmailSubmit} className="flex flex-col gap-3">
+          <input
+            type="email"
+            required
+            value={emailInput}
+            onChange={e => setEmailInput(e.target.value)}
+            placeholder="votre@email.com"
+            className="w-full px-4 py-3 rounded-xl border border-stone-200 text-stone-700 text-sm focus:outline-none focus:border-[#4a5240] transition"
+            style={{ fontWeight: 300, fontFamily: BODY }}
+          />
+          <button
+            type="submit"
+            disabled={emailSubmitting}
+            className="w-full py-3 rounded-xl text-white text-sm transition"
+            style={{ backgroundColor: emailSubmitting ? '#a8b0a0' : SAGE, fontWeight: 400, fontFamily: BODY }}
+          >
+            {emailSubmitting ? 'Envoi…' : 'Continuer gratuitement →'}
+          </button>
+        </form>
+        <button
+          onClick={() => setShowEmailModal(false)}
+          className="mt-3 text-xs text-stone-400 hover:text-stone-500 transition"
+          style={{ fontWeight: 300, fontFamily: BODY }}
+        >
+          Non merci
+        </button>
+      </div>
+    </div>
+  )
 
   // ─── FORM ────────────────────────────────────────────────────────
   if (step === 'form') {
     return (
+      <>
+      {showEmailModal && EmailModal}
       <div style={{ fontFamily: BODY }} className="pt-24 pb-20 px-5 md:px-10">
         <div className="max-w-2xl mx-auto">
 
@@ -365,6 +462,7 @@ export default function GenerateurDiscours() {
 
         </div>
       </div>
+      </>
     )
   }
 
@@ -449,6 +547,8 @@ export default function GenerateurDiscours() {
 
   // ─── RESULT ──────────────────────────────────────────────────────
   return (
+    <>
+    {showEmailModal && EmailModal}
     <div style={{ fontFamily: BODY }} className="pt-24 pb-20 px-5 md:px-10">
       <div className="max-w-2xl mx-auto">
 
@@ -545,5 +645,6 @@ export default function GenerateurDiscours() {
 
       </div>
     </div>
+    </>
   )
 }

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import ChecklistMariage from '@/app/checklist-mariage/ChecklistMariage'
+import ChecklistMariage from './ChecklistMariage'
 import PublicNav from '@/app/_components/PublicNav'
 
 export const metadata: Metadata = {

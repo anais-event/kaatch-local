@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import PlanDeTable from '@/app/plan-de-table-mariage/PlanDeTable'
+import PlanDeTable from './PlanDeTable'
 import PublicNav from '@/app/_components/PublicNav'
 
 export const metadata: Metadata = {

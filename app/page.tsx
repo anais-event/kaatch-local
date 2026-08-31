@@ -2,6 +2,7 @@ import ContactForm from './_components/ContactForm'
 import PublicNav from './_components/PublicNav'
 import ScrollReveal from './_components/ScrollReveal'
 import FeaturesTrack from './_components/FeaturesTrack'
+import EmailPopup from './_components/EmailPopup'
 
 export const dynamic = 'force-dynamic'
 
@@ -861,6 +862,9 @@ export default function Home() {
           ))}
         </div>
       </footer>
+
+      {/* Email popup — apparaît après 12s si email pas encore capturé */}
+      <EmailPopup />
 
       {/* Product Hunt badge */}
       <div style={{ display: 'flex', justifyContent: 'center', padding: '1rem', background: CREAM }}>

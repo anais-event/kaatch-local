@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useCallback, useEffect, type FormEvent } from 'react'
 import Link from 'next/link'
 
 const SAGE      = '#4a5240'
@@ -200,7 +200,7 @@ export default function GenerateurDiscours() {
     doGenerate()
   }, [canGenerate, doGenerate])
 
-  const handleEmailSubmit = useCallback(async (e: React.FormEvent) => {
+  const handleEmailSubmit = useCallback(async (e: FormEvent) => {
     e.preventDefault()
     const em = emailInput.trim()
     if (!em) return

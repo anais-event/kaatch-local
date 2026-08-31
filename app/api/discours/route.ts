@@ -137,7 +137,7 @@ Règles :
 - [TON ANECDOTE ICI] uniquement si l'info est absente
 
 Commence DIRECTEMENT par le discours, sans titre.`
-      maxTokens = duree === 'long' ? 2200 : duree === 'moyen' ? 1300 : 700
+      maxTokens = duree === 'long' ? 4000 : duree === 'moyen' ? 2200 : 1200
     }
 
     const client = await getClient()

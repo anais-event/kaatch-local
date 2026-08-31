@@ -495,13 +495,13 @@ export default function GenerateurDiscours() {
           <textarea
             value={editText}
             onChange={e => setEditText(e.target.value)}
+            rows={Math.max(16, editText.split('\n').length + 4)}
             className="w-full px-6 py-5 focus:outline-none resize-none text-stone-700 leading-relaxed"
             style={{
               fontFamily: BODY,
               fontWeight: 300,
               fontSize: '0.97rem',
               lineHeight: 1.85,
-              minHeight: '400px',
               background: '#fdfcf8',
               border: 'none',
             }}

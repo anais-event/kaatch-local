@@ -842,8 +842,8 @@ export default function Home() {
         fontFamily: BODY,
       }}>
         <span>Kaatch — fait à Paris, avec des vrais humains dedans.</span>
-        <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-          {[
+        <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          {([
             { label: 'Fonctionnalités', href: '#fonctionnalites' },
             { label: 'Tarifs', href: '#tarifs' },
             { label: 'Questions', href: '#faq' },
@@ -851,7 +851,7 @@ export default function Home() {
             { label: 'Confidentialité', href: '/politique-de-confidentialite' },
             { label: 'Contact', href: 'mailto:bonjour@kaatch.fr' },
             { label: 'Instagram', href: 'https://instagram.com/kaatch.fr' },
-          ].map(l => (
+          ] as { label: string; href: string }[]).map(l => (
             <a key={l.href} href={l.href}
                style={{ color: TEXT_SOFT, textDecoration: 'none', transition: 'color 0.2s' }}
                onMouseEnter={e => { e.currentTarget.style.color = SAGE }}
@@ -860,6 +860,13 @@ export default function Home() {
               {l.label}
             </a>
           ))}
+          <a href="/blog" target="_blank" rel="noopener noreferrer"
+             style={{ color: TEXT_SOFT, textDecoration: 'none', transition: 'color 0.2s' }}
+             onMouseEnter={e => { e.currentTarget.style.color = SAGE }}
+             onMouseLeave={e => { e.currentTarget.style.color = TEXT_SOFT }}
+          >
+            Blog&nbsp;↗
+          </a>
         </div>
       </footer>
 

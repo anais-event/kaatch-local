@@ -125,9 +125,9 @@ export default async function BlogPage() {
                         className="group-hover:opacity-80 transition">
                       {p.title}
                     </h3>
-                    {p.description && (
+                    {p.meta_description && (
                       <p className="text-stone-500 text-sm leading-relaxed mt-2 line-clamp-2" style={{ fontWeight: 300 }}>
-                        {p.description}
+                        {p.meta_description}
                       </p>
                     )}
                   </div>

@@ -11,6 +11,46 @@ function adminClient() {
   )
 }
 
+async function deleteWedding(formData: FormData) {
+  'use server'
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user?.email !== ADMIN_EMAIL) return
+
+  const weddingId = formData.get('wedding_id') as string
+  const admin = adminClient()
+
+  // Fetch junction IDs first, then delete child rows
+  const [{ data: tableIds }, { data: photoIds }] = await Promise.all([
+    admin.from('tables').select('id').eq('wedding_id', weddingId),
+    admin.from('photos').select('id').eq('wedding_id', weddingId),
+  ])
+
+  const tIds = (tableIds ?? []).map(t => t.id)
+  const pIds = (photoIds ?? []).map(p => p.id)
+
+  if (tIds.length > 0) await admin.from('table_guests').delete().in('table_id', tIds)
+  if (pIds.length > 0) {
+    await Promise.all([
+      admin.from('photo_likes').delete().in('photo_id', pIds),
+      admin.from('photo_comments').delete().in('photo_id', pIds),
+    ])
+  }
+
+  await Promise.all([
+    admin.from('guests').delete().eq('wedding_id', weddingId),
+    admin.from('photos').delete().eq('wedding_id', weddingId),
+    admin.from('messages').delete().eq('wedding_id', weddingId),
+    admin.from('guestbook_entries').delete().eq('wedding_id', weddingId),
+    admin.from('playlist_songs').delete().eq('wedding_id', weddingId),
+    admin.from('program_steps').delete().eq('wedding_id', weddingId),
+    admin.from('tables').delete().eq('wedding_id', weddingId),
+  ])
+  await admin.from('weddings').delete().eq('id', weddingId)
+
+  redirect('/admin')
+}
+
 export default async function AdminWeddingDetail({
   params,
 }: {
@@ -93,7 +133,18 @@ export default async function AdminWeddingDetail({
             {wedding.name || '—'}
           </h1>
         </div>
-        <span className="text-white/30 text-xs font-mono">{wedding.slug}</span>
+        <div className="flex items-center gap-4">
+          <span className="text-white/30 text-xs font-mono">{wedding.slug}</span>
+          <form action={deleteWedding}
+                onSubmit={(e) => { if (!window.confirm(`Supprimer définitivement "${wedding.name}" et toutes ses données ?`)) e.preventDefault() }}>
+            <input type="hidden" name="wedding_id" value={wedding.id} />
+            <button type="submit"
+              className="text-xs border border-red-400/40 text-red-300 px-3 py-1.5 rounded-lg hover:border-red-400 hover:text-red-200 transition cursor-pointer"
+              style={{ fontWeight: 400 }}>
+              🗑 Supprimer le mariage
+            </button>
+          </form>
+        </div>
       </div>
 
       <div className="max-w-5xl mx-auto px-6 py-8 space-y-8">

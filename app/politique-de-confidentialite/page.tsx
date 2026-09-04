@@ -30,13 +30,12 @@ export default function PolitiqueConfidentialite() {
           Politique de confidentialité
         </h1>
         <p style={{ fontSize: '0.82rem', color: '#a8a29e', fontWeight: 300, marginBottom: '3rem' }}>
-          Dernière mise à jour : avril 2026
+          Dernière mise à jour : septembre 2026
         </p>
 
         <Section n="1" title="Responsable du traitement">
           <p>
-            <strong>Cogitium</strong> — <a href="mailto:bonjour@kaatch.fr" className="underline hover:text-[#2C3B2E]">bonjour@kaatch.fr</a><br />
-            Adresse : [à compléter]
+            <strong>Cogitium</strong> — <a href="mailto:bonjour@kaatch.fr" className="underline hover:text-[#2C3B2E]">bonjour@kaatch.fr</a>
           </p>
         </Section>
 

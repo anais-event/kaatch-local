@@ -140,6 +140,8 @@ export default function BudgetCalculator() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [hoveredSlice, setHoveredSlice] = useState<number | null>(null)
   const segmentsRef = useRef<{ startAngle: number; endAngle: number }[]>([])
+  const [dateEvent, setDateEvent] = useState('')
+  const [editableNames, setEditableNames] = useState<Record<string, string>>({})
 
   const regionMult = useMemo(() => {
     const found = countryRegions.find(r => r.key === city)
@@ -199,11 +201,11 @@ export default function BudgetCalculator() {
       .filter(item => enabled[item.id] && selections[item.id] !== 'skip')
       .map(item => ({
         id: item.id,
-        label: `${item.emoji} ${item.nom}`,
+        label: `${item.emoji} ${editableNames[item.id] ?? item.nom}`,
         amount: getAmount(item, subtotalBeforePercent),
       }))
       .filter(b => b.amount > 0)
-  }, [getAmount, enabled, selections, subtotalBeforePercent, mainItems])
+  }, [getAmount, enabled, selections, subtotalBeforePercent, mainItems, editableNames])
 
   const total = useMemo(() => breakdown.reduce((s, b) => s + b.amount, 0), [breakdown])
   const honeymoonAmount = useMemo(() => {
@@ -336,103 +338,184 @@ export default function BudgetCalculator() {
   const styleLabel = { intimate: t('styles.intimate'), convivial: t('styles.convivial'), grandiose: t('styles.grandiose') }[style] ?? style
   const regionLabel = regions.find(r => r.value === city)?.label ?? t('ui.notSpecified')
 
+  const sanitizePdf = (s: string): string =>
+    s.replace(/['']/g, "'").replace(/[""]/g, '"').replace(/[–—]/g, '-').replace(/…/g, '...').replace(/[^\x20-\xFF]/g, '')
+
   const handlePDF = async () => {
     const { jsPDF } = await import('jspdf')
-    const html2canvas = (await import('html2canvas')).default
+    const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' })
+    const W = doc.internal.pageSize.getWidth()
+    const H = doc.internal.pageSize.getHeight()
+    const ML = 14, MR = 14, TOP = 14, BOT = H - 14
+    const CREAM = '#f5f0e8'
+    const SAGE = '#4a5240'
+    const SAGE_DARK = '#2d3228'
+    const WARM = '#9c8e77'
+    const LINE = '#d4cfc7'
 
-    const container = document.createElement('div')
-    container.style.position = 'fixed'
-    container.style.left = '-10000px'
-    container.style.top = '0'
-    container.style.width = '794px'
-    container.style.padding = '48px'
-    container.style.backgroundColor = '#ffffff'
-    container.style.fontFamily = 'Helvetica, Arial, sans-serif'
-    container.style.color = '#2d3228'
-    container.style.fontWeight = '300'
+    // background
+    doc.setFillColor(CREAM)
+    doc.rect(0, 0, W, H, 'F')
 
-    const rows = breakdown.map(b => {
-      const item = [...lineItems, ...customItems].find(i => i.id === b.id)
-      const sel = selections[b.id]
-      const lvl = customBudgets[b.id] !== null ? t('ui.quote') : (levelLabels[sel] || '—')
-      const name = item?.nom ?? b.label
-      return `
-        <tr>
-          <td style="padding:10px 8px;border-bottom:1px solid #eee5d8;font-size:13px;color:#2d3228;">${name}</td>
-          <td style="padding:10px 8px;border-bottom:1px solid #eee5d8;font-size:13px;color:#9c8e77;text-align:center;">${lvl}</td>
-          <td style="padding:10px 8px;border-bottom:1px solid #eee5d8;font-size:13px;color:#4a5240;text-align:right;font-variant-numeric:tabular-nums;">${fmtEUR(b.amount)}</td>
-        </tr>`
-    }).join('')
+    // header band
+    doc.setFillColor(SAGE_DARK)
+    doc.rect(0, 0, W, 22, 'F')
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(6)
+    doc.setTextColor('#ffffff')
+    doc.setCharSpace(2)
+    doc.text('KAATCH.FR', W / 2, 8, { align: 'center' })
+    doc.setCharSpace(0)
+    doc.setFontSize(13)
+    doc.text(sanitizePdf(t('pdf.title')), W / 2, 16, { align: 'center' })
 
-    container.innerHTML = `
-      <div style="text-align:center;margin-bottom:32px;">
-        <div style="font-size:11px;letter-spacing:0.25em;color:#a8a29e;text-transform:uppercase;margin-bottom:8px;">${t('pdf.tagline')}</div>
-        <h1 style="font-size:30px;font-weight:300;margin:0;color:#2d3228;letter-spacing:-0.01em;">${t('pdf.title')}</h1>
-        <div style="font-size:13px;color:#78716c;margin-top:10px;">
-          ${guestCount} ${t('inputs.guests').toLowerCase()} &nbsp;·&nbsp; ${regionLabel} &nbsp;·&nbsp; ${t('inputs.style')} ${styleLabel}
-        </div>
-      </div>
+    let y = 30
 
-      <div style="background:#f5f0e8;border-radius:14px;padding:28px;text-align:center;margin-bottom:28px;">
-        <div style="font-size:11px;letter-spacing:0.2em;color:#9c8e77;text-transform:uppercase;margin-bottom:8px;">${t('pdf.totalEstimated')}</div>
-        <div style="font-size:42px;font-weight:300;color:#4a5240;font-variant-numeric:tabular-nums;">${fmtEUR(total)}</div>
-        <div style="font-size:13px;color:#78716c;margin-top:6px;">≈ ${fmtEUR(total / Math.max(guestCount, 1))} ${t('pdf.perGuest')}</div>
-      </div>
+    // meta line: guests · date · region · style
+    const dateFmt = dateEvent
+      ? new Date(dateEvent + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+      : null
+    const metaParts = [
+      `${guestCount} invites`,
+      dateFmt ? sanitizePdf(dateFmt) : null,
+      sanitizePdf(regionLabel),
+      sanitizePdf(styleLabel),
+    ].filter(Boolean).join('  ·  ')
+    doc.setFontSize(7)
+    doc.setTextColor(WARM)
+    doc.text(metaParts, W / 2, y, { align: 'center' })
+    y += 9
 
-      <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
-        <thead>
-          <tr>
-            <th style="text-align:left;padding:8px;font-size:10px;letter-spacing:0.18em;color:#a8a29e;text-transform:uppercase;font-weight:400;border-bottom:1.5px solid #d4cfc7;">${t('pdf.post')}</th>
-            <th style="text-align:center;padding:8px;font-size:10px;letter-spacing:0.18em;color:#a8a29e;text-transform:uppercase;font-weight:400;border-bottom:1.5px solid #d4cfc7;width:90px;">${t('pdf.styleCol')}</th>
-            <th style="text-align:right;padding:8px;font-size:10px;letter-spacing:0.18em;color:#a8a29e;text-transform:uppercase;font-weight:400;border-bottom:1.5px solid #d4cfc7;width:120px;">${t('pdf.amount')}</th>
-          </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-        <tfoot>
-          <tr>
-            <td colspan="2" style="padding:14px 8px 4px;font-size:13px;color:#78716c;border-top:1.5px solid #4a5240;">${t('pdf.total')}</td>
-            <td style="padding:14px 8px 4px;font-size:16px;color:#4a5240;text-align:right;font-variant-numeric:tabular-nums;border-top:1.5px solid #4a5240;">${fmtEUR(total)}</td>
-          </tr>
-        </tfoot>
-      </table>
+    // total box
+    const boxH = 22
+    doc.setFillColor('#ffffff')
+    doc.roundedRect(ML, y, W - ML - MR, boxH, 3, 3, 'F')
+    doc.setFontSize(6.5)
+    doc.setTextColor(WARM)
+    doc.text(sanitizePdf(t('pdf.totalEstimated')).toUpperCase(), W / 2, y + 6.5, { align: 'center' })
+    doc.setFontSize(18)
+    doc.setTextColor(SAGE)
+    doc.text(sanitizePdf(fmtEUR(total)), W / 2, y + 15, { align: 'center' })
+    doc.setFontSize(6.5)
+    doc.setTextColor(WARM)
+    doc.text(`~ ${sanitizePdf(fmtEUR(Math.round(total / Math.max(guestCount, 1))))} / invit${guestCount > 1 ? 'e' : 'e'}`, W / 2, y + 20, { align: 'center' })
+    y += boxH + 8
 
-      ${honeymoonAmount > 0 ? `
-        <div style="font-size:12px;color:#a8a29e;margin-bottom:24px;padding:12px;background:#faf9f6;border-radius:8px;">
-          ${t('pdf.honeymoon')} : <span style="color:#78716c;">${fmtEUR(honeymoonAmount)}</span>
-        </div>` : ''}
-
-      <div style="border-top:1px solid #eee5d8;padding-top:16px;margin-top:32px;text-align:center;">
-        <div style="font-size:11px;color:#a8a29e;line-height:1.6;">
-          ${t('pdf.disclaimer')}<br/>
-          ${t('pdf.generatedOn')} <span style="color:#4a5240;">kaatch.fr</span> ${t('pdf.the')} ${new Date().toLocaleDateString('fr-FR')}
-        </div>
-      </div>
-    `
-
-    document.body.appendChild(container)
-    try {
-      const canvas = await html2canvas(container, { scale: 2, backgroundColor: '#ffffff', useCORS: true })
-      const imgData = canvas.toDataURL('image/png')
-      const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' })
-      const pageW = pdf.internal.pageSize.getWidth()
-      const pageH = pdf.internal.pageSize.getHeight()
-      const imgW = pageW
-      const imgH = (canvas.height * imgW) / canvas.width
-      let heightLeft = imgH
-      let position = 0
-      pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH)
-      heightLeft -= pageH
-      while (heightLeft > 0) {
-        position -= pageH
-        pdf.addPage()
-        pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH)
-        heightLeft -= pageH
-      }
-      pdf.save('budget-mariage.pdf')
-      track('budget_pdf_download', { total: Math.round(total), guests: guestCount, style, region: city })
-    } finally {
-      document.body.removeChild(container)
+    // chart from canvas
+    const chartCanvas = canvasRef.current
+    if (chartCanvas && total > 0) {
+      try {
+        const chartImg = chartCanvas.toDataURL('image/png')
+        const chartSize = 44
+        const chartX = W / 2 - chartSize / 2
+        doc.addImage(chartImg, 'PNG', chartX, y, chartSize, chartSize)
+        y += chartSize + 6
+      } catch { y += 4 }
     }
+
+    // items list — 2 columns
+    const COLS = 2
+    const GAP = 6
+    const CW = (W - ML - MR - GAP) / COLS
+    const COL_X = [ML, ML + CW + GAP]
+    // reserve 30mm at bottom for total row + honeymoon note + breathing room
+    const ITEM_FLOOR = BOT - 30
+    const itemRows = Math.ceil(breakdown.length / 2)
+    const availH = ITEM_FLOOR - y - 9
+    const IH = itemRows > 0 ? Math.max(5.5, Math.min(7, availH / itemRows)) : 7
+    const DOT_PALETTE = [SAGE, '#7a9468', '#b5c9a8', '#c4a882', '#8fa87e', '#6b7c5e', '#4a5240', '#9cb492', '#d4b896', '#a0b890']
+
+    doc.setDrawColor(LINE)
+    doc.setLineWidth(0.25)
+
+    // column headers
+    doc.setFontSize(5.5)
+    doc.setTextColor(WARM)
+    const headers = [t('pdf.post'), t('pdf.amount')]
+    for (let c = 0; c < COLS; c++) {
+      doc.text(sanitizePdf(headers[0]).toUpperCase(), COL_X[c] + 5, y, { baseline: 'middle' })
+      doc.text(sanitizePdf(headers[1]).toUpperCase(), COL_X[c] + CW - 2, y, { align: 'right', baseline: 'middle' })
+    }
+    y += 3
+    doc.line(ML, y, W - MR, y)
+    y += 3
+
+    let col = 0
+    let colY = [y, y]
+
+    breakdown.forEach((b, i) => {
+      const item = [...lineItems, ...customItems].find(ii => ii.id === b.id)
+      const displayName = sanitizePdf(editableNames[b.id] ?? item?.nom ?? b.label)
+      const amount = sanitizePdf(fmtEUR(b.amount))
+      const pct = total > 0 ? Math.round(b.amount / total * 100) : 0
+      const cx = COL_X[col]
+      const cy = colY[col]
+
+      if (cy + IH > ITEM_FLOOR) {
+        return
+      }
+
+      // dot
+      const dotColor = DOT_PALETTE[i % DOT_PALETTE.length]
+      doc.setFillColor(dotColor)
+      doc.circle(cx + 1.5, cy + IH / 2 - 1, 1.5, 'F')
+
+      // name
+      doc.setFontSize(6.8)
+      doc.setTextColor(SAGE_DARK)
+      doc.text(displayName, cx + 5, cy + IH / 2 - 0.5, { baseline: 'middle', maxWidth: CW - 30 })
+
+      // pct
+      doc.setFontSize(5.5)
+      doc.setTextColor(WARM)
+      doc.text(`${pct}%`, cx + CW - 18, cy + IH / 2 - 0.5, { align: 'right', baseline: 'middle' })
+
+      // amount
+      doc.setFontSize(6.8)
+      doc.setTextColor(SAGE)
+      doc.text(amount, cx + CW - 2, cy + IH / 2 - 0.5, { align: 'right', baseline: 'middle' })
+
+      // separator line
+      doc.setDrawColor(LINE)
+      doc.line(cx, cy + IH - 0.5, cx + CW, cy + IH - 0.5)
+
+      colY[col] += IH
+
+      // alternate columns
+      col = 1 - col
+    })
+
+    // honeymoon note + total row — always rendered in reserved bottom zone
+    y = Math.min(Math.max(colY[0], colY[1]) + 4, BOT - 26)
+    if (honeymoonAmount > 0) {
+      doc.setFontSize(6.5)
+      doc.setTextColor(WARM)
+      doc.text(sanitizePdf(`${t('pdf.honeymoon')} : ${fmtEUR(honeymoonAmount)} (hors total)`), ML, y)
+      y += 7
+    }
+
+    // total row
+    doc.setDrawColor(SAGE)
+    doc.setLineWidth(0.4)
+    doc.line(ML, y, W - MR, y)
+    y += 5
+    doc.setFontSize(8)
+    doc.setTextColor(SAGE_DARK)
+    doc.text(sanitizePdf(t('pdf.total')), ML, y)
+    doc.setFontSize(10)
+    doc.setTextColor(SAGE)
+    doc.text(sanitizePdf(fmtEUR(total)), W - MR, y, { align: 'right' })
+
+    // footer
+    doc.setFillColor(SAGE_DARK)
+    doc.rect(0, H - 10, W, 10, 'F')
+    doc.setFontSize(5.5)
+    doc.setTextColor('#ffffff')
+    const today = new Date().toLocaleDateString('fr-FR')
+    doc.text(`kaatch.fr  ·  ${sanitizePdf(t('pdf.generatedOn'))} ${today}`, W / 2, H - 4, { align: 'center' })
+
+    doc.save('budget-mariage.pdf')
+    track('budget_pdf_download', { total: Math.round(total), guests: guestCount, style, region: city })
   }
 
   const handleExcel = async () => {
@@ -554,7 +637,7 @@ export default function BudgetCalculator() {
                 style={{ fontFamily: BODY, fontWeight: 400, color: GREEN_DARK }}
               />
             ) : (
-              <span className="text-[0.82rem] tracking-[-0.01em]" style={{ fontFamily: BODY, fontWeight: 400, color: GREEN_DARK }}>{item.nom}</span>
+              <span className="text-[0.82rem] tracking-[-0.01em]" style={{ fontFamily: BODY, fontWeight: 400, color: GREEN_DARK }}>{editableNames[item.id] ?? item.nom}</span>
             )}
             {item.description && !isExpanded && (
               <button
@@ -593,6 +676,25 @@ export default function BudgetCalculator() {
 
         {isExpanded && (
           <div className="mx-5 mt-1 mb-3 rounded-xl bg-[#faf9f6] p-5 space-y-4" style={{ boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.03)' }}>
+            {/* Renommer la catégorie */}
+            <div className="flex items-center gap-2">
+              <span className="text-[0.6rem] uppercase tracking-wider text-stone-300 shrink-0" style={{ fontWeight: 300 }}>Nom</span>
+              <input
+                type="text"
+                value={editableNames[item.id] ?? item.nom}
+                onChange={e => setEditableNames(prev => ({ ...prev, [item.id]: e.target.value }))}
+                onClick={e => e.stopPropagation()}
+                className="flex-1 text-[0.8rem] bg-transparent border-b border-dashed border-stone-200 focus:border-[#4a5240] outline-none py-0.5 text-stone-700"
+                style={{ fontFamily: BODY, fontWeight: 400 }}
+              />
+              {editableNames[item.id] !== undefined && editableNames[item.id] !== item.nom && (
+                <button
+                  onClick={e => { e.stopPropagation(); setEditableNames(prev => { const n = { ...prev }; delete n[item.id]; return n }) }}
+                  className="text-stone-300 hover:text-stone-500 text-xs transition shrink-0"
+                  title="Rétablir le nom par défaut"
+                >↩</button>
+              )}
+            </div>
             {item.conseil && (
               <p className="text-[0.72rem] text-stone-400 leading-relaxed" style={{ fontWeight: 300 }}>
                 💡 {item.conseil}
@@ -752,6 +854,23 @@ export default function BudgetCalculator() {
               ))}
             </div>
           </div>
+        </div>
+
+        {/* Date du mariage */}
+        <div className="mt-5 pt-5 border-t border-stone-100 flex items-center gap-3">
+          <label className="text-[0.65rem] uppercase tracking-wider text-stone-400 shrink-0" style={{ fontWeight: 300 }}>
+            Date du mariage
+          </label>
+          <input
+            type="date"
+            value={dateEvent}
+            onChange={e => setDateEvent(e.target.value)}
+            className="px-3 py-1.5 bg-stone-50 rounded-xl text-[0.82rem] focus:outline-none focus:ring-1 focus:ring-[#4a5240]/30 transition text-stone-600"
+            style={{ fontFamily: BODY, fontWeight: 300 }}
+          />
+          {dateEvent && (
+            <button onClick={() => setDateEvent('')} className="text-stone-300 hover:text-stone-500 text-sm transition">×</button>
+          )}
         </div>
       </div>
 

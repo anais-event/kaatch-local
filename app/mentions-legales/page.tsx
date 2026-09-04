@@ -30,16 +30,13 @@ export default function MentionsLegales() {
           Mentions légales
         </h1>
         <p style={{ fontSize: '0.82rem', color: '#a8a29e', fontWeight: 300, marginBottom: '3rem' }}>
-          Dernière mise à jour : avril 2026
+          Dernière mise à jour : septembre 2026
         </p>
 
         <Section title="Éditeur du site">
           <p>Le site <strong>kaatch.fr</strong> est édité par :</p>
           <p className="mt-3">
             <strong>Cogitium</strong><br />
-            Forme juridique : [à compléter — ex. auto-entrepreneur / SAS / SARL]<br />
-            SIRET : [à compléter]<br />
-            Adresse : [à compléter]<br />
             Email : <a href="mailto:bonjour@kaatch.fr" className="underline hover:text-[#2C3B2E]">bonjour@kaatch.fr</a>
           </p>
         </Section>

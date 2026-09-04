@@ -21,22 +21,37 @@ export default function TopBanner() {
   const [display, setDisplay] = useState<number | null>(null)
 
   useEffect(() => {
-    // Décale la nav pour qu'elle apparaisse sous le bandeau
     document.documentElement.classList.add('has-banner')
     return () => document.documentElement.classList.remove('has-banner')
   }, [])
 
   useEffect(() => {
     const spots = getSpots()
-    // Animation : descend de spots+3 vers spots
+    // Animation d'entrée : descend de spots+3 vers spots
     let current = spots + 3
     setDisplay(current)
-    const tick = setInterval(() => {
+    const intro = setInterval(() => {
       current--
       setDisplay(current)
-      if (current <= spots) clearInterval(tick)
+      if (current <= spots) clearInterval(intro)
     }, 120)
-    return () => clearInterval(tick)
+
+    // Après l'intro, décrémente aléatoirement toutes les 3–8 min
+    let liveValue = spots
+    const scheduleNext = () => {
+      const delay = (180 + Math.random() * 300) * 1000 // 3–8 min
+      return setTimeout(() => {
+        liveValue = Math.max(FLOOR, liveValue - 1)
+        setDisplay(liveValue)
+        timer = scheduleNext()
+      }, delay)
+    }
+    let timer = scheduleNext()
+
+    return () => {
+      clearInterval(intro)
+      clearTimeout(timer)
+    }
   }, [])
 
   return (

@@ -1,62 +1,144 @@
-import Image from "next/image";
-import Link from "next/link";
-import { getSeoPosts } from "notfair-nextjs-blog";
+import Link from 'next/link'
+import { getAllInspirations, categoryLabel, categoryColor, categoryBg, type InspirationCategory } from '@/lib/inspirations'
+import { getSeoPosts } from 'notfair-nextjs-blog'
+import Image from 'next/image'
+import PublicNav from '@/app/_components/PublicNav'
+import { NextIntlClientProvider } from 'next-intl'
+import messages from '@/messages/fr.json'
 
-export const revalidate = 3600;
+export const revalidate = 3600
 
-export default async function BlogIndex() {
-  const posts = await getSeoPosts();
+const DISPLAY = 'var(--font-display)'
+const GREEN = '#2C3B2E'
+const CREAM = '#f5f0e8'
+
+function formatDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+}
+
+export default async function BlogPage() {
+  const all = getAllInspirations()
+  const articles = all.filter(i => i.category === 'article')
+  const shorts = all.filter(i => i.category !== 'article')
+
+  let seoPosts: Awaited<ReturnType<typeof getSeoPosts>> = []
+  try { seoPosts = await getSeoPosts() } catch {}
+
   return (
-    <main style={{ background: "#f5f0e8", minHeight: "100vh", padding: "3rem 1.5rem" }}>
-      <h1 style={{
-        fontFamily: "var(--font-cormorant, serif)",
-        fontSize: "2.5rem",
-        fontWeight: 600,
-        color: "#2d3228",
-        marginBottom: "2.5rem",
-        letterSpacing: "-0.02em",
-      }}>
-        Blog
-      </h1>
-      <div style={{ display: "grid", gap: "2rem", maxWidth: "860px" }}>
-        {posts.map((p) => (
-          <article key={p.slug} style={{
-            background: "white",
-            borderRadius: "1rem",
-            border: "1px solid #e7e5e4",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
-            overflow: "hidden",
-          }}>
-            <div style={{ position: "relative", aspectRatio: "16/7", width: "100%" }}>
-              <Image src={p.image_url} alt={p.title} fill style={{ objectFit: "cover" }} />
+    <NextIntlClientProvider locale="fr" messages={messages}>
+    <main style={{ fontFamily: 'var(--font-lato)', fontWeight: 300, color: '#2d3228', background: CREAM, minHeight: '100vh' }}>
+
+      <PublicNav active="inspirations" />
+
+      <div className="pt-28 pb-24 px-6 max-w-5xl mx-auto">
+
+        <div className="mb-16">
+          <p className="text-xs tracking-[0.2em] uppercase mb-4" style={{ fontWeight: 500, color: GREEN }}>
+            Blog
+          </p>
+          <h1 style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 'clamp(2rem, 4vw, 3rem)', lineHeight: 1.1, letterSpacing: '-0.02em', color: GREEN }}
+              className="mb-4">
+            Conseils, astuces,<br />bons plans.
+          </h1>
+          <p className="text-stone-500 max-w-lg" style={{ fontSize: '1rem', lineHeight: 1.8 }}>
+            Tout ce qu&apos;on aurait aimé savoir avant d&apos;organiser un mariage.
+          </p>
+        </div>
+
+        {articles.length > 0 && (
+          <section className="mb-16">
+            <h2 className="text-xs tracking-[0.2em] uppercase mb-6 text-stone-400" style={{ fontWeight: 500 }}>
+              Articles
+            </h2>
+            <div className="grid md:grid-cols-2 gap-5">
+              {articles.map(item => (
+                <Link key={item.slug} href={`/inspirations/${item.slug}`}
+                      className="group bg-white rounded-2xl p-7 border border-stone-100 hover:border-stone-200 hover:shadow-md transition-all block"
+                      style={{ boxShadow: '0 2px 12px rgba(44,59,46,0.05)' }}>
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="text-xs px-3 py-1 rounded-full font-medium"
+                          style={{ background: categoryBg[item.category], color: categoryColor[item.category] }}>
+                      {categoryLabel[item.category]}
+                    </span>
+                    <span className="text-xs text-stone-400">{item.readTime}</span>
+                  </div>
+                  <h3 style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1.05rem', lineHeight: 1.3, color: GREEN }}
+                      className="mb-3 group-hover:opacity-80 transition">
+                    {item.title}
+                  </h3>
+                  <p className="text-stone-500 text-sm leading-relaxed" style={{ fontWeight: 300 }}>
+                    {item.excerpt}
+                  </p>
+                  <p className="text-xs text-stone-400 mt-5" style={{ fontWeight: 300 }}>
+                    {formatDate(item.date)}
+                  </p>
+                </Link>
+              ))}
             </div>
-            <div style={{ padding: "1.5rem" }}>
-              <Link href={`/blog/${p.slug}`} style={{
-                fontFamily: "var(--font-cormorant, serif)",
-                fontSize: "1.5rem",
-                fontWeight: 600,
-                color: "#2d3228",
-                textDecoration: "none",
-                lineHeight: 1.3,
-              }}>
-                {p.title}
-              </Link>
-              {p.description && (
-                <p style={{
-                  marginTop: "0.75rem",
-                  color: "#57534e",
-                  fontFamily: "var(--font-lato, sans-serif)",
-                  fontWeight: 300,
-                  fontSize: "0.95rem",
-                  lineHeight: 1.6,
-                }}>
-                  {p.description}
-                </p>
-              )}
+          </section>
+        )}
+
+        {shorts.length > 0 && (
+          <section className="mb-16">
+            <h2 className="text-xs tracking-[0.2em] uppercase mb-6 text-stone-400" style={{ fontWeight: 500 }}>
+              Astuces &amp; bons plans
+            </h2>
+            <div className="grid md:grid-cols-3 gap-4">
+              {shorts.map(item => (
+                <Link key={item.slug} href={`/inspirations/${item.slug}`}
+                      className="group rounded-2xl p-6 border border-stone-100 hover:shadow-md transition-all block"
+                      style={{ background: categoryBg[item.category as InspirationCategory] }}>
+                  <div className="mb-3">
+                    <span className="text-xs px-3 py-1 rounded-full font-medium"
+                          style={{ background: 'white', color: categoryColor[item.category] }}>
+                      {categoryLabel[item.category]}
+                    </span>
+                  </div>
+                  <h3 style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '0.95rem', lineHeight: 1.35, color: GREEN }}
+                      className="mb-2 group-hover:opacity-80 transition">
+                    {item.title}
+                  </h3>
+                  <p className="text-stone-500 text-sm leading-relaxed line-clamp-3" style={{ fontWeight: 300 }}>
+                    {item.excerpt}
+                  </p>
+                </Link>
+              ))}
             </div>
-          </article>
-        ))}
+          </section>
+        )}
+
+        {seoPosts.length > 0 && (
+          <section>
+            <h2 className="text-xs tracking-[0.2em] uppercase mb-6 text-stone-400" style={{ fontWeight: 500 }}>
+              À lire aussi
+            </h2>
+            <div className="grid md:grid-cols-2 gap-5">
+              {seoPosts.map(p => (
+                <Link key={p.slug} href={`/blog/${p.slug}`}
+                      className="group bg-white rounded-2xl overflow-hidden border border-stone-100 hover:border-stone-200 hover:shadow-md transition-all block"
+                      style={{ boxShadow: '0 2px 12px rgba(44,59,46,0.05)' }}>
+                  <div style={{ position: 'relative', aspectRatio: '16/7', width: '100%' }}>
+                    <Image src={p.image_url} alt={p.title} fill style={{ objectFit: 'cover' }} />
+                  </div>
+                  <div className="p-6">
+                    <h3 style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: '1rem', lineHeight: 1.3, color: GREEN }}
+                        className="group-hover:opacity-80 transition">
+                      {p.title}
+                    </h3>
+                    {p.description && (
+                      <p className="text-stone-500 text-sm leading-relaxed mt-2 line-clamp-2" style={{ fontWeight: 300 }}>
+                        {p.description}
+                      </p>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
       </div>
     </main>
-  );
+    </NextIntlClientProvider>
+  )
 }

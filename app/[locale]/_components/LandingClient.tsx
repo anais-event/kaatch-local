@@ -513,6 +513,10 @@ export default function LandingClient() {
               {l.label}
             </a>
           ))}
+          <a href="/blog" target="_blank" rel="noopener noreferrer"
+             className="text-[#847d73] hover:text-[#4a5240] transition-colors">
+            Blog&nbsp;↗
+          </a>
         </div>
       </footer>
 

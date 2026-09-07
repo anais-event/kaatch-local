@@ -11,6 +11,16 @@ async function markSent(guestId: string) {
   } catch {}
 }
 
+// Normalise un numéro FR/international pour wa.me (chiffres, indicatif pays, sans +).
+function waPhone(tel: string | null | undefined): string {
+  if (!tel) return ''
+  let d = tel.replace(/[^\d+]/g, '')
+  if (d.startsWith('+')) d = d.slice(1)
+  else if (d.startsWith('00')) d = d.slice(2)
+  else if (d.startsWith('0')) d = '33' + d.slice(1)
+  return d
+}
+
 export default function CopyLinkButton({
   url,
   guestName,
@@ -21,6 +31,7 @@ export default function CopyLinkButton({
   paid = true,
   weddingId,
   theme,
+  telephone,
 }: {
   url: string
   guestName: string
@@ -31,6 +42,7 @@ export default function CopyLinkButton({
   paid?: boolean
   weddingId?: string
   theme?: string | null
+  telephone?: string | null
 }) {
   const locale = useLocale()
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -61,7 +73,20 @@ export default function CopyLinkButton({
   const firstName = guestName?.split(' ')[0] ?? guestName
   const salutation = gender === 'F' ? `Chère ${firstName},` : gender === 'M' ? `Cher ${firstName},` : `Cher(e) ${firstName},`
 
-  const whatsappMsg = encodeURIComponent(`${salutation}\n\nVoici ton invitation personnalisée pour notre mariage${wedding?.name ? ` — ${wedding.name}` : ''} :\n${url}\n\nÀ très vite ! 🥂`)
+  const waIntro = wedding?.name ? `💌 *${wedding.name}*\n\n` : ''
+  const waWhen = [
+    dateStr ? `le *${dateStr}*` : '',
+    wedding?.location ? `dans l'écrin de *${wedding.location}*` : '',
+  ].filter(Boolean).join(', ')
+  const whatsappMsg = encodeURIComponent(
+    `${waIntro}${salutation}\n\n` +
+    `Il y a des jours qui marquent une vie à jamais… et nous avons la joie immense de vous compter parmi ceux qui partageront le nôtre. 🌿✨\n\n` +
+    `Nous vous invitons à célébrer notre mariage${waWhen ? ` ${waWhen}` : ''}.\n\n` +
+    `Votre présence sera, pour nous, le plus beau des cadeaux. 🥂\n\n` +
+    `Votre espace personnel (RSVP, programme, plan de table…) vous attend ici :\n👉 ${url}\n\n` +
+    `Avec tout notre amour${wedding?.name ? `,\n_${wedding.name}_ 💍` : ' 💍'}`
+  )
+  const waHref = `https://wa.me/${waPhone(telephone)}?text=${whatsappMsg}`
   const smsMsg = encodeURIComponent(`${salutation} Voici ton invitation pour notre mariage${wedding?.name ? ` — ${wedding.name}` : ''} : ${url}`)
   const emailSubject = encodeURIComponent(`Ton invitation — ${wedding?.name ?? 'Notre mariage'}`)
   const emailBody = encodeURIComponent(`${salutation}\n\nNous sommes ravis de t'inviter à célébrer notre mariage !\n\nAccède à ton espace personnel ici :\n${url}\n\nÀ très vite,\n${wedding?.name ?? 'Les mariés'}`)
@@ -187,7 +212,7 @@ export default function CopyLinkButton({
 
             {/* WhatsApp */}
             {paid ? (
-              <a href={`https://wa.me/?text=${whatsappMsg}`} target="_blank" rel="noopener noreferrer"
+              <a href={waHref} target="_blank" rel="noopener noreferrer"
                  onClick={() => { setDropdownOpen(false); if (guestId) markSent(guestId) }}
                  className="flex items-center gap-3 px-4 py-2.5 hover:bg-[#f5f0e8] transition cursor-pointer">
                 <svg viewBox="0 0 24 24" fill="#25D366" className="w-4 h-4 shrink-0">
@@ -195,7 +220,9 @@ export default function CopyLinkButton({
                 </svg>
                 <div>
                   <p style={{ fontWeight: 400, fontSize: '0.82rem' }} className="text-stone-700">WhatsApp</p>
-                  <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400">Message personnalisé prêt</p>
+                  <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-400">
+                    {waPhone(telephone) ? `Discussion avec ${firstName}, message prêt` : 'Message personnalisé prêt'}
+                  </p>
                 </div>
               </a>
             ) : (

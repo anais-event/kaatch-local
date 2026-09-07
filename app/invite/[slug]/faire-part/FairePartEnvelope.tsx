@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { createClient } from '@/lib/supabase'
 import { FairePartCard, THEMES, type ThemeKey } from './FairePartCard'
 
 type Props = {
@@ -13,6 +14,8 @@ type Props = {
   personalUrl: string
   paid?: boolean
   theme?: string
+  guestId?: string | null
+  rsvpStatus?: string | null
 }
 
 type Phase = 'curtain-closed' | 'opening' | 'revealed'
@@ -49,11 +52,38 @@ const GOLD_RAIN = Array.from({ length: 38 }, (_, i) => ({
 
 export default function FairePartEnvelope({
   weddingName, dateStr, location, coupleMessage, coverImageUrl, slug, personalUrl, paid = true, theme: themeProp,
+  guestId = null, rsvpStatus = null,
 }: Props) {
   const [phase, setPhase] = useState<Phase>('curtain-closed')
   const [showRain, setShowRain] = useState(false)
   const [downloading, setDownloading] = useState(false)
+  const [rsvp, setRsvp] = useState<string | null>(rsvpStatus)
+  const [rsvpBusy, setRsvpBusy] = useState(false)
   const cardsRef = useRef<HTMLDivElement>(null)
+
+  async function respond(status: 'confirme' | 'decline') {
+    if (!guestId || rsvpBusy) return
+    setRsvpBusy(true)
+    const prev = rsvp
+    setRsvp(status) // optimiste
+    try {
+      const supabase = createClient()
+      const { error } = await supabase
+        .from('guests')
+        .update({ rsvp_status: status, rsvp_at: new Date().toISOString() })
+        .eq('id', guestId)
+      if (error) { setRsvp(prev); return }
+      fetch('/api/rsvp-notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guestId, slug }),
+      }).catch(() => {})
+    } catch {
+      setRsvp(prev)
+    } finally {
+      setRsvpBusy(false)
+    }
+  }
 
   const themeKey: ThemeKey = (['classique', 'champetre', 'romantique'] as const).includes(themeProp as ThemeKey)
     ? (themeProp as ThemeKey)
@@ -250,6 +280,76 @@ export default function FairePartEnvelope({
             personalUrl={personalUrl}
             themeKey={themeKey}
           />
+
+          {/* RSVP — répondre directement depuis le faire-part */}
+          {guestId && (
+            <div className="fade-up" style={{
+              marginTop: 20, marginBottom: 20,
+              background: 'rgba(255,255,255,0.07)',
+              border: '1px solid rgba(255,255,255,0.14)',
+              borderRadius: 16, padding: '20px 22px', textAlign: 'center',
+            }}>
+              {rsvp === 'confirme' ? (
+                <>
+                  <p style={{ fontFamily:'var(--font-cormorant)', fontStyle:'italic', fontWeight:500,
+                    fontSize:'1.3rem', color: t.accent, marginBottom:4 }}>
+                    ✓ Votre présence est confirmée
+                  </p>
+                  <p style={{ fontFamily:'var(--font-lato)', fontWeight:300, fontSize:'0.75rem',
+                    color:'rgba(255,255,255,0.5)', marginBottom:12 }}>
+                    Les mariés ont hâte de vous voir !
+                  </p>
+                  <button onClick={() => respond('decline')} disabled={rsvpBusy}
+                    style={{ background:'none', border:'none', cursor:'pointer',
+                      color:'rgba(255,255,255,0.4)', fontFamily:'var(--font-lato)', fontWeight:300,
+                      fontSize:'0.72rem', textDecoration:'underline' }}>
+                    Annuler ma présence
+                  </button>
+                </>
+              ) : rsvp === 'decline' ? (
+                <>
+                  <p style={{ fontFamily:'var(--font-cormorant)', fontStyle:'italic', fontWeight:500,
+                    fontSize:'1.3rem', color:'rgba(255,255,255,0.75)', marginBottom:4 }}>
+                    Réponse enregistrée
+                  </p>
+                  <p style={{ fontFamily:'var(--font-lato)', fontWeight:300, fontSize:'0.75rem',
+                    color:'rgba(255,255,255,0.5)', marginBottom:12 }}>
+                    Vous nous manquerez…
+                  </p>
+                  <button onClick={() => respond('confirme')} disabled={rsvpBusy}
+                    style={{ background:'none', border:'none', cursor:'pointer',
+                      color: t.accent, fontFamily:'var(--font-lato)', fontWeight:300,
+                      fontSize:'0.72rem', textDecoration:'underline' }}>
+                    Finalement, je serai présent(e)
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p style={{ fontFamily:'var(--font-cormorant)', fontStyle:'italic', fontWeight:500,
+                    fontSize:'1.4rem', color:'rgba(255,255,255,0.9)', marginBottom:14 }}>
+                    Serez-vous des nôtres&nbsp;?
+                  </p>
+                  <div style={{ display:'flex', gap:10 }}>
+                    <button onClick={() => respond('confirme')} disabled={rsvpBusy}
+                      style={{ flex:1, background: t.accent,
+                        color: themeKey === 'champetre' ? '#2d4018' : '#2d3a22',
+                        border:'none', borderRadius:10, padding:'12px', cursor:'pointer',
+                        fontFamily:'var(--font-lato)', fontWeight:600, fontSize:'0.82rem',
+                        letterSpacing:'0.03em', opacity: rsvpBusy ? 0.6 : 1 }}>
+                      🥂 Avec plaisir
+                    </button>
+                    <button onClick={() => respond('decline')} disabled={rsvpBusy}
+                      style={{ flex:1, background:'rgba(255,255,255,0.08)', color:'rgba(255,255,255,0.6)',
+                        border:'1px solid rgba(255,255,255,0.18)', borderRadius:10, padding:'12px',
+                        cursor:'pointer', fontFamily:'var(--font-lato)', fontWeight:400, fontSize:'0.82rem',
+                        opacity: rsvpBusy ? 0.6 : 1 }}>
+                      Je ne pourrai pas
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
 
           {/* Buttons */}
           <div className="fade-up" style={{ display:'flex', flexDirection:'column',

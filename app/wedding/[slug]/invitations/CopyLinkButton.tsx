@@ -1,79 +1,12 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { downloadFairePart } from '@/lib/faire-part-canvas'
 
 async function markSent(guestId: string) {
   try {
     await fetch('/api/invite-sent', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ guestId }) })
   } catch {}
-}
-
-async function downloadFairePartPng(
-  url: string,
-  guestName: string,
-  wedding: { name: string; date: string | null; location: string | null } | undefined
-) {
-  const canvas = document.createElement('canvas')
-  canvas.width = 600
-  canvas.height = 900
-  const ctx = canvas.getContext('2d')!
-
-  ctx.fillStyle = '#fdfcf8'
-  ctx.fillRect(0, 0, 600, 900)
-
-  const grad = ctx.createLinearGradient(0, 0, 600, 0)
-  grad.addColorStop(0, '#4a5240'); grad.addColorStop(1, '#2d3228')
-  ctx.fillStyle = grad; ctx.fillRect(0, 0, 600, 8)
-
-  ctx.fillStyle = '#c9a96e'; ctx.font = '18px Georgia, serif'; ctx.textAlign = 'center'
-  ctx.fillText('✦', 300, 55)
-
-  const firstName = guestName.split(' ')[0]
-  ctx.fillStyle = '#6b6459'; ctx.font = 'italic 22px Georgia, serif'
-  ctx.fillText(`Chère/Cher ${firstName},`, 300, 120)
-
-  ctx.fillStyle = '#9a9187'; ctx.font = '300 13px Arial, sans-serif'
-  ctx.fillText('Nous avons la joie de vous annoncer', 300, 160)
-
-  ctx.fillStyle = '#2d3228'; ctx.font = 'bold 42px Georgia, serif'
-  ctx.fillText(wedding?.name ?? '', 300, 218)
-
-  ctx.fillStyle = '#9a9187'; ctx.font = '300 13px Arial, sans-serif'
-  ctx.fillText('et vous invitent à célébrer leur mariage', 300, 258)
-
-  ctx.strokeStyle = '#e0d9ce'; ctx.lineWidth = 1
-  ctx.beginPath(); ctx.moveTo(80, 290); ctx.lineTo(520, 290); ctx.stroke()
-
-  if (wedding?.date) {
-    const dateStr = new Date(wedding.date).toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
-    ctx.fillStyle = '#4a5240'; ctx.font = '18px Georgia, serif'
-    ctx.fillText(dateStr.charAt(0).toUpperCase() + dateStr.slice(1), 300, 330)
-  }
-  if (wedding?.location) {
-    ctx.fillStyle = '#9a9187'; ctx.font = '300 14px Arial, sans-serif'
-    ctx.fillText(wedding.location, 300, 360)
-  }
-
-  ctx.strokeStyle = '#e0d9ce'; ctx.lineWidth = 1
-  ctx.beginPath(); ctx.moveTo(80, 395); ctx.lineTo(520, 395); ctx.stroke()
-
-  const QR = await import('qrcode')
-  const qrDataUrl = await QR.default.toDataURL(url, { width: 200, margin: 1 })
-  const qrImg = new Image()
-  await new Promise<void>(resolve => { qrImg.onload = () => resolve(); qrImg.src = qrDataUrl })
-  ctx.drawImage(qrImg, 200, 425, 200, 200)
-
-  ctx.fillStyle = '#b5ada3'; ctx.font = '300 12px Arial, sans-serif'
-  ctx.fillText('Scannez pour confirmer votre présence', 300, 645)
-
-  const bot = ctx.createLinearGradient(0, 0, 600, 0)
-  bot.addColorStop(0, '#2d3228'); bot.addColorStop(1, '#4a5240')
-  ctx.fillStyle = bot; ctx.fillRect(0, 892, 600, 8)
-
-  const a = document.createElement('a')
-  a.href = canvas.toDataURL('image/png')
-  a.download = `faire-part-${firstName.toLowerCase()}.png`
-  a.click()
 }
 
 export default function CopyLinkButton({
@@ -110,11 +43,26 @@ export default function CopyLinkButton({
   const emailSubject = encodeURIComponent(`Ton invitation — ${wedding?.name ?? 'Notre mariage'}`)
   const emailBody = encodeURIComponent(`${salutation}\n\nNous sommes ravis de t'inviter à célébrer notre mariage !\n\nAccède à ton espace personnel ici :\n${url}\n\nÀ très vite,\n${wedding?.name ?? 'Les mariés'}`)
 
+  const dateStr = wedding?.date
+    ? new Date(wedding.date).toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+    : null
+
   async function handleDownload() {
     setDownloading(true)
     setDropdownOpen(false)
     try {
-      await downloadFairePartPng(url, guestName, wedding ? { name: wedding.name, date: wedding.date, location: wedding.location } : undefined)
+      await downloadFairePart(
+        {
+          weddingName: wedding?.name ?? '',
+          dateStr,
+          location: wedding?.location ?? null,
+          coupleMessage: wedding?.coupleMessage ?? null,
+          coverImageUrl: wedding?.coverImageUrl ?? null,
+          qrUrl: url,
+          salutation,
+        },
+        `faire-part-${firstName.toLowerCase()}.png`,
+      )
     } finally {
       setDownloading(false)
     }

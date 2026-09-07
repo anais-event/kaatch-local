@@ -14,16 +14,18 @@ export default async function FairePartPage({ params }: { params: Promise<{ slug
 
   if (!wedding) return <div className="p-8">Mariage introuvable</div>
 
-  // Read guest cookie to get their personal invite token for the QR code
+  // Read guest cookie to get their personal invite token + RSVP status
   const cookieStore = await cookies()
   const guestCookie = cookieStore.get(`guest_${slug}`)
   const guestData = guestCookie ? JSON.parse(guestCookie.value) : null
 
   let inviteToken: string | null = null
+  let rsvpStatus: string | null = null
   if (guestData?.id) {
     const { data: guestRow } = await supabase
-      .from('guests').select('invite_token').eq('id', guestData.id).single()
+      .from('guests').select('invite_token, rsvp_status').eq('id', guestData.id).single()
     inviteToken = guestRow?.invite_token ?? null
+    rsvpStatus = guestRow?.rsvp_status ?? null
   }
 
   const h = await headers()
@@ -46,6 +48,8 @@ export default async function FairePartPage({ params }: { params: Promise<{ slug
       coverImageUrl={wedding.cover_image_url}
       slug={slug}
       personalUrl={personalUrl}
+      guestId={guestData?.id ?? null}
+      rsvpStatus={rsvpStatus}
     />
   )
 }

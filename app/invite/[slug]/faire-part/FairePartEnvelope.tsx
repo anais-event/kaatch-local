@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { downloadFairePart } from '@/lib/faire-part-canvas'
 
 type Props = {
   weddingName: string
@@ -10,6 +11,8 @@ type Props = {
   coverImageUrl: string | null
   slug: string
   personalUrl: string
+  guestId: string | null
+  rsvpStatus: string | null
 }
 
 type Phase = 'curtain-closed' | 'opening' | 'revealed'
@@ -34,10 +37,33 @@ export default function FairePartEnvelope({
   coverImageUrl,
   slug,
   personalUrl,
+  guestId,
+  rsvpStatus,
 }: Props) {
   const [phase, setPhase] = useState<Phase>('curtain-closed')
   const [showPetals, setShowPetals] = useState(false)
+  const [rsvp, setRsvp] = useState<string | null>(rsvpStatus)
+  const [rsvpBusy, setRsvpBusy] = useState(false)
   const qrRef = useRef<HTMLCanvasElement>(null)
+
+  async function respond(status: 'confirme' | 'decline') {
+    if (!guestId || rsvpBusy) return
+    setRsvpBusy(true)
+    const prev = rsvp
+    setRsvp(status) // optimiste
+    try {
+      const res = await fetch('/api/rsvp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guestId, status }),
+      })
+      if (!res.ok) setRsvp(prev)
+    } catch {
+      setRsvp(prev)
+    } finally {
+      setRsvpBusy(false)
+    }
+  }
 
   useEffect(() => {
     const t1 = setTimeout(() => { setPhase('opening'); setShowPetals(true) }, 600)
@@ -56,126 +82,17 @@ export default function FairePartEnvelope({
   }, [phase, personalUrl])
 
   const handleDownload = async () => {
-    const canvas = document.createElement('canvas')
-    canvas.width = 600
-    canvas.height = 900
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-
-    ctx.fillStyle = '#fdfcf8'
-    ctx.fillRect(0, 0, 600, 900)
-
-    const topGrad = ctx.createLinearGradient(0, 0, 600, 0)
-    topGrad.addColorStop(0, '#4a5240')
-    topGrad.addColorStop(1, '#2d3228')
-    ctx.fillStyle = topGrad
-    ctx.fillRect(0, 0, 600, 6)
-
-    let y = 50
-
-    if (coverImageUrl) {
-      try {
-        const img = new Image()
-        img.crossOrigin = 'anonymous'
-        await new Promise<void>((resolve, reject) => { img.onload = () => resolve(); img.onerror = reject; img.src = coverImageUrl })
-        const r = 48
-        ctx.save()
-        ctx.beginPath()
-        ctx.arc(300, y + r, r, 0, Math.PI * 2)
-        ctx.clip()
-        ctx.drawImage(img, 300 - r, y, r * 2, r * 2)
-        ctx.restore()
-        ctx.strokeStyle = 'rgba(74,82,64,0.2)'
-        ctx.lineWidth = 2
-        ctx.beginPath()
-        ctx.arc(300, y + r, r + 2, 0, Math.PI * 2)
-        ctx.stroke()
-        y += 120
-      } catch { y += 20 }
-    }
-
-    ctx.fillStyle = '#c9a96e'
-    ctx.font = '14px Georgia, serif'
-    ctx.textAlign = 'center'
-    ctx.fillText('✦', 300, y)
-    y += 36
-
-    ctx.fillStyle = '#a8a29e'
-    ctx.font = '300 11px Arial, sans-serif'
-    ctx.fillText('VOUS ÊTES INVITÉ(E)', 300, y)
-    y += 56
-
-    ctx.fillStyle = '#2d3228'
-    ctx.font = 'italic 52px Georgia, serif'
-    const words = weddingName.split(' ')
-    let line = ''
-    const lines: string[] = []
-    for (const w of words) {
-      const test = line + (line ? ' ' : '') + w
-      if (ctx.measureText(test).width > 500) { lines.push(line); line = w } else { line = test }
-    }
-    lines.push(line)
-    for (const l of lines) { ctx.fillText(l, 300, y); y += 58 }
-    y += 10
-
-    ctx.strokeStyle = '#e7e5e4'
-    ctx.lineWidth = 1
-    ctx.beginPath(); ctx.moveTo(240, y); ctx.lineTo(360, y); ctx.stroke()
-    y += 30
-
-    if (dateStr) {
-      ctx.fillStyle = '#57534e'
-      ctx.font = '500 18px Georgia, serif'
-      ctx.fillText(dateStr.charAt(0).toUpperCase() + dateStr.slice(1), 300, y)
-      y += 28
-    }
-
-    if (location) {
-      ctx.fillStyle = '#a8a29e'
-      ctx.font = '300 13px Arial, sans-serif'
-      ctx.fillText(location, 300, y)
-      y += 36
-    }
-
-    if (dateStr || location) {
-      ctx.strokeStyle = '#e7e5e4'
-      ctx.beginPath(); ctx.moveTo(240, y); ctx.lineTo(360, y); ctx.stroke()
-      y += 30
-    }
-
-    if (coupleMessage) {
-      ctx.fillStyle = '#78716c'
-      ctx.font = 'italic 15px Georgia, serif'
-      const msgWords = coupleMessage.split('\n')[0].split(' ')
-      let ml = ''
-      const mls: string[] = []
-      for (const w of msgWords) {
-        const t = ml + (ml ? ' ' : '') + w
-        if (ctx.measureText(t).width > 460) { mls.push(ml); ml = w } else { ml = t }
-      }
-      mls.push(ml)
-      for (const l of mls) { ctx.fillText(`"${l}"`, 300, y); y += 24 }
-      y += 20
-    }
-
-    if (qrRef.current) {
-      ctx.drawImage(qrRef.current, 245, y, 110, 110)
-      y += 120
-      ctx.fillStyle = '#d6d3d1'
-      ctx.font = '300 10px Arial, sans-serif'
-      ctx.fillText('Flashez pour accéder à votre espace', 300, y)
-    }
-
-    const botGrad = ctx.createLinearGradient(0, 0, 600, 0)
-    botGrad.addColorStop(0, '#2d3228')
-    botGrad.addColorStop(1, '#4a5240')
-    ctx.fillStyle = botGrad
-    ctx.fillRect(0, 894, 600, 6)
-
-    const a = document.createElement('a')
-    a.href = canvas.toDataURL('image/png')
-    a.download = `faire-part-${weddingName.toLowerCase().replace(/\s+/g, '-')}.png`
-    a.click()
+    await downloadFairePart(
+      {
+        weddingName,
+        dateStr,
+        location,
+        coupleMessage,
+        coverImageUrl,
+        qrUrl: personalUrl,
+      },
+      `faire-part-${weddingName.toLowerCase().replace(/\s+/g, '-')}.png`,
+    )
   }
 
   return (
@@ -354,6 +271,57 @@ export default function FairePartEnvelope({
               </p>
               <canvas ref={qrRef} width={110} height={110}
                 style={{ borderRadius:8, display:'block', margin:'0 auto' }} />
+
+              {/* RSVP — répondre directement depuis le faire-part */}
+              {guestId && (
+                <div style={{ marginTop: 28 }}>
+                  <div style={{ height:1, background:'linear-gradient(90deg,transparent,#e7e5e4,transparent)', margin:'0 auto 22px', width:'70%' }} />
+
+                  {rsvp === 'confirme' ? (
+                    <div>
+                      <p style={{ fontFamily:'var(--font-cormorant)', fontStyle:'italic', fontWeight:500, fontSize:'1.25rem', color:'#4a5240', marginBottom:6 }}>
+                        ✓ Vous avez confirmé votre présence
+                      </p>
+                      <p style={{ fontFamily:'var(--font-lato)', fontWeight:300, fontSize:'0.78rem', color:'#a8a29e', marginBottom:10 }}>
+                        Les mariés ont hâte de vous voir !
+                      </p>
+                      <button onClick={() => respond('decline')} disabled={rsvpBusy}
+                        style={{ background:'none', border:'none', cursor:'pointer', color:'#c8c4c0', fontFamily:'var(--font-lato)', fontWeight:300, fontSize:'0.72rem', textDecoration:'underline' }}>
+                        Annuler ma présence
+                      </button>
+                    </div>
+                  ) : rsvp === 'decline' ? (
+                    <div>
+                      <p style={{ fontFamily:'var(--font-cormorant)', fontStyle:'italic', fontWeight:500, fontSize:'1.25rem', color:'#b45', marginBottom:6 }}>
+                        Vous avez décliné l&rsquo;invitation
+                      </p>
+                      <p style={{ fontFamily:'var(--font-lato)', fontWeight:300, fontSize:'0.78rem', color:'#a8a29e', marginBottom:10 }}>
+                        Vous nous manquerez…
+                      </p>
+                      <button onClick={() => respond('confirme')} disabled={rsvpBusy}
+                        style={{ background:'none', border:'none', cursor:'pointer', color:'#4a5240', fontFamily:'var(--font-lato)', fontWeight:300, fontSize:'0.72rem', textDecoration:'underline' }}>
+                        Finalement, je serai présent(e)
+                      </button>
+                    </div>
+                  ) : (
+                    <div>
+                      <p style={{ fontFamily:'var(--font-cormorant)', fontStyle:'italic', fontWeight:500, fontSize:'1.35rem', color:'#2d3228', marginBottom:16 }}>
+                        Serez-vous des nôtres&nbsp;?
+                      </p>
+                      <div style={{ display:'flex', gap:10 }}>
+                        <button onClick={() => respond('confirme')} disabled={rsvpBusy}
+                          style={{ flex:1, background:'#4a5240', color:'#fff', border:'none', borderRadius:12, padding:'12px', cursor:'pointer', fontFamily:'var(--font-lato)', fontWeight:300, fontSize:'0.82rem', letterSpacing:'0.03em' }}>
+                          ✓ Je serai présent(e)
+                        </button>
+                        <button onClick={() => respond('decline')} disabled={rsvpBusy}
+                          style={{ flex:1, background:'#fff', color:'#a8a29e', border:'1px solid #e7e5e4', borderRadius:12, padding:'12px', cursor:'pointer', fontFamily:'var(--font-lato)', fontWeight:300, fontSize:'0.82rem' }}>
+                          Je ne pourrai pas
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
             </div>
 

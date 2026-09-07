@@ -26,12 +26,12 @@ export default async function InvitationsPage({ params }: { params: Promise<{ sl
   if (!user) redirect('/auth')
 
   const { data: wedding } = await supabase
-    .from('weddings').select('id, name, date, location').eq('slug', slug).single()
+    .from('weddings').select('id, name, date, location, couple_message, cover_image_url').eq('slug', slug).single()
   if (!wedding) redirect(`/wedding/${slug}`)
 
   const { data: guests } = await supabase
     .from('guests')
-    .select('id, first_name, last_name, email, telephone, rsvp_status, invite_token')
+    .select('id, first_name, last_name, email, telephone, rsvp_status, invite_token, invite_sent_at, invited_at')
     .eq('wedding_id', wedding.id)
     .order('first_name')
 
@@ -86,7 +86,14 @@ export default async function InvitationsPage({ params }: { params: Promise<{ sl
           guests={guests ?? []}
           baseUrl={baseUrl}
           slug={slug}
-          wedding={{ name: wedding.name, date: wedding.date, location: wedding.location }}
+          weddingId={wedding.id}
+          wedding={{
+            name: wedding.name,
+            date: wedding.date,
+            location: wedding.location,
+            coupleMessage: wedding.couple_message,
+            coverImageUrl: wedding.cover_image_url,
+          }}
         />
 
       </div>

@@ -32,7 +32,7 @@ export default function RSVPForm({ guest }: { guest: any }) {
   }
 
   if (done) return (
-    <div className="text-center text-green-600 font-medium text-lg">
+    <div className="text-center text-emerald-600 text-lg" style={{ fontWeight: 300 }}>
       ✅ Merci, votre réponse a bien été enregistrée !
     </div>
   )
@@ -40,28 +40,29 @@ export default function RSVPForm({ guest }: { guest: any }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm text-stone-600 mb-1" style={{ fontWeight: 300 }}>
           Serez-vous présent(e) ?
         </label>
         <div className="flex gap-3">
-          {['confirmed', 'declined'].map((s) => (
+          {['confirme', 'decline'].map((s) => (
             <button
               key={s}
               type="button"
               onClick={() => setStatus(s)}
-              className={`flex-1 py-2 rounded-lg border text-sm font-medium transition ${
+              className={`flex-1 py-2 rounded-xl border text-sm transition ${
                 status === s
-                  ? 'bg-rose-500 text-white border-rose-500'
-                  : 'border-gray-300 text-gray-600 hover:border-rose-300'
+                  ? 'bg-[#4a5240] text-white border-[#4a5240]'
+                  : 'border-stone-300 text-stone-600 hover:border-[#4a5240]'
               }`}
+              style={{ fontWeight: 300 }}
             >
-              {s === 'confirmed' ? '✅ Oui' : '❌ Non'}
+              {s === 'confirme' ? '✓ Oui' : 'Non'}
             </button>
           ))}
         </div>
       </div>
 
-      {status === 'confirmed' && guest.plus_one && (
+      {status === 'confirme' && guest.plus_one && (
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Nombre d'accompagnants
@@ -77,9 +78,9 @@ export default function RSVPForm({ guest }: { guest: any }) {
         </div>
       )}
 
-      {status === 'confirmed' && (
+      {status === 'confirme' && (
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm text-stone-600 mb-1" style={{ fontWeight: 300 }}>
             Restrictions alimentaires
           </label>
           <textarea
@@ -87,7 +88,8 @@ export default function RSVPForm({ guest }: { guest: any }) {
             onChange={(e) => setDietary(e.target.value)}
             rows={3}
             placeholder="Végétarien, allergie aux noix..."
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+            className="w-full border border-stone-300 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#4a5240] transition"
+            style={{ fontWeight: 300 }}
           />
         </div>
       )}
@@ -95,7 +97,8 @@ export default function RSVPForm({ guest }: { guest: any }) {
       <button
         type="submit"
         disabled={!status || loading}
-        className="w-full bg-rose-500 text-white py-2 rounded-lg font-medium hover:bg-rose-600 disabled:opacity-40 transition"
+        className="w-full bg-[#4a5240] text-white py-2.5 rounded-xl hover:bg-[#2d3228] disabled:opacity-40 transition"
+        style={{ fontWeight: 300, letterSpacing: '0.04em' }}
       >
         {loading ? 'Envoi...' : 'Confirmer ma réponse'}
       </button>

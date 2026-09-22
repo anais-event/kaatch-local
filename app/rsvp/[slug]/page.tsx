@@ -8,7 +8,7 @@ export default async function RSVPPage({ params }: { params: Promise<{ slug: str
 
   const { data: guest } = await supabase
     .from('guests')
-    .select('id, first_name, last_name, rsvp_status, dietary_restrictions, wedding_id')
+    .select('id, first_name, last_name, rsvp_status, dietary_restrictions, plus_one, plus_one_count, wedding_id')
     .eq('invite_token', slug)
     .single()
 
@@ -60,7 +60,7 @@ export default async function RSVPPage({ params }: { params: Promise<{ slug: str
             <span className="font-light">serez-vous des nôtres ?</span>
           </h2>
 
-          <RSVPForm guest={{ ...guest, wedding_slug: wedding?.slug ?? '' }} />
+          <RSVPForm guest={{ ...guest, wedding_slug: wedding?.slug ?? '', invite_token: slug }} />
         </div>
 
         <p className="text-center text-xs text-stone-300 mt-6" style={{ fontWeight: 300 }}>

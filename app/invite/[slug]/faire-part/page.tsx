@@ -26,11 +26,19 @@ export default async function FairePartPage({ params }: { params: Promise<{ slug
 
   let inviteToken: string | null = null
   let rsvpStatus: string | null = null
+  let plusOneAllowed = false
+  let plusOneCount = 0
+  let dietary: string | null = null
   if (guestData?.id) {
     const { data: guestRow } = await supabase
-      .from('guests').select('invite_token, rsvp_status').eq('id', guestData.id).single()
+      .from('guests')
+      .select('invite_token, rsvp_status, plus_one, plus_one_count, dietary_restrictions')
+      .eq('id', guestData.id).single()
     inviteToken = guestRow?.invite_token ?? null
     rsvpStatus = guestRow?.rsvp_status ?? null
+    plusOneAllowed = guestRow?.plus_one ?? false
+    plusOneCount = guestRow?.plus_one_count ?? 0
+    dietary = guestRow?.dietary_restrictions ?? null
   }
 
   const h = await headers()
@@ -56,7 +64,11 @@ export default async function FairePartPage({ params }: { params: Promise<{ slug
       paid={isPaid(wedding.plan)}
       theme={wedding.faire_part_theme ?? 'classique'}
       guestId={guestData?.id ?? null}
+      inviteToken={inviteToken}
       rsvpStatus={rsvpStatus}
+      plusOneAllowed={plusOneAllowed}
+      plusOneCount={plusOneCount}
+      dietary={dietary}
     />
   )
 }

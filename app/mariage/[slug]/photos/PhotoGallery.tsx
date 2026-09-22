@@ -20,6 +20,12 @@ function cleanName(name: string | null | undefined): string {
   return name.split(' ').filter(p => p && p !== 'null').join(' ')
 }
 
+const VIDEO_EXT = ['mp4', 'mov', 'webm', 'm4v', 'ogg', 'ogv', 'avi', 'mkv']
+function isVideo(url: string): boolean {
+  const ext = (url.split('?')[0].toLowerCase().split('.').pop()) ?? ''
+  return VIDEO_EXT.includes(ext)
+}
+
 type Comment = {
   id: string
   author_name: string
@@ -239,7 +245,7 @@ export default function PhotoGallery({ slug, weddingName, photos, moments, guest
   }
 
   function addFiles(files: File[]) {
-    const imgs = files.filter(f => f.type.startsWith('image/'))
+    const imgs = files.filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'))
     if (!imgs.length) return
     const newPhotos: PendingPhoto[] = imgs.map(file => ({
       file,
@@ -354,12 +360,24 @@ export default function PhotoGallery({ slug, weddingName, photos, moments, guest
                   selectMode && selectedIds.has(photo.id) ? 'ring-2 ring-[#4a5240]' : ''
                 }`}
               >
-                <img
-                  src={photo.url}
-                  alt=""
-                  className="w-full object-cover transition duration-300 group-hover:scale-[1.02]"
-                  loading="lazy"
-                />
+                {isVideo(photo.url) ? (
+                  <div className="relative">
+                    <video src={photo.url} className="w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+                      muted playsInline preload="metadata" />
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="w-11 h-11 rounded-full bg-black/45 backdrop-blur-sm flex items-center justify-center">
+                        <svg viewBox="0 0 24 24" fill="white" className="w-5 h-5 ml-0.5"><path d="M8 5v14l11-7z" /></svg>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <img
+                    src={photo.url}
+                    alt=""
+                    className="w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+                    loading="lazy"
+                  />
+                )}
                 {/* Checkbox in select mode */}
                 {selectMode && (
                   <div className="absolute top-2 left-2 z-10">
@@ -578,7 +596,7 @@ export default function PhotoGallery({ slug, weddingName, photos, moments, guest
                     {pendingPhotos.length > 0 ? t('addMore') : t('clickOrDrag')}
                   </p>
                   <p style={{ fontWeight: 300, fontSize: '0.68rem' }} className="text-stone-300 mt-0.5">{t('formats')}</p>
-                  <input ref={fileRef} type="file" accept="image/*" multiple className="hidden"
+                  <input ref={fileRef} type="file" accept="image/*,video/*" multiple className="hidden"
                     onChange={e => { addFiles(Array.from(e.target.files ?? [])); if (fileRef.current) fileRef.current.value = '' }} />
                 </div>
 
@@ -602,7 +620,9 @@ export default function PhotoGallery({ slug, weddingName, photos, moments, guest
                       <div key={idx} className="flex gap-3 bg-stone-50 border border-stone-100 rounded-xl p-3">
                         {/* Miniature */}
                         <div className="relative shrink-0">
-                          <img src={pp.preview} alt="" className="w-16 h-16 object-cover rounded-lg" />
+                          {pp.file.type.startsWith('video/')
+                            ? <video src={pp.preview} className="w-16 h-16 object-cover rounded-lg" muted playsInline preload="metadata" />
+                            : <img src={pp.preview} alt="" className="w-16 h-16 object-cover rounded-lg" />}
                           <button type="button"
                             onClick={() => removePhotoFromPending(idx)}
                             className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-stone-400 text-white flex items-center justify-center text-xs leading-none hover:bg-red-400 transition cursor-pointer">
@@ -698,12 +718,21 @@ export default function PhotoGallery({ slug, weddingName, photos, moments, guest
         <div className="fixed inset-0 z-50 bg-black/90 flex" onClick={closeLightbox}>
           {/* Left: image */}
           <div className="flex-1 flex items-center justify-center relative" onClick={e => e.stopPropagation()}>
-            <img
-              src={currentPhoto.url}
-              alt=""
-              className="max-h-screen object-contain select-none"
-              style={{ maxHeight: '90vh', maxWidth: '100%' }}
-            />
+            {isVideo(currentPhoto.url) ? (
+              <video
+                src={currentPhoto.url}
+                className="max-h-screen object-contain select-none"
+                style={{ maxHeight: '90vh', maxWidth: '100%' }}
+                controls autoPlay playsInline
+              />
+            ) : (
+              <img
+                src={currentPhoto.url}
+                alt=""
+                className="max-h-screen object-contain select-none"
+                style={{ maxHeight: '90vh', maxWidth: '100%' }}
+              />
+            )}
             {/* Nav arrows */}
             {photos.length > 1 && (<>
               <button onClick={prevPhoto}

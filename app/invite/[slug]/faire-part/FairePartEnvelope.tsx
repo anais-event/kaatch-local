@@ -15,7 +15,11 @@ type Props = {
   paid?: boolean
   theme?: string
   guestId?: string | null
+  inviteToken?: string | null
   rsvpStatus?: string | null
+  plusOneAllowed?: boolean
+  plusOneCount?: number
+  dietary?: string | null
 }
 
 type Phase = 'curtain-closed' | 'opening' | 'revealed'
@@ -52,27 +56,37 @@ const GOLD_RAIN = Array.from({ length: 38 }, (_, i) => ({
 
 export default function FairePartEnvelope({
   weddingName, dateStr, location, coupleMessage, coverImageUrl, slug, personalUrl, paid = true, theme: themeProp,
-  guestId = null, rsvpStatus = null,
+  guestId = null, inviteToken = null, rsvpStatus = null, plusOneAllowed = false, plusOneCount = 0, dietary = null,
 }: Props) {
   const [phase, setPhase] = useState<Phase>('curtain-closed')
   const [showRain, setShowRain] = useState(false)
   const [downloading, setDownloading] = useState(false)
   const [rsvp, setRsvp] = useState<string | null>(rsvpStatus)
   const [rsvpBusy, setRsvpBusy] = useState(false)
+  const [party, setParty] = useState<number>(plusOneCount || 0)
+  const [diet, setDiet] = useState<string>(dietary || '')
+  const [detailsBusy, setDetailsBusy] = useState(false)
+  const [detailsSaved, setDetailsSaved] = useState(false)
   const cardsRef = useRef<HTMLDivElement>(null)
 
   async function respond(status: 'confirme' | 'decline') {
-    if (!guestId || rsvpBusy) return
+    if (!inviteToken || rsvpBusy) return
     setRsvpBusy(true)
     const prev = rsvp
     setRsvp(status) // optimiste
+    setDetailsSaved(false)
     try {
       const supabase = createClient()
-      const { error } = await supabase
-        .from('guests')
-        .update({ rsvp_status: status, rsvp_at: new Date().toISOString() })
-        .eq('id', guestId)
+      // Écriture via RPC SECURITY DEFINER (le token = capacité) — l'UPDATE direct
+      // est bloqué par la RLS pour les invités anonymes.
+      const { error } = await supabase.rpc('guest_rsvp', {
+        p_token: inviteToken,
+        p_status: status,
+        p_plus_one_count: status === 'confirme' && plusOneAllowed ? party : 0,
+        p_dietary: status === 'confirme' ? (diet.trim() || null) : null,
+      })
       if (error) { setRsvp(prev); return }
+      if (status === 'decline') setParty(0)
       fetch('/api/rsvp-notify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -82,6 +96,26 @@ export default function FairePartEnvelope({
       setRsvp(prev)
     } finally {
       setRsvpBusy(false)
+    }
+  }
+
+  async function saveDetails() {
+    if (!inviteToken || detailsBusy) return
+    setDetailsBusy(true)
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.rpc('guest_rsvp', {
+        p_token: inviteToken,
+        p_status: 'confirme',
+        p_plus_one_count: plusOneAllowed ? party : 0,
+        p_dietary: diet.trim() || null,
+      })
+      if (!error) {
+        setDetailsSaved(true)
+        setTimeout(() => setDetailsSaved(false), 2500)
+      }
+    } finally {
+      setDetailsBusy(false)
     }
   }
 
@@ -296,9 +330,67 @@ export default function FairePartEnvelope({
                     ✓ Votre présence est confirmée
                   </p>
                   <p style={{ fontFamily:'var(--font-lato)', fontWeight:300, fontSize:'0.75rem',
-                    color:'rgba(255,255,255,0.5)', marginBottom:12 }}>
+                    color:'rgba(255,255,255,0.5)', marginBottom:16 }}>
                     Les mariés ont hâte de vous voir !
                   </p>
+
+                  {/* Détails : accompagnants + régime */}
+                  <div style={{ textAlign:'left', display:'flex', flexDirection:'column', gap:14,
+                    borderTop:'1px solid rgba(255,255,255,0.1)', paddingTop:16, marginBottom:14 }}>
+                    {plusOneAllowed && (
+                      <div>
+                        <label style={{ display:'block', fontFamily:'var(--font-lato)', fontWeight:300,
+                          fontSize:'0.75rem', color:'rgba(255,255,255,0.6)', marginBottom:8 }}>
+                          Combien d&apos;accompagnants ?
+                        </label>
+                        <div style={{ display:'flex', alignItems:'center', gap:14 }}>
+                          <button type="button" onClick={() => setParty(n => Math.max(0, n - 1))}
+                            style={{ width:36, height:36, borderRadius:'50%',
+                              background:'rgba(255,255,255,0.08)', border:'1px solid rgba(255,255,255,0.18)',
+                              color:'rgba(255,255,255,0.85)', fontSize:'1.1rem', cursor:'pointer',
+                              display:'flex', alignItems:'center', justifyContent:'center', lineHeight:1 }}>
+                            −
+                          </button>
+                          <span style={{ fontFamily:'var(--font-cormorant)', fontStyle:'italic',
+                            fontWeight:500, fontSize:'1.5rem', color:'#fff', minWidth:24, textAlign:'center' }}>
+                            {party}
+                          </span>
+                          <button type="button" onClick={() => setParty(n => Math.min(20, n + 1))}
+                            style={{ width:36, height:36, borderRadius:'50%',
+                              background:'rgba(255,255,255,0.08)', border:'1px solid rgba(255,255,255,0.18)',
+                              color:'rgba(255,255,255,0.85)', fontSize:'1.1rem', cursor:'pointer',
+                              display:'flex', alignItems:'center', justifyContent:'center', lineHeight:1 }}>
+                            +
+                          </button>
+                          <span style={{ fontFamily:'var(--font-lato)', fontWeight:300, fontSize:'0.72rem',
+                            color:'rgba(255,255,255,0.4)' }}>
+                            {party === 0 ? 'Je viens seul(e)' : `soit ${party + 1} personnes`}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                    <div>
+                      <label style={{ display:'block', fontFamily:'var(--font-lato)', fontWeight:300,
+                        fontSize:'0.75rem', color:'rgba(255,255,255,0.6)', marginBottom:8 }}>
+                        Régime alimentaire, allergies ? <span style={{ color:'rgba(255,255,255,0.3)' }}>(optionnel)</span>
+                      </label>
+                      <textarea value={diet} onChange={e => setDiet(e.target.value)} rows={2}
+                        placeholder="Végétarien, sans gluten, allergie…"
+                        style={{ width:'100%', resize:'none', borderRadius:10,
+                          background:'rgba(255,255,255,0.08)', border:'1px solid rgba(255,255,255,0.18)',
+                          color:'#fff', padding:'10px 12px', fontFamily:'var(--font-lato)', fontWeight:300,
+                          fontSize:'0.82rem', outline:'none' }} />
+                    </div>
+                    <button type="button" onClick={saveDetails} disabled={detailsBusy}
+                      style={{ background: detailsSaved ? 'rgba(255,255,255,0.12)' : t.accent,
+                        color: detailsSaved ? 'rgba(255,255,255,0.85)' : (themeKey === 'champetre' ? '#2d4018' : '#2d3a22'),
+                        border:'none', borderRadius:10, padding:'10px', cursor:'pointer',
+                        fontFamily:'var(--font-lato)', fontWeight:600, fontSize:'0.8rem',
+                        letterSpacing:'0.03em', opacity: detailsBusy ? 0.6 : 1, transition:'all 0.2s' }}>
+                      {detailsBusy ? '…' : detailsSaved ? '✓ Enregistré' : 'Enregistrer mes infos'}
+                    </button>
+                  </div>
+
                   <button onClick={() => respond('decline')} disabled={rsvpBusy}
                     style={{ background:'none', border:'none', cursor:'pointer',
                       color:'rgba(255,255,255,0.4)', fontFamily:'var(--font-lato)', fontWeight:300,

@@ -5,8 +5,10 @@ import { createClient } from '@/lib/supabase'
 
 export default function RSVPForm({ guest }: { guest: any }) {
   const supabase = createClient()
-  const [status, setStatus] = useState<'confirme' | 'decline' | ''>(guest.rsvp_status || '')
+  const [status, setStatus] = useState<'confirme' | 'decline' | ''>(guest.rsvp_status === 'en_attente' ? '' : guest.rsvp_status || '')
   const [dietary, setDietary] = useState(guest.dietary_restrictions || '')
+  const [party, setParty] = useState<number>(guest.plus_one_count || 0)
+  const plusOneAllowed = !!guest.plus_one
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
 
@@ -14,14 +16,14 @@ export default function RSVPForm({ guest }: { guest: any }) {
     e.preventDefault()
     if (!status) return
     setLoading(true)
-    await supabase
-      .from('guests')
-      .update({
-        rsvp_status: status,
-        dietary_restrictions: dietary || null,
-        rsvp_at: new Date().toISOString(),
-      })
-      .eq('id', guest.id)
+    // Écriture via RPC SECURITY DEFINER (token = capacité) — l'UPDATE direct est
+    // bloqué par la RLS pour les invités anonymes.
+    await supabase.rpc('guest_rsvp', {
+      p_token: guest.invite_token,
+      p_status: status,
+      p_plus_one_count: status === 'confirme' && plusOneAllowed ? party : 0,
+      p_dietary: status === 'confirme' ? (dietary || null) : null,
+    })
     // Notification couple (fire-and-forget)
     fetch('/api/rsvp-notify', {
       method: 'POST',
@@ -81,6 +83,25 @@ export default function RSVPForm({ guest }: { guest: any }) {
           </button>
         </div>
       </div>
+
+      {/* Accompagnants */}
+      {status === 'confirme' && plusOneAllowed && (
+        <div>
+          <p className="text-sm text-stone-500 mb-3" style={{ fontWeight: 300 }}>
+            Combien d&apos;accompagnants ?
+          </p>
+          <div className="flex items-center gap-4">
+            <button type="button" onClick={() => setParty(n => Math.max(0, n - 1))}
+              className="w-10 h-10 rounded-full border border-stone-200 text-stone-500 text-lg leading-none hover:border-[#4a5240] hover:text-[#4a5240] transition">−</button>
+            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '1.6rem' }} className="text-[#2d3228] w-8 text-center">{party}</span>
+            <button type="button" onClick={() => setParty(n => Math.min(20, n + 1))}
+              className="w-10 h-10 rounded-full border border-stone-200 text-stone-500 text-lg leading-none hover:border-[#4a5240] hover:text-[#4a5240] transition">+</button>
+            <span className="text-xs text-stone-400" style={{ fontWeight: 300 }}>
+              {party === 0 ? 'Je viens seul(e)' : `soit ${party + 1} personnes`}
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Restrictions alimentaires */}
       {status === 'confirme' && (

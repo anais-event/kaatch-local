@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
-import { FairePartCard, THEMES, type ThemeKey } from './FairePartCard'
+import { FairePartCard, THEMES, parseNames, type ThemeKey } from './FairePartCard'
 
 type Props = {
   weddingName: string
@@ -124,38 +124,121 @@ export default function FairePartEnvelope({
     : 'classique'
   const t = THEMES[themeKey]
 
+  // Couleurs UI adaptées au thème (champetre = fond clair → texte foncé)
+  const isLight = themeKey === 'champetre'
+  const uiText = t.textColor
+  const uiSubtle = t.subtleText
+  const uiFaint = isLight ? 'rgba(36,46,22,0.45)' : 'rgba(255,255,255,0.4)'
+  const uiPanelBg = isLight ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.07)'
+  const uiPanelBorder = t.borderColor
+  const uiFieldBg = isLight ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.08)'
+  const uiFieldBorder = isLight ? 'rgba(36,46,22,0.22)' : 'rgba(255,255,255,0.18)'
+  const uiBtnText = isLight ? '#2d4018' : '#2d3a22'
+
   useEffect(() => {
     const t1 = setTimeout(() => { setPhase('opening'); setShowRain(true) }, 600)
     const t2 = setTimeout(() => setPhase('revealed'), 4000)
     return () => { clearTimeout(t1); clearTimeout(t2) }
   }, [])
 
+  // Faire-part PDF vectoriel (A5) — dessiné à la main, typo nette, imprimable.
   const handleDownload = async () => {
-    if (!cardsRef.current) return
     setDownloading(true)
     try {
-      const [html2canvas, { jsPDF }] = await Promise.all([
-        import('html2canvas').then(m => m.default),
+      const [{ jsPDF }, QRCode] = await Promise.all([
         import('jspdf'),
+        import('qrcode').then(m => m.default),
       ])
-      const canvas = await html2canvas(cardsRef.current, {
-        scale: 2, useCORS: true, allowTaint: true,
-        backgroundColor: t.night, logging: false,
-      })
-      const imgData = canvas.toDataURL('image/jpeg', 0.93)
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
-      const pdfW = pdf.internal.pageSize.getWidth()
-      const pdfH = pdf.internal.pageSize.getHeight()
-      const ratio = canvas.height / canvas.width
-      const imgH = pdfW * ratio
-      if (imgH <= pdfH) {
-        pdf.addImage(imgData, 'JPEG', 0, (pdfH - imgH) / 2, pdfW, imgH)
-      } else {
-        const scale = pdfH / imgH
-        const scaledW = pdfW * scale
-        pdf.addImage(imgData, 'JPEG', (pdfW - scaledW) / 2, 0, scaledW, pdfH)
+
+      const W = 148, H = 210 // A5 portrait
+      const CX = W / 2
+      const accent = t.accent
+      const INK = '#2d3228'
+      const BODY = '#6f6a5f'
+      const SUBTLE = '#9a9384'
+      const PAPER: [number, number, number] = [247, 244, 236]
+
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a5' })
+
+      // Papier crème
+      pdf.setFillColor(...PAPER)
+      pdf.rect(0, 0, W, H, 'F')
+
+      // Double cadre fin
+      pdf.setDrawColor(accent)
+      pdf.setLineWidth(0.5); pdf.rect(9, 9, W - 18, H - 18)
+      pdf.setLineWidth(0.15); pdf.rect(11.5, 11.5, W - 23, H - 23)
+
+      const [name1, name2] = parseNames(weddingName)
+
+      // Intro
+      let y = 34
+      pdf.setFont('times', 'italic'); pdf.setFontSize(11); pdf.setTextColor(SUBTLE)
+      pdf.text('Vous êtes invités au mariage de', CX, y, { align: 'center' })
+
+      // Noms
+      y += 20
+      pdf.setFont('times', 'bold'); pdf.setFontSize(29); pdf.setTextColor(INK)
+      pdf.setCharSpace(2)
+      pdf.text((name1 || weddingName).toUpperCase(), CX, y, { align: 'center' })
+      if (name2) {
+        y += 9
+        pdf.setCharSpace(0); pdf.setFont('times', 'italic'); pdf.setFontSize(15); pdf.setTextColor(accent)
+        pdf.text('&', CX, y, { align: 'center' })
+        y += 11
+        pdf.setFont('times', 'bold'); pdf.setFontSize(29); pdf.setTextColor(INK); pdf.setCharSpace(2)
+        pdf.text(name2.toUpperCase(), CX, y, { align: 'center' })
       }
-      pdf.save(`faire-part-${weddingName.toLowerCase().replace(/\s+/g, '-')}.pdf`)
+      pdf.setCharSpace(0)
+
+      // Filet doré
+      y += 11
+      pdf.setDrawColor(accent); pdf.setLineWidth(0.4)
+      pdf.line(CX - 16, y, CX + 16, y)
+      pdf.setFontSize(9); pdf.setTextColor(accent); pdf.setFont('times', 'normal')
+      pdf.text('•', CX, y + 0.6, { align: 'center' })
+
+      // Date
+      if (dateStr) {
+        y += 10
+        pdf.setFont('times', 'italic'); pdf.setFontSize(12); pdf.setTextColor(INK)
+        pdf.text(dateStr.charAt(0).toUpperCase() + dateStr.slice(1), CX, y, { align: 'center' })
+      }
+      // Lieu
+      if (location) {
+        y += 7
+        pdf.setFont('times', 'italic'); pdf.setFontSize(10.5); pdf.setTextColor(SUBTLE)
+        pdf.text(location, CX, y, { align: 'center' })
+      }
+
+      // Message des mariés
+      y += 16
+      const message = coupleMessage?.trim()
+        || 'Nous sommes tellement heureux de vous compter parmi nos invités.\nVotre présence rendra ce jour inoubliable.'
+      pdf.setFont('times', 'italic'); pdf.setFontSize(11.5); pdf.setTextColor(BODY)
+      const lines = message.split('\n').flatMap(l => pdf.splitTextToSize(l, W - 46) as string[])
+      lines.forEach(line => { pdf.text(line, CX, y, { align: 'center' }); y += 6.4 })
+
+      // Signature
+      y += 4
+      pdf.setFont('times', 'italic'); pdf.setFontSize(11); pdf.setTextColor(accent)
+      pdf.text(`— ${weddingName}`, CX, y, { align: 'center' })
+
+      // QR (ancré vers le bas)
+      const qrDataUrl = await QRCode.toDataURL(personalUrl, {
+        width: 600, margin: 1, color: { dark: INK, light: '#f7f4ec' },
+      })
+      const qrSize = 30
+      const qrY = Math.min(Math.max(y + 12, 150), H - 42)
+      pdf.setFont('times', 'normal'); pdf.setFontSize(8); pdf.setTextColor(SUBTLE)
+      pdf.text('SCANNEZ POUR VOTRE ESPACE & RSVP', CX, qrY - 4, { align: 'center', charSpace: 0.5 })
+      pdf.addImage(qrDataUrl, 'PNG', CX - qrSize / 2, qrY, qrSize, qrSize)
+
+      // Pied
+      pdf.setFont('times', 'italic'); pdf.setFontSize(8.5); pdf.setTextColor(SUBTLE)
+      pdf.text('Réalisé avec Kaatch', CX, H - 16, { align: 'center' })
+
+      pdf.save(`faire-part-${weddingName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}.pdf`)
     } finally {
       setDownloading(false)
     }
@@ -285,14 +368,12 @@ export default function FairePartEnvelope({
       {phase === 'revealed' && (
         <a href={`/invite/${slug}`}
           style={{ position:'fixed', top:14, right:16, zIndex:60,
-            background:'rgba(255,255,255,0.12)', backdropFilter:'blur(8px)',
-            border:'1px solid rgba(255,255,255,0.18)', borderRadius:99,
+            background: uiFieldBg, backdropFilter:'blur(8px)',
+            border:`1px solid ${uiFieldBorder}`, borderRadius:99,
             padding:'6px 14px', display:'flex', alignItems:'center', gap:6,
-            color:'rgba(255,255,255,0.75)', textDecoration:'none',
+            color: uiText, textDecoration:'none',
             fontFamily:'var(--font-lato)', fontWeight:300, fontSize:'0.75rem',
-            letterSpacing:'0.04em', transition:'all 0.2s' }}
-          onMouseOver={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.22)')}
-          onMouseOut={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.12)')}>
+            letterSpacing:'0.04em', transition:'all 0.2s' }}>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -319,8 +400,8 @@ export default function FairePartEnvelope({
           {guestId && (
             <div className="fade-up" style={{
               marginTop: 20, marginBottom: 20,
-              background: 'rgba(255,255,255,0.07)',
-              border: '1px solid rgba(255,255,255,0.14)',
+              background: uiPanelBg,
+              border: `1px solid ${uiPanelBorder}`,
               borderRadius: 16, padding: '20px 22px', textAlign: 'center',
             }}>
               {rsvp === 'confirme' ? (
@@ -330,40 +411,40 @@ export default function FairePartEnvelope({
                     ✓ Votre présence est confirmée
                   </p>
                   <p style={{ fontFamily:'var(--font-lato)', fontWeight:300, fontSize:'0.75rem',
-                    color:'rgba(255,255,255,0.5)', marginBottom:16 }}>
+                    color: uiSubtle, marginBottom:16 }}>
                     Les mariés ont hâte de vous voir !
                   </p>
 
                   {/* Détails : accompagnants + régime */}
                   <div style={{ textAlign:'left', display:'flex', flexDirection:'column', gap:14,
-                    borderTop:'1px solid rgba(255,255,255,0.1)', paddingTop:16, marginBottom:14 }}>
+                    borderTop:`1px solid ${uiPanelBorder}`, paddingTop:16, marginBottom:14 }}>
                     {plusOneAllowed && (
                       <div>
                         <label style={{ display:'block', fontFamily:'var(--font-lato)', fontWeight:300,
-                          fontSize:'0.75rem', color:'rgba(255,255,255,0.6)', marginBottom:8 }}>
+                          fontSize:'0.75rem', color: uiSubtle, marginBottom:8 }}>
                           Combien d&apos;accompagnants ?
                         </label>
                         <div style={{ display:'flex', alignItems:'center', gap:14 }}>
                           <button type="button" onClick={() => setParty(n => Math.max(0, n - 1))}
                             style={{ width:36, height:36, borderRadius:'50%',
-                              background:'rgba(255,255,255,0.08)', border:'1px solid rgba(255,255,255,0.18)',
-                              color:'rgba(255,255,255,0.85)', fontSize:'1.1rem', cursor:'pointer',
+                              background: uiFieldBg, border:`1px solid ${uiFieldBorder}`,
+                              color: uiText, fontSize:'1.1rem', cursor:'pointer',
                               display:'flex', alignItems:'center', justifyContent:'center', lineHeight:1 }}>
                             −
                           </button>
                           <span style={{ fontFamily:'var(--font-cormorant)', fontStyle:'italic',
-                            fontWeight:500, fontSize:'1.5rem', color:'#fff', minWidth:24, textAlign:'center' }}>
+                            fontWeight:500, fontSize:'1.5rem', color: uiText, minWidth:24, textAlign:'center' }}>
                             {party}
                           </span>
                           <button type="button" onClick={() => setParty(n => Math.min(20, n + 1))}
                             style={{ width:36, height:36, borderRadius:'50%',
-                              background:'rgba(255,255,255,0.08)', border:'1px solid rgba(255,255,255,0.18)',
-                              color:'rgba(255,255,255,0.85)', fontSize:'1.1rem', cursor:'pointer',
+                              background: uiFieldBg, border:`1px solid ${uiFieldBorder}`,
+                              color: uiText, fontSize:'1.1rem', cursor:'pointer',
                               display:'flex', alignItems:'center', justifyContent:'center', lineHeight:1 }}>
                             +
                           </button>
                           <span style={{ fontFamily:'var(--font-lato)', fontWeight:300, fontSize:'0.72rem',
-                            color:'rgba(255,255,255,0.4)' }}>
+                            color: uiFaint }}>
                             {party === 0 ? 'Je viens seul(e)' : `soit ${party + 1} personnes`}
                           </span>
                         </div>
@@ -371,20 +452,21 @@ export default function FairePartEnvelope({
                     )}
                     <div>
                       <label style={{ display:'block', fontFamily:'var(--font-lato)', fontWeight:300,
-                        fontSize:'0.75rem', color:'rgba(255,255,255,0.6)', marginBottom:8 }}>
-                        Régime alimentaire, allergies ? <span style={{ color:'rgba(255,255,255,0.3)' }}>(optionnel)</span>
+                        fontSize:'0.75rem', color: uiSubtle, marginBottom:8 }}>
+                        Régime alimentaire, allergies ? <span style={{ color: uiFaint }}>(optionnel)</span>
                       </label>
                       <textarea value={diet} onChange={e => setDiet(e.target.value)} rows={2}
                         placeholder="Végétarien, sans gluten, allergie…"
                         style={{ width:'100%', resize:'none', borderRadius:10,
-                          background:'rgba(255,255,255,0.08)', border:'1px solid rgba(255,255,255,0.18)',
-                          color:'#fff', padding:'10px 12px', fontFamily:'var(--font-lato)', fontWeight:300,
+                          background: uiFieldBg, border:`1px solid ${uiFieldBorder}`,
+                          color: uiText, padding:'10px 12px', fontFamily:'var(--font-lato)', fontWeight:300,
                           fontSize:'0.82rem', outline:'none' }} />
                     </div>
                     <button type="button" onClick={saveDetails} disabled={detailsBusy}
-                      style={{ background: detailsSaved ? 'rgba(255,255,255,0.12)' : t.accent,
-                        color: detailsSaved ? 'rgba(255,255,255,0.85)' : (themeKey === 'champetre' ? '#2d4018' : '#2d3a22'),
-                        border:'none', borderRadius:10, padding:'10px', cursor:'pointer',
+                      style={{ background: detailsSaved ? uiPanelBg : t.accent,
+                        color: detailsSaved ? uiText : uiBtnText,
+                        border: detailsSaved ? `1px solid ${uiFieldBorder}` : 'none',
+                        borderRadius:10, padding:'10px', cursor:'pointer',
                         fontFamily:'var(--font-lato)', fontWeight:600, fontSize:'0.8rem',
                         letterSpacing:'0.03em', opacity: detailsBusy ? 0.6 : 1, transition:'all 0.2s' }}>
                       {detailsBusy ? '…' : detailsSaved ? '✓ Enregistré' : 'Enregistrer mes infos'}
@@ -393,7 +475,7 @@ export default function FairePartEnvelope({
 
                   <button onClick={() => respond('decline')} disabled={rsvpBusy}
                     style={{ background:'none', border:'none', cursor:'pointer',
-                      color:'rgba(255,255,255,0.4)', fontFamily:'var(--font-lato)', fontWeight:300,
+                      color: uiFaint, fontFamily:'var(--font-lato)', fontWeight:300,
                       fontSize:'0.72rem', textDecoration:'underline' }}>
                     Annuler ma présence
                   </button>
@@ -401,11 +483,11 @@ export default function FairePartEnvelope({
               ) : rsvp === 'decline' ? (
                 <>
                   <p style={{ fontFamily:'var(--font-cormorant)', fontStyle:'italic', fontWeight:500,
-                    fontSize:'1.3rem', color:'rgba(255,255,255,0.75)', marginBottom:4 }}>
+                    fontSize:'1.3rem', color: uiText, marginBottom:4 }}>
                     Réponse enregistrée
                   </p>
                   <p style={{ fontFamily:'var(--font-lato)', fontWeight:300, fontSize:'0.75rem',
-                    color:'rgba(255,255,255,0.5)', marginBottom:12 }}>
+                    color: uiSubtle, marginBottom:12 }}>
                     Vous nous manquerez…
                   </p>
                   <button onClick={() => respond('confirme')} disabled={rsvpBusy}
@@ -418,21 +500,21 @@ export default function FairePartEnvelope({
               ) : (
                 <>
                   <p style={{ fontFamily:'var(--font-cormorant)', fontStyle:'italic', fontWeight:500,
-                    fontSize:'1.4rem', color:'rgba(255,255,255,0.9)', marginBottom:14 }}>
+                    fontSize:'1.4rem', color: uiText, marginBottom:14 }}>
                     Serez-vous des nôtres&nbsp;?
                   </p>
                   <div style={{ display:'flex', gap:10 }}>
                     <button onClick={() => respond('confirme')} disabled={rsvpBusy}
                       style={{ flex:1, background: t.accent,
-                        color: themeKey === 'champetre' ? '#2d4018' : '#2d3a22',
+                        color: uiBtnText,
                         border:'none', borderRadius:10, padding:'12px', cursor:'pointer',
                         fontFamily:'var(--font-lato)', fontWeight:600, fontSize:'0.82rem',
                         letterSpacing:'0.03em', opacity: rsvpBusy ? 0.6 : 1 }}>
                       🥂 Avec plaisir
                     </button>
                     <button onClick={() => respond('decline')} disabled={rsvpBusy}
-                      style={{ flex:1, background:'rgba(255,255,255,0.08)', color:'rgba(255,255,255,0.6)',
-                        border:'1px solid rgba(255,255,255,0.18)', borderRadius:10, padding:'12px',
+                      style={{ flex:1, background: uiFieldBg, color: uiSubtle,
+                        border:`1px solid ${uiFieldBorder}`, borderRadius:10, padding:'12px',
                         cursor:'pointer', fontFamily:'var(--font-lato)', fontWeight:400, fontSize:'0.82rem',
                         opacity: rsvpBusy ? 0.6 : 1 }}>
                       Je ne pourrai pas
@@ -457,16 +539,16 @@ export default function FairePartEnvelope({
               </button>
             ) : (
               <div style={{ textAlign:'center' }}>
-                <div style={{ background:'rgba(255,255,255,0.08)', borderRadius:10,
+                <div style={{ background: uiFieldBg, borderRadius:10,
                   padding:'11px 32px', fontSize:'0.82rem',
-                  fontFamily:'var(--font-lato)', fontWeight:400, color:'rgba(255,255,255,0.35)',
+                  fontFamily:'var(--font-lato)', fontWeight:400, color: uiFaint,
                   letterSpacing:'0.05em', cursor:'default' }}>
                   🔒 Téléchargement — Formule Mariage
                 </div>
               </div>
             )}
             <a href={`/invite/${slug}`}
-              style={{ fontSize:'0.72rem', color:'rgba(255,255,255,0.4)',
+              style={{ fontSize:'0.72rem', color: uiFaint,
                 fontFamily:'var(--font-lato)', fontWeight:300, textDecoration:'none' }}>
               ← Retour à mon espace
             </a>

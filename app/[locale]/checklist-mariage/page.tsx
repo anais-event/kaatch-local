@@ -71,7 +71,6 @@ const JSON_LD = {
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
       "description": "Checklist mariage complète et interactive — toutes les étapes mois par mois, de 18 mois avant à J+1. Cases cochées sauvegardées automatiquement.",
       "url": "https://kaatch.fr/checklist-mariage",
-      "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "reviewCount": "127" },
     },
     {
       "@type": "FAQPage",

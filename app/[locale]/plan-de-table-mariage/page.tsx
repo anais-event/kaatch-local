@@ -70,7 +70,6 @@ const JSON_LD = {
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
       "description": "Outil plan de table mariage en ligne — ajoutez vos invités, créez vos tables, placez chacun par glisser-déposer. Sauvegarde automatique, export PDF.",
       "url": "https://kaatch.fr/plan-de-table-mariage",
-      "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.8", "reviewCount": "89" },
     },
     {
       "@type": "FAQPage",

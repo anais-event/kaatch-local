@@ -33,7 +33,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/entre-nous`,              lastModified: new Date("2026-05-01"), changeFrequency: "weekly",  priority: 0.5 },
     { url: `${baseUrl}/mentions-legales`,        lastModified: new Date("2025-01-01"), changeFrequency: "yearly",  priority: 0.1 },
     { url: `${baseUrl}/cgv`,                     lastModified: new Date("2025-01-01"), changeFrequency: "yearly",  priority: 0.1 },
-    { url: `${baseUrl}/confidentialite`,         lastModified: new Date("2025-01-01"), changeFrequency: "yearly",  priority: 0.1 },
+    { url: `${baseUrl}/politique-de-confidentialite`, lastModified: new Date("2025-01-01"), changeFrequency: "yearly",  priority: 0.1 },
     { url: `${baseUrl}/kaatch-vs-excel`,          lastModified: new Date("2026-05-21"), changeFrequency: "monthly", priority: 0.8 },
   ]
 

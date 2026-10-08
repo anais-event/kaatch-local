@@ -86,3 +86,6 @@ export default async function InviteLayout({
     </AuthIntlProvider>
   )
 }
+
+// Pages privées : jamais indexées (données personnelles du mariage)
+export const metadata = { robots: { index: false, follow: false } }

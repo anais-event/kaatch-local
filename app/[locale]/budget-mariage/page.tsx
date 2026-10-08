@@ -73,7 +73,6 @@ const JSON_LD = {
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
       "description": "Calculateur de budget mariage gratuit — estimez le coût de votre mariage selon votre région, nombre d'invités et niveau de prestation. Export PDF inclus.",
       "url": "https://kaatch.fr/budget-mariage",
-      "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "reviewCount": "341" },
     },
     {
       "@type": "FAQPage",

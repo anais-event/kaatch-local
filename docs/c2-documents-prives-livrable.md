@@ -113,11 +113,14 @@ Ordre exécuté : code mergé/déployé → tests → RLS table → policies sto
 ### État final policies / bucket
 `vendor_documents` → `owner_select_vendor_documents` uniquement ; `storage.objects` → aucune policy publique pour ce bucket ; `storage.buckets.public = false`.
 
-### ⚠️ Tests NON encore réalisés end-to-end
-L'**upload** et la **suppression** n'ont **pas** été testés de bout en bout dans l'interface — à ce stade ils ne sont **pas** considérés comme validés. Ils sont seulement couverts par revue de code + équivalence (mêmes clients `service_role` que la signature/liste, prouvés fonctionnels sur bucket privé ; le flag `public` n'affecte pas `service_role`).
+### Tests fonctionnels E2E (document synthétique, document réel non touché)
+Exécutés en prod via un prestataire authentifié (flow `/v/[token]`) avec un PDF synthétique `c2-test-synthetique.pdf` (192 o) :
 
-Tests fonctionnels restant à exécuter avec un **document synthétique** (sans toucher au document réel) :
-1. Upload par un prestataire autorisé.
-2. Consultation via URL signée.
-3. Suppression du document de test.
-4. Confirmation qu'un autre prestataire ne peut pas y accéder (isolation par `vendor_id`).
+| # | Test | Résultat |
+|---|------|----------|
+| 1 | Upload par prestataire autorisé | ✅ ligne créée, `file_url` = chemin scopé `weddingId/vendorId/…` résolu serveur (jamais depuis le client) |
+| 2 | Consultation via URL signée (bucket privé) | ✅ `200`, 192 o, `application/pdf` |
+| 3 | Suppression du document de test | ✅ ligne supprimée **et** objet Storage retiré ; document réel intact |
+| 4 | Isolation : autre prestataire (même mariage) | ✅ 0 document listé, aucune URL signée, aucun chemin de l'autre prestataire exposé |
+
+Document réel existant (`budget-mariage.pdf`) : **non touché** (ligne + objet toujours présents, vérifiés après le test de suppression).

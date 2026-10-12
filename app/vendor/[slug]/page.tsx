@@ -1,18 +1,16 @@
-import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { getVendorSession } from '@/lib/guest-session'
 import { hasPermission } from '@/lib/vendor-permissions'
 import type { VendorPermissions } from '@/lib/vendor-permissions'
 import VendorDashboardClient from './VendorDashboardClient'
 
 export default async function VendorDashboard({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const cookieStore = await cookies()
-  const vendorCookie = cookieStore.get(`vendor_${slug}`)
-  if (!vendorCookie) redirect('/')
+  const vendor = await getVendorSession(slug)
+  if (!vendor) redirect('/')
 
-  const vendor = JSON.parse(vendorCookie.value)
-  const permissions: VendorPermissions = vendor.permissions ?? {}
+  const permissions: VendorPermissions = (vendor.permissions as VendorPermissions) ?? {}
   const supabase = await createSupabaseServerClient()
 
   const { data: wedding } = await supabase
@@ -135,7 +133,7 @@ export default async function VendorDashboard({ params }: { params: Promise<{ sl
   return (
     <VendorDashboardClient
       slug={slug}
-      vendor={vendor}
+      vendor={{ name: vendor.name ?? '', category: vendor.category ?? '' }}
       wedding={{ name: wedding.name, date: weddingDate, location: wedding.location }}
       permissions={permissions}
       data={{

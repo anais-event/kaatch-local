@@ -1,12 +1,11 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
-import { cookies } from 'next/headers'
+import { getGuestSession } from '@/lib/guest-session'
 import { redirect } from 'next/navigation'
 import ProgrammePDF from './ProgrammePDF'
 
 export default async function GuestProgrammePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const cookieStore = await cookies()
-  if (!cookieStore.get(`guest_${slug}`)) redirect(`/invité/${slug}`)
+  if (!(await getGuestSession(slug))) redirect(`/invité/${slug}`)
 
   const supabase = await createSupabaseServerClient()
   const { data: wedding } = await supabase

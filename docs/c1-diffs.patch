@@ -1,0 +1,1085 @@
+diff --git a/app/api/guest-auth/route.ts b/app/api/guest-auth/route.ts
+index 6b96fcd..7def219 100644
+--- a/app/api/guest-auth/route.ts
++++ b/app/api/guest-auth/route.ts
+@@ -1,4 +1,5 @@
+ import { createSupabaseServerClient } from '@/lib/supabase-server'
++import { buildSessionCookies } from '@/lib/guest-session'
+ import { cookies } from 'next/headers'
+ import { NextResponse } from 'next/server'
+ 
+@@ -35,17 +36,15 @@ export async function POST(req: Request) {
+     })
+   }
+ 
+-  // Poser un cookie avec l'identité de l'invité
++  // Cookie de session signé (payload + signature HMAC)
+   const cookieStore = await cookies()
+-  cookieStore.set(`guest_${weddingSlug}`, JSON.stringify({
++  for (const c of buildSessionCookies('guest', weddingSlug, {
+     id: found.id,
+     firstName: found.first_name,
+     lastName: found.last_name,
+-  }), {
+-    httpOnly: true,
+-    maxAge: 60 * 60 * 24 * 7, // 7 jours
+-    path: '/',
+-  })
++  }, 60 * 60 * 24 * 7)) {
++    cookieStore.set(c.name, c.value, c.options)
++  }
+ 
+   return NextResponse.json({ ok: true })
+ }
+diff --git a/app/api/guest-search/route.ts b/app/api/guest-search/route.ts
+index 97a934b..568d53d 100644
+--- a/app/api/guest-search/route.ts
++++ b/app/api/guest-search/route.ts
+@@ -1,4 +1,5 @@
+ import { createSupabaseServerClient } from '@/lib/supabase-server'
++import { buildSessionCookies } from '@/lib/guest-session'
+ import { cookies } from 'next/headers'
+ import { NextResponse } from 'next/server'
+ 
+@@ -47,15 +48,13 @@ export async function POST(req: Request) {
+   if (!wedding) return NextResponse.json({ ok: false, message: 'Mariage introuvable.' })
+ 
+   const cookieStore = await cookies()
+-  cookieStore.set(`guest_${wedding.slug}`, JSON.stringify({
++  for (const c of buildSessionCookies('guest', wedding.slug, {
+     id: guest.id,
+     firstName: guest.first_name,
+     lastName: guest.last_name,
+-  }), {
+-    httpOnly: true,
+-    maxAge: 60 * 60 * 24 * 7,
+-    path: '/',
+-  })
++  }, 60 * 60 * 24 * 7)) {
++    cookieStore.set(c.name, c.value, c.options)
++  }
+ 
+   return NextResponse.json({ ok: true, slug: wedding.slug })
+ }
+diff --git a/app/api/guest-token-auth/route.ts b/app/api/guest-token-auth/route.ts
+index 505fc81..f499651 100644
+--- a/app/api/guest-token-auth/route.ts
++++ b/app/api/guest-token-auth/route.ts
+@@ -1,13 +1,15 @@
+-import { createSupabaseServerClient } from '@/lib/supabase-server'
+-import { cookies } from 'next/headers'
++import { createServiceClient } from '@/lib/supabase-service'
++import { buildSessionCookies } from '@/lib/guest-session'
+ import { NextResponse } from 'next/server'
++import { cookies } from 'next/headers'
+ 
+ // Authentifie un invité directement via son token personnel — pas besoin de formulaire
+ export async function POST(req: Request) {
+   const { token } = await req.json()
+   if (!token) return NextResponse.json({ ok: false })
+ 
+-  const supabase = await createSupabaseServerClient()
++  // Validation du token via service_role (le token est l'autorisation).
++  const supabase = createServiceClient()
+ 
+   const { data: guest } = await supabase
+     .from('guests')
+@@ -26,15 +28,13 @@ export async function POST(req: Request) {
+   if (!wedding) return NextResponse.json({ ok: false })
+ 
+   const cookieStore = await cookies()
+-  cookieStore.set(`guest_${wedding.slug}`, JSON.stringify({
++  for (const c of buildSessionCookies('guest', wedding.slug, {
+     id: guest.id,
+     firstName: guest.first_name,
+     lastName: guest.last_name,
+-  }), {
+-    httpOnly: true,
+-    maxAge: 60 * 60 * 24 * 30, // 30 jours
+-    path: '/',
+-  })
++  }, 60 * 60 * 24 * 30)) {
++    cookieStore.set(c.name, c.value, c.options)
++  }
+ 
+   return NextResponse.json({ ok: true, slug: wedding.slug })
+ }
+diff --git a/app/api/vendor-code/route.ts b/app/api/vendor-code/route.ts
+index 83c793d..fbe6502 100644
+--- a/app/api/vendor-code/route.ts
++++ b/app/api/vendor-code/route.ts
+@@ -1,4 +1,5 @@
+-import { createSupabaseServerClient } from '@/lib/supabase-server'
++import { createServiceClient } from '@/lib/supabase-service'
++import { buildSessionCookies } from '@/lib/guest-session'
+ import { cookies } from 'next/headers'
+ import { NextResponse } from 'next/server'
+ 
+@@ -9,7 +10,8 @@ export async function POST(req: Request) {
+     return NextResponse.json({ error: "Code invalide" }, { status: 400 })
+   }
+ 
+-  const supabase = await createSupabaseServerClient()
++  // Validation du vendor_code via service_role (le code est l'autorisation).
++  const supabase = createServiceClient()
+ 
+   const { data: vendor } = await supabase
+     .from('wedding_vendors')
+@@ -27,13 +29,16 @@ export async function POST(req: Request) {
+ 
+   const slug = (vendor.weddings as unknown as { slug: string }).slug
+ 
++  // Cookie de session prestataire SIGNÉ (donc infalsifiable) : permissions incluses.
+   const cookieStore = await cookies()
+-  cookieStore.set(`vendor_${slug}`, JSON.stringify({
++  for (const c of buildSessionCookies('vendor', slug, {
+     id: vendor.id,
+     name: vendor.name,
+     category: vendor.category,
+     permissions: vendor.permissions ?? {},
+-  }), { maxAge: 60 * 60 * 24 * 90, path: '/' })
++  }, 60 * 60 * 24 * 90)) {
++    cookieStore.set(c.name, c.value, c.options)
++  }
+ 
+   return NextResponse.json({ redirect: `/vendor/${slug}` })
+ }
+diff --git a/app/i/[token]/route.ts b/app/i/[token]/route.ts
+index b66c1ee..5036cb2 100644
+--- a/app/i/[token]/route.ts
++++ b/app/i/[token]/route.ts
+@@ -1,5 +1,5 @@
+-import { createSupabaseServerClient } from '@/lib/supabase-server'
+-import { createClient } from '@supabase/supabase-js'
++import { createServiceClient } from '@/lib/supabase-service'
++import { buildSessionCookies } from '@/lib/guest-session'
+ import { cookies } from 'next/headers'
+ import { NextResponse } from 'next/server'
+ 
+@@ -9,10 +9,8 @@ export async function GET(
+ ) {
+   const { token } = await params
+ 
+-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+-  const supabase = serviceKey
+-    ? createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceKey)
+-    : await createSupabaseServerClient()
++  // Validation du token côté serveur via service_role (le token est l'autorisation).
++  const supabase = createServiceClient()
+ 
+   const { data: guest } = await supabase
+     .from('guests')
+@@ -26,13 +24,15 @@ export async function GET(
+ 
+   const slug = (guest.weddings as unknown as { slug: string }).slug
+ 
+-  // Écriture cookie — autorisée dans une Route Handler
++  // Cookie de session signé (payload + signature HMAC) — Route Handler
+   const cookieStore = await cookies()
+-  cookieStore.set(`guest_${slug}`, JSON.stringify({
++  for (const c of buildSessionCookies('guest', slug, {
++    id: guest.id,
+     firstName: guest.first_name,
+     lastName: guest.last_name ?? '',
+-    id: guest.id,
+-  }), { maxAge: 60 * 60 * 24 * 90, path: '/' })
++  }, 60 * 60 * 24 * 90)) {
++    cookieStore.set(c.name, c.value, c.options)
++  }
+ 
+   // Marquer l'invitation comme ouverte
+   try {
+diff --git a/app/invite/[slug]/compte/page.tsx b/app/invite/[slug]/compte/page.tsx
+index feae197..354379a 100644
+--- a/app/invite/[slug]/compte/page.tsx
++++ b/app/invite/[slug]/compte/page.tsx
+@@ -1,5 +1,5 @@
+ import { createSupabaseServerClient } from '@/lib/supabase-server'
+-import { cookies } from 'next/headers'
++import { getGuestSession } from '@/lib/guest-session'
+ import { getTranslations, getLocale } from 'next-intl/server'
+ import { toDateLocale } from '@/lib/locale-map'
+ 
+@@ -7,8 +7,7 @@ const ALL_PARTS = ['ceremonie', 'vin_honneur', 'reception']
+ 
+ export default async function ComptePage({ params }: { params: Promise<{ slug: string }> }) {
+   const { slug } = await params
+-  const cookieStore = await cookies()
+-  const guestCookie = cookieStore.get(`guest_${slug}`)
++  const guest = await getGuestSession(slug)
+   const t = await getTranslations('invite.account')
+   const locale = await getLocale()
+ 
+@@ -18,7 +17,7 @@ export default async function ComptePage({ params }: { params: Promise<{ slug: s
+     reception: '🎉 ' + t('partReception'),
+   }
+ 
+-  if (!guestCookie) {
++  if (!guest) {
+     return (
+       <div className="min-h-screen bg-[#f5f0e8] flex items-center justify-center p-8"
+            style={{ fontFamily: 'var(--font-lato)' }}>
+@@ -35,9 +34,6 @@ export default async function ComptePage({ params }: { params: Promise<{ slug: s
+     )
+   }
+ 
+-  const guest = JSON.parse(guestCookie.value) as {
+-    firstName: string; lastName: string; id: string | null
+-  }
+   const guestName = [guest.firstName, guest.lastName].filter(Boolean).join(' ')
+ 
+   const supabase = await createSupabaseServerClient()
+@@ -160,6 +156,7 @@ export default async function ComptePage({ params }: { params: Promise<{ slug: s
+             const { redirect: doRedirect } = await import('next/navigation')
+             const cookieStore2 = await getCookies()
+             cookieStore2.delete(`guest_${slug}`)
++            cookieStore2.delete(`__sig_guest_${slug}`)
+             doRedirect('/rejoindre')
+           }}>
+             <button type="submit"
+diff --git a/app/invite/[slug]/contacts/page.tsx b/app/invite/[slug]/contacts/page.tsx
+index 7cce52a..48084d0 100644
+--- a/app/invite/[slug]/contacts/page.tsx
++++ b/app/invite/[slug]/contacts/page.tsx
+@@ -1,5 +1,5 @@
+ import { createSupabaseServerClient } from '@/lib/supabase-server'
+-import { cookies } from 'next/headers'
++import { getGuestSession } from '@/lib/guest-session'
+ import { revalidatePath } from 'next/cache'
+ import { getTranslations } from 'next-intl/server'
+ 
+@@ -48,10 +48,7 @@ async function sendMessage(formData: FormData) {
+ 
+ export default async function GuestContactsPage({ params }: { params: Promise<{ slug: string }> }) {
+   const { slug } = await params
+-  const cookieStore = await cookies()
+-  const guestCookie = cookieStore.get(`guest_${slug}`)
+-
+-  const guest = guestCookie ? JSON.parse(guestCookie.value) : { firstName: '', lastName: '' }
++  const guest = (await getGuestSession(slug)) ?? { firstName: '', lastName: '' }
+   const guestName = `${guest.firstName} ${guest.lastName}`
+ 
+   const supabase = await createSupabaseServerClient()
+diff --git a/app/invite/[slug]/faire-part/page.tsx b/app/invite/[slug]/faire-part/page.tsx
+index 0832ca0..164dd2b 100644
+--- a/app/invite/[slug]/faire-part/page.tsx
++++ b/app/invite/[slug]/faire-part/page.tsx
+@@ -1,5 +1,7 @@
+ import { createSupabaseServerClient } from '@/lib/supabase-server'
+-import { cookies, headers } from 'next/headers'
++import { createServiceClient } from '@/lib/supabase-service'
++import { getGuestSession } from '@/lib/guest-session'
++import { headers } from 'next/headers'
+ import { getLocale } from 'next-intl/server'
+ import { toDateLocale } from '@/lib/locale-map'
+ import FairePartEnvelope from './FairePartEnvelope'
+@@ -19,10 +21,9 @@ export default async function FairePartPage({ params }: { params: Promise<{ slug
+ 
+   if (!wedding) return <div className="p-8">Not found</div>
+ 
+-  // Read guest cookie to get their personal invite token for the QR code
+-  const cookieStore = await cookies()
+-  const guestCookie = cookieStore.get(`guest_${slug}`)
+-  const guestData = guestCookie ? JSON.parse(guestCookie.value) : null
++  // Session invité vérifiée (cookie signé) ; le token n'est lu que pour SA propre ligne,
++  // côté serveur via service_role (invite_token n'est plus lisible par anon).
++  const guestData = await getGuestSession(slug)
+ 
+   let inviteToken: string | null = null
+   let rsvpStatus: string | null = null
+@@ -30,10 +31,13 @@ export default async function FairePartPage({ params }: { params: Promise<{ slug
+   let plusOneCount = 0
+   let dietary: string | null = null
+   if (guestData?.id) {
+-    const { data: guestRow } = await supabase
++    const service = createServiceClient()
++    const { data: guestRow } = await service
+       .from('guests')
+       .select('invite_token, rsvp_status, plus_one, plus_one_count, dietary_restrictions')
+-      .eq('id', guestData.id).single()
++      .eq('id', guestData.id)
++      .eq('wedding_id', wedding?.id ?? '')
++      .single()
+     inviteToken = guestRow?.invite_token ?? null
+     rsvpStatus = guestRow?.rsvp_status ?? null
+     plusOneAllowed = guestRow?.plus_one ?? false
+diff --git a/app/invite/[slug]/groupes/[groupId]/page.tsx b/app/invite/[slug]/groupes/[groupId]/page.tsx
+index 4b9ea26..df938b0 100644
+--- a/app/invite/[slug]/groupes/[groupId]/page.tsx
++++ b/app/invite/[slug]/groupes/[groupId]/page.tsx
+@@ -1,5 +1,5 @@
+ import { createSupabaseServerClient } from '@/lib/supabase-server'
+-import { cookies } from 'next/headers'
++import { getGuestSession } from '@/lib/guest-session'
+ import { redirect } from 'next/navigation'
+ import GroupChat from './GroupChat'
+ 
+@@ -9,10 +9,7 @@ export default async function GroupConversationPage({
+   params: Promise<{ slug: string; groupId: string }>
+ }) {
+   const { slug, groupId } = await params
+-  const cookieStore = await cookies()
+-  const guestCookie = cookieStore.get(`guest_${slug}`)
+-
+-  const guest = guestCookie ? JSON.parse(guestCookie.value) : { firstName: '', lastName: '', id: null }
++  const guest = (await getGuestSession(slug)) ?? { firstName: '', lastName: '', id: null }
+   const guestName = [guest.firstName, guest.lastName].filter(Boolean).join(' ')
+ 
+   const supabase = await createSupabaseServerClient()
+diff --git a/app/invite/[slug]/groupes/layout.tsx b/app/invite/[slug]/groupes/layout.tsx
+index 9ab5d21..cfbfd56 100644
+--- a/app/invite/[slug]/groupes/layout.tsx
++++ b/app/invite/[slug]/groupes/layout.tsx
+@@ -1,5 +1,5 @@
+ import { createSupabaseServerClient } from '@/lib/supabase-server'
+-import { cookies } from 'next/headers'
++import { getGuestSession } from '@/lib/guest-session'
+ import MessagerieShell from './MessagerieShell'
+ 
+ export default async function GroupesLayout({
+@@ -10,10 +10,7 @@ export default async function GroupesLayout({
+   params: Promise<{ slug: string }>
+ }) {
+   const { slug } = await params
+-  const cookieStore = await cookies()
+-  const guestCookie = cookieStore.get(`guest_${slug}`)
+-
+-  const guest = guestCookie ? JSON.parse(guestCookie.value) : { firstName: "", lastName: "", id: null }
++  const guest = (await getGuestSession(slug)) ?? { firstName: "", lastName: "", id: null }
+   const guestName = [guest.firstName, guest.lastName].filter(Boolean).join(' ')
+ 
+   const supabase = await createSupabaseServerClient()
+diff --git a/app/invite/[slug]/groupes/page.tsx b/app/invite/[slug]/groupes/page.tsx
+index 6f00085..3ba9184 100644
+--- a/app/invite/[slug]/groupes/page.tsx
++++ b/app/invite/[slug]/groupes/page.tsx
+@@ -1,5 +1,5 @@
+ import { createSupabaseServerClient } from '@/lib/supabase-server'
+-import { cookies } from 'next/headers'
++import { getGuestSession } from '@/lib/guest-session'
+ import { revalidatePath } from 'next/cache'
+ import { redirect } from 'next/navigation'
+ import MarkMessagesSeen from './MarkMessagesSeen'
+@@ -86,10 +86,7 @@ async function createGroup(formData: FormData) {
+ 
+ export default async function GuestGroupesPage({ params }: { params: Promise<{ slug: string }> }) {
+   const { slug } = await params
+-  const cookieStore = await cookies()
+-  const guestCookie = cookieStore.get(`guest_${slug}`)
+-
+-  const guest = guestCookie ? JSON.parse(guestCookie.value) : { firstName: "", lastName: "", id: null }
++  const guest = (await getGuestSession(slug)) ?? { firstName: "", lastName: "", id: null }
+   const guestName = [guest.firstName, guest.lastName].filter(Boolean).join(' ')
+ 
+   const supabase = await createSupabaseServerClient()
+diff --git a/app/invite/[slug]/layout.tsx b/app/invite/[slug]/layout.tsx
+index 60283de..e0c0660 100644
+--- a/app/invite/[slug]/layout.tsx
++++ b/app/invite/[slug]/layout.tsx
+@@ -1,7 +1,7 @@
+-import { cookies } from 'next/headers'
+ import { redirect } from 'next/navigation'
+ import { getTranslations } from 'next-intl/server'
+ import { createSupabaseServerClient } from '@/lib/supabase-server'
++import { getGuestSession } from '@/lib/guest-session'
+ import AuthIntlProvider from '@/app/_components/AuthIntlProvider'
+ import GuestNav from './GuestNav'
+ import BottomNavGuest from './BottomNavGuest'
+@@ -16,9 +16,9 @@ export default async function InviteLayout({
+   params: Promise<{ slug: string }>
+ }) {
+   const { slug } = await params
+-  const cookieStore = await cookies()
+-  const guestCookie = cookieStore.get(`guest_${slug}`)
+-  const isPreview = !guestCookie
++  // Session invité vérifiée (cookie signé). Un cookie forgé/non signé => session nulle.
++  const guestSession = await getGuestSession(slug)
++  const isPreview = !guestSession
+ 
+   const supabase = await createSupabaseServerClient()
+ 
+diff --git a/app/invite/[slug]/livre-dor/page.tsx b/app/invite/[slug]/livre-dor/page.tsx
+index 8490923..b385ecc 100644
+--- a/app/invite/[slug]/livre-dor/page.tsx
++++ b/app/invite/[slug]/livre-dor/page.tsx
+@@ -1,5 +1,5 @@
+ import { createSupabaseServerClient } from '@/lib/supabase-server'
+-import { cookies } from 'next/headers'
++import { getGuestSession } from '@/lib/guest-session'
+ import { revalidatePath } from 'next/cache'
+ import GuestbookForm from './GuestbookForm'
+ import { notifyCouple } from '@/lib/email/notify-couple'
+@@ -97,9 +97,7 @@ async function submitEntry(formData: FormData) {
+ 
+ export default async function LivreDorPage({ params }: { params: Promise<{ slug: string }> }) {
+   const { slug } = await params
+-  const cookieStore = await cookies()
+-  const guestCookie = cookieStore.get(`guest_${slug}`)
+-  const guest = guestCookie ? JSON.parse(guestCookie.value) : { firstName: '', lastName: '', id: null }
++  const guest = (await getGuestSession(slug)) ?? { firstName: '', lastName: '', id: null }
+   const guestName = [guest.firstName, guest.lastName].filter(v => v && v !== 'null').join(' ')
+   const t = await getTranslations('invite.guestbook')
+ 
+diff --git a/app/invite/[slug]/musique/page.tsx b/app/invite/[slug]/musique/page.tsx
+index 7e023fe..8e4d7bb 100644
+--- a/app/invite/[slug]/musique/page.tsx
++++ b/app/invite/[slug]/musique/page.tsx
+@@ -1,5 +1,5 @@
+ import { createSupabaseServerClient } from '@/lib/supabase-server'
+-import { cookies } from 'next/headers'
++import { getGuestSession } from '@/lib/guest-session'
+ import { revalidatePath } from 'next/cache'
+ import { getTranslations } from 'next-intl/server'
+ 
+@@ -45,9 +45,7 @@ export default async function MusiqueGuestPage({ params }: { params: Promise<{ s
+   const { slug } = await params
+   const t = await getTranslations('invite.music')
+   const supabase = await createSupabaseServerClient()
+-  const cookieStore = await cookies()
+-  const guestCookie = cookieStore.get(`guest_${slug}`)
+-  const guest = guestCookie ? JSON.parse(guestCookie.value) : { firstName: '', id: null }
++  const guest = (await getGuestSession(slug)) ?? { firstName: '', id: null }
+   const guestName = guest.firstName || t('guest')
+ 
+   const { data: wedding } = await supabase
+diff --git a/app/invite/[slug]/page.tsx b/app/invite/[slug]/page.tsx
+index 8a964da..67b8035 100644
+--- a/app/invite/[slug]/page.tsx
++++ b/app/invite/[slug]/page.tsx
+@@ -1,5 +1,5 @@
+ import { createSupabaseServerClient } from '@/lib/supabase-server'
+-import { cookies } from 'next/headers'
++import { getGuestSession } from '@/lib/guest-session'
+ import { redirect } from 'next/navigation'
+ import { getTranslations, getLocale } from 'next-intl/server'
+ import { toDateLocale } from '@/lib/locale-map'
+@@ -13,6 +13,7 @@ async function logout(formData: FormData) {
+   const cookieStore = await cookies()
+   const slug = formData.get('slug') as string
+   cookieStore.delete(`guest_${slug}`)
++  cookieStore.delete(`__sig_guest_${slug}`)
+   redirect('/rejoindre')
+ }
+ 
+@@ -44,10 +45,9 @@ async function saveMessage(formData: FormData) {
+ 
+ export default async function GuestPage({ params }: { params: Promise<{ slug: string }> }) {
+   const { slug } = await params
+-  const cookieStore = await cookies()
+-  const guestCookie = cookieStore.get(`guest_${slug}`)
++  const guestSession = await getGuestSession(slug)
+ 
+-  const isPreview = !guestCookie
++  const isPreview = !guestSession
+ 
+   if (isPreview) {
+     const supabase = await createSupabaseServerClient()
+@@ -63,7 +63,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
+   const tc = await getTranslations('common')
+   const locale = await getLocale()
+ 
+-  const guest = guestCookie ? JSON.parse(guestCookie.value) : { firstName: t('preview'), id: null }
++  const guest = guestSession ?? { firstName: t('preview'), id: null }
+ 
+   const supabase = await createSupabaseServerClient()
+   const { data: wedding } = await supabase
+diff --git a/app/invite/[slug]/photos/page.tsx b/app/invite/[slug]/photos/page.tsx
+index 3db84c3..ae1c7ca 100644
+--- a/app/invite/[slug]/photos/page.tsx
++++ b/app/invite/[slug]/photos/page.tsx
+@@ -1,5 +1,5 @@
+ import { createSupabaseServerClient } from '@/lib/supabase-server'
+-import { cookies } from 'next/headers'
++import { getGuestSession } from '@/lib/guest-session'
+ import { revalidatePath } from 'next/cache'
+ import { getTranslations } from 'next-intl/server'
+ import GuestPhotoFeed from './GuestPhotoFeed'
+@@ -111,10 +111,7 @@ async function uploadPhoto(formData: FormData) {
+ 
+ export default async function GuestPhotosPage({ params }: { params: Promise<{ slug: string }> }) {
+   const { slug } = await params
+-  const cookieStore = await cookies()
+-  const guestCookie = cookieStore.get(`guest_${slug}`)
+-
+-  const guest = guestCookie ? JSON.parse(guestCookie.value) : { firstName: "", lastName: "", id: null }
++  const guest = (await getGuestSession(slug)) ?? { firstName: "", lastName: "", id: null }
+   const guestName = [guest.firstName, guest.lastName].filter(v => v && v !== 'null').join(' ')
+ 
+   const supabase = await createSupabaseServerClient()
+diff --git a/app/invite/[slug]/surprises/page.tsx b/app/invite/[slug]/surprises/page.tsx
+index bd5d08a..c28822c 100644
+--- a/app/invite/[slug]/surprises/page.tsx
++++ b/app/invite/[slug]/surprises/page.tsx
+@@ -1,5 +1,5 @@
+ import { createSupabaseServerClient } from '@/lib/supabase-server'
+-import { cookies } from 'next/headers'
++import { getGuestSession } from '@/lib/guest-session'
+ import { revalidatePath } from 'next/cache'
+ import { getTranslations } from 'next-intl/server'
+ import LoveNotesSection from './LoveNotesSection'
+@@ -57,9 +57,7 @@ const IDEES_SURPRISES = [
+ 
+ export default async function SurprisesPage({ params }: { params: Promise<{ slug: string }> }) {
+   const { slug } = await params
+-  const cookieStore = await cookies()
+-  const guestCookie = cookieStore.get(`guest_${slug}`)
+-  const guest = guestCookie ? JSON.parse(guestCookie.value) : { firstName: '', lastName: '' }
++  const guest = (await getGuestSession(slug)) ?? { firstName: '', lastName: '', id: null }
+   const t = await getTranslations('invite.surprises')
+   const guestName = [guest.firstName, guest.lastName].filter(Boolean).join(' ') || t('guest')
+ 
+diff --git "a/app/invit\303\251/[slug]/contacts/page.tsx" "b/app/invit\303\251/[slug]/contacts/page.tsx"
+index 235f701..f184e30 100644
+--- "a/app/invit\303\251/[slug]/contacts/page.tsx"
++++ "b/app/invit\303\251/[slug]/contacts/page.tsx"
+@@ -1,5 +1,5 @@
+ import { createSupabaseServerClient } from '@/lib/supabase-server'
+-import { cookies } from 'next/headers'
++import { getGuestSession } from '@/lib/guest-session'
+ import { redirect } from 'next/navigation'
+ import { revalidatePath } from 'next/cache'
+ 
+@@ -48,11 +48,9 @@ async function sendMessage(formData: FormData) {
+ 
+ export default async function GuestContactsPage({ params }: { params: Promise<{ slug: string }> }) {
+   const { slug } = await params
+-  const cookieStore = await cookies()
+-  const guestCookie = cookieStore.get(`guest_${slug}`)
+-  if (!guestCookie) redirect(`/invité/${slug}`)
++  const guest = await getGuestSession(slug)
++  if (!guest) redirect(`/invité/${slug}`)
+ 
+-  const guest = JSON.parse(guestCookie.value)
+   const guestName = `${guest.firstName} ${guest.lastName}`
+ 
+   const supabase = await createSupabaseServerClient()
+diff --git "a/app/invit\303\251/[slug]/groupes/page.tsx" "b/app/invit\303\251/[slug]/groupes/page.tsx"
+index f9bd898..7f6484d 100644
+--- "a/app/invit\303\251/[slug]/groupes/page.tsx"
++++ "b/app/invit\303\251/[slug]/groupes/page.tsx"
+@@ -1,5 +1,5 @@
+ import { createSupabaseServerClient } from '@/lib/supabase-server'
+-import { cookies } from 'next/headers'
++import { getGuestSession } from '@/lib/guest-session'
+ import { redirect } from 'next/navigation'
+ import { revalidatePath } from 'next/cache'
+ 
+@@ -53,11 +53,9 @@ async function sendMessage(formData: FormData) {
+ 
+ export default async function GuestGroupesPage({ params }: { params: Promise<{ slug: string }> }) {
+   const { slug } = await params
+-  const cookieStore = await cookies()
+-  const guestCookie = cookieStore.get(`guest_${slug}`)
+-  if (!guestCookie) redirect(`/invité/${slug}`)
++  const guest = await getGuestSession(slug)
++  if (!guest) redirect(`/invité/${slug}`)
+ 
+-  const guest = JSON.parse(guestCookie.value)
+   const guestName = `${guest.firstName} ${guest.lastName}`
+ 
+   const supabase = await createSupabaseServerClient()
+diff --git "a/app/invit\303\251/[slug]/page.tsx" "b/app/invit\303\251/[slug]/page.tsx"
+index e206fd3..d5be04e 100644
+--- "a/app/invit\303\251/[slug]/page.tsx"
++++ "b/app/invit\303\251/[slug]/page.tsx"
+@@ -1,13 +1,12 @@
+ import { createSupabaseServerClient } from '@/lib/supabase-server'
+-import { cookies } from 'next/headers'
++import { getGuestSession } from '@/lib/guest-session'
+ import { redirect } from 'next/navigation'
+ 
+ export default async function GuestPage({ params }: { params: Promise<{ slug: string }> }) {
+   const { slug } = await params
+-  const cookieStore = await cookies()
+-  const guestCookie = cookieStore.get(`guest_${slug}`)
++  const guestSession = await getGuestSession(slug)
+ 
+-  const isPreview = !guestCookie
++  const isPreview = !guestSession
+ 
+   if (isPreview) {
+     // Vérifier que c'est bien le marié connecté (preview mode)
+@@ -20,7 +19,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
+     }
+   }
+ 
+-  const guest = guestCookie ? JSON.parse(guestCookie.value) : { firstName: 'Prévisualisation' }
++  const guest = guestSession ?? { firstName: 'Prévisualisation' }
+ 
+   const supabase = await createSupabaseServerClient()
+   const { data: wedding } = await supabase
+diff --git "a/app/invit\303\251/[slug]/photos/page.tsx" "b/app/invit\303\251/[slug]/photos/page.tsx"
+index 07abfff..b0bb908 100644
+--- "a/app/invit\303\251/[slug]/photos/page.tsx"
++++ "b/app/invit\303\251/[slug]/photos/page.tsx"
+@@ -1,5 +1,5 @@
+ import { createSupabaseServerClient } from '@/lib/supabase-server'
+-import { cookies } from 'next/headers'
++import { getGuestSession } from '@/lib/guest-session'
+ import { redirect } from 'next/navigation'
+ import { revalidatePath } from 'next/cache'
+ import GuestPhotoFeed from './GuestPhotoFeed'
+@@ -64,11 +64,9 @@ async function uploadPhoto(formData: FormData) {
+ 
+ export default async function GuestPhotosPage({ params }: { params: Promise<{ slug: string }> }) {
+   const { slug } = await params
+-  const cookieStore = await cookies()
+-  const guestCookie = cookieStore.get(`guest_${slug}`)
+-  if (!guestCookie) redirect(`/invité/${slug}`)
++  const guest = await getGuestSession(slug)
++  if (!guest) redirect(`/invité/${slug}`)
+ 
+-  const guest = JSON.parse(guestCookie.value)
+   const guestName = `${guest.firstName} ${guest.lastName}`
+ 
+   const supabase = await createSupabaseServerClient()
+diff --git "a/app/invit\303\251/[slug]/programme/page.tsx" "b/app/invit\303\251/[slug]/programme/page.tsx"
+index b2868e0..d7e3802 100644
+--- "a/app/invit\303\251/[slug]/programme/page.tsx"
++++ "b/app/invit\303\251/[slug]/programme/page.tsx"
+@@ -1,12 +1,11 @@
+ import { createSupabaseServerClient } from '@/lib/supabase-server'
+-import { cookies } from 'next/headers'
++import { getGuestSession } from '@/lib/guest-session'
+ import { redirect } from 'next/navigation'
+ import ProgrammePDF from './ProgrammePDF'
+ 
+ export default async function GuestProgrammePage({ params }: { params: Promise<{ slug: string }> }) {
+   const { slug } = await params
+-  const cookieStore = await cookies()
+-  if (!cookieStore.get(`guest_${slug}`)) redirect(`/invité/${slug}`)
++  if (!(await getGuestSession(slug))) redirect(`/invité/${slug}`)
+ 
+   const supabase = await createSupabaseServerClient()
+   const { data: wedding } = await supabase
+diff --git a/app/p/[code]/page.tsx b/app/p/[code]/page.tsx
+index d040cb1..a9631e4 100644
+--- a/app/p/[code]/page.tsx
++++ b/app/p/[code]/page.tsx
+@@ -1,5 +1,5 @@
+ import { createSupabaseServerClient } from '@/lib/supabase-server'
+-import { cookies } from 'next/headers'
++import { getGuestSession } from '@/lib/guest-session'
+ import { redirect } from 'next/navigation'
+ import GuestAuthForm from './GuestAuthForm'
+ import PrintButton from './PrintButton'
+@@ -29,9 +29,8 @@ export default async function PublicPage({ params }: { params: Promise<{ code: s
+     )
+   }
+ 
+-  const cookieStore = await cookies()
+-  const existingCookie = cookieStore.get(`guest_${wedding.slug}`)
+-  if (existingCookie) redirect(`/invite/${wedding.slug}`)
++  // Ne rediriger que si une session signée valide existe déjà (évite une boucle avec un cookie invalide)
++  if (await getGuestSession(wedding.slug)) redirect(`/invite/${wedding.slug}`)
+ 
+   const { data: rules } = await supabase
+     .from('wedding_rules')
+diff --git a/app/v/[token]/route.ts b/app/v/[token]/route.ts
+index 08a29fe..6a95ef5 100644
+--- a/app/v/[token]/route.ts
++++ b/app/v/[token]/route.ts
+@@ -1,4 +1,5 @@
+-import { createSupabaseServerClient } from '@/lib/supabase-server'
++import { createServiceClient } from '@/lib/supabase-service'
++import { buildSessionCookies } from '@/lib/guest-session'
+ import { cookies } from 'next/headers'
+ import { NextResponse } from 'next/server'
+ 
+@@ -7,7 +8,8 @@ export async function GET(
+   { params }: { params: Promise<{ token: string }> }
+ ) {
+   const { token } = await params
+-  const supabase = await createSupabaseServerClient()
++  // Validation du token prestataire via service_role (le token est l'autorisation).
++  const supabase = createServiceClient()
+ 
+   const { data: vendor } = await supabase
+     .from('wedding_vendors')
+@@ -25,13 +27,16 @@ export async function GET(
+ 
+   const slug = (vendor.weddings as unknown as { slug: string }).slug
+ 
++  // Cookie de session prestataire SIGNÉ (donc infalsifiable) : permissions incluses.
+   const cookieStore = await cookies()
+-  cookieStore.set(`vendor_${slug}`, JSON.stringify({
++  for (const c of buildSessionCookies('vendor', slug, {
+     id: vendor.id,
+     name: vendor.name,
+     category: vendor.category,
+     permissions: vendor.permissions ?? {},
+-  }), { maxAge: 60 * 60 * 24 * 90, path: '/' })
++  }, 60 * 60 * 24 * 90)) {
++    cookieStore.set(c.name, c.value, c.options)
++  }
+ 
+   return NextResponse.redirect(new URL(`/vendor/${slug}`, _req.url))
+ }
+diff --git a/app/vendor/[slug]/documents/page.tsx b/app/vendor/[slug]/documents/page.tsx
+index 286d519..0cd00e6 100644
+--- a/app/vendor/[slug]/documents/page.tsx
++++ b/app/vendor/[slug]/documents/page.tsx
+@@ -1,16 +1,14 @@
+-import { cookies } from 'next/headers'
+ import { redirect } from 'next/navigation'
+ import { createSupabaseServerClient } from '@/lib/supabase-server'
++import { getVendorSession } from '@/lib/guest-session'
+ import { revalidatePath } from 'next/cache'
+ import VendorDocumentsClient from './VendorDocumentsClient'
+ 
+ export default async function VendorDocumentsPage({ params }: { params: Promise<{ slug: string }> }) {
+   const { slug } = await params
+-  const cookieStore = await cookies()
+-  const vendorCookie = cookieStore.get(`vendor_${slug}`)
+-  if (!vendorCookie) redirect('/')
++  const vendor = await getVendorSession(slug)
++  if (!vendor) redirect('/')
+ 
+-  const vendor = JSON.parse(vendorCookie.value)
+   const supabase = await createSupabaseServerClient()
+ 
+   const { data: wedding } = await supabase
+@@ -90,7 +88,7 @@ export default async function VendorDocumentsPage({ params }: { params: Promise<
+   return (
+     <VendorDocumentsClient
+       slug={slug}
+-      vendor={vendor}
++      vendor={{ id: vendor.id, name: vendor.name ?? '' }}
+       weddingId={wedding.id}
+       documents={docs}
+       uploadAction={uploadDocument}
+diff --git a/app/vendor/[slug]/invites/page.tsx b/app/vendor/[slug]/invites/page.tsx
+index 699c3bb..8257fb6 100644
+--- a/app/vendor/[slug]/invites/page.tsx
++++ b/app/vendor/[slug]/invites/page.tsx
+@@ -1,17 +1,15 @@
+-import { cookies } from 'next/headers'
+ import { redirect } from 'next/navigation'
++import { getVendorSession } from '@/lib/guest-session'
+ import { createSupabaseServerClient } from '@/lib/supabase-server'
+ import { hasPermission } from '@/lib/vendor-permissions'
+ import type { VendorPermissions } from '@/lib/vendor-permissions'
+ 
+ export default async function VendorInvitesPage({ params }: { params: Promise<{ slug: string }> }) {
+   const { slug } = await params
+-  const cookieStore = await cookies()
+-  const vendorCookie = cookieStore.get(`vendor_${slug}`)
+-  if (!vendorCookie) redirect('/')
++  const vendor = await getVendorSession(slug)
++  if (!vendor) redirect('/')
+ 
+-  const vendor = JSON.parse(vendorCookie.value)
+-  const permissions: VendorPermissions = vendor.permissions ?? {}
++  const permissions: VendorPermissions = (vendor.permissions as VendorPermissions) ?? {}
+ 
+   if (!hasPermission(permissions, 'guest_names') && !hasPermission(permissions, 'guest_allergies')) {
+     return (
+diff --git a/app/vendor/[slug]/layout.tsx b/app/vendor/[slug]/layout.tsx
+index b02032b..9575744 100644
+--- a/app/vendor/[slug]/layout.tsx
++++ b/app/vendor/[slug]/layout.tsx
+@@ -1,6 +1,6 @@
+-import { cookies } from 'next/headers'
+ import { redirect } from 'next/navigation'
+ import { createSupabaseServerClient } from '@/lib/supabase-server'
++import { getVendorSession } from '@/lib/guest-session'
+ import VendorNav from './VendorNav'
+ import { isPaid } from '@/lib/plan'
+ 
+@@ -12,14 +12,13 @@ export default async function VendorLayout({
+   params: Promise<{ slug: string }>
+ }) {
+   const { slug } = await params
+-  const cookieStore = await cookies()
+-  const vendorCookie = cookieStore.get(`vendor_${slug}`)
++  // Session prestataire vérifiée (cookie signé). Cookie forgé/non signé => null.
++  const vendorData = await getVendorSession(slug)
+ 
+-  if (!vendorCookie) {
++  if (!vendorData) {
+     redirect('/')
+   }
+ 
+-  const vendorData = JSON.parse(vendorCookie.value)
+   const supabase = await createSupabaseServerClient()
+ 
+   // Always fetch fresh permissions from DB (cookie may be stale)
+@@ -59,7 +58,7 @@ export default async function VendorLayout({
+ 
+   return (
+     <>
+-      <VendorNav slug={slug} vendorName={vendor.name} vendorCategory={vendor.category} />
++      <VendorNav slug={slug} vendorName={vendor.name ?? ''} vendorCategory={vendor.category ?? ''} />
+       <div className="pt-12 md:pt-0 md:ml-56 pb-8">
+         {children}
+       </div>
+diff --git a/app/vendor/[slug]/lieux/page.tsx b/app/vendor/[slug]/lieux/page.tsx
+index 9fadadc..a531023 100644
+--- a/app/vendor/[slug]/lieux/page.tsx
++++ b/app/vendor/[slug]/lieux/page.tsx
+@@ -1,17 +1,15 @@
+-import { cookies } from 'next/headers'
+ import { redirect } from 'next/navigation'
++import { getVendorSession } from '@/lib/guest-session'
+ import { createSupabaseServerClient } from '@/lib/supabase-server'
+ import { hasPermission } from '@/lib/vendor-permissions'
+ import type { VendorPermissions } from '@/lib/vendor-permissions'
+ 
+ export default async function VendorLieuxPage({ params }: { params: Promise<{ slug: string }> }) {
+   const { slug } = await params
+-  const cookieStore = await cookies()
+-  const vendorCookie = cookieStore.get(`vendor_${slug}`)
+-  if (!vendorCookie) redirect('/')
++  const vendor = await getVendorSession(slug)
++  if (!vendor) redirect('/')
+ 
+-  const vendor = JSON.parse(vendorCookie.value)
+-  const permissions: VendorPermissions = vendor.permissions ?? {}
++  const permissions: VendorPermissions = (vendor.permissions as VendorPermissions) ?? {}
+ 
+   if (!hasPermission(permissions, 'programme') && !hasPermission(permissions, 'location')) {
+     return (
+diff --git a/app/vendor/[slug]/messagerie/page.tsx b/app/vendor/[slug]/messagerie/page.tsx
+index 40dc74c..e61d56d 100644
+--- a/app/vendor/[slug]/messagerie/page.tsx
++++ b/app/vendor/[slug]/messagerie/page.tsx
+@@ -1,5 +1,5 @@
+-import { cookies } from 'next/headers'
+ import { redirect } from 'next/navigation'
++import { getVendorSession } from '@/lib/guest-session'
+ import { createSupabaseServerClient } from '@/lib/supabase-server'
+ import { revalidatePath } from 'next/cache'
+ 
+@@ -14,11 +14,9 @@ function formatDateSeparator(date: Date): string {
+ 
+ export default async function VendorMessageriePage({ params }: { params: Promise<{ slug: string }> }) {
+   const { slug } = await params
+-  const cookieStore = await cookies()
+-  const vendorCookie = cookieStore.get(`vendor_${slug}`)
+-  if (!vendorCookie) redirect('/')
++  const vendor = await getVendorSession(slug)
++  if (!vendor) redirect('/')
+ 
+-  const vendor = JSON.parse(vendorCookie.value)
+   const supabase = await createSupabaseServerClient()
+ 
+   const { data: wedding } = await supabase
+diff --git a/app/vendor/[slug]/page.tsx b/app/vendor/[slug]/page.tsx
+index b6891d6..4c20bd7 100644
+--- a/app/vendor/[slug]/page.tsx
++++ b/app/vendor/[slug]/page.tsx
+@@ -1,18 +1,16 @@
+-import { cookies } from 'next/headers'
+ import { redirect } from 'next/navigation'
+ import { createSupabaseServerClient } from '@/lib/supabase-server'
++import { getVendorSession } from '@/lib/guest-session'
+ import { hasPermission } from '@/lib/vendor-permissions'
+ import type { VendorPermissions } from '@/lib/vendor-permissions'
+ import VendorDashboardClient from './VendorDashboardClient'
+ 
+ export default async function VendorDashboard({ params }: { params: Promise<{ slug: string }> }) {
+   const { slug } = await params
+-  const cookieStore = await cookies()
+-  const vendorCookie = cookieStore.get(`vendor_${slug}`)
+-  if (!vendorCookie) redirect('/')
++  const vendor = await getVendorSession(slug)
++  if (!vendor) redirect('/')
+ 
+-  const vendor = JSON.parse(vendorCookie.value)
+-  const permissions: VendorPermissions = vendor.permissions ?? {}
++  const permissions: VendorPermissions = (vendor.permissions as VendorPermissions) ?? {}
+   const supabase = await createSupabaseServerClient()
+ 
+   const { data: wedding } = await supabase
+@@ -135,7 +133,7 @@ export default async function VendorDashboard({ params }: { params: Promise<{ sl
+   return (
+     <VendorDashboardClient
+       slug={slug}
+-      vendor={vendor}
++      vendor={{ name: vendor.name ?? '', category: vendor.category ?? '' }}
+       wedding={{ name: wedding.name, date: weddingDate, location: wedding.location }}
+       permissions={permissions}
+       data={{
+diff --git a/app/vendor/[slug]/programme/page.tsx b/app/vendor/[slug]/programme/page.tsx
+index 37cae8d..31d7694 100644
+--- a/app/vendor/[slug]/programme/page.tsx
++++ b/app/vendor/[slug]/programme/page.tsx
+@@ -1,5 +1,5 @@
+-import { cookies } from 'next/headers'
+ import { redirect } from 'next/navigation'
++import { getVendorSession } from '@/lib/guest-session'
+ import { revalidatePath } from 'next/cache'
+ import { createSupabaseServerClient } from '@/lib/supabase-server'
+ import { hasPermission } from '@/lib/vendor-permissions'
+@@ -8,12 +8,10 @@ import VendorProgrammeClient from './VendorProgrammeClient'
+ 
+ export default async function VendorProgrammePage({ params }: { params: Promise<{ slug: string }> }) {
+   const { slug } = await params
+-  const cookieStore = await cookies()
+-  const vendorCookie = cookieStore.get(`vendor_${slug}`)
+-  if (!vendorCookie) redirect('/')
++  const vendor = await getVendorSession(slug)
++  if (!vendor) redirect('/')
+ 
+-  const vendor = JSON.parse(vendorCookie.value)
+-  const permissions: VendorPermissions = vendor.permissions ?? {}
++  const permissions: VendorPermissions = (vendor.permissions as VendorPermissions) ?? {}
+ 
+   if (!hasPermission(permissions, 'programme')) {
+     return (
+diff --git a/app/vendor/[slug]/tables/page.tsx b/app/vendor/[slug]/tables/page.tsx
+index 310273b..c7a2890 100644
+--- a/app/vendor/[slug]/tables/page.tsx
++++ b/app/vendor/[slug]/tables/page.tsx
+@@ -1,5 +1,5 @@
+-import { cookies } from 'next/headers'
+ import { redirect } from 'next/navigation'
++import { getVendorSession } from '@/lib/guest-session'
+ import { createSupabaseServerClient } from '@/lib/supabase-server'
+ import { hasPermission } from '@/lib/vendor-permissions'
+ import type { VendorPermissions } from '@/lib/vendor-permissions'
+@@ -7,12 +7,10 @@ import VendorTablesClient from './VendorTablesClient'
+ 
+ export default async function VendorTablesPage({ params }: { params: Promise<{ slug: string }> }) {
+   const { slug } = await params
+-  const cookieStore = await cookies()
+-  const vendorCookie = cookieStore.get(`vendor_${slug}`)
+-  if (!vendorCookie) redirect('/')
++  const vendor = await getVendorSession(slug)
++  if (!vendor) redirect('/')
+ 
+-  const vendor = JSON.parse(vendorCookie.value)
+-  const permissions: VendorPermissions = vendor.permissions ?? {}
++  const permissions: VendorPermissions = (vendor.permissions as VendorPermissions) ?? {}
+ 
+   if (!hasPermission(permissions, 'seating_plan')) {
+     return (
+diff --git a/lib/guest-session.ts b/lib/guest-session.ts
+new file mode 100644
+index 0000000..9499553
+--- /dev/null
++++ b/lib/guest-session.ts
+@@ -0,0 +1,99 @@
++import crypto from 'crypto'
++import { cookies } from 'next/headers'
++
++/**
++ * Session invité / prestataire signée (HMAC-SHA256).
++ *
++ * Le cookie `guest_[slug]` / `vendor_[slug]` reste au format JSON (lu via les
++ * helpers ci-dessous), accompagné d'un cookie de signature `__sig_guest_[slug]`
++ * / `__sig_vendor_[slug]` (httpOnly) qui authentifie le payload.
++ *
++ * La signature lie : le TYPE de session (guest/vendor), le SLUG du mariage et le
++ * PAYLOAD. Un cookie ne peut donc pas être rejoué pour un autre type ni un autre
++ * mariage. Le payload porte `exp` (expiration), vérifiée côté serveur.
++ *
++ * Secret : variable d'env serveur dédiée GUEST_COOKIE_SECRET (jamais exposée au navigateur).
++ */
++
++function getSecret(): string {
++  const s = process.env.GUEST_COOKIE_SECRET
++  if (!s) throw new Error('GUEST_COOKIE_SECRET manquant côté serveur')
++  return s
++}
++
++function hmac(kind: 'guest' | 'vendor', slug: string, data: string): string {
++  return crypto.createHmac('sha256', getSecret()).update(`${kind}.${slug}.${data}`).digest('base64url')
++}
++
++function safeEqual(a: string, b: string): boolean {
++  const ba = Buffer.from(a)
++  const bb = Buffer.from(b)
++  if (ba.length !== bb.length) return false
++  return crypto.timingSafeEqual(ba, bb)
++}
++
++const COOKIE_OPTS = {
++  httpOnly: true as const,
++  secure: true as const,
++  sameSite: 'lax' as const,
++  path: '/' as const,
++}
++
++export type GuestPayload = { id: string; firstName?: string; lastName?: string }
++export type VendorPayload = { id: string; name?: string; category?: string; permissions?: unknown }
++
++/** Deux cookies à poser par les émetteurs (payload JSON signé + signature). */
++export function buildSessionCookies(
++  kind: 'guest' | 'vendor',
++  slug: string,
++  payload: Record<string, unknown>,
++  maxAge: number
++) {
++  const full = { ...payload, exp: Date.now() + maxAge * 1000 }
++  const value = JSON.stringify(full)
++  const sig = hmac(kind, slug, value)
++  return [
++    { name: `${kind}_${slug}`, value, options: { ...COOKIE_OPTS, maxAge } },
++    { name: `__sig_${kind}_${slug}`, value: sig, options: { ...COOKIE_OPTS, maxAge } },
++  ]
++}
++
++function verify(
++  kind: 'guest' | 'vendor',
++  slug: string,
++  payloadValue: string | undefined,
++  sigValue: string | undefined
++): Record<string, unknown> | null {
++  if (!payloadValue || !sigValue) return null
++  let expected: string
++  try {
++    expected = hmac(kind, slug, payloadValue)
++  } catch {
++    return null
++  }
++  if (!safeEqual(sigValue, expected)) return null
++  let parsed: Record<string, unknown>
++  try {
++    parsed = JSON.parse(payloadValue)
++  } catch {
++    return null
++  }
++  // Expiration vérifiée côté serveur
++  const exp = parsed.exp
++  if (typeof exp !== 'number' || exp < Date.now()) return null
++  return parsed
++}
++
++/** Lit + vérifie la session invité (signature + type + mariage + expiration). */
++export async function getGuestSession(slug: string): Promise<GuestPayload | null> {
++  const store = await cookies()
++  const p = verify('guest', slug, store.get(`guest_${slug}`)?.value, store.get(`__sig_guest_${slug}`)?.value)
++  return p && typeof p.id === 'string' ? (p as GuestPayload) : null
++}
++
++/** Lit + vérifie la session prestataire (signature + type + mariage + expiration). */
++export async function getVendorSession(slug: string): Promise<VendorPayload | null> {
++  const store = await cookies()
++  const p = verify('vendor', slug, store.get(`vendor_${slug}`)?.value, store.get(`__sig_vendor_${slug}`)?.value)
++  return p && typeof p.id === 'string' ? (p as VendorPayload) : null
++}
+diff --git a/lib/supabase-service.ts b/lib/supabase-service.ts
+new file mode 100644
+index 0000000..85d34de
+--- /dev/null
++++ b/lib/supabase-service.ts
+@@ -0,0 +1,18 @@
++import { createClient } from '@supabase/supabase-js'
++
++/**
++ * Client Supabase service_role — STRICTEMENT côté serveur.
++ * Ne jamais importer dans un composant client ni exposer la clé au navigateur.
++ *
++ * Usage : lookups d'autorisation (validation d'un token de lien) et lectures/écritures
++ * dont l'autorisation a déjà été vérifiée côté serveur. Chaque appel doit scoper
++ * explicitement par le mariage/ressource autorisé — le service_role contourne la RLS.
++ */
++export function createServiceClient() {
++  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
++  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
++  if (!url || !key) throw new Error('SUPABASE_SERVICE_ROLE_KEY/URL manquant côté serveur')
++  return createClient(url, key, {
++    auth: { persistSession: false, autoRefreshToken: false },
++  })
++}

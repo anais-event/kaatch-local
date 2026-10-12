@@ -1,5 +1,5 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
-import { cookies } from 'next/headers'
+import { getGuestSession } from '@/lib/guest-session'
 import { revalidatePath } from 'next/cache'
 import { getTranslations } from 'next-intl/server'
 
@@ -45,9 +45,7 @@ export default async function MusiqueGuestPage({ params }: { params: Promise<{ s
   const { slug } = await params
   const t = await getTranslations('invite.music')
   const supabase = await createSupabaseServerClient()
-  const cookieStore = await cookies()
-  const guestCookie = cookieStore.get(`guest_${slug}`)
-  const guest = guestCookie ? JSON.parse(guestCookie.value) : { firstName: '', id: null }
+  const guest = (await getGuestSession(slug)) ?? { firstName: '', id: null }
   const guestName = guest.firstName || t('guest')
 
   const { data: wedding } = await supabase

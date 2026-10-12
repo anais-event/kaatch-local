@@ -1,5 +1,5 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
-import { cookies } from 'next/headers'
+import { getGuestSession } from '@/lib/guest-session'
 import { getTranslations, getLocale } from 'next-intl/server'
 import { toDateLocale } from '@/lib/locale-map'
 
@@ -7,8 +7,7 @@ const ALL_PARTS = ['ceremonie', 'vin_honneur', 'reception']
 
 export default async function ComptePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const cookieStore = await cookies()
-  const guestCookie = cookieStore.get(`guest_${slug}`)
+  const guest = await getGuestSession(slug)
   const t = await getTranslations('invite.account')
   const locale = await getLocale()
 
@@ -18,7 +17,7 @@ export default async function ComptePage({ params }: { params: Promise<{ slug: s
     reception: '🎉 ' + t('partReception'),
   }
 
-  if (!guestCookie) {
+  if (!guest) {
     return (
       <div className="min-h-screen bg-[#f5f0e8] flex items-center justify-center p-8"
            style={{ fontFamily: 'var(--font-lato)' }}>
@@ -35,9 +34,6 @@ export default async function ComptePage({ params }: { params: Promise<{ slug: s
     )
   }
 
-  const guest = JSON.parse(guestCookie.value) as {
-    firstName: string; lastName: string; id: string | null
-  }
   const guestName = [guest.firstName, guest.lastName].filter(Boolean).join(' ')
 
   const supabase = await createSupabaseServerClient()
@@ -160,6 +156,7 @@ export default async function ComptePage({ params }: { params: Promise<{ slug: s
             const { redirect: doRedirect } = await import('next/navigation')
             const cookieStore2 = await getCookies()
             cookieStore2.delete(`guest_${slug}`)
+            cookieStore2.delete(`__sig_guest_${slug}`)
             doRedirect('/rejoindre')
           }}>
             <button type="submit"

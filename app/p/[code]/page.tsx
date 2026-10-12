@@ -1,5 +1,5 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
-import { cookies } from 'next/headers'
+import { getGuestSession } from '@/lib/guest-session'
 import { redirect } from 'next/navigation'
 import GuestAuthForm from './GuestAuthForm'
 import PrintButton from './PrintButton'
@@ -29,9 +29,8 @@ export default async function PublicPage({ params }: { params: Promise<{ code: s
     )
   }
 
-  const cookieStore = await cookies()
-  const existingCookie = cookieStore.get(`guest_${wedding.slug}`)
-  if (existingCookie) redirect(`/invite/${wedding.slug}`)
+  // Ne rediriger que si une session signée valide existe déjà (évite une boucle avec un cookie invalide)
+  if (await getGuestSession(wedding.slug)) redirect(`/invite/${wedding.slug}`)
 
   const { data: rules } = await supabase
     .from('wedding_rules')

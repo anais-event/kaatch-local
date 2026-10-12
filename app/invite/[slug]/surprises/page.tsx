@@ -1,5 +1,5 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
-import { cookies } from 'next/headers'
+import { getGuestSession } from '@/lib/guest-session'
 import { revalidatePath } from 'next/cache'
 import { getTranslations } from 'next-intl/server'
 import LoveNotesSection from './LoveNotesSection'
@@ -57,9 +57,7 @@ const IDEES_SURPRISES = [
 
 export default async function SurprisesPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const cookieStore = await cookies()
-  const guestCookie = cookieStore.get(`guest_${slug}`)
-  const guest = guestCookie ? JSON.parse(guestCookie.value) : { firstName: '', lastName: '' }
+  const guest = (await getGuestSession(slug)) ?? { firstName: '', lastName: '', id: null }
   const t = await getTranslations('invite.surprises')
   const guestName = [guest.firstName, guest.lastName].filter(Boolean).join(' ') || t('guest')
 

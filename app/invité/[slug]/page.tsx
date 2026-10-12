@@ -1,13 +1,12 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
-import { cookies } from 'next/headers'
+import { getGuestSession } from '@/lib/guest-session'
 import { redirect } from 'next/navigation'
 
 export default async function GuestPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const cookieStore = await cookies()
-  const guestCookie = cookieStore.get(`guest_${slug}`)
+  const guestSession = await getGuestSession(slug)
 
-  const isPreview = !guestCookie
+  const isPreview = !guestSession
 
   if (isPreview) {
     // Vérifier que c'est bien le marié connecté (preview mode)
@@ -20,7 +19,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
     }
   }
 
-  const guest = guestCookie ? JSON.parse(guestCookie.value) : { firstName: 'Prévisualisation' }
+  const guest = guestSession ?? { firstName: 'Prévisualisation' }
 
   const supabase = await createSupabaseServerClient()
   const { data: wedding } = await supabase

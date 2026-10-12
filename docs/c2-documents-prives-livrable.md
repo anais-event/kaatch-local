@@ -1,6 +1,6 @@
 # C2 — Documents prestataires réellement privés (livrable)
 
-Rien déployé, **bucket non modifié**, aucune migration appliquée. Préparation à valider.
+> **✅ DÉPLOYÉ ET VÉRIFIÉ — 2026-10-12.** Code live sur master (PR #5, merge `b908b72`, prod Vercel OK). Migrations 3a + 3b appliquées. Bucket `vendor-documents` basculé en **privé**. Résultats de tests en fin de document.
 
 ## Constat données (prod)
 - `vendor_documents` : **1 ligne**, `file_url` = **chemin Storage** (pas d'URL http publique). → **aucune migration de références legacy nécessaire** (0 URL publique à convertir). La référence permanente en base reste le **chemin Storage** ; l'URL signée est générée à l'accès.
@@ -90,3 +90,37 @@ PUT /storage/v1/bucket/vendor-documents   { "public": false }
 - `file_url` reste un **chemin permanent** ; jamais remplacé par une URL signée expirante.
 - Aucun fichier déplacé/supprimé pendant la migration (0 legacy à convertir).
 - Si un futur document avait une URL http legacy, le code garde un fallback d'affichage (compat), mais le bucket privé le rendrait inaccessible → à re-signer le cas échéant (aucun en prod aujourd'hui).
+
+## 7. Résultats de déploiement (2026-10-12)
+
+Ordre exécuté : code mergé/déployé → tests → RLS table → policies storage → **bucket privé (dernier)** → re-tests.
+
+| # | Test | Avant | Après C2 |
+|---|------|-------|----------|
+| Fuite | URL publique directe du doc (`/object/public/...`) | **200** (6795 o, sans auth) | **400** `NoSuchBucket` (cache-bust + bare URL `cf-cache: BYPASS`) |
+| Signé | URL signée prestataire (`/object/sign/...?token`) sur bucket privé | — | **200** (6795 o, `application/pdf`) |
+| Signé− | même chemin sans token | — | **400** |
+| RLS | anon REST `GET vendor_documents` | lecture ouverte | **`[]`** |
+| RLS | anon REST `POST vendor_documents` | insert ouvert | **401** |
+| Route | `/vendor/[slug]/documents` sans session | — | **307 → /**, zéro fuite (nom/chemin/token = 0 hit dans le body) |
+| Auth | prestataire via `/v/[token]` → espace documents | — | doc listé, URL **signée** rendue par le serveur (service_role) |
+
+### Migrations appliquées
+- **3a** `c2_harden_rls_vendor_documents` : DROP des 3 policies publiques `true` (SELECT/INSERT/DELETE) ; CREATE `owner_select_vendor_documents` (lecture mariés propriétaires).
+- **3b (i)** `c2_drop_public_storage_policies_vendor_documents` : DROP des policies publiques `storage.objects` (`Public read`/`Public insert vendor-documents`).
+- **3b (ii)** bascule du bucket `vendor-documents` en **privé** (`public = false`) via le Dashboard Supabase (pas de SQL sur `storage.buckets`).
+
+### État final policies / bucket
+`vendor_documents` → `owner_select_vendor_documents` uniquement ; `storage.objects` → aucune policy publique pour ce bucket ; `storage.buckets.public = false`.
+
+### Tests fonctionnels E2E (document synthétique, document réel non touché)
+Exécutés en prod via un prestataire authentifié (flow `/v/[token]`) avec un PDF synthétique `c2-test-synthetique.pdf` (192 o) :
+
+| # | Test | Résultat |
+|---|------|----------|
+| 1 | Upload par prestataire autorisé | ✅ ligne créée, `file_url` = chemin scopé `weddingId/vendorId/…` résolu serveur (jamais depuis le client) |
+| 2 | Consultation via URL signée (bucket privé) | ✅ `200`, 192 o, `application/pdf` |
+| 3 | Suppression du document de test | ✅ ligne supprimée **et** objet Storage retiré ; document réel intact |
+| 4 | Isolation : autre prestataire (même mariage) | ✅ 0 document listé, aucune URL signée, aucun chemin de l'autre prestataire exposé |
+
+Document réel existant (`budget-mariage.pdf`) : **non touché** (ligne + objet toujours présents, vérifiés après le test de suppression).

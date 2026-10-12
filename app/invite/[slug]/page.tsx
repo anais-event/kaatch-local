@@ -1,5 +1,5 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
-import { cookies } from 'next/headers'
+import { getGuestSession } from '@/lib/guest-session'
 import { redirect } from 'next/navigation'
 import { getTranslations, getLocale } from 'next-intl/server'
 import { toDateLocale } from '@/lib/locale-map'
@@ -13,6 +13,7 @@ async function logout(formData: FormData) {
   const cookieStore = await cookies()
   const slug = formData.get('slug') as string
   cookieStore.delete(`guest_${slug}`)
+  cookieStore.delete(`__sig_guest_${slug}`)
   redirect('/rejoindre')
 }
 
@@ -44,10 +45,9 @@ async function saveMessage(formData: FormData) {
 
 export default async function GuestPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const cookieStore = await cookies()
-  const guestCookie = cookieStore.get(`guest_${slug}`)
+  const guestSession = await getGuestSession(slug)
 
-  const isPreview = !guestCookie
+  const isPreview = !guestSession
 
   if (isPreview) {
     const supabase = await createSupabaseServerClient()
@@ -63,7 +63,7 @@ export default async function GuestPage({ params }: { params: Promise<{ slug: st
   const tc = await getTranslations('common')
   const locale = await getLocale()
 
-  const guest = guestCookie ? JSON.parse(guestCookie.value) : { firstName: t('preview'), id: null }
+  const guest = guestSession ?? { firstName: t('preview'), id: null }
 
   const supabase = await createSupabaseServerClient()
   const { data: wedding } = await supabase

@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { buildSessionCookies } from '@/lib/guest-session'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -47,15 +48,13 @@ export async function POST(req: Request) {
   if (!wedding) return NextResponse.json({ ok: false, message: 'Mariage introuvable.' })
 
   const cookieStore = await cookies()
-  cookieStore.set(`guest_${wedding.slug}`, JSON.stringify({
+  for (const c of buildSessionCookies('guest', wedding.slug, {
     id: guest.id,
     firstName: guest.first_name,
     lastName: guest.last_name,
-  }), {
-    httpOnly: true,
-    maxAge: 60 * 60 * 24 * 7,
-    path: '/',
-  })
+  }, 60 * 60 * 24 * 7)) {
+    cookieStore.set(c.name, c.value, c.options)
+  }
 
   return NextResponse.json({ ok: true, slug: wedding.slug })
 }

@@ -1,16 +1,14 @@
-import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { getVendorSession } from '@/lib/guest-session'
 import { revalidatePath } from 'next/cache'
 import VendorDocumentsClient from './VendorDocumentsClient'
 
 export default async function VendorDocumentsPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const cookieStore = await cookies()
-  const vendorCookie = cookieStore.get(`vendor_${slug}`)
-  if (!vendorCookie) redirect('/')
+  const vendor = await getVendorSession(slug)
+  if (!vendor) redirect('/')
 
-  const vendor = JSON.parse(vendorCookie.value)
   const supabase = await createSupabaseServerClient()
 
   const { data: wedding } = await supabase
@@ -90,7 +88,7 @@ export default async function VendorDocumentsPage({ params }: { params: Promise<
   return (
     <VendorDocumentsClient
       slug={slug}
-      vendor={vendor}
+      vendor={{ id: vendor.id, name: vendor.name ?? '' }}
       weddingId={wedding.id}
       documents={docs}
       uploadAction={uploadDocument}

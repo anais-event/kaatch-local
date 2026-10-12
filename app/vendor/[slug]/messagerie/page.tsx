@@ -1,5 +1,5 @@
-import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { getVendorSession } from '@/lib/guest-session'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
 
@@ -14,11 +14,9 @@ function formatDateSeparator(date: Date): string {
 
 export default async function VendorMessageriePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const cookieStore = await cookies()
-  const vendorCookie = cookieStore.get(`vendor_${slug}`)
-  if (!vendorCookie) redirect('/')
+  const vendor = await getVendorSession(slug)
+  if (!vendor) redirect('/')
 
-  const vendor = JSON.parse(vendorCookie.value)
   const supabase = await createSupabaseServerClient()
 
   const { data: wedding } = await supabase

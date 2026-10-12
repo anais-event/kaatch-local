@@ -1,5 +1,5 @@
-import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { getVendorSession } from '@/lib/guest-session'
 import { revalidatePath } from 'next/cache'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { hasPermission } from '@/lib/vendor-permissions'
@@ -8,12 +8,10 @@ import VendorProgrammeClient from './VendorProgrammeClient'
 
 export default async function VendorProgrammePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const cookieStore = await cookies()
-  const vendorCookie = cookieStore.get(`vendor_${slug}`)
-  if (!vendorCookie) redirect('/')
+  const vendor = await getVendorSession(slug)
+  if (!vendor) redirect('/')
 
-  const vendor = JSON.parse(vendorCookie.value)
-  const permissions: VendorPermissions = vendor.permissions ?? {}
+  const permissions: VendorPermissions = (vendor.permissions as VendorPermissions) ?? {}
 
   if (!hasPermission(permissions, 'programme')) {
     return (

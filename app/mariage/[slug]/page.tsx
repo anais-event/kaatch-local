@@ -16,6 +16,8 @@ import {
 } from 'lucide-react'
 import TodoNow from './TodoNow'
 import RecentActivitySection from './RecentActivitySection'
+import { Suspense } from 'react'
+import WeddingDashboardTracker from './WeddingDashboardTracker'
 
 export default async function WeddingPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -102,6 +104,7 @@ export default async function WeddingPage({ params }: { params: Promise<{ slug: 
 
   return (
     <>
+    <Suspense fallback={null}><WeddingDashboardTracker /></Suspense>
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
 
       {/* Cover banner */}

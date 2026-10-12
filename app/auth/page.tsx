@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState, Suspense } from 'react'
+import { trackEvent, EVENTS } from '@/lib/analytics'
 
 function AuthInner() {
   const router = useRouter()
@@ -47,6 +48,7 @@ function AuthInner() {
       setLoading(false)
       return
     }
+    trackEvent(EVENTS.SIGNUP_STARTED)
     const supabase = createClient()
     const { data, error: err } = await supabase.auth.signUp({
       email,
@@ -62,6 +64,7 @@ function AuthInner() {
     }
     // Si la session est déjà active (email confirm désactivé côté Supabase), on redirige
     if (data.session) {
+      trackEvent(EVENTS.SIGNUP_COMPLETED)
       router.push(next)
       router.refresh()
       return

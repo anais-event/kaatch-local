@@ -3,6 +3,7 @@ import { Outfit, Cormorant_Garamond, Plus_Jakarta_Sans, Instrument_Serif } from 
 import "./globals.css";
 import { Analytics } from '@vercel/analytics/next';
 import { GoogleAnalytics } from '@next/third-parties/google';
+import AnalyticsInit from './_components/AnalyticsInit';
 import { getLocale } from 'next-intl/server';
 
 const outfit = Outfit({
@@ -74,6 +75,7 @@ export default async function RootLayout({
       <head />
       <body className="min-h-full flex flex-col">
         {children}
+        <AnalyticsInit />
         <Analytics />
       </body>
       <GoogleAnalytics gaId="G-JZGV5T58NL" />

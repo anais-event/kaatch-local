@@ -163,11 +163,18 @@ export default async function AdminPage() {
             Dashboard administrateur
           </h1>
         </div>
-        <a href="/dashboard"
-           className="text-white/50 text-xs hover:text-white transition"
-           style={{ fontWeight: 300 }}>
-          ← Mon espace
-        </a>
+        <div className="flex items-center gap-3">
+          <a href="/admin/analytics"
+             className="text-white text-xs border border-white/25 px-3 py-1.5 rounded-lg hover:bg-white/10 transition"
+             style={{ fontWeight: 400 }}>
+            📊 Analytics
+          </a>
+          <a href="/dashboard"
+             className="text-white/50 text-xs hover:text-white transition"
+             style={{ fontWeight: 300 }}>
+            ← Mon espace
+          </a>
+        </div>
       </div>
 
       <div className="max-w-5xl mx-auto px-6 py-8">

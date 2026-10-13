@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { FREE_GUEST_LIMIT } from '@/lib/plan'
+import { trackEvent, EVENTS } from '@/lib/analytics'
 
 const RELATIONS = ['Ami(e)', 'Frère', 'Sœur', 'Père', 'Mère', 'Oncle', 'Tante', 'Cousin(e)', 'Collègue', 'Autre']
 
@@ -22,6 +23,8 @@ export default function AddGuestForm({ weddingId, slug, addGuest, guestCount, pa
   async function handleSubmit(fd: FormData) {
     setSubmitting(true)
     await addGuest(fd)
+    // Activation : 1re action significative dans l'espace. On ne transmet que le nom de la feature.
+    trackEvent(EVENTS.FEATURE_USED, { feature: 'guest_added' })
     setSubmitting(false)
     setOpen(false)
     formRef.current?.reset()

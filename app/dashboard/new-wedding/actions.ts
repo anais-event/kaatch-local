@@ -53,6 +53,6 @@ export async function createWedding(formData: FormData) {
 
   console.log('🟢 Mariage créé:', data)
 
-  // Redirige vers le dashboard du mariage
-  redirect(`/mariage/${slug}`)
+  // Redirige vers le dashboard du mariage (flag ?created=1 → tracking wedding_created côté client)
+  redirect(`/mariage/${slug}?created=1`)
 }

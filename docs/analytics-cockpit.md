@@ -206,5 +206,8 @@ Qui vient · D'où · Que consultent-ils · Restent-ils/naviguent · Quels outil
 
 ### Consentement (vérifié avant P2)
 - Politique §7 : « cookies techniques uniquement, aucun traceur tiers ».
-- **P2 = mesure d'audience interne, anonyme, non recoupée, non partagée** → **exemptée de consentement** (recommandation CNIL, art. 82). **Aucun popup ajouté.** Minimal requis = **informer** : paragraphe ajouté à [la politique de confidentialité](../app/politique-de-confidentialite/page.tsx) (mesure d'audience, conservation ≤ 25 mois).
-- **Signalé, hors périmètre** : GA4 (Google = tiers) tourne sans consentement alors que la politique dit « aucun traceur tiers » → **incohérence préexistante** à corriger séparément (consentement GA4 ou retrait). Non traité ici (consigne : ne pas toucher GA4).
+- **P2 a été conçue pour relever du cadre « mesure d'audience »** des recommandations CNIL : interne, pseudonyme, finalité limitée, pas de recoupement, pas de partage tiers, pas de fingerprinting, conservation ≤ 25 mois. **Ces caractéristiques techniques ne valent pas à elles seules confirmation juridique** de l'exemption de consentement : l'absence de nom/email dans les events ne suffit pas à l'établir. **À faire valider** (DPO/conseil) avant de considérer l'exemption acquise. En attendant, aucun popup n'a été ajouté et la politique de confidentialité informe de cette mesure.
+- Paragraphe d'information ajouté à [la politique de confidentialité](../app/politique-de-confidentialite/page.tsx), formulé sans affirmer l'exemption comme acquise.
+
+### Point distinct à résoudre (hors de cette mission) — GA4 vs politique
+GA4 (Google, tiers) est chargé **sans consentement** alors que la politique §7 affirme « aucun traceur tiers ». C'est une **incohérence préexistante**, indépendante de la collecte first-party de cette mission. **À traiter séparément** : soit conditionner GA4 à un consentement, soit le retirer, soit mettre la politique en accord avec la réalité. Non investigué et non modifié ici (consigne : ne pas toucher GA4, pas de nouvel audit).

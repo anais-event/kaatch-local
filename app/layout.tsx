@@ -4,6 +4,7 @@ import "./globals.css";
 import { Analytics } from '@vercel/analytics/next';
 import { GoogleAnalytics } from '@next/third-parties/google';
 import AnalyticsInit from './_components/AnalyticsInit';
+import PageViewTracker from './_components/PageViewTracker';
 import { getLocale } from 'next-intl/server';
 
 const outfit = Outfit({
@@ -76,6 +77,7 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col">
         {children}
         <AnalyticsInit />
+        <PageViewTracker />
         <Analytics />
       </body>
       <GoogleAnalytics gaId="G-JZGV5T58NL" />

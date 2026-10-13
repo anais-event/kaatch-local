@@ -2,6 +2,7 @@
 
 import { useCallback } from 'react'
 import type { CostBreakdown, WeddingLevel, Region } from '@/lib/calculator/budget-formulas'
+import { trackTool } from '@/lib/analytics'
 
 interface PDFDownloadButtonProps {
   breakdown: CostBreakdown
@@ -147,6 +148,7 @@ export default function PDFDownloadButton({
       }
 
       pdf.save(`budget-mariage-${guestCount}-invites.pdf`)
+      trackTool('export', 'budget', { guest_count: guestCount })
       if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
         window.gtag('event', 'pdf_download', { tool: 'budget', guests: guestCount, level, region })
       }

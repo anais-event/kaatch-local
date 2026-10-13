@@ -1,8 +1,7 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { createClient } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
-
-const ADMIN_EMAIL = 'anais@kaatch.fr'
+import { isAdmin, requireAdmin } from '@/lib/admin'
 
 function adminClient() {
   return createClient(
@@ -15,7 +14,7 @@ async function deleteWedding(formData: FormData) {
   'use server'
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (user?.email !== ADMIN_EMAIL) return
+  if (!user || !(await isAdmin(user.id))) return
 
   const weddingId = formData.get('wedding_id') as string
   const admin = adminClient()
@@ -57,9 +56,7 @@ export default async function AdminWeddingDetail({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const supabase = await createSupabaseServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (user?.email !== ADMIN_EMAIL) redirect('/auth')
+  await requireAdmin()
 
   const admin = adminClient()
 

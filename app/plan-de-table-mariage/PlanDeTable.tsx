@@ -29,6 +29,8 @@ function uid(): string {
 }
 
 const STORAGE_KEY = 'kaatch-pdtm-v1'
+// Les données expirent après 24 h d'inactivité (pas de données fantômes au long cours).
+const STORAGE_TTL_MS = 24 * 60 * 60 * 1000
 
 const DEFAULT_TABLES: WeddingTable[] = [
   { id: 't1', name: 'Table 1', capacity: 8, shape: 'round' },
@@ -86,9 +88,14 @@ export default function PlanDeTable() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY)
       if (raw) {
-        const saved = JSON.parse(raw) as { guests?: Guest[]; tables?: WeddingTable[] }
-        if (saved.guests) setGuests(saved.guests)
-        if (saved.tables?.length) setTables(saved.tables)
+        const saved = JSON.parse(raw) as { guests?: Guest[]; tables?: WeddingTable[]; savedAt?: number }
+        const expired = !saved.savedAt || (Date.now() - saved.savedAt) > STORAGE_TTL_MS
+        if (expired) {
+          localStorage.removeItem(STORAGE_KEY)
+        } else {
+          if (saved.guests) setGuests(saved.guests)
+          if (saved.tables?.length) setTables(saved.tables)
+        }
       }
     } catch {}
     trackEvent(EVENTS.SEATING_VIEWED, { tool_version: TOOL_VERSION })
@@ -96,7 +103,7 @@ export default function PlanDeTable() {
 
   useEffect(() => {
     if (!mounted) return
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ guests, tables })) } catch {}
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ guests, tables, savedAt: Date.now() })) } catch {}
   }, [guests, tables, mounted])
 
   // Plan complet : tous les invités placés (et au moins ~1 table pleine de sens).

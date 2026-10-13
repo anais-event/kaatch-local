@@ -2,8 +2,7 @@ import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { createClient } from '@supabase/supabase-js'
 import { redirect, notFound } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
-
-const ADMIN_EMAIL = 'anais@kaatch.fr'
+import { isAdmin, requireAdmin } from '@/lib/admin'
 
 function adminClient() {
   return createClient(
@@ -16,7 +15,7 @@ async function updateCode(formData: FormData) {
   'use server'
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (user?.email !== ADMIN_EMAIL) return
+  if (!user || !(await isAdmin(user.id))) return
 
   const id = formData.get('id') as string
   const code = (formData.get('code') as string).trim().toUpperCase()
@@ -35,10 +34,7 @@ async function updateCode(formData: FormData) {
 
 export default async function EditPromoPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-
-  const supabase = await createSupabaseServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (user?.email !== ADMIN_EMAIL) redirect('/auth')
+  await requireAdmin()
 
   const { data: code } = await adminClient()
     .from('promo_codes')

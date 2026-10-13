@@ -1,5 +1,6 @@
 ﻿import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
+import { isAdmin } from '@/lib/admin'
 import { getTranslations } from 'next-intl/server'
 import AuthIntlProvider from '@/app/_components/AuthIntlProvider'
 import { isPaid, checkoutUrl } from '@/lib/plan'
@@ -36,6 +37,7 @@ export default async function Dashboard({
 
   const t = await getTranslations('dashboard')
   const locale = await getLocale()
+  const admin = await isAdmin(user.id)
 
   // Afficher la liste
   return (
@@ -151,12 +153,12 @@ export default async function Dashboard({
             </a>
           </div>
 
-          {user.email === 'anais@kaatch.fr' && (
+          {admin && (
             <div className="text-center mt-6">
               <a href="/admin"
                  className="text-xs text-stone-300 hover:text-[#4a5240] transition"
                  style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}>
-                ⚙ Admin
+                ⚙ Administration Kaatch
               </a>
             </div>
           )}

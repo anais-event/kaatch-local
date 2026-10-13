@@ -1,5 +1,9 @@
 # Cockpit Analytics interne — Kaatch
 
+> **MàJ 1B (2026-10-13)** : cockpit restructuré en 4 sections orientées pilotage + séparation
+> de l'espace admin. Voir §9 et §10 en bas.
+
+
 > Mission 1. Interface privée de pilotage acquisition & conversion, intégrée à l'app.
 > Branche de travail : `claude/c2-doc-resultats` (à renommer en PR dédiée analytics).
 
@@ -105,3 +109,62 @@ anon, jamais de crash) et le cockpit affiche un bandeau d'avertissement explicit
 - GA4 : marquer `signup_completed`, `wedding_created`, `feature_used`, `seating_plan_pdf_downloaded` comme
   **conversions** ; créer une exploration funnel + une exploration par canal.
 - Après ~30 j de collecte : activer le panneau **rétention J+1/J+7/J+30** dans le cockpit.
+
+---
+
+## 9. MàJ 1B — Cockpit restructuré (pilotage produit)
+
+Objectif : comprendre en < 30 s si Kaatch attire, d'où, si l'outil sert, si ça convertit, et quelle étape travailler.
+
+- **Bandeau « En bref »** : 5 réponses directes (visiteurs, source principale, usage outil, conversions, étape prioritaire = plus grosse perte relative).
+- **4 sections** : A. Acquisition · B. Plan de table · C. Conversion produit · D. Pages & sources.
+- **Diagnostic technique replié** (`<details>` « Diagnostic du suivi ») — plus en page principale.
+- Logique d'agrégation extraite dans [`lib/analytics-cockpit.ts`](../lib/analytics-cockpit.ts) (testable, page = présentation).
+
+### Ambiguïtés corrigées
+- **Pages admin / espaces privés exclus de l'acquisition** : `isPublicPath()` écarte `/admin`, `/dashboard`,
+  `/mariage`, `/invite`, `/vendor`, `/rsvp`, `/api`… Un admin qui ouvre le cockpit ne compte plus comme visiteur.
+  (Les events de conversion restent comptés où qu'ils surviennent.)
+- **Espaces : période vs total** : « Espaces créés (période) » vient de la table `weddings` filtrée sur la période ;
+  « X au total (historique) » affiché séparément. Les espaces créés **avant** le suivi ne sont jamais présentés
+  comme des créations récentes ni attribués à une source.
+- **Visiteurs vs sessions** : distincts et étiquetés.
+- **Comparaison période précédente** : affichée seulement si chaque période a ≥ 5 visiteurs (`MIN_COMPARE`),
+  sinon « · » (donnée insuffisante). Jamais de variation trompeuse sur petits volumes.
+- **Distinction zéro / n/d / insuffisant** : taux sans dénominateur = `n/d` ; sparkline vide = message explicite ;
+  sections sans events = état vide utile.
+- **Attribution conversions** : `signup_completed` / `wedding_created` portent le canal first-touch → section
+  « Conversions par source ». Tant qu'il n'y a pas d'events de conversion, état vide honnête (pas de reconstruction).
+
+### Clic ≠ action réussie
+`seating_plan_cta_clicked` (clic) est distinct de `signup_completed` (inscription réelle). Le funnel ne confond pas les deux.
+
+## 10. MàJ 1B — Espace admin séparé des mariages
+
+**Cause du problème** : l'accès admin était un **email en dur** (`anais@kaatch.fr`) comparé à la session Supabase
+des mariés. L'admin « roulait » donc sur un compte marié, et le raccourci vivait dans le dashboard mariés.
+
+**Architecture retenue (changement minimal, pas de refonte d'auth)** :
+- Table **`admins`** (`user_id` → `auth.users`). RLS **ON, 0 policy** → lisible via **service_role** uniquement.
+  Rôle explicite, maintenable, **indépendant de tout mariage**. Aucun email admin en dur. Seed : compte Anaïs.
+- [`lib/admin.ts`](../lib/admin.ts) : `isAdmin(userId)` (lecture service_role), `getAdminUser()`, `requireAdmin()`
+  (redirige `/admin/login`, ou `/admin/login?denied=1` si connecté sans droits).
+- **`/admin/login`** : connexion admin dédiée (Supabase `signInWithPassword`), indépendante des mariages.
+- Toutes les pages & server actions `/admin/**` gatées par `isAdmin`/`requireAdmin` (plus aucun email en dur).
+  Le lien admin du dashboard mariés utilise aussi `isAdmin` côté serveur.
+
+**Trois espaces distincts** : 💍 mariés (`/dashboard`, `/mariage`) · 💌 invités/prestataires (`/invite`, `/vendor`) ·
+📊 admin (`/admin`, `/admin/login`, `/admin/analytics`).
+
+**Connexion admin** : `/admin/login` avec le compte Supabase existant (`anais@kaatch.fr`). L'autorisation vient
+de la table `admins`, pas de l'email ni de l'URL.
+
+**Sécurité** : autorisation vérifiée **côté serveur** (jamais sur l'URL/l'interface) ; `service_role` jamais exposé
+au navigateur ; RLS existantes inchangées ; être marié/invité/prestataire ne donne aucun accès admin.
+
+### Tests effectués (1B)
+- Admin (`admins` table) : anais présente (`anais_is_admin=true`), aucun autre (`admin_count=1`).
+- Non authentifié : `/admin` et `/admin/analytics` → redirigent vers `/admin/login` ✅ ; `/admin/login` rend le formulaire ✅.
+- Mariée non-admin / invité / prestataire : `requireAdmin` → `isAdmin(false)` → `/admin/login?denied=1` (même chemin serveur, aucune dérogation URL).
+- `next build` + `tsc` ✅. Cockpit v2 : agrégats validés en SQL (exclusion admin, période vs total).
+- Local sans `SUPABASE_SERVICE_ROLE_KEY` : `isAdmin` renvoie `false` (jamais de fallback anon) → admin verrouillé en local, fonctionnel en prod.

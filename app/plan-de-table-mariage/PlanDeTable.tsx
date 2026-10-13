@@ -268,7 +268,7 @@ export default function PlanDeTable() {
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
               <h1 className="text-[#2C3B2E] mb-2" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', lineHeight: 1.1, letterSpacing: '-0.02em' }}>
-                Plan de table
+                Plan de table mariage
               </h1>
               <p className="text-stone-500 text-base max-w-xl leading-relaxed" style={{ fontWeight: 300 }}>
                 Ajoutez vos invités, créez vos tables, glissez-déposez pour placer chacun.

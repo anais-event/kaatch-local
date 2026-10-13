@@ -119,6 +119,7 @@ export type Agg = {
   journeys: { from: string; to: string; count: number }[]
   // outils gratuits
   tools: { tool: string; label: string; path: string; visitors: number; started: number; exported: number }[]
+  toolVisitors: number              // visiteurs uniques ayant vu au moins une page d'outil
   // plan de table (détail historique conservé)
   tool: { viewed: number; started: number; completed: number; pdf: number; cta: number }
   // conversion
@@ -170,6 +171,8 @@ export function aggregate(rawEvents: Ev[], dayKeys: string[], priorVisitorIds?: 
   const engByPath: Record<string, { sum: number; n: number }> = {}
   const toolStarted: Record<string, Set<string>> = {}
   const toolExported: Record<string, Set<string>> = {}
+  const toolPaths = new Set(TOOLS.map(t => t.path))
+  const toolPageVisitors = new Set<string>()
   const signupSessions = new Set<string>()
   let unknownChannel = 0, adminExcluded = 0, lastAt = ''
 
@@ -210,6 +213,7 @@ export function aggregate(rawEvents: Ev[], dayKeys: string[], priorVisitorIds?: 
 
     if (e.event_name === 'page_view' && e.page_path) {
       pvRows.push({ vid, sid, path: e.page_path, ts: e.created_at })
+      if (toolPaths.has(e.page_path)) toolPageVisitors.add(vid)
     }
     if (e.event_name === 'page_engagement' && e.page_path) {
       const d = num(e.props?.duration_ms)
@@ -325,6 +329,7 @@ export function aggregate(rawEvents: Ev[], dayKeys: string[], priorVisitorIds?: 
     exitPages: Object.entries(exitPages).sort((a, b) => b[1] - a[1]).slice(0, 10),
     journeys: Object.entries(journeyMap).map(([k, count]) => { const [from, to] = k.split(' → '); return { from, to, count } }).sort((a, b) => b.count - a.count).slice(0, 12),
     tools,
+    toolVisitors: toolPageVisitors.size,
     tool: {
       viewed: vcount('seating_plan_viewed'), started: vcount('seating_plan_started'),
       completed: vcount('seating_plan_completed'), pdf: vcount('seating_plan_pdf_downloaded'), cta: vcount('seating_plan_cta_clicked'),

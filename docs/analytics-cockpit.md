@@ -168,3 +168,43 @@ au navigateur ; RLS existantes inchangées ; être marié/invité/prestataire ne
 - Mariée non-admin / invité / prestataire : `requireAdmin` → `isAdmin(false)` → `/admin/login?denied=1` (même chemin serveur, aucune dérogation URL).
 - `next build` + `tsc` ✅. Cockpit v2 : agrégats validés en SQL (exclusion admin, période vs total).
 - Local sans `SUPABASE_SERVICE_ROLE_KEY` : `isAdmin` renvoie `false` (jamais de fallback anon) → admin verrouillé en local, fonctionnel en prod.
+
+---
+
+## 11. V2 comportement — collecte first-party des pages & engagement (P1→P4)
+
+Objectif : comprendre **le comportement** des visiteurs (pas seulement « des events existent »). Pas d'API GA4, pas de refonte.
+
+### Collecte ajoutée (P2) — mesure d'audience anonyme
+- `page_view` : 1 par **page publique** consultée, **path-only**, avec `from_path` (page interne précédente) pour les parcours. Émis par [`PageViewTracker`](../app/_components/PageViewTracker.tsx) sur changement de route.
+- `page_engagement` : durée passée sur la page quittée (`duration_ms`), via Page Visibility API + `pagehide` + `sendBeacon`. **Approximative** (temps onglet actif) — documentée comme telle, cappée à 1 h.
+- **Pages privées jamais tracées** (mariés/invités/prestataires/admin) : double garde client (`isPublicPath`) + serveur (rejet `from_path` privé) → aucun slug de mariage (donc aucun nom) stocké.
+- Réutilise `analytics_events` (pas de nouvelle table). Aucun fingerprint, aucun contenu, aucune PII.
+
+### Outils instrumentés (P3)
+Fréquentation de **tous** les outils = dérivée gratuitement des `page_view` (par chemin). Profondeur d'usage :
+- `plan-de-table` : `seating_plan_started` / `seating_plan_pdf_downloaded` (déjà là, mappés start/export).
+- `budget` : `tool_export` au téléchargement PDF.
+- `checklist` : `tool_started` (1re case cochée, dédup visiteur) + `tool_export` (PDF).
+- `discours` : `tool_started` (génération) + `tool_export` (PDF).
+- `liste-invites` & `programme` : **pages vitrines statiques** (pas d'outil interactif) → fréquentation via `page_view` uniquement, rien à instrumenter. Documenté, pas d'event fictif.
+
+### Rapports (P1 + P4) — cockpit réorganisé autour de 6 questions métier
+Qui vient · D'où · Que consultent-ils · Restent-ils/naviguent · Quels outils · Qu'est-ce qui fait découvrir l'app.
+- **P1 exploité** : nouveaux vs retour (via historique `visitor_id`), sources + **UTM**, pages d'entrée — rien de perdu.
+- **Tableau de pages dynamique** (toutes pages publiques réellement vues, pas de liste en dur) + **drill-down** (temps, entrées, sortie, pages avant/après).
+- **Parcours** (enchaînements page→page), pages de sortie, pages/session, temps moyen, taux « 1 page ».
+- **Outils** : comparatif visiteurs / démarrés / exportés.
+- **Découverte** : pages vues avant une inscription, conversions par source.
+- Libellés **vulgarisés en français simple** ; distinction faits / tendances / durées approximatives.
+
+### Limites documentées (affichées dans le cockpit)
+- Durées = temps onglet actif → **approximatives** (`beforeunload`/`pagehide` non garantis).
+- Une visite n'est pas une visite « engagée » : le taux « 1 page » et le temps moyen le rappellent.
+- `visitor_id` localStorage : sous-compte si cookies effacés, pas de cross-device.
+- Rien n'est reconstitué avant le déploiement du suivi (pas de donnée historique fabriquée).
+
+### Consentement (vérifié avant P2)
+- Politique §7 : « cookies techniques uniquement, aucun traceur tiers ».
+- **P2 = mesure d'audience interne, anonyme, non recoupée, non partagée** → **exemptée de consentement** (recommandation CNIL, art. 82). **Aucun popup ajouté.** Minimal requis = **informer** : paragraphe ajouté à [la politique de confidentialité](../app/politique-de-confidentialite/page.tsx) (mesure d'audience, conservation ≤ 25 mois).
+- **Signalé, hors périmètre** : GA4 (Google = tiers) tourne sans consentement alors que la politique dit « aucun traceur tiers » → **incohérence préexistante** à corriger séparément (consentement GA4 ou retrait). Non traité ici (consigne : ne pas toucher GA4).

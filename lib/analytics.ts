@@ -9,6 +9,13 @@ import { captureAttribution, getSessionId, getVisitorId, isNewSession } from './
 // ── Noms d'événements autorisés (funnel réel de Kaatch) ──
 export const EVENTS = {
   SESSION_START: 'session_start',
+  // Trafic & comportement (first-party, mesure d'audience anonyme)
+  PAGE_VIEW: 'page_view',            // 1 par page consultée (path-only)
+  PAGE_ENGAGEMENT: 'page_engagement',// durée passée sur la page quittée
+  // Outils gratuits (génériques, prop `tool`)
+  TOOL_VIEWED: 'tool_viewed',
+  TOOL_STARTED: 'tool_started',
+  TOOL_EXPORT: 'tool_export',
   // Plan de table (outil gratuit, sans compte)
   SEATING_VIEWED: 'seating_plan_viewed',
   SEATING_STARTED: 'seating_plan_started',
@@ -35,6 +42,7 @@ const ALLOWED_PROP_KEYS = new Set<string>([
   'guest_count', 'table_count', 'unplaced_count', 'seated_count',
   'remaining_capacity', 'completion_pct', 'cta_location', 'tool_version',
   'feature', 'device', 'bulk', 'from',
+  'from_path', 'duration_ms', 'tool', // trafic/comportement + outils
 ])
 
 // Détection grossière de PII pour refus défensif côté client aussi.
@@ -62,7 +70,7 @@ function pathOnly(): string {
 /**
  * Émet un événement analytics. Non bloquant, silencieux en cas d'erreur.
  */
-export function trackEvent(name: EventName, props?: Record<string, unknown>) {
+export function trackEvent(name: EventName, props?: Record<string, unknown>, opts?: { pagePath?: string }) {
   if (typeof window === 'undefined') return
   if (!ALLOWED_EVENTS.has(name)) return
   const clean = sanitizeProps(props)
@@ -85,7 +93,8 @@ export function trackEvent(name: EventName, props?: Record<string, unknown>) {
       medium: first.medium,
       campaign: first.campaign,
       landing_page: landing,
-      page_path: pathOnly(),
+      // page concernée : override explicite (ex. page quittée sur page_engagement) sinon page courante
+      page_path: opts?.pagePath ?? pathOnly(),
       props: clean,
     })
     const url = '/api/track'
@@ -100,4 +109,22 @@ export function trackEvent(name: EventName, props?: Record<string, unknown>) {
 /** Émet session_start une seule fois par session. */
 export function trackSessionStart() {
   if (isNewSession()) trackEvent(EVENTS.SESSION_START)
+}
+
+/** Page consultée (path-only). `fromPath` = page interne précédente (parcours), '' si entrée. */
+export function trackPageView(fromPath?: string) {
+  trackEvent(EVENTS.PAGE_VIEW, fromPath ? { from_path: fromPath } : undefined)
+}
+
+/** Durée passée sur une page (approx.). `path` = page quittée (explicite car la nav a déjà changé). */
+export function trackEngagement(path: string, durationMs: number) {
+  if (!path || durationMs < 1000) return // on ignore le bruit (< 1 s) et les cas sans durée
+  const capped = Math.min(durationMs, 60 * 60 * 1000) // cap 1 h (onglet laissé ouvert)
+  trackEvent(EVENTS.PAGE_ENGAGEMENT, { duration_ms: Math.round(capped) }, { pagePath: path })
+}
+
+/** Outil gratuit : vue / démarrage / export. `tool` = identifiant stable (ex. 'budget'). */
+export function trackTool(kind: 'viewed' | 'started' | 'export', tool: string, extra?: Record<string, unknown>) {
+  const name = kind === 'viewed' ? EVENTS.TOOL_VIEWED : kind === 'started' ? EVENTS.TOOL_STARTED : EVENTS.TOOL_EXPORT
+  trackEvent(name, { tool, ...extra })
 }

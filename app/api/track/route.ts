@@ -4,11 +4,14 @@
 
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase-service'
+import { isPublicPath } from '@/lib/analytics-cockpit'
 
 export const runtime = 'nodejs'
 
 const ALLOWED_EVENTS = new Set<string>([
   'session_start',
+  'page_view', 'page_engagement',
+  'tool_viewed', 'tool_started', 'tool_export',
   'seating_plan_viewed', 'seating_plan_started', 'guest_added', 'table_created',
   'guest_seated', 'seating_plan_completed', 'seating_plan_pdf_downloaded', 'seating_plan_cta_clicked',
   'signup_started', 'signup_completed', 'wedding_created', 'dashboard_first_view', 'feature_used',
@@ -18,6 +21,7 @@ const ALLOWED_PROP_KEYS = new Set<string>([
   'guest_count', 'table_count', 'unplaced_count', 'seated_count',
   'remaining_capacity', 'completion_pct', 'cta_location', 'tool_version',
   'feature', 'device', 'bulk', 'from',
+  'from_path', 'duration_ms', 'tool',
 ])
 
 const ALLOWED_CHANNELS = new Set<string>([
@@ -68,6 +72,8 @@ function sanitizeProps(raw: unknown): Record<string, string | number | boolean> 
     if (typeof v === 'boolean') { out[k] = v; count++; continue }
     const s = String(v).slice(0, 60)
     if (PII_RE.test(s)) continue
+    // from_path = chemin interne : on refuse tout chemin privé (jamais de slug de mariage).
+    if (k === 'from_path' && !isPublicPath(s)) continue
     out[k] = s; count++
   }
   return out

@@ -109,6 +109,9 @@ export default function PolitiqueConfidentialite() {
           <p className="mt-3">
             Aucun cookie publicitaire ou de traçage tiers n'est utilisé. Aucune donnée n'est transmise à des régies publicitaires.
           </p>
+          <p className="mt-3">
+            Kaatch réalise une <strong>mesure d'audience interne et anonyme</strong> de son site : nombre de visiteurs, pages consultées, origine du trafic et temps de consultation approximatif. Cette mesure est strictement limitée à l'amélioration du service, n'est pas recoupée avec d'autres traitements, n'est pas partagée avec des tiers, ne permet pas de vous identifier (aucun nom, email, téléphone ni contenu privé, pas de « fingerprinting ») et repose sur un identifiant technique anonyme conservé sur votre appareil pour une durée limitée. Conformément aux recommandations de la CNIL, cette mesure d'audience est exemptée de consentement. Les données agrégées sont conservées au maximum 25 mois.
+          </p>
         </Section>
       </div>
     </main>

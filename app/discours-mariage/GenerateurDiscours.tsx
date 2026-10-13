@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect, type FormEvent } from 'react'
 import Link from 'next/link'
 import { assembleDiscours } from '@/lib/discours-templates'
+import { trackTool } from '@/lib/analytics'
 
 const SAGE      = '#4a5240'
 const SAGE_DARK = '#2d3228'
@@ -137,6 +138,7 @@ export default function GenerateurDiscours() {
     setStep('generating')
     setStreamText('')
     setError(null)
+    trackTool('started', 'discours')
 
     if (timerRef.current) clearInterval(timerRef.current)
 
@@ -204,6 +206,7 @@ export default function GenerateurDiscours() {
   }, [editText])
 
   const handlePDF = useCallback(() => {
+    trackTool('export', 'discours')
     const typeLabel = type ? TYPE_LABELS[type] : 'Discours'
     const bodyHtml = editText
       .split(/\n\n+/)

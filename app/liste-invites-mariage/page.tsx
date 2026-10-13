@@ -137,6 +137,17 @@ export default function ListeInvitesPage() {
             ))}
           </div>
 
+          {/* Lien contextuel vers le plan de table */}
+          <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-5 mb-14">
+            <p className="text-stone-500 text-sm leading-relaxed" style={{ fontWeight: 300 }}>
+              Une fois votre liste d&apos;invités finalisée, l&apos;étape suivante est le placement : créez votre{' '}
+              <Link href="/plan-de-table-mariage" className="underline hover:text-[#4a5240] transition" style={{ color: SAGE }}>
+                plan de table mariage gratuit
+              </Link>{' '}
+              par glisser-déposer, puis exportez-le en PDF pour votre traiteur.
+            </p>
+          </div>
+
           {/* FAQ */}
           <div className="mb-12">
             <h2

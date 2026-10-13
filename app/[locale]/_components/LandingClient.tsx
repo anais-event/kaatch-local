@@ -77,7 +77,7 @@ export default function LandingClient() {
         </div>
 
         <h1 style={{ fontWeight: 800, fontSize: 'clamp(2.6rem, 5.8vw, 4.8rem)', lineHeight: 1.08, color: SAGE_DARK, marginBottom: '1.8rem', maxWidth: '44rem', animation: 'fadeUp 0.6s ease both 0.15s', letterSpacing: '-0.02em' }}>
-          Toute l&apos;organisation de votre mariage au même endroit.
+          Toute l&apos;organisation de votre mariage.
         </h1>
 
         <p style={{ fontSize: '1.05rem', fontWeight: 300, lineHeight: 1.7, color: TEXT_MID, maxWidth: '38rem', marginBottom: '1rem', animation: 'fadeUp 0.6s ease both 0.3s' }}>

@@ -127,7 +127,7 @@ export default function Home() {
           animation: 'fadeUp 0.6s ease both 0.15s',
           letterSpacing: '-0.02em',
         }}>
-          Toute l&apos;organisation de votre mariage au même endroit.
+          Toute l&apos;organisation de votre mariage.
         </h1>
 
         <p style={{

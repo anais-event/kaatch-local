@@ -8,6 +8,12 @@ import messages from '@/messages/fr.json'
 
 export const revalidate = 3600
 
+// /blog et /inspirations partagent le même contenu (getAllInspirations).
+// /inspirations est la page de référence (présente dans le sitemap) → on la désigne comme canonique.
+export const metadata = {
+  alternates: { canonical: 'https://kaatch.fr/inspirations' },
+}
+
 const DISPLAY = 'var(--font-display)'
 const GREEN = '#2C3B2E'
 const CREAM = '#f5f0e8'

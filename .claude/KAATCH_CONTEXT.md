@@ -209,6 +209,16 @@ await Promise.all(photos.map(async (p, i) => {
 - **Apostrophes dans strings JS** : `'d'invités'` casse Turbopack → utiliser des doubles guillemets `"d'invités"`
 - **SUPABASE_SERVICE_ROLE_KEY** : pas défini en prod Vercel → toujours prévoir un fallback vers `createSupabaseServerClient()`
 - **Canvas `letterSpacing`** : non standard sur tous les contextes canvas — utiliser avec prudence
+- **Domaine primaire = apex `kaatch.fr`** (depuis 20/10/2026) : Vercel sert l'apex (200), `www.kaatch.fr` → 308 → apex. Tout le code (metadataBase, canonical, sitemap) DOIT rester en `https://kaatch.fr` sans www. Ne jamais réintroduire www comme primaire → casserait les canonical et créerait des doublons GSC.
+- **middleware matcher + pages FR-only** : toute page listée dans `middleware.ts` `config.matcher` DOIT avoir un jumeau `app/[locale]/<page>` (sinon next-intl réécrit vers `/fr/<page>` inexistante → 404). Une page FR-only (ex `/guide`) ne va PAS dans le matcher — Next la sert directement depuis `app/<page>/page.tsx`. Bug historique : `/guide` était dans le matcher sans jumeau → 404 (corrigé PR #15).
+
+## SEO & Indexation (Google Search Console)
+- Propriété GSC : `sc-domain:kaatch.fr` (compte groupe.cogitium@gmail.com).
+- **Sitemap dynamique** : `app/sitemap.ts` (PAS `public/sitemap.xml`, inexistant). Locales alternates fr/en/es/it/de. `robots.txt` (`public/robots.txt`) Disallow les zones privées (`/i/`, `/p/`, `/rsvp/`, `/invite/`, `/mariage/`, `/prestataire/`, etc.).
+- **Canonical** : pages racine + `[locale]` pointent toutes vers l'URL apex. `/blog` ≈ `/inspirations` (même `getAllInspirations()`) → `/blog` a un `canonical` vers `/inspirations` (page de référence, dans le sitemap).
+- **noindex** : layouts privés (admin, auth, dashboard, invite, mariage, rsvp, vendor, rejoindre) + `app/design-preview/page.tsx` (page de dev).
+- Motifs "non indexées" normaux/intentionnels : redirections (`/login→/auth`, `/wedding→/mariage`), noindex privés, `/prestataire/` Disallow.
+- Après un fix d'indexation : GSC → Indexation → Pages → cliquer le motif → **Valider la correction** (recrawl prioritaire). Ne valider QUE les motifs réellement corrigés (pas les redirects/noindex intentionnels).
 
 ## Workflow de déploiement
 ```bash

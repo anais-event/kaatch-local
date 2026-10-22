@@ -14,22 +14,35 @@ function localeAlternates(path: string, baseUrl: string) {
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://kaatch.fr"
-  const now = new Date()
+
+  // getAllInspirations() lit dynamiquement content/inspirations/*.mdx
+  const inspirations = getAllInspirations()
+
+  // lastmod stable des articles : date du plus récent article publié.
+  // On n'utilise JAMAIS `new Date()` (= timestamp du build) pour lastmod :
+  // un lastmod qui change à chaque déploiement est ignoré par Google.
+  const latestPostDate = inspirations.reduce<Date>((max, item) => {
+    const d = new Date(item.date)
+    return d > max ? d : max
+  }, new Date("2026-05-01"))
+
+  // Stamp manuel des pages outils/landing : à bumper quand leur contenu change réellement.
+  const SITE_UPDATED = new Date("2026-10-22")
 
   const mainPages: MetadataRoute.Sitemap = [
-    { url: baseUrl,                              alternates: localeAlternates("/", baseUrl),              lastModified: now,                    changeFrequency: "weekly",  priority: 1.0 },
+    { url: baseUrl,                              alternates: localeAlternates("/", baseUrl),              lastModified: SITE_UPDATED,           changeFrequency: "weekly",  priority: 1.0 },
     { url: `${baseUrl}/pricing`,                 alternates: localeAlternates("/pricing", baseUrl),       lastModified: new Date("2026-05-01"), changeFrequency: "monthly", priority: 0.8 },
     { url: `${baseUrl}/guide`,                   lastModified: new Date("2026-05-01"), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${baseUrl}/faq`,                     lastModified: now,                    changeFrequency: "monthly", priority: 0.8 },
+    { url: `${baseUrl}/faq`,                     lastModified: SITE_UPDATED,           changeFrequency: "monthly", priority: 0.8 },
     { url: `${baseUrl}/budget-mariage`,          alternates: localeAlternates("/budget-mariage", baseUrl),          lastModified: new Date("2026-05-01"), changeFrequency: "monthly", priority: 0.9 },
-    { url: `${baseUrl}/checklist-mariage`,       alternates: localeAlternates("/checklist-mariage", baseUrl),       lastModified: now,                    changeFrequency: "monthly", priority: 0.9 },
-    { url: `${baseUrl}/plan-de-table-mariage`,   alternates: localeAlternates("/plan-de-table-mariage", baseUrl),   lastModified: now,                    changeFrequency: "monthly", priority: 0.9 },
-    { url: `${baseUrl}/discours-mariage`,        alternates: localeAlternates("/discours-mariage", baseUrl),        lastModified: now,                    changeFrequency: "monthly", priority: 0.9 },
-    { url: `${baseUrl}/outils`,                  alternates: localeAlternates("/outils", baseUrl),                  lastModified: now,                    changeFrequency: "monthly", priority: 0.8 },
-    { url: `${baseUrl}/liste-invites-mariage`,   alternates: localeAlternates("/liste-invites-mariage", baseUrl),   lastModified: now,                    changeFrequency: "monthly", priority: 0.8 },
-    { url: `${baseUrl}/programme-mariage`,       alternates: localeAlternates("/programme-mariage", baseUrl),       lastModified: now,                    changeFrequency: "monthly", priority: 0.8 },
+    { url: `${baseUrl}/checklist-mariage`,       alternates: localeAlternates("/checklist-mariage", baseUrl),       lastModified: SITE_UPDATED,           changeFrequency: "monthly", priority: 0.9 },
+    { url: `${baseUrl}/plan-de-table-mariage`,   alternates: localeAlternates("/plan-de-table-mariage", baseUrl),   lastModified: SITE_UPDATED,           changeFrequency: "monthly", priority: 0.9 },
+    { url: `${baseUrl}/discours-mariage`,        alternates: localeAlternates("/discours-mariage", baseUrl),        lastModified: SITE_UPDATED,           changeFrequency: "monthly", priority: 0.9 },
+    { url: `${baseUrl}/outils`,                  alternates: localeAlternates("/outils", baseUrl),                  lastModified: SITE_UPDATED,           changeFrequency: "monthly", priority: 0.8 },
+    { url: `${baseUrl}/liste-invites-mariage`,   alternates: localeAlternates("/liste-invites-mariage", baseUrl),   lastModified: SITE_UPDATED,           changeFrequency: "monthly", priority: 0.8 },
+    { url: `${baseUrl}/programme-mariage`,       alternates: localeAlternates("/programme-mariage", baseUrl),       lastModified: SITE_UPDATED,           changeFrequency: "monthly", priority: 0.8 },
     { url: `${baseUrl}/studio`,                  alternates: localeAlternates("/studio", baseUrl),                  lastModified: new Date("2026-05-01"), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${baseUrl}/inspirations`,            lastModified: now,                    changeFrequency: "weekly",  priority: 0.8 },
+    { url: `${baseUrl}/inspirations`,            lastModified: latestPostDate,         changeFrequency: "weekly",  priority: 0.8 },
     { url: `${baseUrl}/entre-nous`,              lastModified: new Date("2026-05-01"), changeFrequency: "weekly",  priority: 0.5 },
     { url: `${baseUrl}/mentions-legales`,        lastModified: new Date("2025-01-01"), changeFrequency: "yearly",  priority: 0.1 },
     { url: `${baseUrl}/cgv`,                     lastModified: new Date("2025-01-01"), changeFrequency: "yearly",  priority: 0.1 },
@@ -52,8 +65,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.9,
   }))
 
-  // getAllInspirations() lit dynamiquement content/inspirations/*.mdx — inclut tous les articles automatiquement
-  const blogPosts: MetadataRoute.Sitemap = getAllInspirations().map((item) => ({
+  const blogPosts: MetadataRoute.Sitemap = inspirations.map((item) => ({
     url: `${baseUrl}/inspirations/${item.slug}`,
     lastModified: new Date(item.date),
     changeFrequency: "monthly" as const,

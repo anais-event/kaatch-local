@@ -58,6 +58,9 @@ export const metadata: Metadata = {
     title: "Kaatch — Organiser son mariage en ligne",
     description: "Invitations personnalisées, RSVP, plan de table, album photo partagé. Essai gratuit.",
   },
+  other: {
+    "p:domain_verify": "06b5411ce8fda7d761cf30157378a0aa", // Vérification du site Pinterest
+  },
 };
 
 export default async function RootLayout({

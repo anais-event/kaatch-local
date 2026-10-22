@@ -1,9 +1,7 @@
 ﻿import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { createClient } from '@supabase/supabase-js'
-import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
-
-const ADMIN_EMAIL = 'anais@kaatch.fr'
+import { isAdmin, requireAdmin } from '@/lib/admin'
 
 function adminClient() {
   return createClient(
@@ -16,7 +14,7 @@ async function createCode(formData: FormData) {
   'use server'
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (user?.email !== ADMIN_EMAIL) return
+  if (!user || !(await isAdmin(user.id))) return
 
   const code = (formData.get('code') as string).trim().toUpperCase()
   const maxUsesRaw = formData.get('max_uses') as string
@@ -31,7 +29,7 @@ async function deleteCode(formData: FormData) {
   'use server'
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (user?.email !== ADMIN_EMAIL) return
+  if (!user || !(await isAdmin(user.id))) return
 
   const id = formData.get('id') as string
   await adminClient().from('promo_codes').delete().eq('id', id)
@@ -42,7 +40,7 @@ async function toggleCode(formData: FormData) {
   'use server'
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (user?.email !== ADMIN_EMAIL) return
+  if (!user || !(await isAdmin(user.id))) return
 
   const id = formData.get('id') as string
   const active = formData.get('active') === 'true'
@@ -54,7 +52,7 @@ async function setPlan(formData: FormData) {
   'use server'
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (user?.email !== ADMIN_EMAIL) return
+  if (!user || !(await isAdmin(user.id))) return
 
   const weddingId = formData.get('wedding_id') as string
   const plan = formData.get('plan') as string | null
@@ -63,10 +61,7 @@ async function setPlan(formData: FormData) {
 }
 
 export default async function AdminPage() {
-  const supabase = await createSupabaseServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (user?.email !== ADMIN_EMAIL) redirect('/auth')
+  await requireAdmin()
 
   const admin = adminClient()
 
@@ -163,11 +158,18 @@ export default async function AdminPage() {
             Dashboard administrateur
           </h1>
         </div>
-        <a href="/dashboard"
-           className="text-white/50 text-xs hover:text-white transition"
-           style={{ fontWeight: 300 }}>
-          ← Mon espace
-        </a>
+        <div className="flex items-center gap-3">
+          <a href="/admin/analytics"
+             className="text-white text-xs border border-white/25 px-3 py-1.5 rounded-lg hover:bg-white/10 transition"
+             style={{ fontWeight: 400 }}>
+            📊 Analytics
+          </a>
+          <a href="/dashboard"
+             className="text-white/50 text-xs hover:text-white transition"
+             style={{ fontWeight: 300 }}>
+            ← Mon espace
+          </a>
+        </div>
       </div>
 
       <div className="max-w-5xl mx-auto px-6 py-8">

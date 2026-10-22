@@ -2,7 +2,10 @@ import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+function getResend(): Resend | null {
+  const key = process.env.RESEND_API_KEY
+  return key ? new Resend(key) : null
+}
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://kaatch.fr'
 
 function generateToken() {
@@ -165,6 +168,9 @@ export async function POST(req: Request) {
 
   // Envoi email
   const results = { sent: 0, skipped: 0, errors: [] as string[] }
+
+  const resend = getResend()
+  if (!resend) return NextResponse.json({ error: 'Service email non configuré' }, { status: 503 })
 
   for (const guest of guests) {
     if (!guest.email) { results.skipped++; continue }

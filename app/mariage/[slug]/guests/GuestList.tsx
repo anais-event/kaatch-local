@@ -343,7 +343,7 @@ export default function GuestList({
             <div onClick={e => e.stopPropagation()} className="shrink-0">
               <CopyLinkButton url={link} guestName={fullName} gender={guest.gender}
                 slug={slug} wedding={wedding} guestId={guest.id} paid={paid} weddingId={resolvedWeddingId}
-                theme={wedding.fairePartTheme} />
+                theme={wedding.fairePartTheme} telephone={guest.telephone} />
             </div>
           )}
           <button onClick={() => { setExpandedId(isExpanded ? null : guest.id); setEditingId(null) }} className="shrink-0 cursor-pointer">

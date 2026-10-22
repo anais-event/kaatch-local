@@ -1,7 +1,7 @@
-import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { getGuestSession } from '@/lib/guest-session'
 import AuthIntlProvider from '@/app/_components/AuthIntlProvider'
 import GuestNav from './GuestNav'
 import BottomNavGuest from './BottomNavGuest'
@@ -16,9 +16,9 @@ export default async function InviteLayout({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const cookieStore = await cookies()
-  const guestCookie = cookieStore.get(`guest_${slug}`)
-  const isPreview = !guestCookie
+  // Session invité vérifiée (cookie signé). Un cookie forgé/non signé => session nulle.
+  const guestSession = await getGuestSession(slug)
+  const isPreview = !guestSession
 
   const supabase = await createSupabaseServerClient()
 
@@ -86,3 +86,6 @@ export default async function InviteLayout({
     </AuthIntlProvider>
   )
 }
+
+// Pages privées : jamais indexées (données personnelles du mariage)
+export const metadata = { robots: { index: false, follow: false } }

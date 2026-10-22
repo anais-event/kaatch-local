@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
+import { trackTool } from '@/lib/analytics'
 
 const SAGE = '#4a5240'
 const SAGE_DARK = '#2d3228'
@@ -262,6 +263,7 @@ export default function ChecklistMariage() {
   }, [checked, mounted])
 
   const toggle = useCallback((id: string) => {
+    trackTool('started', 'checklist') // dédupliqué par visiteur côté cockpit
     setChecked(prev => {
       const next = new Set(prev)
       if (next.has(id)) next.delete(id)
@@ -324,6 +326,7 @@ export default function ChecklistMariage() {
       doc.text('Genere par Kaatch - kaatch.fr/checklist-mariage', 20, 287)
 
       doc.save('checklist-mariage-kaatch.pdf')
+      trackTool('export', 'checklist', { completion_pct: pct })
       if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
         window.gtag('event', 'pdf_download', { tool: 'checklist', progression: pct, checked: checked.size })
       }

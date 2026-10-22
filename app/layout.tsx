@@ -3,6 +3,8 @@ import { Outfit, Cormorant_Garamond, Plus_Jakarta_Sans, Instrument_Serif } from 
 import "./globals.css";
 import { Analytics } from '@vercel/analytics/next';
 import { GoogleAnalytics } from '@next/third-parties/google';
+import AnalyticsInit from './_components/AnalyticsInit';
+import PageViewTracker from './_components/PageViewTracker';
 import { getLocale } from 'next-intl/server';
 
 const outfit = Outfit({
@@ -36,6 +38,7 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://kaatch.fr"),
   title: "Kaatch — Organiser son mariage en ligne | RSVP, Plan de table, Album photo",
   description: "Invitations personnalisées, gestion des RSVP, plan de table drag & drop, album photo partagé entre tous les invités. Votre mariage, tout au même endroit. Essai gratuit.",
   keywords: "organisation mariage, application mariage, RSVP mariage en ligne, plan de table mariage, album photo mariage partagé, faire-part numérique, gestion invités mariage",
@@ -73,6 +76,8 @@ export default async function RootLayout({
       <head />
       <body className="min-h-full flex flex-col">
         {children}
+        <AnalyticsInit />
+        <PageViewTracker />
         <Analytics />
       </body>
       <GoogleAnalytics gaId="G-JZGV5T58NL" />

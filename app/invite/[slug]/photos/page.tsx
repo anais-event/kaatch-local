@@ -1,5 +1,5 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
-import { cookies } from 'next/headers'
+import { getGuestSession } from '@/lib/guest-session'
 import { revalidatePath } from 'next/cache'
 import { getTranslations } from 'next-intl/server'
 import GuestPhotoFeed from './GuestPhotoFeed'
@@ -111,10 +111,7 @@ async function uploadPhoto(formData: FormData) {
 
 export default async function GuestPhotosPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const cookieStore = await cookies()
-  const guestCookie = cookieStore.get(`guest_${slug}`)
-
-  const guest = guestCookie ? JSON.parse(guestCookie.value) : { firstName: "", lastName: "", id: null }
+  const guest = (await getGuestSession(slug)) ?? { firstName: "", lastName: "", id: null }
   const guestName = [guest.firstName, guest.lastName].filter(v => v && v !== 'null').join(' ')
 
   const supabase = await createSupabaseServerClient()

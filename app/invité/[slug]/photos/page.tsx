@@ -1,5 +1,5 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
-import { cookies } from 'next/headers'
+import { getGuestSession } from '@/lib/guest-session'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import GuestPhotoFeed from './GuestPhotoFeed'
@@ -64,11 +64,9 @@ async function uploadPhoto(formData: FormData) {
 
 export default async function GuestPhotosPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const cookieStore = await cookies()
-  const guestCookie = cookieStore.get(`guest_${slug}`)
-  if (!guestCookie) redirect(`/invité/${slug}`)
+  const guest = await getGuestSession(slug)
+  if (!guest) redirect(`/invité/${slug}`)
 
-  const guest = JSON.parse(guestCookie.value)
   const guestName = `${guest.firstName} ${guest.lastName}`
 
   const supabase = await createSupabaseServerClient()

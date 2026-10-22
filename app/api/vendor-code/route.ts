@@ -1,4 +1,5 @@
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createServiceClient } from '@/lib/supabase-service'
+import { buildSessionCookies } from '@/lib/guest-session'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -9,7 +10,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Code invalide" }, { status: 400 })
   }
 
-  const supabase = await createSupabaseServerClient()
+  // Validation du vendor_code via service_role (le code est l'autorisation).
+  const supabase = createServiceClient()
 
   const { data: vendor } = await supabase
     .from('wedding_vendors')
@@ -27,13 +29,16 @@ export async function POST(req: Request) {
 
   const slug = (vendor.weddings as unknown as { slug: string }).slug
 
+  // Cookie de session prestataire SIGNÉ (donc infalsifiable) : permissions incluses.
   const cookieStore = await cookies()
-  cookieStore.set(`vendor_${slug}`, JSON.stringify({
+  for (const c of buildSessionCookies('vendor', slug, {
     id: vendor.id,
     name: vendor.name,
     category: vendor.category,
     permissions: vendor.permissions ?? {},
-  }), { maxAge: 60 * 60 * 24 * 90, path: '/' })
+  }, 60 * 60 * 24 * 90)) {
+    cookieStore.set(c.name, c.value, c.options)
+  }
 
   return NextResponse.json({ redirect: `/vendor/${slug}` })
 }

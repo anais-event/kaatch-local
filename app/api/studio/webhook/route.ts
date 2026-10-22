@@ -8,7 +8,10 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
-const resend = new Resend(process.env.RESEND_API_KEY)
+function getResend(): Resend | null {
+  const key = process.env.RESEND_API_KEY
+  return key ? new Resend(key) : null
+}
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://kaatch.fr'
 
@@ -60,7 +63,8 @@ export async function POST(req: NextRequest) {
   const customerEmail = session.customer_details?.email
   const customerName = session.customer_details?.name ?? ''
 
-  if (customerEmail) {
+  const resend = getResend()
+  if (customerEmail && resend) {
     await resend.emails.send({
       from: 'Kaatch Studio <bonjour@kaatch.fr>',
       to: customerEmail,

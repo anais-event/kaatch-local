@@ -1,6 +1,6 @@
-import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { getVendorSession } from '@/lib/guest-session'
 import VendorNav from './VendorNav'
 import { isPaid } from '@/lib/plan'
 
@@ -12,14 +12,13 @@ export default async function VendorLayout({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const cookieStore = await cookies()
-  const vendorCookie = cookieStore.get(`vendor_${slug}`)
+  // Session prestataire vérifiée (cookie signé). Cookie forgé/non signé => null.
+  const vendorData = await getVendorSession(slug)
 
-  if (!vendorCookie) {
+  if (!vendorData) {
     redirect('/')
   }
 
-  const vendorData = JSON.parse(vendorCookie.value)
   const supabase = await createSupabaseServerClient()
 
   // Always fetch fresh permissions from DB (cookie may be stale)
@@ -59,10 +58,13 @@ export default async function VendorLayout({
 
   return (
     <>
-      <VendorNav slug={slug} vendorName={vendor.name} vendorCategory={vendor.category} />
+      <VendorNav slug={slug} vendorName={vendor.name ?? ''} vendorCategory={vendor.category ?? ''} />
       <div className="pt-12 md:pt-0 md:ml-56 pb-8">
         {children}
       </div>
     </>
   )
 }
+
+// Pages privées : jamais indexées (données personnelles du mariage)
+export const metadata = { robots: { index: false, follow: false } }

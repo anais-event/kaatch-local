@@ -1,4 +1,6 @@
-﻿export default function DesignPreview() {
+﻿export const metadata = { robots: { index: false, follow: false } }
+
+export default function DesignPreview() {
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <h1 className="text-2xl font-bold text-center mb-2">Vert Olive — Choix de typographie</h1>

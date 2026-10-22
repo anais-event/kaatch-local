@@ -1,7 +1,10 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
+import { trackEvent, EVENTS } from '@/lib/analytics'
+
+const TOOL_VERSION = 'pdtm-v1'
 
 const SAGE = '#4a5240'
 const SAGE_DARK = '#2d3228'
@@ -26,6 +29,8 @@ function uid(): string {
 }
 
 const STORAGE_KEY = 'kaatch-pdtm-v1'
+// Les données expirent après 24 h d'inactivité (pas de données fantômes au long cours).
+const STORAGE_TTL_MS = 24 * 60 * 60 * 1000
 
 const DEFAULT_TABLES: WeddingTable[] = [
   { id: 't1', name: 'Table 1', capacity: 8, shape: 'round' },
@@ -68,21 +73,54 @@ export default function PlanDeTable() {
   const [editingTableName, setEditingTableName] = useState('')
   const [ctaDismissed, setCtaDismissed] = useState(false)
 
+  const startedRef = useRef(false)
+  const completedRef = useRef(false)
+
+  // Émet seating_plan_started une seule fois, à la 1re interaction réelle.
+  const markStarted = useCallback(() => {
+    if (startedRef.current) return
+    startedRef.current = true
+    trackEvent(EVENTS.SEATING_STARTED, { tool_version: TOOL_VERSION })
+  }, [])
+
   useEffect(() => {
     setMounted(true)
     try {
       const raw = localStorage.getItem(STORAGE_KEY)
       if (raw) {
-        const saved = JSON.parse(raw) as { guests?: Guest[]; tables?: WeddingTable[] }
-        if (saved.guests) setGuests(saved.guests)
-        if (saved.tables?.length) setTables(saved.tables)
+        const saved = JSON.parse(raw) as { guests?: Guest[]; tables?: WeddingTable[]; savedAt?: number }
+        const expired = !saved.savedAt || (Date.now() - saved.savedAt) > STORAGE_TTL_MS
+        if (expired) {
+          localStorage.removeItem(STORAGE_KEY)
+        } else {
+          if (saved.guests) setGuests(saved.guests)
+          if (saved.tables?.length) setTables(saved.tables)
+        }
       }
     } catch {}
+    trackEvent(EVENTS.SEATING_VIEWED, { tool_version: TOOL_VERSION })
   }, [])
 
   useEffect(() => {
     if (!mounted) return
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ guests, tables })) } catch {}
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ guests, tables, savedAt: Date.now() })) } catch {}
+  }, [guests, tables, mounted])
+
+  // Plan complet : tous les invités placés (et au moins ~1 table pleine de sens).
+  useEffect(() => {
+    if (!mounted) return
+    const unplaced = guests.filter(g => g.tableId === null).length
+    const complete = guests.length >= 2 && unplaced === 0
+    if (complete && !completedRef.current) {
+      completedRef.current = true
+      trackEvent(EVENTS.SEATING_COMPLETED, {
+        guest_count: guests.length,
+        table_count: tables.length,
+        tool_version: TOOL_VERSION,
+      })
+    } else if (!complete) {
+      completedRef.current = false
+    }
   }, [guests, tables, mounted])
 
   const unassigned = guests.filter(g => g.tableId === null)
@@ -93,10 +131,13 @@ export default function PlanDeTable() {
   const addGuests = useCallback(() => {
     const names = guestInput.split('\n').map(s => s.trim()).filter(Boolean)
     if (!names.length) return
+    markStarted()
     setGuests(prev => [...prev, ...names.map(name => ({ id: uid(), name, tableId: null }))])
+    // On ne transmet QUE le nombre, jamais les noms (PII).
+    trackEvent(EVENTS.GUEST_ADDED, { guest_count: names.length, bulk: bulkMode, tool_version: TOOL_VERSION })
     setGuestInput('')
     setBulkMode(false)
-  }, [guestInput])
+  }, [guestInput, bulkMode, markStarted])
 
   const removeGuest = useCallback((id: string) => {
     setGuests(prev => prev.filter(g => g.id !== id))
@@ -108,24 +149,26 @@ export default function PlanDeTable() {
   }, [])
 
   const assignGuest = useCallback((guestId: string, tableId: string) => {
-    setGuests(prev => {
-      const table = tables.find(t => t.id === tableId)
-      if (!table) return prev
-      const seated = prev.filter(g => g.tableId === tableId && g.id !== guestId).length
-      if (seated >= table.capacity) return prev
-      return prev.map(g => g.id === guestId ? { ...g, tableId } : g)
-    })
+    const table = tables.find(t => t.id === tableId)
+    if (!table) return
+    const seatedNow = guests.filter(g => g.tableId === tableId && g.id !== guestId).length
+    if (seatedNow >= table.capacity) return
+    const already = guests.find(g => g.id === guestId)?.tableId === tableId
+    setGuests(prev => prev.map(g => g.id === guestId ? { ...g, tableId } : g))
     setSelectedGuest(null)
-  }, [tables])
+    if (!already) trackEvent(EVENTS.GUEST_SEATED, { tool_version: TOOL_VERSION })
+  }, [tables, guests])
 
   const addTable = useCallback(() => {
+    markStarted()
     const name = newTableName.trim() || `Table ${tables.length + 1}`
     setTables(prev => [...prev, { id: uid(), name, capacity: newTableCap, shape: newTableShape }])
+    trackEvent(EVENTS.TABLE_CREATED, { table_count: tables.length + 1, tool_version: TOOL_VERSION })
     setNewTableName('')
     setNewTableCap(8)
     setNewTableShape('round')
     setAddTableOpen(false)
-  }, [newTableName, newTableCap, newTableShape, tables.length])
+  }, [newTableName, newTableCap, newTableShape, tables.length, markStarted])
 
   const deleteTable = useCallback((tableId: string) => {
     setGuests(prev => prev.map(g => g.tableId === tableId ? { ...g, tableId: null } : g))
@@ -209,9 +252,12 @@ export default function PlanDeTable() {
       doc.setFontSize(8); doc.setTextColor(180, 180, 180)
       doc.text('Genere par Kaatch - kaatch.fr/plan-de-table-mariage', 20, 287)
       doc.save('plan-de-table-mariage-kaatch.pdf')
-      if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
-        window.gtag('event', 'pdf_download', { tool: 'plan-de-table', guests: guests.length })
-      }
+      trackEvent(EVENTS.SEATING_PDF, {
+        guest_count: guests.length,
+        table_count: tables.length,
+        seated_count: totalSeated,
+        tool_version: TOOL_VERSION,
+      })
     } catch (e) { console.error(e) }
   }, [guests, tables, totalSeated, unassigned])
 
@@ -229,7 +275,7 @@ export default function PlanDeTable() {
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
               <h1 className="text-[#2C3B2E] mb-2" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', lineHeight: 1.1, letterSpacing: '-0.02em' }}>
-                Plan de table
+                Plan de table mariage
               </h1>
               <p className="text-stone-500 text-base max-w-xl leading-relaxed" style={{ fontWeight: 300 }}>
                 Ajoutez vos invités, créez vos tables, glissez-déposez pour placer chacun.
@@ -323,7 +369,7 @@ export default function PlanDeTable() {
               </p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <Link href="/auth" className="px-3 py-1.5 bg-white rounded-lg text-xs font-medium hover:bg-stone-100 transition whitespace-nowrap" style={{ color: SAGE_DARK }}>
+              <Link href="/auth" onClick={() => trackEvent(EVENTS.SEATING_CTA, { cta_location: 'banner', guest_count: guests.length, tool_version: TOOL_VERSION })} className="px-3 py-1.5 bg-white rounded-lg text-xs font-medium hover:bg-stone-100 transition whitespace-nowrap" style={{ color: SAGE_DARK }}>
                 Essayer →
               </Link>
               <button onClick={() => setCtaDismissed(true)} className="text-stone-400 hover:text-white text-xl leading-none transition" aria-label="Fermer">×</button>
@@ -747,6 +793,7 @@ export default function PlanDeTable() {
           </p>
           <Link
             href="/auth"
+            onClick={() => trackEvent(EVENTS.SEATING_CTA, { cta_location: 'bottom', guest_count: guests.length, tool_version: TOOL_VERSION })}
             className="inline-block px-6 py-3 bg-white rounded-xl text-sm font-medium hover:bg-stone-100 transition"
             style={{ color: SAGE_DARK }}
           >

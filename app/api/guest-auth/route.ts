@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { buildSessionCookies } from '@/lib/guest-session'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -35,17 +36,15 @@ export async function POST(req: Request) {
     })
   }
 
-  // Poser un cookie avec l'identité de l'invité
+  // Cookie de session signé (payload + signature HMAC)
   const cookieStore = await cookies()
-  cookieStore.set(`guest_${weddingSlug}`, JSON.stringify({
+  for (const c of buildSessionCookies('guest', weddingSlug, {
     id: found.id,
     firstName: found.first_name,
     lastName: found.last_name,
-  }), {
-    httpOnly: true,
-    maxAge: 60 * 60 * 24 * 7, // 7 jours
-    path: '/',
-  })
+  }, 60 * 60 * 24 * 7)) {
+    cookieStore.set(c.name, c.value, c.options)
+  }
 
   return NextResponse.json({ ok: true })
 }

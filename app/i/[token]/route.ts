@@ -1,5 +1,5 @@
-import { createSupabaseServerClient } from '@/lib/supabase-server'
-import { createClient } from '@supabase/supabase-js'
+import { createServiceClient } from '@/lib/supabase-service'
+import { buildSessionCookies } from '@/lib/guest-session'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -9,10 +9,8 @@ export async function GET(
 ) {
   const { token } = await params
 
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-  const supabase = serviceKey
-    ? createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceKey)
-    : await createSupabaseServerClient()
+  // Validation du token côté serveur via service_role (le token est l'autorisation).
+  const supabase = createServiceClient()
 
   const { data: guest } = await supabase
     .from('guests')
@@ -26,13 +24,15 @@ export async function GET(
 
   const slug = (guest.weddings as unknown as { slug: string }).slug
 
-  // Écriture cookie — autorisée dans une Route Handler
+  // Cookie de session signé (payload + signature HMAC) — Route Handler
   const cookieStore = await cookies()
-  cookieStore.set(`guest_${slug}`, JSON.stringify({
+  for (const c of buildSessionCookies('guest', slug, {
+    id: guest.id,
     firstName: guest.first_name,
     lastName: guest.last_name ?? '',
-    id: guest.id,
-  }), { maxAge: 60 * 60 * 24 * 90, path: '/' })
+  }, 60 * 60 * 24 * 90)) {
+    cookieStore.set(c.name, c.value, c.options)
+  }
 
   // Marquer l'invitation comme ouverte
   try {

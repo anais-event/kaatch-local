@@ -105,8 +105,9 @@ export default function PublicNav({ active }: { active?: string }) {
             </button>
 
             {dropOpen && (
+              <div className="absolute top-full left-1/2 -translate-x-1/2 pt-1.5 w-[460px]">
               <div
-                className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 w-[460px] bg-white rounded-2xl border border-stone-100 p-3"
+                className="bg-white rounded-2xl border border-stone-100 p-3"
                 style={{ boxShadow: '0 8px 32px rgba(44,59,46,0.12), 0 2px 8px rgba(44,59,46,0.06)' }}
               >
                 <div className="grid grid-cols-2 gap-1">
@@ -135,6 +136,7 @@ export default function PublicNav({ active }: { active?: string }) {
                     Voir comment ça marche →
                   </Link>
                 </div>
+              </div>
               </div>
             )}
           </div>
@@ -165,8 +167,9 @@ export default function PublicNav({ active }: { active?: string }) {
             </button>
 
             {toolsOpen && (
+              <div className="absolute top-full left-1/2 -translate-x-1/2 pt-1.5 w-[300px]">
               <div
-                className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 w-[300px] bg-white rounded-2xl border border-stone-100 p-3"
+                className="bg-white rounded-2xl border border-stone-100 p-3"
                 style={{ boxShadow: '0 8px 32px rgba(44,59,46,0.12), 0 2px 8px rgba(44,59,46,0.06)' }}
               >
                 <div className="space-y-1 mb-2">
@@ -198,6 +201,7 @@ export default function PublicNav({ active }: { active?: string }) {
                     ))}
                   </div>
                 </div>
+              </div>
               </div>
             )}
           </div>

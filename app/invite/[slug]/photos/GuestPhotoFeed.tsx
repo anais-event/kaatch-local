@@ -16,6 +16,13 @@ function cleanName(name: string | null | undefined): string {
   return name.split(' ').filter(p => p && p !== 'null').join(' ')
 }
 
+const VIDEO_EXT = ['mp4', 'mov', 'webm', 'm4v', 'ogg', 'ogv', 'avi', 'mkv']
+function isVideo(url: string): boolean {
+  const clean = url.split('?')[0].toLowerCase()
+  const ext = clean.split('.').pop() ?? ''
+  return VIDEO_EXT.includes(ext)
+}
+
 function formatDateShort(d: string, locale: string) {
   return new Date(d).toLocaleDateString(toDateLocale(locale), { day: 'numeric', month: 'short' })
 }
@@ -38,12 +45,13 @@ async function downloadZip(photos: Photo[]) {
   await Promise.all(photos.map(async (p, i) => {
     try {
       const blob = await fetch(p.url).then(r => r.blob())
-      zip.file(`photo-${i + 1}.jpg`, blob)
+      const ext = isVideo(p.url) ? (p.url.split('?')[0].split('.').pop() || 'mp4') : 'jpg'
+      zip.file(`${isVideo(p.url) ? 'video' : 'photo'}-${i + 1}.${ext}`, blob)
     } catch {}
   }))
   const a = document.createElement('a')
   a.href = URL.createObjectURL(await zip.generateAsync({ type: 'blob' }))
-  a.download = 'photos-mariage.zip'; a.click()
+  a.download = 'souvenirs-mariage.zip'; a.click()
 }
 
 const emptyItem = (): FileItem => ({ moment: '', tagged: [], tagInput: '', tagSuggestions: [] })
@@ -58,6 +66,7 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
 }) {
   const locale = useLocale()
   const [search, setSearch] = useState('')
+  const [activeFilter, setActiveFilter] = useState<string>('all') // 'all' | '__tagged__' | '__videos__' | moment
   const [selectMode, setSelectMode] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [zipping, setZipping] = useState(false)
@@ -108,7 +117,21 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
     setFileItems(prev => prev.map((item, idx) => idx === i ? { ...item, ...update } : item))
   }
 
+  const myClean = cleanName(guestName).toLowerCase()
+  // Moments présents dans les photos (albums), ordonnés selon `moments`
+  const usedMoments = moments.filter(m => photos.some(p => p.moment_tag === m))
+  const hasVideos = photos.some(p => isVideo(p.url))
+
   const filtered = photos.filter(p => {
+    // Filtre album/onglet
+    if (activeFilter === '__tagged__') {
+      if (!myClean || !p.tagged_guests.some(g => cleanName(g).toLowerCase() === myClean)) return false
+    } else if (activeFilter === '__videos__') {
+      if (!isVideo(p.url)) return false
+    } else if (activeFilter !== 'all') {
+      if (p.moment_tag !== activeFilter) return false
+    }
+    // Recherche
     if (!search.trim()) return true
     const q = search.toLowerCase()
     return cleanName(p.uploaded_by_name).toLowerCase().includes(q) ||
@@ -116,8 +139,16 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
       (p.moment_tag?.toLowerCase().includes(q) ?? false)
   })
 
+  const chips: { key: string; label: string }[] = [
+    { key: 'all', label: `Tout (${photos.length})` },
+    ...(myClean ? [{ key: '__tagged__', label: '📌 Où je suis' }] : []),
+    ...(hasVideos ? [{ key: '__videos__', label: '🎬 Vidéos' }] : []),
+    ...usedMoments.map(m => ({ key: m, label: m })),
+  ]
+
   const currentPhoto = lightbox ? photos.find(p => p.id === lightbox) ?? null : null
-  const currentIdx = lightbox ? photos.findIndex(p => p.id === lightbox) : -1
+  // Navigation dans la sélection filtrée courante (album/onglet actif)
+  const currentIdx = lightbox ? filtered.findIndex(p => p.id === lightbox) : -1
 
   const openLightbox = useCallback((id: string) => {
     const p = photos.find(x => x.id === id)
@@ -126,8 +157,8 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
   }, [photos])
 
   const closeLightbox = () => { setLightbox(null); setLbComments([]); setEditingName(false); setOptimisticName(null) }
-  const prevPhoto = () => { setOptimisticName(null); openLightbox(photos[(currentIdx - 1 + photos.length) % photos.length].id) }
-  const nextPhoto = () => { setOptimisticName(null); openLightbox(photos[(currentIdx + 1) % photos.length].id) }
+  const prevPhoto = () => { if (filtered.length < 2 || currentIdx < 0) return; setOptimisticName(null); openLightbox(filtered[(currentIdx - 1 + filtered.length) % filtered.length].id) }
+  const nextPhoto = () => { if (filtered.length < 2 || currentIdx < 0) return; setOptimisticName(null); openLightbox(filtered[(currentIdx + 1) % filtered.length].id) }
 
   useEffect(() => {
     const fn = (e: KeyboardEvent) => {
@@ -219,6 +250,25 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
   return (
     <div className="min-h-screen bg-[#f5f0e8]" style={{ fontFamily: 'var(--font-lato)' }}>
 
+      {/* Albums / filtres */}
+      {chips.length > 2 && (
+        <div className="max-w-2xl mx-auto px-3 pt-3">
+          <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
+            {chips.map(c => (
+              <button key={c.key} onClick={() => setActiveFilter(c.key)}
+                className={`shrink-0 px-3.5 py-1.5 rounded-full text-xs whitespace-nowrap transition ${
+                  activeFilter === c.key
+                    ? 'bg-[#4a5240] text-white'
+                    : 'bg-white text-stone-500 border border-stone-200 hover:border-[#4a5240]'
+                }`}
+                style={{ fontWeight: 300 }}>
+                {c.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Gallery */}
       <div className="p-3 max-w-2xl mx-auto">
         {filtered.length === 0 ? (
@@ -235,7 +285,19 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
                   onClick={() => selectMode ? toggleSelect(photo.id) : openLightbox(photo.id)}
                   className={`break-inside-avoid rounded-2xl overflow-hidden cursor-pointer group shadow-sm transition ${isSelected ? 'ring-2 ring-[#4a5240]' : ''}`}>
                   <div className="relative">
-                    <img src={photo.url} alt="" className="w-full object-cover transition duration-300 group-hover:brightness-90" />
+                    {isVideo(photo.url) ? (
+                      <>
+                        <video src={photo.url} className="w-full object-cover transition duration-300 group-hover:brightness-90"
+                          muted playsInline preload="metadata" />
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="w-11 h-11 rounded-full bg-black/45 backdrop-blur-sm flex items-center justify-center">
+                            <svg viewBox="0 0 24 24" fill="white" className="w-5 h-5 ml-0.5"><path d="M8 5v14l11-7z" /></svg>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <img src={photo.url} alt="" className="w-full object-cover transition duration-300 group-hover:brightness-90" />
+                    )}
                     <div
                       onClick={e => { e.stopPropagation(); if (!selectMode) setSelectMode(true); toggleSelect(photo.id) }}
                       className={`absolute top-2 left-2 w-6 h-6 rounded-full border-2 flex items-center justify-center transition shadow cursor-pointer z-10 ${isSelected ? 'bg-[#4a5240] border-[#4a5240]' : 'bg-white/80 border-stone-300 opacity-0 group-hover:opacity-100'}`}>
@@ -357,7 +419,7 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
               {/* Drop zone */}
               <div onClick={() => fileRef.current?.click()}
                 onDragOver={e => e.preventDefault()}
-                onDrop={e => { e.preventDefault(); setPendingFiles(Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'))) }}
+                onDrop={e => { e.preventDefault(); setPendingFiles(Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'))) }}
                 className="border-2 border-dashed border-stone-200 hover:border-[#4a5240] rounded-2xl p-8 text-center cursor-pointer transition">
                 {pendingFiles.length > 0 ? (
                   <div>
@@ -369,11 +431,11 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1} className="w-10 h-10 text-stone-300 mx-auto mb-3">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
                     </svg>
-                    <p className="text-stone-500 text-sm mb-1" style={{ fontWeight: 300 }}>Cliquer ou glisser des photos</p>
-                    <p className="text-stone-300 text-xs" style={{ fontWeight: 300 }}>JPG, PNG, HEIC</p>
+                    <p className="text-stone-500 text-sm mb-1" style={{ fontWeight: 300 }}>Cliquer ou glisser photos & vidéos</p>
+                    <p className="text-stone-300 text-xs" style={{ fontWeight: 300 }}>JPG, PNG, HEIC · MP4, MOV (50 Mo max)</p>
                   </div>
                 )}
-                <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={e => setPendingFiles(Array.from(e.target.files ?? []))} />
+                <input ref={fileRef} type="file" accept="image/*,video/*" multiple className="hidden" onChange={e => setPendingFiles(Array.from(e.target.files ?? []))} />
               </div>
 
               {/* Qui publie */}
@@ -468,11 +530,16 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
 
           {/* Photo — plein écran */}
           <div className="absolute inset-0 flex items-center justify-center" onClick={e => e.stopPropagation()}>
-            <img src={currentPhoto.url} alt="" className="object-contain select-none w-full h-full" style={{ maxHeight: '100dvh' }} />
+            {isVideo(currentPhoto.url) ? (
+              <video src={currentPhoto.url} className="object-contain select-none w-full h-full" style={{ maxHeight: '100dvh' }}
+                controls autoPlay playsInline />
+            ) : (
+              <img src={currentPhoto.url} alt="" className="object-contain select-none w-full h-full" style={{ maxHeight: '100dvh' }} />
+            )}
           </div>
 
           {/* Flèches navigation */}
-          {photos.length > 1 && (<>
+          {filtered.length > 1 && (<>
             <button onClick={e => { e.stopPropagation(); prevPhoto() }} className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 transition flex items-center justify-center cursor-pointer z-10">
               <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
             </button>
@@ -485,7 +552,7 @@ export default function GuestPhotoFeed({ photos, moments, guestName, guestNames,
           <div className="md:hidden absolute top-4 left-0 right-0 flex items-center justify-between px-4 z-10"
             onClick={e => e.stopPropagation()}
             onTouchStart={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
-            <span className="text-white/50 text-xs" style={{ fontWeight: 300 }}>{currentIdx + 1} / {photos.length}</span>
+            <span className="text-white/50 text-xs" style={{ fontWeight: 300 }}>{currentIdx + 1} / {filtered.length}</span>
             <button onClick={closeLightbox} className="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 transition flex items-center justify-center cursor-pointer">
               <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>

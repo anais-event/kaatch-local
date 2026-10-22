@@ -72,7 +72,6 @@ const JSON_LD = {
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
       "description": "Génération de discours mariage par IA — témoin, vœux, parents, toast. Structure, points clés ou discours complet. Éditable, export PDF.",
       "url": "https://kaatch.fr/discours-mariage",
-      "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "reviewCount": "203" },
     },
     {
       "@type": "FAQPage",

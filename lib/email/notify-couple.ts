@@ -1,6 +1,15 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Init paresseuse : ne pas instancier Resend au chargement du module.
+// Sinon toute page (Server Component) qui importe ce fichier plante en SSR
+// quand RESEND_API_KEY est absent (ex. dev local sans clé).
+let _resend: Resend | null = null
+function getResend(): Resend | null {
+  const key = process.env.RESEND_API_KEY
+  if (!key) return null
+  if (!_resend) _resend = new Resend(key)
+  return _resend
+}
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://kaatch.fr'
 const FROM = 'Kaatch <noreply@kaatch.fr>'
 
@@ -81,6 +90,8 @@ function html(type: NotifType, weddingName: string, slug: string, data: Record<s
 }
 
 export async function notifyCouple(payload: CoupleNotifPayload): Promise<void> {
+  const resend = getResend()
+  if (!resend) return // pas de clé API → notification ignorée silencieusement
   const d = payload.data ?? {}
   await resend.emails.send({
     from:    FROM,

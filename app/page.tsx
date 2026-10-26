@@ -131,6 +131,16 @@ export default function Home() {
         </h1>
 
         <p style={{
+          fontSize: '0.98rem', fontWeight: 500, lineHeight: 1.6,
+          color: SAGE, maxWidth: '38rem', marginBottom: '1.1rem',
+          animation: 'fadeUp 0.6s ease both 0.25s',
+          fontFamily: BODY,
+        }}>
+          L&apos;application que vous utilisez vous-même pour tout organiser —
+          pas une agence, pas un wedding planner. Vous gardez les commandes, Kaatch range le reste.
+        </p>
+
+        <p style={{
           fontSize: '1.05rem', fontWeight: 300, lineHeight: 1.7,
           color: TEXT_MID, maxWidth: '38rem', marginBottom: '1rem',
           animation: 'fadeUp 0.6s ease both 0.3s',

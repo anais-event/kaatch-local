@@ -2,19 +2,25 @@
 
 import { useEffect, useState } from 'react'
 
-const LAUNCH_DATE = new Date('2025-06-01')
-const START_SPOTS = 100
-const FLOOR = 23
+// On libère les places par "lots" : un lot s'épuise sur ~45 jours,
+// puis un nouveau lot se recharge. Le compteur reste donc toujours vivant
+// (jamais figé sur un plancher comme avec un simple décompte depuis le lancement).
+const ANCHOR = new Date('2026-10-01')
+const BATCH = 58          // places ajoutées en haut de chaque lot
+const FLOOR = 14          // plancher bas d'un lot (crée l'urgence)
+const PERIOD_DAYS = 45    // durée d'épuisement d'un lot
 
 function getSpots(): number {
   const now = new Date()
-  const daysSince = Math.floor((now.getTime() - LAUNCH_DATE.getTime()) / (1000 * 60 * 60 * 24))
+  const days = (now.getTime() - ANCHOR.getTime()) / (1000 * 60 * 60 * 24)
+  const inCycle = ((days % PERIOD_DAYS) + PERIOD_DAYS) % PERIOD_DAYS
   const hour = now.getHours()
-  let base = START_SPOTS - Math.floor(daysSince * 1.15)
-  const seed = daysSince * 24 + hour
+  // Décroît linéairement de (BATCH + FLOOR) vers FLOOR sur la période
+  let base = Math.round(BATCH * (1 - inCycle / PERIOD_DAYS)) + FLOOR
+  const seed = Math.floor(days) * 24 + hour
   const jitter = ((seed * 7 + 13) % 5) - 2 // -2 à +2
   base += jitter
-  return Math.max(FLOOR, Math.min(START_SPOTS, base))
+  return Math.max(FLOOR, Math.min(BATCH + FLOOR, base))
 }
 
 export default function TopBanner() {

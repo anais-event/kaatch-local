@@ -1,5 +1,5 @@
 import { createServiceClient } from '@/lib/supabase-service'
-import { aggregate, dayKeysFor, pageLabel, EXPECTED_EVENTS, type Ev, type Agg } from '@/lib/analytics-cockpit'
+import { aggregate, dayKeysFor, pageLabel, EXPECTED_EVENTS, SURVEY, SURVEY_ANSWER_LABELS, type Ev, type Agg } from '@/lib/analytics-cockpit'
 import { requireAdmin } from '@/lib/admin'
 import { AreaChart, Donut, RankBars, Funnel, FlowList, ToolCompare, fmtDuration, SEGMENT_COLORS } from './charts'
 
@@ -259,8 +259,40 @@ export default async function AnalyticsCockpit({ searchParams }: { searchParams:
           </Card>
         </Section>
 
-        {/* SECTION 7 — Opportunités */}
-        <Section n="7" title="Mes opportunités de croissance" sub="Observations tirées uniquement des données réelles.">
+        {/* SECTION 7 — Micro-sondage d'intention */}
+        <Section n="7" title="Que viennent-ils faire ?" sub={`Réponses déclaratives à « ${SURVEY.question} ». Facultatif, affiché une fois par visiteur.`}>
+          <Card>
+            {agg.surveyShown === 0 ? (
+              <p className="text-stone-500 text-sm py-2" style={{ fontWeight: 300 }}>
+                Le sondage n'a pas encore été présenté sur cette période (il s'affiche après 5 s sur les pages publiques, une seule fois par visiteur).
+              </p>
+            ) : (
+              <>
+                <div className="grid grid-cols-3 gap-4 mb-5 pb-5 border-b border-stone-100 text-center">
+                  <div>
+                    <p style={{ fontFamily: DISPLAY, fontWeight: 600, fontSize: '1.4rem', color: SAGE_DARK }}>{agg.surveyShown}</p>
+                    <p className="text-stone-400 text-xs mt-1" style={{ fontWeight: 300 }}>sondage présenté</p>
+                  </div>
+                  <div>
+                    <p style={{ fontFamily: DISPLAY, fontWeight: 600, fontSize: '1.4rem', color: SAGE }}>{agg.surveyAnswers}</p>
+                    <p className="text-stone-400 text-xs mt-1" style={{ fontWeight: 300 }}>ont répondu</p>
+                  </div>
+                  <div>
+                    <p style={{ fontFamily: DISPLAY, fontWeight: 600, fontSize: '1.4rem', color: SAGE_DARK }}>{agg.surveyShown > 0 ? Math.round((agg.surveyAnswers / agg.surveyShown) * 100) + '%' : '—'}</p>
+                    <p className="text-stone-400 text-xs mt-1" style={{ fontWeight: 300 }}>taux de réponse</p>
+                  </div>
+                </div>
+                <RankBars
+                  rows={agg.surveyBreakdown.map(([id, v]) => ({ label: SURVEY_ANSWER_LABELS[id] ?? id, value: v }))}
+                  emptyLabel="Présenté, mais aucune réponse pour l'instant."
+                />
+              </>
+            )}
+          </Card>
+        </Section>
+
+        {/* SECTION 8 — Opportunités */}
+        <Section n="8" title="Mes opportunités de croissance" sub="Observations tirées uniquement des données réelles.">
           <Card>
             {obs.length === 0 ? (
               <p className="text-stone-500 text-sm py-2" style={{ fontWeight: 300 }}>

@@ -5,6 +5,7 @@ import { Analytics } from '@vercel/analytics/next';
 import { GoogleAnalytics } from '@next/third-parties/google';
 import AnalyticsInit from './_components/AnalyticsInit';
 import PageViewTracker from './_components/PageViewTracker';
+import IntentSurvey from './_components/IntentSurvey';
 import { getLocale } from 'next-intl/server';
 
 const outfit = Outfit({
@@ -81,6 +82,7 @@ export default async function RootLayout({
         {children}
         <AnalyticsInit />
         <PageViewTracker />
+        <IntentSurvey />
         <Analytics />
       </body>
       <GoogleAnalytics gaId="G-JZGV5T58NL" />

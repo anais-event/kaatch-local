@@ -83,7 +83,29 @@ export const EXPECTED_EVENTS = [
   'table_created', 'guest_seated', 'seating_plan_completed', 'seating_plan_pdf_downloaded',
   'seating_plan_cta_clicked', 'signup_started', 'signup_completed', 'wedding_created',
   'dashboard_first_view', 'feature_used',
+  'survey_shown', 'survey_answered',
 ]
+
+// ── Micro-sondage d'intention (question unique, réponse en 1 clic, facultatif) ──
+// Les ids de réponse sont un ENUM fermé : jamais de texte libre → aucune PII possible.
+// Question B (intention immédiate du visiteur) — cf. décision produit.
+export const SURVEY = {
+  id: 'intent',
+  question: "Qu'est-ce qui vous amène ?",
+  intro: "Votre réponse nous aide à rendre Kaatch plus utile.",
+  options: [
+    { id: 'plan-de-table', emoji: '🪑', label: 'Créer mon plan de table' },
+    { id: 'tout-organiser', emoji: '💍', label: 'Organiser tout mon mariage au même endroit' },
+    { id: 'budget', emoji: '💶', label: 'Suivre mon budget' },
+    { id: 'invites', emoji: '✉️', label: 'Gérer mes invités' },
+    { id: 'inspiration', emoji: '✨', label: 'Trouver des idées et de l’inspiration' },
+    { id: 'outil-gratuit', emoji: '🔧', label: 'Je cherche simplement un outil gratuit' },
+  ],
+} as const
+
+export const SURVEY_ANSWER_IDS = new Set<string>(SURVEY.options.map(o => o.id))
+export const SURVEY_ANSWER_LABELS: Record<string, string> =
+  Object.fromEntries(SURVEY.options.map(o => [o.id, o.label]))
 
 export type PageStat = {
   path: string; label: string
@@ -130,6 +152,10 @@ export type Agg = {
   signupsByChannel: [string, number][]
   weddingsByChannel: [string, number][]
   pagesBeforeSignup: [string, number][]  // pages vues dans une session qui a mené à une inscription
+  // micro-sondage d'intention
+  surveyShown: number                     // visiteurs uniques à qui le sondage a été présenté
+  surveyAnswers: number                   // visiteurs uniques ayant répondu
+  surveyBreakdown: [string, number][]     // id de réponse → visiteurs uniques (desc)
   // diagnostic
   countByEvent: Record<string, number>
   totalEvents: number
@@ -174,6 +200,9 @@ export function aggregate(rawEvents: Ev[], dayKeys: string[], priorVisitorIds?: 
   const toolPaths = new Set(TOOLS.map(t => t.path))
   const toolPageVisitors = new Set<string>()
   const signupSessions = new Set<string>()
+  const surveyShownSet = new Set<string>()
+  const surveyAnsweredSet = new Set<string>()
+  const surveyAns: Record<string, Set<string>> = {}
   let unknownChannel = 0, adminExcluded = 0, lastAt = ''
 
   for (const e of rawEvents) {
@@ -191,6 +220,14 @@ export function aggregate(rawEvents: Ev[], dayKeys: string[], priorVisitorIds?: 
     if (e.event_name === 'feature_used') activatedSet.add(vid)
     if (e.event_name === 'wedding_created') { weddingSet.add(vid); if (e.channel) (weddingChan[e.channel] ??= new Set()).add(vid) }
     if (e.event_name === 'dashboard_first_view') dashFirstSet.add(vid)
+
+    // Micro-sondage : comptés partout (le composant ne s'affiche que sur le public de toute façon)
+    if (e.event_name === 'survey_shown') surveyShownSet.add(vid)
+    if (e.event_name === 'survey_answered') {
+      surveyAnsweredSet.add(vid)
+      const a = typeof e.props?.survey_a === 'string' ? (e.props.survey_a as string) : null
+      if (a) (surveyAns[a] ??= new Set()).add(vid)
+    }
 
     // Outils (events génériques)
     const toolId = typeof e.props?.tool === 'string' ? (e.props!.tool as string) : null
@@ -341,6 +378,9 @@ export function aggregate(rawEvents: Ev[], dayKeys: string[], priorVisitorIds?: 
     signupsByChannel: toEntriesSize(signupChan),
     weddingsByChannel: toEntriesSize(weddingChan),
     pagesBeforeSignup: Object.entries(pagesBeforeSignup).sort((a, b) => b[1] - a[1]).slice(0, 8),
+    surveyShown: surveyShownSet.size,
+    surveyAnswers: surveyAnsweredSet.size,
+    surveyBreakdown: Object.entries(surveyAns).map(([k, s]) => [k, s.size] as [string, number]).sort((a, b) => b[1] - a[1]),
     countByEvent,
     totalEvents: rawEvents.length,
     adminEventsExcluded: adminExcluded,

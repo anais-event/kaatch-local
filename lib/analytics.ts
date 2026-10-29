@@ -31,6 +31,9 @@ export const EVENTS = {
   WEDDING_CREATED: 'wedding_created',
   DASHBOARD_FIRST_VIEW: 'dashboard_first_view',
   FEATURE_USED: 'feature_used', // 1re action significative dans l'espace (activation)
+  // Micro-sondage d'intention (facultatif, réponse en 1 clic)
+  SURVEY_SHOWN: 'survey_shown',
+  SURVEY_ANSWERED: 'survey_answered',
 } as const
 
 export type EventName = (typeof EVENTS)[keyof typeof EVENTS]
@@ -43,6 +46,7 @@ const ALLOWED_PROP_KEYS = new Set<string>([
   'remaining_capacity', 'completion_pct', 'cta_location', 'tool_version',
   'feature', 'device', 'bulk', 'from',
   'from_path', 'duration_ms', 'tool', // trafic/comportement + outils
+  'survey_q', 'survey_a', // micro-sondage (enum fermé, validé côté serveur)
 ])
 
 // Détection grossière de PII pour refus défensif côté client aussi.
@@ -127,4 +131,14 @@ export function trackEngagement(path: string, durationMs: number) {
 export function trackTool(kind: 'viewed' | 'started' | 'export', tool: string, extra?: Record<string, unknown>) {
   const name = kind === 'viewed' ? EVENTS.TOOL_VIEWED : kind === 'started' ? EVENTS.TOOL_STARTED : EVENTS.TOOL_EXPORT
   trackEvent(name, { tool, ...extra })
+}
+
+/** Micro-sondage affiché au visiteur. `questionId` = ex. 'intent'. */
+export function trackSurveyShown(questionId: string) {
+  trackEvent(EVENTS.SURVEY_SHOWN, { survey_q: questionId })
+}
+
+/** Réponse au micro-sondage. `answerId` = id d'option (enum fermé, aucune PII). */
+export function trackSurveyAnswer(questionId: string, answerId: string) {
+  trackEvent(EVENTS.SURVEY_ANSWERED, { survey_q: questionId, survey_a: answerId })
 }

@@ -4,7 +4,7 @@
 
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase-service'
-import { isPublicPath } from '@/lib/analytics-cockpit'
+import { isPublicPath, SURVEY, SURVEY_ANSWER_IDS } from '@/lib/analytics-cockpit'
 
 export const runtime = 'nodejs'
 
@@ -15,6 +15,7 @@ const ALLOWED_EVENTS = new Set<string>([
   'seating_plan_viewed', 'seating_plan_started', 'guest_added', 'table_created',
   'guest_seated', 'seating_plan_completed', 'seating_plan_pdf_downloaded', 'seating_plan_cta_clicked',
   'signup_started', 'signup_completed', 'wedding_created', 'dashboard_first_view', 'feature_used',
+  'survey_shown', 'survey_answered',
 ])
 
 const ALLOWED_PROP_KEYS = new Set<string>([
@@ -22,6 +23,7 @@ const ALLOWED_PROP_KEYS = new Set<string>([
   'remaining_capacity', 'completion_pct', 'cta_location', 'tool_version',
   'feature', 'device', 'bulk', 'from',
   'from_path', 'duration_ms', 'tool',
+  'survey_q', 'survey_a',
 ])
 
 const ALLOWED_CHANNELS = new Set<string>([
@@ -74,6 +76,9 @@ function sanitizeProps(raw: unknown): Record<string, string | number | boolean> 
     if (PII_RE.test(s)) continue
     // from_path = chemin interne : on refuse tout chemin privé (jamais de slug de mariage).
     if (k === 'from_path' && !isPublicPath(s)) continue
+    // Micro-sondage : enum fermé. Toute valeur hors liste est rejetée (aucun texte libre admis).
+    if (k === 'survey_q' && s !== SURVEY.id) continue
+    if (k === 'survey_a' && !SURVEY_ANSWER_IDS.has(s)) continue
     out[k] = s; count++
   }
   return out
